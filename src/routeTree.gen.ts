@@ -15,7 +15,9 @@ import { Route as CollegesIndexRouteImport } from './routes/colleges.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as CommunityCollegeIdRouteImport } from './routes/community.$collegeId'
 import { Route as CollegesIdRouteImport } from './routes/colleges.$id'
+import { Route as AdminPostsRouteImport } from './routes/admin.posts'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminIncidentsRouteImport } from './routes/admin.incidents'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminCollegesRouteImport } from './routes/admin.colleges'
 
@@ -49,9 +51,19 @@ const CollegesIdRoute = CollegesIdRouteImport.update({
   path: '/colleges/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminPostsRoute = AdminPostsRouteImport.update({
+  id: '/admin/posts',
+  path: '/admin/posts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
   path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIncidentsRoute = AdminIncidentsRouteImport.update({
+  id: '/admin/incidents',
+  path: '/admin/incidents',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminDashboardRoute = AdminDashboardRouteImport.update({
@@ -70,7 +82,9 @@ export interface FileRoutesByFullPath {
   '/report': typeof ReportRoute
   '/admin/colleges': typeof AdminCollegesRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/incidents': typeof AdminIncidentsRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/posts': typeof AdminPostsRoute
   '/colleges/$id': typeof CollegesIdRoute
   '/community/$collegeId': typeof CommunityCollegeIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -81,7 +95,9 @@ export interface FileRoutesByTo {
   '/report': typeof ReportRoute
   '/admin/colleges': typeof AdminCollegesRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/incidents': typeof AdminIncidentsRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/posts': typeof AdminPostsRoute
   '/colleges/$id': typeof CollegesIdRoute
   '/community/$collegeId': typeof CommunityCollegeIdRoute
   '/admin': typeof AdminIndexRoute
@@ -93,7 +109,9 @@ export interface FileRoutesById {
   '/report': typeof ReportRoute
   '/admin/colleges': typeof AdminCollegesRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/incidents': typeof AdminIncidentsRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/posts': typeof AdminPostsRoute
   '/colleges/$id': typeof CollegesIdRoute
   '/community/$collegeId': typeof CommunityCollegeIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -106,7 +124,9 @@ export interface FileRouteTypes {
     | '/report'
     | '/admin/colleges'
     | '/admin/dashboard'
+    | '/admin/incidents'
     | '/admin/login'
+    | '/admin/posts'
     | '/colleges/$id'
     | '/community/$collegeId'
     | '/admin/'
@@ -117,7 +137,9 @@ export interface FileRouteTypes {
     | '/report'
     | '/admin/colleges'
     | '/admin/dashboard'
+    | '/admin/incidents'
     | '/admin/login'
+    | '/admin/posts'
     | '/colleges/$id'
     | '/community/$collegeId'
     | '/admin'
@@ -128,7 +150,9 @@ export interface FileRouteTypes {
     | '/report'
     | '/admin/colleges'
     | '/admin/dashboard'
+    | '/admin/incidents'
     | '/admin/login'
+    | '/admin/posts'
     | '/colleges/$id'
     | '/community/$collegeId'
     | '/admin/'
@@ -140,7 +164,9 @@ export interface RootRouteChildren {
   ReportRoute: typeof ReportRoute
   AdminCollegesRoute: typeof AdminCollegesRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminIncidentsRoute: typeof AdminIncidentsRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminPostsRoute: typeof AdminPostsRoute
   CollegesIdRoute: typeof CollegesIdRoute
   CommunityCollegeIdRoute: typeof CommunityCollegeIdRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -191,11 +217,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CollegesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/posts': {
+      id: '/admin/posts'
+      path: '/admin/posts'
+      fullPath: '/admin/posts'
+      preLoaderRoute: typeof AdminPostsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/login': {
       id: '/admin/login'
       path: '/admin/login'
       fullPath: '/admin/login'
       preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/incidents': {
+      id: '/admin/incidents'
+      path: '/admin/incidents'
+      fullPath: '/admin/incidents'
+      preLoaderRoute: typeof AdminIncidentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/dashboard': {
@@ -220,7 +260,9 @@ const rootRouteChildren: RootRouteChildren = {
   ReportRoute: ReportRoute,
   AdminCollegesRoute: AdminCollegesRoute,
   AdminDashboardRoute: AdminDashboardRoute,
+  AdminIncidentsRoute: AdminIncidentsRoute,
   AdminLoginRoute: AdminLoginRoute,
+  AdminPostsRoute: AdminPostsRoute,
   CollegesIdRoute: CollegesIdRoute,
   CommunityCollegeIdRoute: CommunityCollegeIdRoute,
   AdminIndexRoute: AdminIndexRoute,
