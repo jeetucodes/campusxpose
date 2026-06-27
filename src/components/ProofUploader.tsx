@@ -152,7 +152,7 @@ export function ProofUploader({ onUploaded }: Props) {
                 <li>📍 Location data in photo metadata</li>
               </ul>
               <div className="mt-5 space-y-2">
-                <Button className="w-full rounded-full bg-success text-background hover:bg-success/90" onClick={() => setPhase(imgUrl ? "editor" : "uploading") || (!imgUrl && upload())}>
+                <Button className="w-full rounded-full bg-success text-background hover:bg-success/90" onClick={() => { if (imgUrl) { setPhase("editor"); } else { upload(); } }}>
                   ✅ Auto-Blur Sensitive Areas <span className="ml-1 text-xs">(recommended)</span>
                 </Button>
                 {imgUrl && <Button variant="outline" className="w-full rounded-full" onClick={() => setPhase("editor")}>✏️ I'll Blur Manually</Button>}
