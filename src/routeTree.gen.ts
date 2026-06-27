@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CollegesIndexRouteImport } from './routes/colleges.index'
+import { Route as CommunityCollegeIdRouteImport } from './routes/community.$collegeId'
 import { Route as CollegesIdRouteImport } from './routes/colleges.$id'
 
 const ReportRoute = ReportRouteImport.update({
@@ -29,6 +30,11 @@ const CollegesIndexRoute = CollegesIndexRouteImport.update({
   path: '/colleges/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommunityCollegeIdRoute = CommunityCollegeIdRouteImport.update({
+  id: '/community/$collegeId',
+  path: '/community/$collegeId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CollegesIdRoute = CollegesIdRouteImport.update({
   id: '/colleges/$id',
   path: '/colleges/$id',
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/report': typeof ReportRoute
   '/colleges/$id': typeof CollegesIdRoute
+  '/community/$collegeId': typeof CommunityCollegeIdRoute
   '/colleges/': typeof CollegesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/report': typeof ReportRoute
   '/colleges/$id': typeof CollegesIdRoute
+  '/community/$collegeId': typeof CommunityCollegeIdRoute
   '/colleges': typeof CollegesIndexRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,33 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/report': typeof ReportRoute
   '/colleges/$id': typeof CollegesIdRoute
+  '/community/$collegeId': typeof CommunityCollegeIdRoute
   '/colleges/': typeof CollegesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/report' | '/colleges/$id' | '/colleges/'
+  fullPaths:
+    | '/'
+    | '/report'
+    | '/colleges/$id'
+    | '/community/$collegeId'
+    | '/colleges/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/report' | '/colleges/$id' | '/colleges'
-  id: '__root__' | '/' | '/report' | '/colleges/$id' | '/colleges/'
+  to: '/' | '/report' | '/colleges/$id' | '/community/$collegeId' | '/colleges'
+  id:
+    | '__root__'
+    | '/'
+    | '/report'
+    | '/colleges/$id'
+    | '/community/$collegeId'
+    | '/colleges/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ReportRoute: typeof ReportRoute
   CollegesIdRoute: typeof CollegesIdRoute
+  CommunityCollegeIdRoute: typeof CommunityCollegeIdRoute
   CollegesIndexRoute: typeof CollegesIndexRoute
 }
 
@@ -92,6 +113,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CollegesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/community/$collegeId': {
+      id: '/community/$collegeId'
+      path: '/community/$collegeId'
+      fullPath: '/community/$collegeId'
+      preLoaderRoute: typeof CommunityCollegeIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/colleges/$id': {
       id: '/colleges/$id'
       path: '/colleges/$id'
@@ -106,6 +134,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ReportRoute: ReportRoute,
   CollegesIdRoute: CollegesIdRoute,
+  CommunityCollegeIdRoute: CommunityCollegeIdRoute,
   CollegesIndexRoute: CollegesIndexRoute,
 }
 export const routeTree = rootRouteImport
