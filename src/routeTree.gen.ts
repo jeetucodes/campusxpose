@@ -17,6 +17,7 @@ import { Route as CommunityCollegeIdRouteImport } from './routes/community.$coll
 import { Route as CollegesIdRouteImport } from './routes/colleges.$id'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
+import { Route as AdminCollegesRouteImport } from './routes/admin.colleges'
 
 const ReportRoute = ReportRouteImport.update({
   id: '/report',
@@ -58,10 +59,16 @@ const AdminDashboardRoute = AdminDashboardRouteImport.update({
   path: '/admin/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminCollegesRoute = AdminCollegesRouteImport.update({
+  id: '/admin/colleges',
+  path: '/admin/colleges',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/report': typeof ReportRoute
+  '/admin/colleges': typeof AdminCollegesRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/login': typeof AdminLoginRoute
   '/colleges/$id': typeof CollegesIdRoute
@@ -72,6 +79,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/report': typeof ReportRoute
+  '/admin/colleges': typeof AdminCollegesRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/login': typeof AdminLoginRoute
   '/colleges/$id': typeof CollegesIdRoute
@@ -83,6 +91,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/report': typeof ReportRoute
+  '/admin/colleges': typeof AdminCollegesRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/login': typeof AdminLoginRoute
   '/colleges/$id': typeof CollegesIdRoute
@@ -95,6 +104,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/report'
+    | '/admin/colleges'
     | '/admin/dashboard'
     | '/admin/login'
     | '/colleges/$id'
@@ -105,6 +115,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/report'
+    | '/admin/colleges'
     | '/admin/dashboard'
     | '/admin/login'
     | '/colleges/$id'
@@ -115,6 +126,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/report'
+    | '/admin/colleges'
     | '/admin/dashboard'
     | '/admin/login'
     | '/colleges/$id'
@@ -126,6 +138,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ReportRoute: typeof ReportRoute
+  AdminCollegesRoute: typeof AdminCollegesRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminLoginRoute: typeof AdminLoginRoute
   CollegesIdRoute: typeof CollegesIdRoute
@@ -192,12 +205,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/colleges': {
+      id: '/admin/colleges'
+      path: '/admin/colleges'
+      fullPath: '/admin/colleges'
+      preLoaderRoute: typeof AdminCollegesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ReportRoute: ReportRoute,
+  AdminCollegesRoute: AdminCollegesRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminLoginRoute: AdminLoginRoute,
   CollegesIdRoute: CollegesIdRoute,
