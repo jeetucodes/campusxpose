@@ -9,7 +9,7 @@ import {
 } from "recharts";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { useAdmin } from "@/stores/admin";
-import { adminStats } from "@/lib/admin.functions";
+import { adminStats, adminRecentActivity } from "@/lib/admin.functions";
 import { INCIDENT_CATEGORIES, categoryLabel } from "@/lib/categories";
 import { timeAgo } from "@/lib/format";
 import { Skeleton } from "@/components/ui/skeleton";
