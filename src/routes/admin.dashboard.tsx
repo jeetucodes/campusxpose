@@ -102,7 +102,6 @@ function Dashboard() {
 
 function RecentActivity() {
   const { token } = useAdmin();
-  const { adminRecentActivity } = require("@/lib/admin.functions");
   const fn = useServerFn(adminRecentActivity);
   const q = useQuery({
     queryKey: ["admin-recent"],
