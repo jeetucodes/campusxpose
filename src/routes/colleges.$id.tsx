@@ -179,7 +179,7 @@ function CollegeDetail() {
               <div key={i.id} className="rounded-xl border border-border bg-surface p-5">
                 <div className="flex items-start justify-between gap-3">
                   <h3 className="font-semibold">{i.title}</h3>
-                  <span className={cn("shrink-0 rounded-full border px-2 py-0.5 text-xs capitalize", statusColor(i.status))}>{i.status}</span>
+                  <span className={cn("shrink-0 rounded-full border px-2 py-0.5 text-xs capitalize", statusColor(i.status ?? "active"))}>{i.status}</span>
                 </div>
                 <p className="mt-1 text-sm text-accent">{i.affected_count} students reported the same issue</p>
                 {i.ai_summary && <p className="mt-2 text-sm text-muted-foreground">{i.ai_summary}</p>}
