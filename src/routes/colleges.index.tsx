@@ -1,0 +1,163 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import { Search, Flame, MapPin, ArrowRight } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { SiteShell } from "@/components/Footer";
+import { StarRating } from "@/components/StarRating";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { CITIES, COLLEGE_TYPES } from "@/lib/categories";
+import { cn } from "@/lib/utils";
+
+export const Route = createFileRoute("/colleges/")({
+  head: () => ({
+    meta: [
+      { title: "Find Your College's Truth — CampusXpose" },
+      { name: "description", content: "Browse Indian colleges, see ratings and incident reports. Search by name or city." },
+    ],
+  }),
+  component: CollegesPage,
+});
+
+type Col = {
+  id: string; name: string; city: string; state: string; type: string;
+  total_rating: number; total_reviews: number; incident_count: number;
+};
+
+const TYPE_COLORS: Record<string, string> = {
+  Engineering: "bg-primary/15 text-primary",
+  Medical: "bg-success/15 text-success",
+  Arts: "bg-warning/15 text-warning",
+  University: "bg-accent/15 text-accent",
+  Research: "bg-blue-500/15 text-blue-400",
+  Commerce: "bg-pink-500/15 text-pink-400",
+};
+
+function CollegesPage() {
+  const { data, isLoading } = useQuery({
+    queryKey: ["colleges"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("colleges").select("*");
+      if (error) throw error;
+      return data as Col[];
+    },
+  });
+
+  const [q, setQ] = useState("");
+  const [city, setCity] = useState("All");
+  const [type, setType] = useState("All");
+  const [sort, setSort] = useState<"reported" | "rating" | "reviews">("reported");
+  const [detectedCity, setDetectedCity] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      () => setDetectedCity("Bhopal"),
+      () => setDetectedCity(null),
+      { timeout: 4000 },
+    );
+  }, []);
+
+  const filtered = useMemo(() => {
+    let rows = data ?? [];
+    if (q.trim()) {
+      const s = q.toLowerCase();
+      rows = rows.filter((c) => c.name.toLowerCase().includes(s) || c.city.toLowerCase().includes(s));
+    }
+    if (city !== "All") rows = rows.filter((c) => c.city === city);
+    if (type !== "All") rows = rows.filter((c) => c.type === type);
+    rows = [...rows].sort((a, b) => {
+      if (sort === "reported") return b.incident_count - a.incident_count;
+      if (sort === "rating") return a.total_rating - b.total_rating;
+      return b.total_reviews - a.total_reviews;
+    });
+    return rows;
+  }, [data, q, city, type, sort]);
+
+  return (
+    <SiteShell>
+      <div className="mx-auto max-w-6xl px-4 py-10">
+        <h1 className="text-3xl font-bold">Find Your College's Truth</h1>
+        {detectedCity && <p className="mt-1 text-sm text-muted-foreground">Showing colleges near {detectedCity}</p>}
+
+        <div className="mt-6 space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by college name or city..." className="bg-surface pl-9" />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {["All", ...CITIES].map((c) => (
+              <Pill key={c} active={city === c} onClick={() => setCity(c)}>{c}</Pill>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {["All", ...COLLEGE_TYPES].map((t) => (
+              <Pill key={t} active={type === t} onClick={() => setType(t)} small>{t}</Pill>
+            ))}
+            <div className="ml-auto flex gap-2 text-xs">
+              <SortBtn active={sort === "reported"} onClick={() => setSort("reported")}>Most Reported</SortBtn>
+              <SortBtn active={sort === "rating"} onClick={() => setSort("rating")}>Lowest Rated</SortBtn>
+              <SortBtn active={sort === "reviews"} onClick={() => setSort("reviews")}>Most Reviews</SortBtn>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {isLoading
+            ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-56 rounded-xl bg-surface" />)
+            : filtered.map((c, i) => (
+                <motion.div key={c.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(i * 0.04, 0.4) }}>
+                  <div className="glow-card flex h-full flex-col rounded-xl border border-border bg-surface p-5">
+                    <h3 className="text-lg font-semibold leading-tight">{c.name}</h3>
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-2 py-0.5 text-muted-foreground">
+                        <MapPin className="h-3 w-3" />{c.city}, {c.state}
+                      </span>
+                      <span className={cn("rounded-full px-2 py-0.5 font-medium", TYPE_COLORS[c.type] ?? "bg-surface-2 text-muted-foreground")}>{c.type}</span>
+                    </div>
+                    <div className="mt-4 flex items-center justify-between">
+                      <StarRating value={c.total_rating} />
+                      <span className="text-xs text-muted-foreground">{c.total_reviews} reviews</span>
+                    </div>
+                    <div className="mt-3">
+                      <span className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium", c.incident_count > 50 ? "bg-destructive/15 text-destructive" : "bg-surface-2 text-muted-foreground")}>
+                        {c.incident_count > 50 && <Flame className="h-3.5 w-3.5" />}
+                        {c.incident_count} incidents
+                      </span>
+                    </div>
+                    <Button asChild className="mt-5 w-full rounded-full">
+                      <Link to="/colleges/$id" params={{ id: c.id }}>View Truth <ArrowRight className="ml-1 h-4 w-4" /></Link>
+                    </Button>
+                  </div>
+                </motion.div>
+              ))}
+        </div>
+
+        {!isLoading && filtered.length === 0 && (
+          <div className="mt-16 text-center text-muted-foreground">
+            <div className="text-5xl">🔍</div>
+            <p className="mt-3">No colleges found. Try a different search.</p>
+          </div>
+        )}
+      </div>
+    </SiteShell>
+  );
+}
+
+function Pill({ active, onClick, children, small }: { active: boolean; onClick: () => void; children: React.ReactNode; small?: boolean }) {
+  return (
+    <button onClick={onClick} className={cn("rounded-full border px-3 py-1 transition-colors", small ? "text-xs" : "text-sm", active ? "border-primary bg-primary/15 text-primary" : "border-border bg-surface text-muted-foreground hover:text-foreground")}>
+      {children}
+    </button>
+  );
+}
+function SortBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button onClick={onClick} className={cn("rounded-full px-2.5 py-1 transition-colors", active ? "bg-primary text-primary-foreground" : "bg-surface text-muted-foreground hover:text-foreground")}>
+      {children}
+    </button>
+  );
+}
