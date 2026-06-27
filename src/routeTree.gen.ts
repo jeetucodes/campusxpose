@@ -12,8 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CollegesIndexRouteImport } from './routes/colleges.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as CommunityCollegeIdRouteImport } from './routes/community.$collegeId'
 import { Route as CollegesIdRouteImport } from './routes/colleges.$id'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
 
 const ReportRoute = ReportRouteImport.update({
   id: '/report',
@@ -30,6 +32,11 @@ const CollegesIndexRoute = CollegesIndexRouteImport.update({
   path: '/colleges/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CommunityCollegeIdRoute = CommunityCollegeIdRouteImport.update({
   id: '/community/$collegeId',
   path: '/community/$collegeId',
@@ -40,27 +47,38 @@ const CollegesIdRoute = CollegesIdRouteImport.update({
   path: '/colleges/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/report': typeof ReportRoute
+  '/admin/login': typeof AdminLoginRoute
   '/colleges/$id': typeof CollegesIdRoute
   '/community/$collegeId': typeof CommunityCollegeIdRoute
+  '/admin/': typeof AdminIndexRoute
   '/colleges/': typeof CollegesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/report': typeof ReportRoute
+  '/admin/login': typeof AdminLoginRoute
   '/colleges/$id': typeof CollegesIdRoute
   '/community/$collegeId': typeof CommunityCollegeIdRoute
+  '/admin': typeof AdminIndexRoute
   '/colleges': typeof CollegesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/report': typeof ReportRoute
+  '/admin/login': typeof AdminLoginRoute
   '/colleges/$id': typeof CollegesIdRoute
   '/community/$collegeId': typeof CommunityCollegeIdRoute
+  '/admin/': typeof AdminIndexRoute
   '/colleges/': typeof CollegesIndexRoute
 }
 export interface FileRouteTypes {
@@ -68,25 +86,38 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/report'
+    | '/admin/login'
     | '/colleges/$id'
     | '/community/$collegeId'
+    | '/admin/'
     | '/colleges/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/report' | '/colleges/$id' | '/community/$collegeId' | '/colleges'
+  to:
+    | '/'
+    | '/report'
+    | '/admin/login'
+    | '/colleges/$id'
+    | '/community/$collegeId'
+    | '/admin'
+    | '/colleges'
   id:
     | '__root__'
     | '/'
     | '/report'
+    | '/admin/login'
     | '/colleges/$id'
     | '/community/$collegeId'
+    | '/admin/'
     | '/colleges/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ReportRoute: typeof ReportRoute
+  AdminLoginRoute: typeof AdminLoginRoute
   CollegesIdRoute: typeof CollegesIdRoute
   CommunityCollegeIdRoute: typeof CommunityCollegeIdRoute
+  AdminIndexRoute: typeof AdminIndexRoute
   CollegesIndexRoute: typeof CollegesIndexRoute
 }
 
@@ -113,6 +144,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CollegesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/community/$collegeId': {
       id: '/community/$collegeId'
       path: '/community/$collegeId'
@@ -127,14 +165,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CollegesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ReportRoute: ReportRoute,
+  AdminLoginRoute: AdminLoginRoute,
   CollegesIdRoute: CollegesIdRoute,
   CommunityCollegeIdRoute: CommunityCollegeIdRoute,
+  AdminIndexRoute: AdminIndexRoute,
   CollegesIndexRoute: CollegesIndexRoute,
 }
 export const routeTree = rootRouteImport
