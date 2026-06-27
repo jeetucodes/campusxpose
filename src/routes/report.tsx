@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ProofUploader } from "@/components/ProofUploader";
 import { REPORT_CATEGORIES } from "@/lib/categories";
 import { useIdentity } from "@/stores/identity";
-import { submitPost, analyzePost } from "@/lib/content.functions";
+import { submitPost } from "@/lib/content.functions";
 import { analyzePost as aiAnalyze } from "@/lib/ai.functions";
 import { cn } from "@/lib/utils";
 
