@@ -9,38 +9,264 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ReportRouteImport } from './routes/report'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CollegesIndexRouteImport } from './routes/colleges.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as CommunityCollegeIdRouteImport } from './routes/community.$collegeId'
+import { Route as CollegesIdRouteImport } from './routes/colleges.$id'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminPostsRouteImport } from './routes/admin.posts'
+import { Route as AdminModerationRouteImport } from './routes/admin.moderation'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminIncidentsRouteImport } from './routes/admin.incidents'
+import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
+import { Route as AdminCommunityRouteImport } from './routes/admin.community'
+import { Route as AdminCollegesRouteImport } from './routes/admin.colleges'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
+import { Route as AdminAiRouteImport } from './routes/admin.ai'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportRoute = ReportRouteImport.update({
+  id: '/report',
+  path: '/report',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CollegesIndexRoute = CollegesIndexRouteImport.update({
+  id: '/colleges/',
+  path: '/colleges/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityCollegeIdRoute = CommunityCollegeIdRouteImport.update({
+  id: '/community/$collegeId',
+  path: '/community/$collegeId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CollegesIdRoute = CollegesIdRouteImport.update({
+  id: '/colleges/$id',
+  path: '/colleges/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPostsRoute = AdminPostsRouteImport.update({
+  id: '/admin/posts',
+  path: '/admin/posts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminModerationRoute = AdminModerationRouteImport.update({
+  id: '/admin/moderation',
+  path: '/admin/moderation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIncidentsRoute = AdminIncidentsRouteImport.update({
+  id: '/admin/incidents',
+  path: '/admin/incidents',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminDashboardRoute = AdminDashboardRouteImport.update({
+  id: '/admin/dashboard',
+  path: '/admin/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCommunityRoute = AdminCommunityRouteImport.update({
+  id: '/admin/community',
+  path: '/admin/community',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCollegesRoute = AdminCollegesRouteImport.update({
+  id: '/admin/colleges',
+  path: '/admin/colleges',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/admin/analytics',
+  path: '/admin/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAiRoute = AdminAiRouteImport.update({
+  id: '/admin/ai',
+  path: '/admin/ai',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/report': typeof ReportRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/ai': typeof AdminAiRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/colleges': typeof AdminCollegesRoute
+  '/admin/community': typeof AdminCommunityRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/incidents': typeof AdminIncidentsRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/moderation': typeof AdminModerationRoute
+  '/admin/posts': typeof AdminPostsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/colleges/$id': typeof CollegesIdRoute
+  '/community/$collegeId': typeof CommunityCollegeIdRoute
+  '/admin/': typeof AdminIndexRoute
+  '/colleges/': typeof CollegesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/report': typeof ReportRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/ai': typeof AdminAiRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/colleges': typeof AdminCollegesRoute
+  '/admin/community': typeof AdminCommunityRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/incidents': typeof AdminIncidentsRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/moderation': typeof AdminModerationRoute
+  '/admin/posts': typeof AdminPostsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/colleges/$id': typeof CollegesIdRoute
+  '/community/$collegeId': typeof CommunityCollegeIdRoute
+  '/admin': typeof AdminIndexRoute
+  '/colleges': typeof CollegesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/report': typeof ReportRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/ai': typeof AdminAiRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/colleges': typeof AdminCollegesRoute
+  '/admin/community': typeof AdminCommunityRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/incidents': typeof AdminIncidentsRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/moderation': typeof AdminModerationRoute
+  '/admin/posts': typeof AdminPostsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/colleges/$id': typeof CollegesIdRoute
+  '/community/$collegeId': typeof CommunityCollegeIdRoute
+  '/admin/': typeof AdminIndexRoute
+  '/colleges/': typeof CollegesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/report'
+    | '/sitemap.xml'
+    | '/admin/ai'
+    | '/admin/analytics'
+    | '/admin/colleges'
+    | '/admin/community'
+    | '/admin/dashboard'
+    | '/admin/incidents'
+    | '/admin/login'
+    | '/admin/moderation'
+    | '/admin/posts'
+    | '/admin/users'
+    | '/colleges/$id'
+    | '/community/$collegeId'
+    | '/admin/'
+    | '/colleges/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/report'
+    | '/sitemap.xml'
+    | '/admin/ai'
+    | '/admin/analytics'
+    | '/admin/colleges'
+    | '/admin/community'
+    | '/admin/dashboard'
+    | '/admin/incidents'
+    | '/admin/login'
+    | '/admin/moderation'
+    | '/admin/posts'
+    | '/admin/users'
+    | '/colleges/$id'
+    | '/community/$collegeId'
+    | '/admin'
+    | '/colleges'
+  id:
+    | '__root__'
+    | '/'
+    | '/report'
+    | '/sitemap.xml'
+    | '/admin/ai'
+    | '/admin/analytics'
+    | '/admin/colleges'
+    | '/admin/community'
+    | '/admin/dashboard'
+    | '/admin/incidents'
+    | '/admin/login'
+    | '/admin/moderation'
+    | '/admin/posts'
+    | '/admin/users'
+    | '/colleges/$id'
+    | '/community/$collegeId'
+    | '/admin/'
+    | '/colleges/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ReportRoute: typeof ReportRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  AdminAiRoute: typeof AdminAiRoute
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  AdminCollegesRoute: typeof AdminCollegesRoute
+  AdminCommunityRoute: typeof AdminCommunityRoute
+  AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminIncidentsRoute: typeof AdminIncidentsRoute
+  AdminLoginRoute: typeof AdminLoginRoute
+  AdminModerationRoute: typeof AdminModerationRoute
+  AdminPostsRoute: typeof AdminPostsRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+  CollegesIdRoute: typeof CollegesIdRoute
+  CommunityCollegeIdRoute: typeof CommunityCollegeIdRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  CollegesIndexRoute: typeof CollegesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/report': {
+      id: '/report'
+      path: '/report'
+      fullPath: '/report'
+      preLoaderRoute: typeof ReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +274,126 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/colleges/': {
+      id: '/colleges/'
+      path: '/colleges'
+      fullPath: '/colleges/'
+      preLoaderRoute: typeof CollegesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community/$collegeId': {
+      id: '/community/$collegeId'
+      path: '/community/$collegeId'
+      fullPath: '/community/$collegeId'
+      preLoaderRoute: typeof CommunityCollegeIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/colleges/$id': {
+      id: '/colleges/$id'
+      path: '/colleges/$id'
+      fullPath: '/colleges/$id'
+      preLoaderRoute: typeof CollegesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/posts': {
+      id: '/admin/posts'
+      path: '/admin/posts'
+      fullPath: '/admin/posts'
+      preLoaderRoute: typeof AdminPostsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/moderation': {
+      id: '/admin/moderation'
+      path: '/admin/moderation'
+      fullPath: '/admin/moderation'
+      preLoaderRoute: typeof AdminModerationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/incidents': {
+      id: '/admin/incidents'
+      path: '/admin/incidents'
+      fullPath: '/admin/incidents'
+      preLoaderRoute: typeof AdminIncidentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/dashboard': {
+      id: '/admin/dashboard'
+      path: '/admin/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AdminDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/community': {
+      id: '/admin/community'
+      path: '/admin/community'
+      fullPath: '/admin/community'
+      preLoaderRoute: typeof AdminCommunityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/colleges': {
+      id: '/admin/colleges'
+      path: '/admin/colleges'
+      fullPath: '/admin/colleges'
+      preLoaderRoute: typeof AdminCollegesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/admin/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/ai': {
+      id: '/admin/ai'
+      path: '/admin/ai'
+      fullPath: '/admin/ai'
+      preLoaderRoute: typeof AdminAiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ReportRoute: ReportRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
+  AdminAiRoute: AdminAiRoute,
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
+  AdminCollegesRoute: AdminCollegesRoute,
+  AdminCommunityRoute: AdminCommunityRoute,
+  AdminDashboardRoute: AdminDashboardRoute,
+  AdminIncidentsRoute: AdminIncidentsRoute,
+  AdminLoginRoute: AdminLoginRoute,
+  AdminModerationRoute: AdminModerationRoute,
+  AdminPostsRoute: AdminPostsRoute,
+  AdminUsersRoute: AdminUsersRoute,
+  CollegesIdRoute: CollegesIdRoute,
+  CommunityCollegeIdRoute: CommunityCollegeIdRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  CollegesIndexRoute: CollegesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
