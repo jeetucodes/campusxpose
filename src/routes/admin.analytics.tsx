@@ -29,7 +29,7 @@ function Analytics() {
   const totalFine = d.incidents.reduce((s, i) => s + (i.total_amount ?? 0), 0);
   const resolved = d.incidents.filter((i) => i.status === "resolved").length;
   const resolutionRate = d.incidents.length ? Math.round((resolved / d.incidents.length) * 100) : 0;
-  const mostReported = [...d.colleges].sort((a, b) => b.incident_count - a.incident_count)[0];
+  const mostReported = [...d.colleges].sort((a, b) => (b.incident_count ?? 0) - (a.incident_count ?? 0))[0];
 
   const cities = Array.from(new Set(d.colleges.map((c) => c.city))).map((city) => {
     const cols = d.colleges.filter((c) => c.city === city);
