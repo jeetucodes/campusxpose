@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Flame, MapPin, ArrowRight } from "lucide-react";
+import { Search, Flame, MapPin, ArrowRight, SlidersHorizontal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteShell } from "@/components/Footer";
 import { StarRating } from "@/components/StarRating";
