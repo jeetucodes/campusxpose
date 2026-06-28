@@ -82,6 +82,20 @@ function CollegeDetail() {
   const incidents = incidentsQ.data ?? [];
   const posts = postsQ.data ?? [];
 
+  const { hashedId } = useIdentity();
+  const myVotesQ = useQuery({
+    queryKey: ["my-votes", id, hashedId],
+    queryFn: async () => {
+      if (!hashedId) return {} as Record<string, "up" | "down">;
+      const { data } = await supabase.from("post_votes").select("post_id, dir").eq("anonymous_user_hash", hashedId);
+      const map: Record<string, "up" | "down"> = {};
+      (data ?? []).forEach((v: any) => { map[v.post_id] = v.dir; });
+      return map;
+    },
+    enabled: !!hashedId,
+  });
+  const myVotes = myVotesQ.data ?? {};
+
   return (
     <SiteShell hideFooter>
       <div className="mx-auto max-w-4xl px-4 py-8">
@@ -205,7 +219,7 @@ function CollegeDetail() {
           <h2 className="mb-4 text-xl font-bold">Dark Secrets Feed</h2>
           <div className="space-y-3">
             {posts.map((p) => (
-              <PostCard key={p.id} post={p} onVoted={() => postsQ.refetch()} />
+              <PostCard key={p.id} post={p} userVote={myVotes[p.id] ?? null} onVoted={() => { postsQ.refetch(); myVotesQ.refetch(); }} />
             ))}
             {posts.length === 0 && <p className="text-sm text-muted-foreground">No posts yet. Be the first to share the truth.</p>}
           </div>
@@ -236,13 +250,22 @@ function Trend({ t }: { t?: string | null }) {
   return <Minus className="h-3.5 w-3.5 text-warning" />;
 }
 
-function PostCard({ post, onVoted }: { post: any; onVoted: () => void }) {
+function PostCard({ post, userVote, onVoted }: { post: any; userVote: "up" | "down" | null; onVoted: () => void }) {
+  const { hashedId } = useIdentity();
   const vote = useServerFn(votePost);
   const [voting, setVoting] = useState(false);
   const doVote = async (dir: "up" | "down") => {
+    if (!hashedId) return;
     setVoting(true);
-    try { await vote({ data: { postId: post.id, dir } }); onVoted(); } finally { setVoting(false); }
+    try {
+      await vote({ data: { postId: post.id, dir, hashedId } });
+      onVoted();
+    } finally {
+      setVoting(false);
+    }
   };
+  const upActive = userVote === "up";
+  const downActive = userVote === "down";
   return (
     <div className="rounded-xl border border-border bg-surface p-4">
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -253,13 +276,13 @@ function PostCard({ post, onVoted }: { post: any; onVoted: () => void }) {
       </div>
       <p className="mt-2 text-sm">{post.content}</p>
       <div className="mt-3 flex items-center gap-2">
-        <button disabled={voting} onClick={() => doVote("up")} className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-2.5 py-1 text-xs hover:text-success">
+        <button disabled={voting} onClick={() => doVote("up")} className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs", upActive ? "bg-success/15 text-success" : "bg-surface-2 hover:text-success")}>
           <ArrowUp className="h-3.5 w-3.5" /> {post.upvotes}
         </button>
-        <button disabled={voting} onClick={() => doVote("down")} className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-2.5 py-1 text-xs hover:text-destructive">
+        <button disabled={voting} onClick={() => doVote("down")} className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs", downActive ? "bg-destructive/15 text-destructive" : "bg-surface-2 hover:text-destructive")}>
           <ArrowDown className="h-3.5 w-3.5" /> {post.downvotes}
         </button>
-        <button disabled={voting} onClick={() => doVote("up")} className="ml-auto inline-flex items-center gap-1 rounded-full bg-primary/15 px-2.5 py-1 text-xs text-primary">
+        <button disabled={voting} onClick={() => doVote("up")} className={cn("ml-auto inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs", upActive ? "bg-primary text-primary-foreground" : "bg-primary/15 text-primary")}>
           <Plus className="h-3 w-3" /> Same happened to me
         </button>
       </div>

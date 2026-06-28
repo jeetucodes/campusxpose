@@ -336,6 +336,38 @@ export type Database = {
           },
         ]
       }
+      post_votes: {
+        Row: {
+          anonymous_user_hash: string
+          created_at: string
+          dir: string
+          id: string
+          post_id: string
+        }
+        Insert: {
+          anonymous_user_hash: string
+          created_at?: string
+          dir: string
+          id?: string
+          post_id: string
+        }
+        Update: {
+          anonymous_user_hash?: string
+          created_at?: string
+          dir?: string
+          id?: string
+          post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_votes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       posts: {
         Row: {
           ai_analyzed: boolean | null
