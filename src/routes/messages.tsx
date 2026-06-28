@@ -146,6 +146,11 @@ function Messages() {
         )}
       >
         <header className="flex items-center gap-2 border-b-2 border-dashed border-border px-4 py-3">
+          <Button asChild variant="ghost" size="icon" className="md:hidden">
+            <Link to="/">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+          </Button>
           <MessageCircle className="h-5 w-5 text-accent" strokeWidth={2.5} />
           <span className="font-display text-lg font-bold">Direct Messages</span>
           <Button asChild variant="ghost" size="icon" className="ml-auto">
