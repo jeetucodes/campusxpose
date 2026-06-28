@@ -72,7 +72,6 @@ function Community() {
     const isSignal = DEFAULT_KEYWORDS.some((k) => text.toLowerCase().includes(k));
     const content = text.trim();
     setText("");
-    setCooldown(10);
     setIncidentPrompt(false);
     try {
       await sendFn({ data: { collegeId, hashedId, username, content, isIncidentSignal: isSignal } });
