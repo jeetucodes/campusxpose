@@ -1,10 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Ghost, Search, Shield, FileWarning, Sparkles, ArrowRight, Flame, TrendingUp } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { SiteShell } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { getHomeData } from "@/lib/home.functions";
+
+const homeQueryOptions = queryOptions({
+  queryKey: ["home"],
+  queryFn: () => getHomeData(),
+});
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -13,26 +18,10 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Anonymous platform for Indian students. Report fake fines, placement fraud, faculty issues — 100% anonymously." },
     ],
   }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(homeQueryOptions),
+  errorComponent: ({ error }) => <div role="alert" className="p-8 text-center">{error.message}</div>,
   component: Home,
 });
-
-function useHomeData() {
-  return useQuery({
-    queryKey: ["home"],
-    queryFn: async () => {
-      const [colleges, posts, top] = await Promise.all([
-        supabase.from("colleges").select("*", { count: "exact", head: true }),
-        supabase.from("posts").select("*", { count: "exact", head: true }),
-        supabase.from("colleges").select("id, name, city, incident_count, total_rating").order("incident_count", { ascending: false }).limit(5),
-      ]);
-      return {
-        collegeCount: colleges.count ?? 0,
-        postCount: posts.count ?? 0,
-        top: top.data ?? [],
-      };
-    },
-  });
-}
 
 const fadeUp = {
   initial: { opacity: 0, y: 20 },
@@ -44,7 +33,8 @@ const WOBBLY = "255px 15px 225px 15px / 15px 225px 15px 255px";
 const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
 
 function Home() {
-  const { data } = useHomeData();
+  const { data } = useSuspenseQuery(homeQueryOptions);
+
 
   const steps = [
     { icon: Ghost, title: "Anonymous Login", desc: "App open karo — auto identity ban jaati hai", rot: "-rotate-2" },
