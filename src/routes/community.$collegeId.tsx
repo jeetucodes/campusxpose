@@ -95,7 +95,7 @@ function Community() {
   };
 
   return (
-    <div className="flex h-screen flex-col bg-background">
+    <div className="flex h-[calc(100dvh-8rem)] flex-col bg-background md:h-[calc(100dvh-4rem)]">
       <header className="flex items-center gap-3 border-b border-border bg-surface px-4 py-3">
         <Link to="/colleges/$id" params={{ id: collegeId }}><ArrowLeft className="h-5 w-5" /></Link>
         <div>
