@@ -62,22 +62,6 @@ function CollegeDetail() {
   const [openCat, setOpenCat] = useState<string | null>(null);
 
   const c = collegeQ.data;
-  if (collegeQ.isLoading) {
-    return <SiteShell hideFooter><div className="mx-auto max-w-4xl space-y-4 px-4 py-10"><Skeleton className="h-40 rounded-xl bg-surface" /><Skeleton className="h-60 rounded-xl bg-surface" /></div></SiteShell>;
-  }
-  if (!c) {
-    return <SiteShell hideFooter><div className="mx-auto max-w-2xl px-4 py-20 text-center text-muted-foreground"><p>College not found.</p><Button asChild className="mt-4 rounded-full"><Link to="/colleges">Back to Colleges</Link></Button></div></SiteShell>;
-  }
-
-  const ratings = ratingsQ.data ?? [];
-  const avg = (k: string) => ratings.length ? ratings.reduce((s, r) => s + ((r as any)[k] ?? 0), 0) / ratings.length : (c.total_rating ?? 0);
-  const cats: { key: string; label: string }[] = [
-    { key: "faculty_rating", label: "Faculty" },
-    { key: "placement_rating", label: "Placements" },
-    { key: "infrastructure_rating", label: "Infrastructure" },
-    { key: "campus_life_rating", label: "Campus Life" },
-    { key: "value_rating", label: "Value" },
-  ];
 
   const incidents = incidentsQ.data ?? [];
   const posts = postsQ.data ?? [];
@@ -116,6 +100,24 @@ function CollegeDetail() {
     enabled: incidentsQ.isFetched && postsQ.isFetched,
   });
   const evidence = evidenceQ.data ?? [];
+
+  if (collegeQ.isLoading) {
+    return <SiteShell hideFooter><div className="mx-auto max-w-4xl space-y-4 px-4 py-10"><Skeleton className="h-40 rounded-xl bg-surface" /><Skeleton className="h-60 rounded-xl bg-surface" /></div></SiteShell>;
+  }
+  if (!c) {
+    return <SiteShell hideFooter><div className="mx-auto max-w-2xl px-4 py-20 text-center text-muted-foreground"><p>College not found.</p><Button asChild className="mt-4 rounded-full"><Link to="/colleges">Back to Colleges</Link></Button></div></SiteShell>;
+  }
+
+  const ratings = ratingsQ.data ?? [];
+  const avg = (k: string) => ratings.length ? ratings.reduce((s, r) => s + ((r as any)[k] ?? 0), 0) / ratings.length : (c.total_rating ?? 0);
+  const cats: { key: string; label: string }[] = [
+    { key: "faculty_rating", label: "Faculty" },
+    { key: "placement_rating", label: "Placements" },
+    { key: "infrastructure_rating", label: "Infrastructure" },
+    { key: "campus_life_rating", label: "Campus Life" },
+    { key: "value_rating", label: "Value" },
+  ];
+
 
   return (
     <SiteShell hideFooter>
