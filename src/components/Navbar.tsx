@@ -20,33 +20,41 @@ export function Navbar() {
   }, [init]);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur">
-      <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
+    <header className="sticky top-0 z-40 border-b-2 border-dashed border-border bg-background/90 backdrop-blur">
+      <nav className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
         <Logo />
-        <div className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
-          <Link to="/colleges" className="transition-colors hover:text-foreground">Colleges</Link>
-          <Link to="/report" className="transition-colors hover:text-foreground">Report</Link>
+        <div className="hidden items-center gap-6 text-lg md:flex">
+          <Link to="/colleges" className="transition-colors hover:wavy-underline">Colleges</Link>
+          <Link to="/report" className="transition-colors hover:wavy-underline">Report</Link>
         </div>
         <DropdownMenu open={open} onOpenChange={setOpen}>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5 text-sm transition-colors hover:border-primary/50">
-              <Ghost className="h-4 w-4 text-primary" />
+            <button
+              className="flex items-center gap-2 border-2 border-border bg-white px-3 py-1.5 text-sm shadow-ink-soft transition-transform duration-100 hover:-rotate-2"
+              style={{ borderRadius: "20px 7px 22px 7px / 7px 22px 7px 20px" }}
+            >
+              <Ghost className="h-4 w-4 text-accent" strokeWidth={2.5} />
               <span className="max-w-[120px] truncate font-medium">{isReady ? username : "..."}</span>
               <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-64 border-border bg-surface p-3">
+          <DropdownMenuContent
+            align="end"
+            className="w-64 border-2 border-border bg-white p-3 shadow-ink"
+            style={{ borderRadius: "18px 6px 20px 6px / 6px 20px 6px 18px" }}
+          >
             <div className="mb-2 flex items-center gap-2">
-              <Ghost className="h-5 w-5 text-primary" />
-              <span className="font-semibold">{username}</span>
+              <Ghost className="h-5 w-5 text-accent" strokeWidth={2.5} />
+              <span className="font-display font-bold">{username}</span>
             </div>
-            <div className="mb-3 flex items-center gap-2 rounded-lg bg-success/10 px-3 py-2 text-xs text-success">
+            <div className="mb-3 flex items-center gap-2 border border-dashed border-success bg-success/10 px-3 py-2 text-xs text-success">
               <Shield className="h-4 w-4" />
               Identity never stored
             </div>
             <Button
-              variant="ghost"
-              className="w-full justify-start gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
+              variant="destructive"
+              size="sm"
+              className="w-full justify-start gap-2"
               onClick={async () => {
                 await reset();
                 toast.success("New anonymous identity generated");
