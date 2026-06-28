@@ -151,15 +151,16 @@ function CollegesPage() {
 
 function Pill({ active, onClick, children, small }: { active: boolean; onClick: () => void; children: React.ReactNode; small?: boolean }) {
   return (
-    <button onClick={onClick} className={cn("rounded-full border px-3 py-1 transition-colors", small ? "text-xs" : "text-sm", active ? "border-primary bg-primary/15 text-primary" : "border-border bg-surface text-muted-foreground hover:text-foreground")}>
+    <button onClick={onClick} style={{ borderRadius: "14px 5px 16px 5px / 5px 16px 5px 14px" }} className={cn("border-2 px-3 py-1 transition-transform duration-100 hover:-rotate-2", small ? "text-xs" : "text-sm", active ? "border-border bg-accent text-accent-foreground shadow-ink-soft" : "border-border bg-white text-muted-foreground hover:text-foreground")}>
       {children}
     </button>
   );
 }
 function SortBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
-    <button onClick={onClick} className={cn("rounded-full px-2.5 py-1 transition-colors", active ? "bg-primary text-primary-foreground" : "bg-surface text-muted-foreground hover:text-foreground")}>
+    <button onClick={onClick} style={{ borderRadius: "12px 4px 14px 4px / 4px 14px 4px 12px" }} className={cn("border-2 border-border px-2.5 py-1 transition-transform duration-100 hover:-rotate-2", active ? "bg-[#2d5da1] text-white shadow-ink-soft" : "bg-white text-muted-foreground hover:text-foreground")}>
       {children}
     </button>
   );
 }
+
