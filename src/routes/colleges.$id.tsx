@@ -96,6 +96,27 @@ function CollegeDetail() {
   });
   const myVotes = myVotesQ.data ?? {};
 
+  const evidenceQ = useQuery({
+    queryKey: ["verified-evidence", id, incidents.map((i) => i.id).join(","), posts.map((p) => p.id).join(",")],
+    queryFn: async () => {
+      const incidentIds = incidents.map((i) => i.id);
+      const postIds = posts.map((p) => p.id);
+      if (!incidentIds.length && !postIds.length) return [] as any[];
+      const ors: string[] = [];
+      if (incidentIds.length) ors.push(`incident_id.in.(${incidentIds.join(",")})`);
+      if (postIds.length) ors.push(`post_id.in.(${postIds.join(",")})`);
+      const { data } = await supabase
+        .from("evidence")
+        .select("*")
+        .eq("is_verified", true)
+        .or(ors.join(","))
+        .order("created_at", { ascending: false });
+      return data ?? [];
+    },
+    enabled: incidentsQ.isFetched && postsQ.isFetched,
+  });
+  const evidence = evidenceQ.data ?? [];
+
   return (
     <SiteShell hideFooter>
       <div className="mx-auto max-w-4xl px-4 py-8">
