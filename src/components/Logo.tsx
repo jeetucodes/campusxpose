@@ -10,7 +10,7 @@ export function Logo({ className = "" }: { className?: string }) {
       >
         <Ghost className="h-5 w-5" strokeWidth={2.5} />
       </span>
-      <span className="text-2xl">
+      <span className="whitespace-nowrap text-xl sm:text-2xl">
         Campus
         <span className="relative inline-block text-accent">
           <span
