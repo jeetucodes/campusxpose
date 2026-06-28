@@ -68,7 +68,7 @@ function Community() {
   };
 
   const send = async () => {
-    if (!text.trim() || cooldown > 0 || !hashedId || !username) return;
+    if (!text.trim() || !hashedId || !username) return;
     const isSignal = DEFAULT_KEYWORDS.some((k) => text.toLowerCase().includes(k));
     const content = text.trim();
     setText("");
