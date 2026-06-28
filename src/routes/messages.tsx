@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useIdentity } from "@/stores/identity";
-import { submitDirectMessage } from "@/lib/content.functions";
+import { submitDirectMessage, fetchDirectMessages } from "@/lib/content.functions";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
