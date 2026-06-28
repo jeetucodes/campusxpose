@@ -44,7 +44,6 @@ function Messages() {
   const { hashedId, username, init } = useIdentity();
   const [all, setAll] = useState<DM[]>([]);
   const [text, setText] = useState("");
-  const [cooldown, setCooldown] = useState(0);
   const [newName, setNewName] = useState("");
 
   useEffect(() => {
