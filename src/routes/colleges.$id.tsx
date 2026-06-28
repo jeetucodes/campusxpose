@@ -325,9 +325,6 @@ function PostCard({ post, userVote, onVoted }: { post: any; userVote: "up" | "do
         <button disabled={voting} onClick={() => doVote("down")} className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs", downActive ? "bg-destructive/15 text-destructive" : "bg-surface-2 hover:text-destructive")}>
           <ArrowDown className="h-3.5 w-3.5" /> {post.downvotes}
         </button>
-        <button disabled={voting} onClick={() => doVote("up")} className={cn("ml-auto inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs", upActive ? "bg-primary text-primary-foreground" : "bg-primary/15 text-primary")}>
-          <Plus className="h-3 w-3" /> Same happened to me
-        </button>
       </div>
     </div>
   );
