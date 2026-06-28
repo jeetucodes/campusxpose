@@ -44,7 +44,6 @@ function Messages() {
   const { hashedId, username, init } = useIdentity();
   const [all, setAll] = useState<DM[]>([]);
   const [text, setText] = useState("");
-  const [cooldown, setCooldown] = useState(0);
   const [newName, setNewName] = useState("");
 
   useEffect(() => {
@@ -72,11 +71,6 @@ function Messages() {
   }, [username, load]);
 
 
-  useEffect(() => {
-    if (cooldown <= 0) return;
-    const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
-    return () => clearTimeout(t);
-  }, [cooldown]);
 
   // Build conversation list: the "other party" for every message I'm part of.
   const conversations = useMemo(() => {
@@ -108,10 +102,9 @@ function Messages() {
   );
 
   const send = async () => {
-    if (!text.trim() || cooldown > 0 || !hashedId || !username || !active) return;
+    if (!text.trim() || !hashedId || !username || !active) return;
     const content = text.trim();
     setText("");
-    setCooldown(3);
     try {
       await submitDirectMessage({
         data: { hashedId, username, recipientUsername: active, content },
@@ -267,13 +260,12 @@ function Messages() {
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && send()}
-                  placeholder={cooldown > 0 ? `${cooldown}s...` : "Message..."}
-                  disabled={cooldown > 0}
+                  placeholder="Message..."
                   maxLength={1000}
                 />
                 <Button
                   onClick={send}
-                  disabled={cooldown > 0 || !text.trim()}
+                  disabled={!text.trim()}
                   size="icon"
                   className="shrink-0"
                 >

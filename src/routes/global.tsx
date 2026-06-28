@@ -37,7 +37,6 @@ function GlobalChat() {
   const { hashedId, username, init } = useIdentity();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [text, setText] = useState("");
-  const [cooldown, setCooldown] = useState(0);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navigate = useNavigate();
 
@@ -70,17 +69,11 @@ function GlobalChat() {
     };
   }, []);
 
-  useEffect(() => {
-    if (cooldown <= 0) return;
-    const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
-    return () => clearTimeout(t);
-  }, [cooldown]);
 
   const send = async () => {
-    if (!text.trim() || cooldown > 0 || !hashedId || !username) return;
+    if (!text.trim() || !hashedId || !username) return;
     const content = text.trim();
     setText("");
-    setCooldown(5);
     try {
       await submitGlobalMessage({ data: { hashedId, username, content } });
     } catch {
@@ -163,13 +156,12 @@ function GlobalChat() {
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send()}
-            placeholder={cooldown > 0 ? `${cooldown}s...` : "Message everyone..."}
-            disabled={cooldown > 0}
+            placeholder="Message everyone..."
             maxLength={1000}
           />
           <Button
             onClick={send}
-            disabled={cooldown > 0 || !text.trim()}
+            disabled={!text.trim()}
             size="icon"
             className="shrink-0"
           >
