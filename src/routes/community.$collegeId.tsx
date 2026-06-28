@@ -57,11 +57,6 @@ function Community() {
     return () => { supabase.removeChannel(ch); };
   }, [collegeId]);
 
-  useEffect(() => {
-    if (cooldown <= 0) return;
-    const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
-    return () => clearTimeout(t);
-  }, [cooldown]);
 
   const onType = (v: string) => {
     setText(v);
