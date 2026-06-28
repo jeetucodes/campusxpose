@@ -118,15 +118,17 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
-  const isCommunityChat = useMemo(() => router.state.location.pathname.startsWith("/community/"), [router.state.location.pathname]);
+  const pathname = router.state.location.pathname;
+  const isCommunityChat = useMemo(() => pathname.startsWith("/community/"), [pathname]);
+  const isAdmin = useMemo(() => pathname.startsWith("/admin/"), [pathname]);
 
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <div className={cn("md:pb-0", !isCommunityChat && "pb-16")}>
+      <div className={cn("md:pb-0", !isCommunityChat && !isAdmin && "pb-16")}>
         <Outlet />
       </div>
-      {!isCommunityChat && <MobileBottomNav />}
+      {!isCommunityChat && !isAdmin && <MobileBottomNav />}
       <Toaster position="top-center" theme="light" richColors />
 
     </QueryClientProvider>
