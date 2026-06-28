@@ -181,7 +181,8 @@ function CollegesPage() {
           <div className="mt-16 text-center">
             <div className="mx-auto inline-grid h-20 w-20 place-items-center border-2 border-border bg-postit text-4xl shadow-ink" style={{ borderRadius: "50% 42% 55% 45% / 45% 55% 42% 50%" }}>🔍</div>
             <h3 className="mt-4 font-display text-xl font-bold">No colleges found</h3>
-            <p className="mt-1 text-muted-foreground">Try a different search or filter.</p>
+            <p className="mt-1 text-muted-foreground">Try a different search, or request to add it.</p>
+            <div className="mt-4 flex justify-center"><RequestCollegeDialog /></div>
           </div>
         )}
       </div>
