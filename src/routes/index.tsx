@@ -1,14 +1,20 @@
+import { useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Ghost, Search, Shield, FileWarning, Sparkles, ArrowRight, Flame, TrendingUp } from "lucide-react";
 import { SiteShell } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { getHomeData } from "@/lib/home.functions";
+import { supabase } from "@/integrations/supabase/client";
+import { INCIDENT_CATEGORIES, categoryLabel, categoryEmoji } from "@/lib/categories";
+import { timeAgo } from "@/lib/format";
 
 const homeQueryOptions = queryOptions({
   queryKey: ["home"],
   queryFn: () => getHomeData(),
+  refetchInterval: 15000,
+  refetchOnWindowFocus: true,
 });
 
 export const Route = createFileRoute("/")({
@@ -34,7 +40,24 @@ const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
 
 function Home() {
   const { data } = useSuspenseQuery(homeQueryOptions);
+  const queryClient = useQueryClient();
 
+  // Auto-update top reported + stats when posts/incidents/colleges change.
+  useEffect(() => {
+    const ch = supabase
+      .channel("home-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "posts" }, () => {
+        queryClient.invalidateQueries({ queryKey: ["home"] });
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "incidents" }, () => {
+        queryClient.invalidateQueries({ queryKey: ["home"] });
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "colleges" }, () => {
+        queryClient.invalidateQueries({ queryKey: ["home"] });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [queryClient]);
 
   const steps = [
     { icon: Ghost, title: "Anonymous Login", desc: "App open karo — auto identity ban jaati hai", rot: "-rotate-2" },
@@ -46,6 +69,7 @@ function Home() {
     { icon: FileWarning, title: "Evidence Based", desc: "Built-in blur tool for proof documents.", bg: "bg-postit" },
     { icon: Sparkles, title: "AI Powered", desc: "Pattern detection aur incident analysis.", bg: "bg-white" },
   ];
+
 
   return (
     <SiteShell>
