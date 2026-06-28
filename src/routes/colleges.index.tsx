@@ -28,13 +28,14 @@ type Col = {
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  Engineering: "bg-primary/15 text-primary",
+  Engineering: "bg-[#2d5da1]/15 text-[#2d5da1]",
   Medical: "bg-success/15 text-success",
   Arts: "bg-warning/15 text-warning",
   University: "bg-accent/15 text-accent",
-  Research: "bg-blue-500/15 text-blue-400",
-  Commerce: "bg-pink-500/15 text-pink-400",
+  Research: "bg-[#2d5da1]/15 text-[#2d5da1]",
+  Commerce: "bg-accent/15 text-accent",
 };
+
 
 function CollegesPage() {
   const { data, isLoading } = useQuery({
