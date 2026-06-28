@@ -60,31 +60,6 @@ export function Footer() {
               </li>
             </ul>
           </div>
-
-          {/* Legal / Info */}
-          <div
-            className="space-y-4 border-2 border-ink bg-white p-5 shadow-ink"
-            style={{ borderRadius: WOBBLY }}
-          >
-            <h3 className="text-lg font-display font-bold wavy-underline">Legal</h3>
-            <ul className="space-y-2.5 text-muted-foreground">
-              <li>
-                <span className="inline-flex items-center gap-2 hover:text-foreground transition-colors cursor-pointer">
-                  <Scale className="h-4 w-4" /> Terms of Service
-                </span>
-              </li>
-              <li>
-                <span className="inline-flex items-center gap-2 hover:text-foreground transition-colors cursor-pointer">
-                  <Shield className="h-4 w-4" /> Privacy Policy
-                </span>
-              </li>
-              <li>
-                <span className="inline-flex items-center gap-2 hover:text-foreground transition-colors cursor-pointer">
-                  <Mail className="h-4 w-4" /> Contact Us
-                </span>
-              </li>
-            </ul>
-          </div>
         </div>
 
         {/* Bottom bar */}
