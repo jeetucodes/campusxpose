@@ -81,7 +81,7 @@ function CollegesPage() {
   }, [data, q, city, type, sort]);
 
   return (
-    <SiteShell>
+    <SiteShell hideFooter>
       <div className="mx-auto max-w-6xl px-4 py-10">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-3xl font-bold">Find Your College's Truth</h1>
