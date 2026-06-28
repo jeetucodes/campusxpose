@@ -136,22 +136,48 @@ export const submitRating = createServerFn({ method: "POST" })
 
 export const votePost = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
-    z.object({ postId: z.string().uuid(), dir: z.enum(["up", "down"]) }).parse(d),
+    z.object({ postId: z.string().uuid(), dir: z.enum(["up", "down"]), hashedId: z.string().min(8) }).parse(d),
   )
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: post } = await supabaseAdmin
-      .from("posts")
-      .select("upvotes, downvotes")
-      .eq("id", data.postId)
-      .single();
-    if (!post) throw new Error("Post not found");
-    const update =
-      data.dir === "up"
-        ? { upvotes: (post.upvotes ?? 0) + 1 }
-        : { downvotes: (post.downvotes ?? 0) + 1 };
-    await supabaseAdmin.from("posts").update(update).eq("id", data.postId);
-    return { ok: true };
+
+    const { data: existing } = await supabaseAdmin
+      .from("post_votes")
+      .select("id, dir")
+      .eq("post_id", data.postId)
+      .eq("anonymous_user_hash", data.hashedId)
+      .maybeSingle();
+
+    let userVote: "up" | "down" | null = null;
+
+    if (existing) {
+      if (existing.dir === data.dir) {
+        await supabaseAdmin.from("post_votes").delete().eq("id", existing.id);
+        userVote = null;
+      } else {
+        await supabaseAdmin.from("post_votes").update({ dir: data.dir }).eq("id", existing.id);
+        userVote = data.dir;
+      }
+    } else {
+      await supabaseAdmin.from("post_votes").insert({
+        post_id: data.postId,
+        anonymous_user_hash: data.hashedId,
+        dir: data.dir,
+      });
+      userVote = data.dir;
+    }
+
+    const { data: votes } = await supabaseAdmin
+      .from("post_votes")
+      .select("dir")
+      .eq("post_id", data.postId);
+
+    const upvotes = (votes ?? []).filter((v) => v.dir === "up").length;
+    const downvotes = (votes ?? []).filter((v) => v.dir === "down").length;
+
+    await supabaseAdmin.from("posts").update({ upvotes, downvotes }).eq("id", data.postId);
+
+    return { ok: true, userVote };
   });
 
 export const submitGlobalMessage = createServerFn({ method: "POST" })
