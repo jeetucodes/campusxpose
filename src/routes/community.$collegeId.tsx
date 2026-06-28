@@ -34,7 +34,7 @@ function Community() {
 
   const [messages, setMessages] = useState<Msg[]>([]);
   const [text, setText] = useState("");
-  const [cooldown, setCooldown] = useState(0);
+  
   const [summaryOpen, setSummaryOpen] = useState(true);
   const [summary, setSummary] = useState<{ key_issues: string[] } | null>(null);
   const [loadingSummary, setLoadingSummary] = useState(false);
