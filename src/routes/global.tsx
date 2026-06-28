@@ -69,11 +69,6 @@ function GlobalChat() {
     };
   }, []);
 
-  useEffect(() => {
-    if (cooldown <= 0) return;
-    const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
-    return () => clearTimeout(t);
-  }, [cooldown]);
 
   const send = async () => {
     if (!text.trim() || cooldown > 0 || !hashedId || !username) return;

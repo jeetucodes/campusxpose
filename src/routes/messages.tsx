@@ -71,11 +71,6 @@ function Messages() {
   }, [username, load]);
 
 
-  useEffect(() => {
-    if (cooldown <= 0) return;
-    const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
-    return () => clearTimeout(t);
-  }, [cooldown]);
 
   // Build conversation list: the "other party" for every message I'm part of.
   const conversations = useMemo(() => {
