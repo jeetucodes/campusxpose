@@ -161,7 +161,7 @@ function GlobalChat() {
           />
           <Button
             onClick={send}
-            disabled={cooldown > 0 || !text.trim()}
+            disabled={!text.trim()}
             size="icon"
             className="shrink-0"
           >
