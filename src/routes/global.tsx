@@ -71,10 +71,9 @@ function GlobalChat() {
 
 
   const send = async () => {
-    if (!text.trim() || cooldown > 0 || !hashedId || !username) return;
+    if (!text.trim() || !hashedId || !username) return;
     const content = text.trim();
     setText("");
-    setCooldown(5);
     try {
       await submitGlobalMessage({ data: { hashedId, username, content } });
     } catch {
@@ -157,8 +156,7 @@ function GlobalChat() {
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send()}
-            placeholder={cooldown > 0 ? `${cooldown}s...` : "Message everyone..."}
-            disabled={cooldown > 0}
+            placeholder="Message everyone..."
             maxLength={1000}
           />
           <Button

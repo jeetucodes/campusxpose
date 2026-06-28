@@ -102,10 +102,9 @@ function Messages() {
   );
 
   const send = async () => {
-    if (!text.trim() || cooldown > 0 || !hashedId || !username || !active) return;
+    if (!text.trim() || !hashedId || !username || !active) return;
     const content = text.trim();
     setText("");
-    setCooldown(3);
     try {
       await submitDirectMessage({
         data: { hashedId, username, recipientUsername: active, content },
@@ -261,8 +260,7 @@ function Messages() {
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && send()}
-                  placeholder={cooldown > 0 ? `${cooldown}s...` : "Message..."}
-                  disabled={cooldown > 0}
+                  placeholder="Message..."
                   maxLength={1000}
                 />
                 <Button
