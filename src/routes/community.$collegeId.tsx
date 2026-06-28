@@ -91,7 +91,7 @@ function Community() {
   const initials = (collegeQ.data?.name ?? "Community").trim().slice(0, 2).toUpperCase();
 
   return (
-    <div className="flex h-[calc(100dvh-8rem)] flex-col bg-background md:h-[calc(100dvh-4rem)]">
+    <div className="flex h-[100dvh] flex-col bg-background md:h-[calc(100dvh-4rem)]">
       <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col overflow-hidden md:border-x md:border-border">
         {/* header */}
         <header className="flex items-center gap-3 border-b border-border bg-surface/80 px-3 py-3 backdrop-blur-sm sm:px-4">
