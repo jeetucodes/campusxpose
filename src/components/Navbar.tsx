@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Ghost, Shield, ChevronDown, Trash2 } from "lucide-react";
+import { Shield, ChevronDown, Trash2 } from "lucide-react";
+import { UserSymbol } from "@/components/UserSymbol";
 import { toast } from "sonner";
 import { useIdentity } from "@/stores/identity";
 import { Logo } from "@/components/Logo";
