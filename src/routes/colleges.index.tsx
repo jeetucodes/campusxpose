@@ -205,3 +205,90 @@ function SortBtn({ active, onClick, children }: { active: boolean; onClick: () =
   );
 }
 
+function RequestCollegeDialog() {
+  const { hashedId } = useIdentity();
+  const submit = useServerFn(submitCollegeRequest);
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [form, setForm] = useState({
+    name: "", city: "", state: "Madhya Pradesh", type: "Engineering", established: "", description: "",
+  });
+
+  const set = (k: keyof typeof form, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  async function onSubmit() {
+    if (!hashedId) return;
+    if (form.name.trim().length < 2 || form.city.trim().length < 2 || form.state.trim().length < 2) {
+      toast.error("Please fill in name, city and state.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const res = await submit({
+        data: {
+          hashedId,
+          name: form.name.trim(),
+          city: form.city.trim(),
+          state: form.state.trim(),
+          type: form.type as any,
+          established: form.established ? Number(form.established) : null,
+          description: form.description.trim() || undefined,
+        },
+      });
+      if ((res as any).ok === false && (res as any).reason === "exists") {
+        toast.error("This college already exists — try searching for it.");
+      } else {
+        toast.success("Request sent! Admins will review and add it soon.");
+        setOpen(false);
+        setForm({ name: "", city: "", state: "Madhya Pradesh", type: "Engineering", established: "", description: "" });
+      }
+    } catch (e: any) {
+      toast.error(e?.message ?? "Something went wrong.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="gap-2">
+          <Plus className="h-4 w-4" /> Request a College
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[90dvh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Request to add a college</DialogTitle>
+          <DialogDescription>Can't find your college? Send it for review and we'll add it.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <Input placeholder="College name *" value={form.name} onChange={(e) => set("name", e.target.value)} />
+          <div className="grid grid-cols-2 gap-3">
+            <Input placeholder="City *" value={form.city} onChange={(e) => set("city", e.target.value)} />
+            <Select value={form.state} onValueChange={(v) => set("state", v)}>
+              <SelectTrigger><SelectValue placeholder="State" /></SelectTrigger>
+              <SelectContent>
+                {INDIAN_STATES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Select value={form.type} onValueChange={(v) => set("type", v)}>
+              <SelectTrigger><SelectValue placeholder="Type" /></SelectTrigger>
+              <SelectContent>
+                {COLLEGE_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Input type="number" placeholder="Established (year)" value={form.established} onChange={(e) => set("established", e.target.value)} />
+          </div>
+          <Textarea placeholder="Anything else? (optional)" value={form.description} onChange={(e) => set("description", e.target.value)} />
+        </div>
+        <DialogFooter>
+          <Button onClick={onSubmit} disabled={busy}>{busy ? "Sending..." : "Send Request"}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+
