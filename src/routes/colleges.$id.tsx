@@ -146,29 +146,38 @@ function CollegeDetail() {
               const sev = list.length ? Math.max(...list.map((i) => i.severity ?? 1)) : 0;
               const open = openCat === cat.key;
               return (
-                <button key={cat.key} onClick={() => setOpenCat(open ? null : cat.key)} style={{ borderRadius: "22px 7px 24px 7px / 7px 24px 7px 22px" }} className={cn("sketch-card p-4 text-left", open ? "border-[#2d5da1]" : "border-border")}>
-                  <div className="text-2xl">{cat.emoji}</div>
-                  <div className="mt-1 text-sm font-medium">{cat.label}</div>
-                  <div className="mt-2 flex items-center gap-2">
-                    <span className="text-lg font-bold">{list.length}</span>
-                    {sev > 0 && <span className={cn("rounded-full border px-1.5 py-0.5 text-[10px]", severityColor(sev))}>S{sev}</span>}
-                    <Trend t={list[0]?.trend} />
+                <div key={cat.key}>
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setOpenCat(open ? null : cat.key)}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpenCat(open ? null : cat.key); } }}
+                    style={{ borderRadius: "22px 7px 24px 7px / 7px 24px 7px 22px" }}
+                    className={cn("sketch-card cursor-pointer p-4 text-left", open ? "border-[#2d5da1]" : "border-border")}
+                  >
+                    <div className="text-2xl">{cat.emoji}</div>
+                    <div className="mt-1 text-sm font-medium">{cat.label}</div>
+                    <div className="mt-2 flex items-center gap-2">
+                      <span className="text-lg font-bold">{list.length}</span>
+                      {sev > 0 && <span className={cn("rounded-full border px-1.5 py-0.5 text-[10px]", severityColor(sev))}>S{sev}</span>}
+                      <Trend t={list[0]?.trend} />
+                    </div>
                   </div>
-                </button>
+                  {open && (
+                    <div className="mt-2 space-y-2">
+                      {list.map((i) => (
+                        <div key={i.id} className="rounded-lg border border-border bg-surface-2 p-3 text-sm">
+                          <div className="font-medium">{i.title}</div>
+                          <div className="text-xs text-muted-foreground">{i.affected_count} affected · severity {i.severity}</div>
+                        </div>
+                      ))}
+                      {list.length === 0 && <p className="text-sm text-muted-foreground">No incidents in this category.</p>}
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>
-          {openCat && (
-            <div className="mt-3 space-y-2">
-              {incidents.filter((i) => i.category === openCat).map((i) => (
-                <div key={i.id} className="rounded-lg border border-border bg-surface-2 p-3 text-sm">
-                  <div className="font-medium">{i.title}</div>
-                  <div className="text-xs text-muted-foreground">{i.affected_count} affected · severity {i.severity}</div>
-                </div>
-              ))}
-              {incidents.filter((i) => i.category === openCat).length === 0 && <p className="text-sm text-muted-foreground">No incidents in this category.</p>}
-            </div>
-          )}
         </section>
 
         {/* Clustered incidents */}
