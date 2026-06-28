@@ -94,7 +94,7 @@ function CollegesPage() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               {["All", ...COLLEGE_TYPES].map((t) => (
-                <Pillustr key={t} active={type === t} onClick={() => setType(t)} small>{t}</Pill>
+                <Pill key={t} active={type === t} onClick={() => setType(t)} small>{t}</Pill>
               ))}
               <div className="ml-auto flex gap-2 text-xs">
                 <SortBtn active={sort === "reported"} onClick={() => setSort("reported")}>Most Reported</SortBtn>
