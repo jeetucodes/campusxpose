@@ -40,53 +40,74 @@ const fadeUp = {
   viewport: { once: true },
 };
 
+const WOBBLY = "255px 15px 225px 15px / 15px 225px 15px 255px";
+const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
+
 function Home() {
   const { data } = useHomeData();
 
   const steps = [
-    { icon: Ghost, title: "Anonymous Login", desc: "App open karo — auto identity ban jaati hai" },
-    { icon: Search, title: "College Dhundo", desc: "Apne city ke colleges dekho" },
-    { icon: Shield, title: "Sach Share Karo", desc: "Anonymously report karo, proof upload karo" },
+    { icon: Ghost, title: "Anonymous Login", desc: "App open karo — auto identity ban jaati hai", rot: "-rotate-2" },
+    { icon: Search, title: "College Dhundo", desc: "Apne city ke colleges dekho", rot: "rotate-1" },
+    { icon: Shield, title: "Sach Share Karo", desc: "Anonymously report karo, proof upload karo", rot: "-rotate-1" },
   ];
   const features = [
-    { icon: Ghost, title: "Fully Anonymous", desc: "No email, no phone. Sirf ek ghost identity." },
-    { icon: FileWarning, title: "Evidence Based", desc: "Built-in blur tool for proof documents." },
-    { icon: Sparkles, title: "AI Powered", desc: "Pattern detection aur incident analysis." },
+    { icon: Ghost, title: "Fully Anonymous", desc: "No email, no phone. Sirf ek ghost identity.", bg: "bg-white" },
+    { icon: FileWarning, title: "Evidence Based", desc: "Built-in blur tool for proof documents.", bg: "bg-postit" },
+    { icon: Sparkles, title: "AI Powered", desc: "Pattern detection aur incident analysis.", bg: "bg-white" },
   ];
 
   return (
     <SiteShell>
       {/* Hero */}
       <section className="relative overflow-hidden px-4 pb-16 pt-20 text-center">
-        <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-96 w-96 -translate-x-1/2 rounded-full bg-primary/20 blur-[120px]" />
+        {/* hand-drawn arrow to CTA (desktop) */}
+        <svg className="pointer-events-none absolute right-[14%] top-[46%] hidden h-24 w-24 -rotate-12 text-accent md:block" viewBox="0 0 100 100" fill="none">
+          <path d="M10 20 C 40 30, 60 50, 80 80" stroke="currentColor" strokeWidth="3" strokeDasharray="6 6" strokeLinecap="round" />
+          <path d="M80 80 L 64 76 M80 80 L 76 62" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+        </svg>
+        {/* bouncing decorative circle */}
+        <div className="absolute left-[12%] top-28 hidden h-12 w-12 animate-gentle-bounce border-2 border-border bg-postit md:block" style={{ borderRadius: "50% 40% 55% 45% / 45% 55% 40% 50%" }} />
+
         <motion.div {...fadeUp} className="mx-auto max-w-3xl">
-          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-1.5 text-xs font-medium text-success">
+          <span
+            className="inline-flex -rotate-2 items-center gap-2 border-2 border-border bg-white px-4 py-1.5 text-sm font-semibold text-success shadow-ink-soft"
+            style={{ borderRadius: WOBBLY_MD }}
+          >
             <Shield className="h-3.5 w-3.5" /> 100% Anonymous Platform
           </span>
-          <h1 className="mt-6 text-5xl font-extrabold tracking-tight sm:text-7xl">
+          <h1 className="mt-6 font-display text-5xl font-bold tracking-tight sm:text-7xl">
             Campus<span className="text-accent">Xpose</span>
+            <span className="ml-1 inline-block rotate-12 text-accent">!</span>
           </h1>
-          <p className="mt-4 text-xl font-semibold text-foreground/90">College ka sach, bina darr ke</p>
-          <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
+          <p className="mt-4 text-2xl font-semibold">College ka sach, bina darr ke</p>
+          <p className="mx-auto mt-3 max-w-xl text-lg text-muted-foreground">
             Apne college ki asli kahani share karo. Fake fines, placement fraud, faculty issues — sab kuch anonymously report karo.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Button asChild size="lg" className="rounded-full">
+            <Button asChild size="lg" variant="destructive">
               <Link to="/colleges">Apna College Dhundo <ArrowRight className="ml-1 h-4 w-4" /></Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="rounded-full">
+            <Button asChild size="lg">
               <Link to="/report">Issue Report Karo</Link>
             </Button>
           </div>
           <div className="mx-auto mt-12 grid max-w-lg grid-cols-3 gap-4">
             {[
-              { n: data?.collegeCount ?? 0, l: "Colleges" },
-              { n: data?.postCount ?? 0, l: "Reports" },
-              { n: "∞", l: "Anonymous Users" },
+              { n: data?.collegeCount ?? 0, l: "Colleges", rot: "-rotate-2", bg: "bg-white" },
+              { n: data?.postCount ?? 0, l: "Reports", rot: "rotate-2", bg: "bg-postit" },
+              { n: "∞", l: "Anonymous Users", rot: "-rotate-1", bg: "bg-white" },
             ].map((s, i) => (
-              <motion.div key={i} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 * i }} className="rounded-xl border border-border bg-surface p-4">
-                <div className="text-2xl font-bold text-primary">{s.n}</div>
-                <div className="text-xs text-muted-foreground">{s.l}</div>
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.1 * i }}
+                className={`border-2 border-border p-4 shadow-ink ${s.rot} ${s.bg}`}
+                style={{ borderRadius: WOBBLY_MD }}
+              >
+                <div className="font-display text-3xl font-bold text-accent">{s.n}</div>
+                <div className="text-sm text-muted-foreground">{s.l}</div>
               </motion.div>
             ))}
           </div>
@@ -94,30 +115,52 @@ function Home() {
       </section>
 
       {/* How it works */}
-      <section className="mx-auto max-w-6xl px-4 py-16">
-        <h2 className="mb-10 text-center text-3xl font-bold">How It Works</h2>
-        <div className="grid gap-6 md:grid-cols-3">
+      <section className="mx-auto max-w-5xl px-4 py-16">
+        <h2 className="mb-10 text-center font-display text-4xl font-bold">How It Works</h2>
+        <div className="grid gap-8 md:grid-cols-3">
           {steps.map((s, i) => (
-            <motion.div key={i} {...fadeUp} transition={{ delay: i * 0.1 }} className="glow-card rounded-xl border border-border bg-surface p-6">
-              <div className="mb-4 grid h-12 w-12 place-items-center rounded-xl bg-primary/15 text-primary">
-                <s.icon className="h-6 w-6" />
+            <motion.div
+              key={i}
+              {...fadeUp}
+              transition={{ delay: i * 0.1 }}
+              className={`sketch-card p-6 ${s.rot}`}
+              style={{ borderRadius: WOBBLY_MD }}
+            >
+              <div
+                className="mb-4 grid h-12 w-12 place-items-center border-2 border-border bg-accent text-accent-foreground"
+                style={{ borderRadius: "50% 42% 55% 45% / 45% 55% 42% 50%" }}
+              >
+                <s.icon className="h-6 w-6" strokeWidth={2.5} />
               </div>
               <div className="mb-1 text-sm text-muted-foreground">Step {i + 1}</div>
-              <h3 className="mb-2 text-lg font-semibold">{s.title}</h3>
-              <p className="text-sm text-muted-foreground">{s.desc}</p>
+              <h3 className="mb-2 font-display text-xl font-bold">{s.title}</h3>
+              <p className="text-muted-foreground">{s.desc}</p>
             </motion.div>
           ))}
         </div>
       </section>
 
       {/* Features */}
-      <section className="mx-auto max-w-6xl px-4 py-8">
-        <div className="grid gap-6 md:grid-cols-3">
+      <section className="mx-auto max-w-5xl px-4 py-8">
+        <div className="grid gap-8 md:grid-cols-3">
           {features.map((f, i) => (
-            <motion.div key={i} {...fadeUp} transition={{ delay: i * 0.1 }} className="glow-card rounded-xl border border-border bg-surface p-6">
-              <f.icon className="mb-4 h-7 w-7 text-accent" />
-              <h3 className="mb-2 text-lg font-semibold">{f.title}</h3>
-              <p className="text-sm text-muted-foreground">{f.desc}</p>
+            <motion.div
+              key={i}
+              {...fadeUp}
+              transition={{ delay: i * 0.1 }}
+              className={`relative border-2 border-border p-6 shadow-ink transition-transform duration-100 hover:-rotate-1 ${f.bg}`}
+              style={{ borderRadius: WOBBLY_MD }}
+            >
+              {/* tape strip */}
+              <span className="absolute -top-3 left-1/2 h-5 w-16 -translate-x-1/2 rotate-3 bg-foreground/10 backdrop-blur-sm" />
+              <div
+                className="mb-4 grid h-11 w-11 place-items-center border-2 border-border bg-white"
+                style={{ borderRadius: "50% 42% 55% 45% / 45% 55% 42% 50%" }}
+              >
+                <f.icon className="h-6 w-6 text-accent" strokeWidth={2.5} />
+              </div>
+              <h3 className="mb-2 font-display text-xl font-bold">{f.title}</h3>
+              <p className="text-muted-foreground">{f.desc}</p>
             </motion.div>
           ))}
         </div>
@@ -125,19 +168,25 @@ function Home() {
 
       {/* Top reported */}
       <section className="mx-auto max-w-3xl px-4 py-16">
-        <h2 className="mb-6 text-2xl font-bold">🔥 Top Reported Colleges This Week</h2>
-        <div className="space-y-3">
-          {(data?.top ?? []).map((c) => (
-            <Link key={c.id} to="/colleges/$id" params={{ id: c.id }} className="glow-card flex items-center justify-between rounded-xl border border-border bg-surface p-4">
+        <h2 className="mb-6 font-display text-3xl font-bold">🔥 Top Reported Colleges This Week</h2>
+        <div className="space-y-4">
+          {(data?.top ?? []).map((c, i) => (
+            <Link
+              key={c.id}
+              to="/colleges/$id"
+              params={{ id: c.id }}
+              className={`sketch-card flex items-center justify-between p-4 ${i % 2 ? "rotate-1" : "-rotate-1"}`}
+              style={{ borderRadius: WOBBLY_MD }}
+            >
               <div>
-                <div className="font-semibold">{c.name}</div>
-                <div className="text-xs text-muted-foreground">{c.city}</div>
+                <div className="font-display text-lg font-bold">{c.name}</div>
+                <div className="text-sm text-muted-foreground">{c.city}</div>
               </div>
               <div className="flex items-center gap-3">
-                <span className="inline-flex items-center gap-1 rounded-full bg-destructive/15 px-2.5 py-1 text-xs font-medium text-destructive">
+                <span className="inline-flex items-center gap-1 border-2 border-border bg-accent/15 px-2.5 py-1 text-sm font-bold text-accent">
                   <Flame className="h-3.5 w-3.5" /> {c.incident_count}
                 </span>
-                <TrendingUp className="h-4 w-4 text-destructive" />
+                <TrendingUp className="h-4 w-4 text-accent" strokeWidth={2.5} />
               </div>
             </Link>
           ))}
