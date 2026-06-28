@@ -98,7 +98,7 @@ function GlobalChat() {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div
-          className="flex h-10 w-10 items-center justify-center border-2 border-border bg-accent/15 text-accent"
+          className="flex h-10 w-10 -rotate-2 items-center justify-center border-2 border-border bg-accent/15 text-accent shadow-ink-soft"
           style={{ borderRadius: "18px 7px 20px 7px / 7px 20px 7px 18px" }}
         >
           <Globe className="h-5 w-5" strokeWidth={2.5} />
