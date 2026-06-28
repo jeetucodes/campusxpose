@@ -30,27 +30,44 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(
       { auth: { persistSession: false } },
     );
 
-    const [colleges, posts, incidents, top, recent] = await Promise.all([
-      supabase.from("colleges").select("*", { count: "exact", head: true }),
-      supabase.from("posts").select("*", { count: "exact", head: true }),
-      supabase.from("incidents").select("*", { count: "exact", head: true }),
-      supabase
-        .from("colleges")
-        .select("id, name, city, incident_count, total_rating")
-        .order("incident_count", { ascending: false })
-        .limit(5),
-      supabase
-        .from("posts")
-        .select("id, username, content, category, created_at, college_id")
-        .order("created_at", { ascending: false })
-        .limit(6),
-    ]);
+    const [colleges, posts, incidents, allColleges, postRows, incidentRows, recent] =
+      await Promise.all([
+        supabase.from("colleges").select("*", { count: "exact", head: true }),
+        supabase.from("posts").select("*", { count: "exact", head: true }),
+        supabase.from("incidents").select("*", { count: "exact", head: true }),
+        supabase.from("colleges").select("id, name, city, total_rating"),
+        supabase.from("posts").select("college_id"),
+        supabase.from("incidents").select("college_id"),
+        supabase
+          .from("posts")
+          .select("id, username, content, category, created_at, college_id")
+          .order("created_at", { ascending: false })
+          .limit(6),
+      ]);
+
+    // Live report counts per college (posts + incidents).
+    const counts = new Map<string, number>();
+    for (const r of [...(postRows.data ?? []), ...(incidentRows.data ?? [])]) {
+      const cid = (r as { college_id: string | null }).college_id;
+      if (cid) counts.set(cid, (counts.get(cid) ?? 0) + 1);
+    }
+
+    const top = (allColleges.data ?? [])
+      .map((c) => ({
+        id: c.id as string,
+        name: c.name as string,
+        city: (c.city ?? null) as string | null,
+        total_rating: (c.total_rating ?? null) as number | null,
+        incident_count: counts.get(c.id as string) ?? 0,
+      }))
+      .sort((a, b) => b.incident_count - a.incident_count)
+      .slice(0, 5);
 
     return {
       collegeCount: colleges.count ?? 0,
       postCount: posts.count ?? 0,
       incidentCount: incidents.count ?? 0,
-      top: top.data ?? [],
+      top,
       recentPosts: recent.data ?? [],
     };
   },
