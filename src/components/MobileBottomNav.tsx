@@ -3,9 +3,9 @@ import { Home, GraduationCap, Globe, MessageCircle } from "lucide-react";
 
 const items = [
   { to: "/", label: "Home", icon: Home, exact: true },
-  { to: "/colleges", label: "Colleges", icon: GraduationCap },
-  { to: "/global", label: "Global", icon: Globe },
-  { to: "/messages", label: "DMs", icon: MessageCircle },
+  { to: "/colleges", label: "Colleges", icon: GraduationCap, exact: false },
+  { to: "/global", label: "Global", icon: Globe, exact: false },
+  { to: "/messages", label: "DMs", icon: MessageCircle, exact: false },
 ] as const;
 
 export function MobileBottomNav() {
