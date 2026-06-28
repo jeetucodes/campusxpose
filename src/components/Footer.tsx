@@ -27,12 +27,12 @@ export function Footer() {
   );
 }
 
-export function SiteShell({ children }: { children: React.ReactNode }) {
+export function SiteShell({ children, hideFooter }: { children: React.ReactNode; hideFooter?: boolean }) {
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
       <main className="flex-1">{children}</main>
-      <Footer />
+      {!hideFooter && <Footer />}
     </div>
   );
 }

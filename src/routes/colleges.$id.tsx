@@ -63,10 +63,10 @@ function CollegeDetail() {
 
   const c = collegeQ.data;
   if (collegeQ.isLoading) {
-    return <SiteShell><div className="mx-auto max-w-4xl space-y-4 px-4 py-10"><Skeleton className="h-40 rounded-xl bg-surface" /><Skeleton className="h-60 rounded-xl bg-surface" /></div></SiteShell>;
+    return <SiteShell hideFooter><div className="mx-auto max-w-4xl space-y-4 px-4 py-10"><Skeleton className="h-40 rounded-xl bg-surface" /><Skeleton className="h-60 rounded-xl bg-surface" /></div></SiteShell>;
   }
   if (!c) {
-    return <SiteShell><div className="mx-auto max-w-2xl px-4 py-20 text-center text-muted-foreground"><p>College not found.</p><Button asChild className="mt-4 rounded-full"><Link to="/colleges">Back to Colleges</Link></Button></div></SiteShell>;
+    return <SiteShell hideFooter><div className="mx-auto max-w-2xl px-4 py-20 text-center text-muted-foreground"><p>College not found.</p><Button asChild className="mt-4 rounded-full"><Link to="/colleges">Back to Colleges</Link></Button></div></SiteShell>;
   }
 
   const ratings = ratingsQ.data ?? [];
@@ -83,7 +83,7 @@ function CollegeDetail() {
   const posts = postsQ.data ?? [];
 
   return (
-    <SiteShell>
+    <SiteShell hideFooter>
       <div className="mx-auto max-w-4xl px-4 py-8">
         {/* Header */}
         <div className="rounded-xl border border-border bg-surface p-6">
