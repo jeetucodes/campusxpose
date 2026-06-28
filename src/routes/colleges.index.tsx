@@ -7,7 +7,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { SiteShell } from "@/components/Footer";
 import { StarRating } from "@/components/StarRating";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CITIES, COLLEGE_TYPES } from "@/lib/categories";
 import { cn } from "@/lib/utils";
