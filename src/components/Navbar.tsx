@@ -25,6 +25,8 @@ export function Navbar() {
         <Logo />
         <div className="hidden items-center gap-6 text-lg md:flex">
           <Link to="/colleges" className="transition-colors hover:wavy-underline">Colleges</Link>
+          <Link to="/global" className="transition-colors hover:wavy-underline">Global</Link>
+          <Link to="/messages" className="transition-colors hover:wavy-underline">DMs</Link>
           <Link to="/report" className="transition-colors hover:wavy-underline">Report</Link>
         </div>
         <DropdownMenu open={open} onOpenChange={setOpen}>

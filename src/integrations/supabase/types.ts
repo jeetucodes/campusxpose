@@ -127,6 +127,33 @@ export type Database = {
           },
         ]
       }
+      direct_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          recipient_username: string
+          sender_hash: string
+          sender_username: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          recipient_username: string
+          sender_hash: string
+          sender_username: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          recipient_username?: string
+          sender_hash?: string
+          sender_username?: string
+        }
+        Relationships: []
+      }
       evidence: {
         Row: {
           ai_extracted_data: Json | null
@@ -177,6 +204,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      global_messages: {
+        Row: {
+          anonymous_user_hash: string
+          content: string
+          created_at: string
+          id: string
+          username: string
+        }
+        Insert: {
+          anonymous_user_hash: string
+          content: string
+          created_at?: string
+          id?: string
+          username: string
+        }
+        Update: {
+          anonymous_user_hash?: string
+          content?: string
+          created_at?: string
+          id?: string
+          username?: string
+        }
+        Relationships: []
       }
       incidents: {
         Row: {

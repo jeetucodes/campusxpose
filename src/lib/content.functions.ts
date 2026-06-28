@@ -153,3 +153,52 @@ export const votePost = createServerFn({ method: "POST" })
     await supabaseAdmin.from("posts").update(update).eq("id", data.postId);
     return { ok: true };
   });
+
+export const submitGlobalMessage = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        hashedId: z.string().min(8),
+        username: z.string().min(3).max(40),
+        content: z.string().min(1).max(1000),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (await isBanned(data.hashedId)) return { ok: true, shadow: true };
+    const { error } = await supabaseAdmin.from("global_messages").insert({
+      anonymous_user_hash: data.hashedId,
+      username: data.username,
+      content: clean(data.content),
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true, shadow: false };
+  });
+
+export const submitDirectMessage = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        hashedId: z.string().min(8),
+        username: z.string().min(3).max(40),
+        recipientUsername: z.string().min(3).max(40),
+        content: z.string().min(1).max(1000),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (await isBanned(data.hashedId)) return { ok: true, shadow: true };
+    if (data.recipientUsername === data.username) {
+      throw new Error("You cannot message yourself");
+    }
+    const { error } = await supabaseAdmin.from("direct_messages").insert({
+      sender_hash: data.hashedId,
+      sender_username: data.username,
+      recipient_username: data.recipientUsername,
+      content: clean(data.content),
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true, shadow: false };
+  });
