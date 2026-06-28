@@ -98,16 +98,25 @@ function CollegesPage() {
           </div>
           {filtersOpen && (
             <div className="space-y-4">
-              <div className="flex flex-wrap gap-2">
-                {["All", ...CITIES].map((c) => (
-                  <Pill key={c} active={city === c} onClick={() => setCity(c)}>{c}</Pill>
-                ))}
+              <div>
+                <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">City</div>
+                <div className="flex flex-wrap gap-2">
+                  {["All", ...CITIES].map((c) => (
+                    <Pill key={c} active={city === c} onClick={() => setCity(c)}>{c}</Pill>
+                  ))}
+                </div>
               </div>
-              <div className="flex flex-wrap items-center gap-2">
-                {["All", ...COLLEGE_TYPES].map((t) => (
-                  <Pill key={t} active={type === t} onClick={() => setType(t)} small>{t}</Pill>
-                ))}
-                <div className="ml-auto flex gap-2 text-xs">
+              <div>
+                <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Type</div>
+                <div className="flex flex-wrap gap-2">
+                  {["All", ...COLLEGE_TYPES].map((t) => (
+                    <Pill key={t} active={type === t} onClick={() => setType(t)} small>{t}</Pill>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Sort by</div>
+                <div className="flex flex-wrap gap-2">
                   <SortBtn active={sort === "reported"} onClick={() => setSort("reported")}>Most Reported</SortBtn>
                   <SortBtn active={sort === "rating"} onClick={() => setSort("rating")}>Lowest Rated</SortBtn>
                   <SortBtn active={sort === "reviews"} onClick={() => setSort("reviews")}>Most Reviews</SortBtn>
