@@ -164,11 +164,11 @@ function Community() {
             value={text}
             onChange={(e) => onType(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send()}
-            placeholder={cooldown > 0 ? `${cooldown} seconds...` : "Message likho..."}
-            disabled={cooldown > 0}
+            placeholder="Message likho..."
+            disabled={!hashedId || !username}
             className="bg-surface-2"
           />
-          <Button onClick={send} disabled={cooldown > 0 || !text.trim()} size="icon" className="shrink-0 rounded-full">
+          <Button onClick={send} disabled={!text.trim()} size="icon" className="shrink-0 rounded-full">
             <Send className="h-4 w-4" />
           </Button>
         </div>
