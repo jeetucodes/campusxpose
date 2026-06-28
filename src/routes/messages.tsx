@@ -115,6 +115,7 @@ function Messages() {
       await submitDirectMessage({
         data: { hashedId, username, recipientUsername: active, content },
       });
+      await load();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Message failed");
     }
