@@ -28,13 +28,14 @@ type Col = {
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  Engineering: "bg-primary/15 text-primary",
+  Engineering: "bg-[#2d5da1]/15 text-[#2d5da1]",
   Medical: "bg-success/15 text-success",
   Arts: "bg-warning/15 text-warning",
   University: "bg-accent/15 text-accent",
-  Research: "bg-blue-500/15 text-blue-400",
-  Commerce: "bg-pink-500/15 text-pink-400",
+  Research: "bg-[#2d5da1]/15 text-[#2d5da1]",
+  Commerce: "bg-accent/15 text-accent",
 };
+
 
 function CollegesPage() {
   const { data, isLoading } = useQuery({
@@ -107,33 +108,34 @@ function CollegesPage() {
 
         <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {isLoading
-            ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-56 rounded-xl bg-surface" />)
+            ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-56 wobbly-md bg-surface-2" />)
             : filtered.map((c, i) => (
                 <motion.div key={c.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(i * 0.04, 0.4) }}>
-                  <div className="glow-card flex h-full flex-col rounded-xl border border-border bg-surface p-5">
-                    <h3 className="text-lg font-semibold leading-tight">{c.name}</h3>
+                  <div className={cn("sketch-card flex h-full flex-col p-5", i % 2 ? "rotate-1" : "-rotate-1")} style={{ borderRadius: "25px 8px 22px 8px / 8px 22px 8px 25px" }}>
+                    <h3 className="font-display text-lg font-bold leading-tight">{c.name}</h3>
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-2 py-0.5 text-muted-foreground">
+                      <span className="inline-flex items-center gap-1 border border-border bg-surface-2 px-2 py-0.5 text-muted-foreground">
                         <MapPin className="h-3 w-3" />{c.city}, {c.state}
                       </span>
-                      <span className={cn("rounded-full px-2 py-0.5 font-medium", TYPE_COLORS[c.type] ?? "bg-surface-2 text-muted-foreground")}>{c.type}</span>
+                      <span className={cn("border border-border px-2 py-0.5 font-semibold", TYPE_COLORS[c.type] ?? "bg-surface-2 text-muted-foreground")}>{c.type}</span>
                     </div>
                     <div className="mt-4 flex items-center justify-between">
                       <StarRating value={c.total_rating} />
                       <span className="text-xs text-muted-foreground">{c.total_reviews} reviews</span>
                     </div>
                     <div className="mt-3">
-                      <span className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium", c.incident_count > 50 ? "bg-destructive/15 text-destructive" : "bg-surface-2 text-muted-foreground")}>
+                      <span className={cn("inline-flex items-center gap-1 border-2 border-border px-2.5 py-1 text-xs font-bold", c.incident_count > 50 ? "bg-accent/15 text-accent" : "bg-surface-2 text-muted-foreground")}>
                         {c.incident_count > 50 && <Flame className="h-3.5 w-3.5" />}
                         {c.incident_count} incidents
                       </span>
                     </div>
-                    <Button asChild className="mt-5 w-full rounded-full">
+                    <Button asChild variant="destructive" className="mt-5 w-full">
                       <Link to="/colleges/$id" params={{ id: c.id }}>View Truth <ArrowRight className="ml-1 h-4 w-4" /></Link>
                     </Button>
                   </div>
                 </motion.div>
               ))}
+
         </div>
 
         {!isLoading && filtered.length === 0 && (
@@ -149,15 +151,16 @@ function CollegesPage() {
 
 function Pill({ active, onClick, children, small }: { active: boolean; onClick: () => void; children: React.ReactNode; small?: boolean }) {
   return (
-    <button onClick={onClick} className={cn("rounded-full border px-3 py-1 transition-colors", small ? "text-xs" : "text-sm", active ? "border-primary bg-primary/15 text-primary" : "border-border bg-surface text-muted-foreground hover:text-foreground")}>
+    <button onClick={onClick} style={{ borderRadius: "14px 5px 16px 5px / 5px 16px 5px 14px" }} className={cn("border-2 px-3 py-1 transition-transform duration-100 hover:-rotate-2", small ? "text-xs" : "text-sm", active ? "border-border bg-accent text-accent-foreground shadow-ink-soft" : "border-border bg-white text-muted-foreground hover:text-foreground")}>
       {children}
     </button>
   );
 }
 function SortBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
-    <button onClick={onClick} className={cn("rounded-full px-2.5 py-1 transition-colors", active ? "bg-primary text-primary-foreground" : "bg-surface text-muted-foreground hover:text-foreground")}>
+    <button onClick={onClick} style={{ borderRadius: "12px 4px 14px 4px / 4px 14px 4px 12px" }} className={cn("border-2 border-border px-2.5 py-1 transition-transform duration-100 hover:-rotate-2", active ? "bg-[#2d5da1] text-white shadow-ink-soft" : "bg-white text-muted-foreground hover:text-foreground")}>
       {children}
     </button>
   );
 }
+

@@ -146,7 +146,7 @@ function CollegeDetail() {
               const sev = list.length ? Math.max(...list.map((i) => i.severity ?? 1)) : 0;
               const open = openCat === cat.key;
               return (
-                <button key={cat.key} onClick={() => setOpenCat(open ? null : cat.key)} className={cn("glow-card rounded-xl border bg-surface p-4 text-left", open ? "border-primary" : "border-border")}>
+                <button key={cat.key} onClick={() => setOpenCat(open ? null : cat.key)} style={{ borderRadius: "22px 7px 24px 7px / 7px 24px 7px 22px" }} className={cn("sketch-card p-4 text-left", open ? "border-[#2d5da1]" : "border-border")}>
                   <div className="text-2xl">{cat.emoji}</div>
                   <div className="mt-1 text-sm font-medium">{cat.label}</div>
                   <div className="mt-2 flex items-center gap-2">
