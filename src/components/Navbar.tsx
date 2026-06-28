@@ -60,7 +60,7 @@ export function Navbar() {
             style={{ borderRadius: "18px 6px 20px 6px / 6px 20px 6px 18px" }}
           >
             <div className="mb-2 flex items-center gap-2">
-              <Ghost className="h-5 w-5 text-accent" strokeWidth={2.5} />
+              <UserSymbol username={username} size="sm" />
               <span className="font-display font-bold">{username}</span>
             </div>
             <div className="mb-3 flex items-center gap-2 border border-dashed border-success bg-success/10 px-3 py-2 text-xs text-success">
