@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
-  Zap, MessageCircle, ArrowUp, ArrowDown, Ghost, Star, TrendingUp, TrendingDown, Minus,
+  Zap, MessageCircle, ArrowUp, ArrowDown, Star, TrendingUp, TrendingDown, Minus,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteShell } from "@/components/Footer";
@@ -17,6 +17,7 @@ import { ratingBarColor, severityColor, statusColor, timeAgo, ratingColor, inr }
 import { useIdentity } from "@/stores/identity";
 import { submitRating, votePost } from "@/lib/content.functions";
 import { cn } from "@/lib/utils";
+import { UserSymbol } from "@/components/UserSymbol";
 
 export const Route = createFileRoute("/colleges/$id")({
   component: CollegeDetail,
