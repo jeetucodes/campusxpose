@@ -1,14 +1,20 @@
+import { useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Ghost, Search, Shield, FileWarning, Sparkles, ArrowRight, Flame, TrendingUp } from "lucide-react";
 import { SiteShell } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { getHomeData } from "@/lib/home.functions";
+import { supabase } from "@/integrations/supabase/client";
+import { INCIDENT_CATEGORIES, categoryLabel, categoryEmoji } from "@/lib/categories";
+import { timeAgo } from "@/lib/format";
 
 const homeQueryOptions = queryOptions({
   queryKey: ["home"],
   queryFn: () => getHomeData(),
+  refetchInterval: 15000,
+  refetchOnWindowFocus: true,
 });
 
 export const Route = createFileRoute("/")({
@@ -34,7 +40,24 @@ const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
 
 function Home() {
   const { data } = useSuspenseQuery(homeQueryOptions);
+  const queryClient = useQueryClient();
 
+  // Auto-update top reported + stats when posts/incidents/colleges change.
+  useEffect(() => {
+    const ch = supabase
+      .channel("home-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "posts" }, () => {
+        queryClient.invalidateQueries({ queryKey: ["home"] });
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "incidents" }, () => {
+        queryClient.invalidateQueries({ queryKey: ["home"] });
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "colleges" }, () => {
+        queryClient.invalidateQueries({ queryKey: ["home"] });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [queryClient]);
 
   const steps = [
     { icon: Ghost, title: "Anonymous Login", desc: "App open karo — auto identity ban jaati hai", rot: "-rotate-2" },
@@ -46,6 +69,7 @@ function Home() {
     { icon: FileWarning, title: "Evidence Based", desc: "Built-in blur tool for proof documents.", bg: "bg-postit" },
     { icon: Sparkles, title: "AI Powered", desc: "Pattern detection aur incident analysis.", bg: "bg-white" },
   ];
+
 
   return (
     <SiteShell>
@@ -82,11 +106,12 @@ function Home() {
               <Link to="/report">Issue Report Karo</Link>
             </Button>
           </div>
-          <div className="mx-auto mt-12 grid max-w-lg grid-cols-3 gap-4">
+          <div className="mx-auto mt-12 grid max-w-xl grid-cols-2 gap-4 sm:grid-cols-4">
             {[
               { n: data?.collegeCount ?? 0, l: "Colleges", rot: "-rotate-2", bg: "bg-white" },
               { n: data?.postCount ?? 0, l: "Reports", rot: "rotate-2", bg: "bg-postit" },
-              { n: "∞", l: "Anonymous Users", rot: "-rotate-1", bg: "bg-white" },
+              { n: data?.incidentCount ?? 0, l: "Incidents", rot: "rotate-1", bg: "bg-white" },
+              { n: "∞", l: "Anon Users", rot: "-rotate-1", bg: "bg-postit" },
             ].map((s, i) => (
               <motion.div
                 key={i}
@@ -158,7 +183,16 @@ function Home() {
 
       {/* Top reported */}
       <section className="mx-auto max-w-3xl px-4 py-16">
-        <h2 className="mb-6 font-display text-3xl font-bold">🔥 Top Reported Colleges This Week</h2>
+        <div className="mb-6 flex items-center justify-between gap-3">
+          <h2 className="font-display text-3xl font-bold">🔥 Top Reported Colleges</h2>
+          <span className="inline-flex items-center gap-1.5 border-2 border-border bg-white px-2.5 py-1 text-xs font-bold text-success" style={{ borderRadius: WOBBLY_MD }}>
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
+            </span>
+            LIVE
+          </span>
+        </div>
         <div className="space-y-4">
           {(data?.top ?? []).map((c, i) => (
             <Link
@@ -168,9 +202,12 @@ function Home() {
               className={`sketch-card flex items-center justify-between p-4 ${i % 2 ? "rotate-1" : "-rotate-1"}`}
               style={{ borderRadius: WOBBLY_MD }}
             >
-              <div>
-                <div className="font-display text-lg font-bold">{c.name}</div>
-                <div className="text-sm text-muted-foreground">{c.city}</div>
+              <div className="flex items-center gap-3">
+                <span className="font-display text-2xl font-bold text-muted-foreground">#{i + 1}</span>
+                <div>
+                  <div className="font-display text-lg font-bold">{c.name}</div>
+                  <div className="text-sm text-muted-foreground">{c.city}</div>
+                </div>
               </div>
               <div className="flex items-center gap-3">
                 <span className="inline-flex items-center gap-1 border-2 border-border bg-accent/15 px-2.5 py-1 text-sm font-bold text-accent">
@@ -180,8 +217,88 @@ function Home() {
               </div>
             </Link>
           ))}
+          {(data?.top ?? []).length === 0 && (
+            <p className="text-center text-muted-foreground">Abhi tak koi report nahi. Pehle aap karo!</p>
+          )}
+        </div>
+      </section>
+
+      {/* Browse by category */}
+      <section className="mx-auto max-w-5xl px-4 py-12">
+        <h2 className="mb-8 text-center font-display text-3xl font-bold">Kya Report Kar Sakte Ho?</h2>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+          {INCIDENT_CATEGORIES.map((cat, i) => (
+            <motion.div
+              key={cat.key}
+              {...fadeUp}
+              transition={{ delay: i * 0.05 }}
+              className={`sketch-card flex flex-col items-center gap-2 p-5 text-center ${i % 2 ? "rotate-1" : "-rotate-1"}`}
+              style={{ borderRadius: WOBBLY_MD }}
+            >
+              <span className="text-4xl">{cat.emoji}</span>
+              <span className="font-display font-bold">{cat.label}</span>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Live latest reports */}
+      <section className="mx-auto max-w-3xl px-4 py-16">
+        <div className="mb-6 flex items-center justify-between gap-3">
+          <h2 className="font-display text-3xl font-bold">📰 Latest Reports</h2>
+          <span className="inline-flex items-center gap-1.5 border-2 border-border bg-white px-2.5 py-1 text-xs font-bold text-success" style={{ borderRadius: WOBBLY_MD }}>
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
+            </span>
+            LIVE
+          </span>
+        </div>
+        <div className="space-y-4">
+          {(data?.recentPosts ?? []).map((p, i) => {
+            const card = (
+              <div
+                className={`sketch-card p-4 ${i % 2 ? "rotate-1" : "-rotate-1"}`}
+                style={{ borderRadius: WOBBLY_MD }}
+              >
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Ghost className="h-4 w-4 text-accent" />
+                  <span className="font-medium text-foreground">{p.username ?? "Anonymous"}</span>
+                  {p.created_at && <span>· {timeAgo(p.created_at)}</span>}
+                  <span className="ml-auto border border-border bg-white px-2 py-0.5 text-[11px]">
+                    {categoryEmoji(p.category ?? "general")} {categoryLabel(p.category ?? "general")}
+                  </span>
+                </div>
+                <p className="mt-2 line-clamp-3 text-sm">{p.content}</p>
+              </div>
+            );
+            return p.college_id ? (
+              <Link key={p.id} to="/colleges/$id" params={{ id: p.college_id }} className="block">
+                {card}
+              </Link>
+            ) : (
+              <div key={p.id}>{card}</div>
+            );
+          })}
+          {(data?.recentPosts ?? []).length === 0 && (
+            <p className="text-center text-muted-foreground">Abhi koi report nahi aayi.</p>
+          )}
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="mx-auto max-w-3xl px-4 pb-20 pt-4 text-center">
+        <div className="sketch-card -rotate-1 p-8" style={{ borderRadius: WOBBLY_MD }}>
+          <h2 className="font-display text-3xl font-bold">Tumhare college ka sach kya hai?</h2>
+          <p className="mx-auto mt-3 max-w-md text-muted-foreground">
+            Bina darr ke, bina naam ke. Apni baat rakho — kisi ko pata nahi chalega.
+          </p>
+          <Button asChild size="lg" className="mt-6">
+            <Link to="/report">Abhi Report Karo <ArrowRight className="ml-1 h-4 w-4" /></Link>
+          </Button>
         </div>
       </section>
     </SiteShell>
+
   );
 }
