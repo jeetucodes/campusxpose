@@ -159,9 +159,7 @@ function Community() {
                   className={cn("flex items-end gap-2", own ? "flex-row-reverse" : "justify-start")}
                 >
                   {!own && (
-                    <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-surface-2 text-[10px] font-bold text-muted-foreground">
-                      {avatar}
-                    </div>
+                    <UserSymbol username={m.username} size="sm" />
                   )}
                   <div className="flex max-w-[80%] flex-col gap-1">
                     <div
