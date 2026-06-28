@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "direct_messages public read" ON public.direct_messages;
