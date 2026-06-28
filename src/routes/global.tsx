@@ -1,6 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Send, Globe, MessageCircle } from "lucide-react";
+import { Send, Globe, MessageCircle, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -38,6 +38,7 @@ function GlobalChat() {
   const [text, setText] = useState("");
   const [cooldown, setCooldown] = useState(0);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     init();
@@ -89,6 +90,14 @@ function GlobalChat() {
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col bg-background">
       <header className="flex items-center gap-3 border-b-2 border-dashed border-border bg-background px-4 py-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden"
+          onClick={() => navigate({ to: "/" })}
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
         <div
           className="flex h-10 w-10 items-center justify-center border-2 border-border bg-accent/15 text-accent"
           style={{ borderRadius: "18px 7px 20px 7px / 7px 20px 7px 18px" }}
