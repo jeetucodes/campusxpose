@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Send, Sparkles, RefreshCw, ChevronDown, ChevronUp, X, FileWarning, CheckCheck } from "lucide-react";
+import { UserSymbol } from "@/components/UserSymbol";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -158,9 +159,7 @@ function Community() {
                   className={cn("flex items-end gap-2", own ? "flex-row-reverse" : "justify-start")}
                 >
                   {!own && (
-                    <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-surface-2 text-[10px] font-bold text-muted-foreground">
-                      {avatar}
-                    </div>
+                    <UserSymbol username={m.username} size="sm" />
                   )}
                   <div className="flex max-w-[80%] flex-col gap-1">
                     <div

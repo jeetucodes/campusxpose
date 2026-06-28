@@ -3,6 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Ghost, Search, Shield, FileWarning, Sparkles, ArrowRight, Flame, TrendingUp } from "lucide-react";
+import { UserSymbol } from "@/components/UserSymbol";
 import { SiteShell } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { getHomeData } from "@/lib/home.functions";
@@ -262,7 +263,7 @@ function Home() {
                 style={{ borderRadius: WOBBLY_MD }}
               >
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Ghost className="h-4 w-4 text-accent" />
+                  <UserSymbol username={p.username} size="sm" />
                   <span className="font-medium text-foreground">{p.username ?? "Anonymous"}</span>
                   {p.created_at && <span>· {timeAgo(p.created_at)}</span>}
                   <span className="ml-auto border border-border bg-white px-2 py-0.5 text-[11px]">

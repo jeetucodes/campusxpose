@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
-  Zap, MessageCircle, ArrowUp, ArrowDown, Ghost, Star, TrendingUp, TrendingDown, Minus,
+  Zap, MessageCircle, ArrowUp, ArrowDown, Star, TrendingUp, TrendingDown, Minus,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteShell } from "@/components/Footer";
@@ -17,6 +17,7 @@ import { ratingBarColor, severityColor, statusColor, timeAgo, ratingColor, inr }
 import { useIdentity } from "@/stores/identity";
 import { submitRating, votePost } from "@/lib/content.functions";
 import { cn } from "@/lib/utils";
+import { UserSymbol } from "@/components/UserSymbol";
 
 export const Route = createFileRoute("/colleges/$id")({
   component: CollegeDetail,
@@ -314,7 +315,7 @@ function PostCard({ post, userVote, onVoted }: { post: any; userVote: "up" | "do
   return (
     <div className="rounded-xl border border-border bg-surface p-4">
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        <Ghost className="h-4 w-4 text-primary" />
+        <UserSymbol username={post.username} size="sm" />
         <span className="font-medium text-foreground">{post.username}</span>
         <span>· {timeAgo(post.created_at)}</span>
         <span className="ml-auto rounded-full bg-surface-2 px-2 py-0.5 capitalize">{categoryLabel(post.category ?? "general")}</span>
