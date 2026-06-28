@@ -88,89 +88,122 @@ function Community() {
     } catch { toast.error("Could not generate summary"); } finally { setLoadingSummary(false); }
   };
 
+  const initials = (collegeQ.data?.name ?? "Community").trim().slice(0, 2).toUpperCase();
+
   return (
     <div className="flex h-[calc(100dvh-8rem)] flex-col bg-background md:h-[calc(100dvh-4rem)]">
-      <header className="flex items-center gap-3 border-b border-border bg-surface px-4 py-3">
-        <Link to="/colleges/$id" params={{ id: collegeId }}><ArrowLeft className="h-5 w-5" /></Link>
-        <div>
-          <div className="font-semibold">{collegeQ.data?.name ?? "Community"}</div>
-          <div className="text-xs text-muted-foreground">Anonymous community chat</div>
-        </div>
-      </header>
+      <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col overflow-hidden md:border-x md:border-border">
+        {/* header */}
+        <header className="flex items-center gap-3 border-b border-border bg-surface/80 px-3 py-3 backdrop-blur-sm sm:px-4">
+          <Link
+            to="/colleges/$id"
+            params={{ id: collegeId }}
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-full transition-colors hover:bg-surface-2"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/15 text-sm font-bold text-primary">
+            {initials}
+          </div>
+          <div className="min-w-0">
+            <div className="truncate font-semibold leading-tight">{collegeQ.data?.name ?? "Community"}</div>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <span className="h-1.5 w-1.5 rounded-full bg-success" /> Anonymous live chat
+            </div>
+          </div>
+        </header>
 
-      {/* AI summary bar */}
-      <div className="border-b border-border bg-surface-2/50">
-        <button onClick={() => setSummaryOpen((o) => !o)} className="flex w-full items-center gap-2 px-4 py-2 text-sm">
-          <Sparkles className="h-4 w-4 text-primary" /> Today's Key Issues
-          {summaryOpen ? <ChevronUp className="ml-auto h-4 w-4" /> : <ChevronDown className="ml-auto h-4 w-4" />}
-        </button>
-        {summaryOpen && (
-          <div className="px-4 pb-3 text-sm">
-            {summary?.key_issues?.length ? (
-              <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
-                {summary.key_issues.map((k, i) => <li key={i}>{k}</li>)}
-              </ul>
-            ) : (
-              <p className="text-muted-foreground">No summary yet.</p>
-            )}
-            <Button size="sm" variant="outline" className="mt-2 rounded-full" onClick={loadSummary} disabled={loadingSummary}>
-              <RefreshCw className={cn("mr-1 h-3.5 w-3.5", loadingSummary && "animate-spin")} /> {loadingSummary ? "Analyzing..." : "Refresh"}
-            </Button>
+        {/* AI summary bar */}
+        <div className="border-b border-border bg-surface-2/40">
+          <button onClick={() => setSummaryOpen((o) => !o)} className="flex w-full items-center gap-2 px-3 py-2.5 text-sm font-medium sm:px-4">
+            <Sparkles className="h-4 w-4 text-primary" /> Today's Key Issues
+            {summaryOpen ? <ChevronUp className="ml-auto h-4 w-4 text-muted-foreground" /> : <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground" />}
+          </button>
+          {summaryOpen && (
+            <div className="px-3 pb-3 text-sm sm:px-4">
+              {summary?.key_issues?.length ? (
+                <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
+                  {summary.key_issues.map((k, i) => <li key={i}>{k}</li>)}
+                </ul>
+              ) : (
+                <p className="text-muted-foreground">No summary yet.</p>
+              )}
+              <Button size="sm" variant="outline" className="mt-2 rounded-full" onClick={loadSummary} disabled={loadingSummary}>
+                <RefreshCw className={cn("mr-1 h-3.5 w-3.5", loadingSummary && "animate-spin")} /> {loadingSummary ? "Analyzing..." : "Refresh"}
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {showRules && (
+          <div className="flex items-center gap-2 bg-primary/10 px-3 py-2 text-xs text-primary sm:px-4">
+            Stay anonymous. Share truth. No personal attacks.
+            <button className="ml-auto shrink-0" onClick={() => setShowRules(false)}><X className="h-4 w-4" /></button>
           </div>
         )}
-      </div>
 
-      {showRules && (
-        <div className="flex items-center gap-2 bg-primary/10 px-4 py-2 text-xs text-primary">
-          Stay anonymous. Share truth. No personal attacks.
-          <button className="ml-auto" onClick={() => setShowRules(false)}><X className="h-4 w-4" /></button>
+        {/* messages */}
+        <div className="flex flex-1 flex-col-reverse gap-1.5 overflow-y-auto px-3 py-4 sm:px-4">
+          <AnimatePresence initial={false}>
+            {messages.map((m) => {
+              const own = m.anonymous_user_hash === hashedId;
+              return (
+                <motion.div
+                  key={m.id}
+                  layout
+                  initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.18 }}
+                  className={cn("flex", own ? "justify-end" : "justify-start")}
+                >
+                  <div
+                    className={cn(
+                      "max-w-[85%] rounded-2xl px-3.5 py-2 text-sm shadow-sm sm:max-w-[75%]",
+                      own
+                        ? "rounded-br-md bg-primary text-primary-foreground"
+                        : "rounded-bl-md bg-surface-2",
+                      m.is_incident_signal && !own && "border-l-2 border-warning",
+                    )}
+                  >
+                    {!own && <div className="mb-0.5 text-xs font-semibold text-primary/80">{m.username}</div>}
+                    <div className="whitespace-pre-wrap break-words leading-relaxed">{m.content}</div>
+                    <div className={cn("mt-0.5 text-right text-[10px]", own ? "text-primary-foreground/60" : "text-muted-foreground")}>{timeAgo(m.created_at)}</div>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+          {messages.length === 0 && <p className="my-auto text-center text-sm text-muted-foreground">No messages yet. Start the conversation.</p>}
         </div>
-      )}
 
-      {/* messages */}
-      <div className="flex flex-1 flex-col-reverse gap-2 overflow-y-auto px-4 py-4">
-        {messages.map((m) => {
-          const own = m.anonymous_user_hash === hashedId;
-          return (
-            <div key={m.id} className={cn("flex", own ? "justify-end" : "justify-start")}>
-              <div className={cn("max-w-[80%] rounded-xl px-3 py-2 text-sm", own ? "bg-primary text-primary-foreground" : "bg-surface-2", m.is_incident_signal && !own && "border-l-2 border-warning")}>
-                {!own && <div className="mb-0.5 text-xs font-medium opacity-70">{m.username}</div>}
-                <div>{m.content}</div>
-                <div className="mt-0.5 text-[10px] opacity-60">{timeAgo(m.created_at)}</div>
+        {/* incident prompt */}
+        <AnimatePresence>
+          {incidentPrompt && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="mx-3 mb-2 rounded-xl border border-warning/40 bg-warning/10 p-3 text-sm sm:mx-4">
+              <div className="flex items-center gap-2 text-warning"><FileWarning className="h-4 w-4" /> Lagta hai kuch issue hai?</div>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <Button asChild size="sm" className="rounded-full"><Link to="/report" search={{ college: collegeId }}>📋 Report Officially</Link></Button>
+                <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setIncidentPrompt(false)}>Nahi, bas baat kar raha tha</Button>
               </div>
-            </div>
-          );
-        })}
-        {messages.length === 0 && <p className="my-auto text-center text-sm text-muted-foreground">No messages yet. Start the conversation.</p>}
-      </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-      {/* incident prompt */}
-      <AnimatePresence>
-        {incidentPrompt && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="mx-4 mb-2 rounded-xl border border-warning/40 bg-warning/10 p-3 text-sm">
-            <div className="flex items-center gap-2 text-warning"><FileWarning className="h-4 w-4" /> Lagta hai kuch issue hai?</div>
-            <div className="mt-2 flex gap-2">
-              <Button asChild size="sm" className="rounded-full"><Link to="/report" search={{ college: collegeId }}>📋 Report Officially</Link></Button>
-              <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setIncidentPrompt(false)}>Nahi, bas baat kar raha tha</Button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* input */}
-      <div className="border-t border-border bg-surface px-4 py-3">
-        <div className="flex items-center gap-2">
-          <Input
-            value={text}
-            onChange={(e) => onType(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && send()}
-            placeholder="Message likho..."
-            disabled={!hashedId || !username}
-            className="bg-surface-2"
-          />
-          <Button onClick={send} disabled={!text.trim()} size="icon" className="shrink-0 rounded-full">
-            <Send className="h-4 w-4" />
-          </Button>
+        {/* input */}
+        <div className="border-t border-border bg-surface px-3 py-3 sm:px-4">
+          <div className="flex items-end gap-2">
+            <Input
+              value={text}
+              onChange={(e) => onType(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && send()}
+              placeholder="Message likho..."
+              disabled={!hashedId || !username}
+              className="rounded-full bg-surface-2"
+            />
+            <Button onClick={send} disabled={!text.trim()} size="icon" className="h-10 w-10 shrink-0 rounded-full">
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
