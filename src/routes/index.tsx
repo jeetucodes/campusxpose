@@ -106,11 +106,12 @@ function Home() {
               <Link to="/report">Issue Report Karo</Link>
             </Button>
           </div>
-          <div className="mx-auto mt-12 grid max-w-lg grid-cols-3 gap-4">
+          <div className="mx-auto mt-12 grid max-w-xl grid-cols-2 gap-4 sm:grid-cols-4">
             {[
               { n: data?.collegeCount ?? 0, l: "Colleges", rot: "-rotate-2", bg: "bg-white" },
               { n: data?.postCount ?? 0, l: "Reports", rot: "rotate-2", bg: "bg-postit" },
-              { n: "∞", l: "Anonymous Users", rot: "-rotate-1", bg: "bg-white" },
+              { n: data?.incidentCount ?? 0, l: "Incidents", rot: "rotate-1", bg: "bg-white" },
+              { n: "∞", l: "Anon Users", rot: "-rotate-1", bg: "bg-postit" },
             ].map((s, i) => (
               <motion.div
                 key={i}
