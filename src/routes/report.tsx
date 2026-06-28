@@ -110,7 +110,7 @@ function ReportPage() {
                   <h2 className="mb-3 font-semibold">Choose Category</h2>
                   <div className="grid grid-cols-2 gap-2">
                     {REPORT_CATEGORIES.map((cat) => (
-                      <button key={cat.key} onClick={() => setCategory(cat.key)} className={cn("rounded-xl border p-4 text-left transition-colors", category === cat.key ? "border-primary bg-primary/10" : "border-border hover:bg-surface-2")}>
+                      <button key={cat.key} onClick={() => setCategory(cat.key)} className={cn("border-2 p-4 text-left transition-all duration-100 hover:-translate-y-0.5", category === cat.key ? "border-primary bg-primary/10 shadow-ink-soft" : "border-border bg-white hover:bg-surface-2")} style={{ borderRadius: "18px 6px 20px 6px / 6px 20px 6px 18px" }}>
                         <div className="text-2xl">{cat.emoji}</div>
                         <div className="mt-1 text-sm font-medium">{cat.label}</div>
                       </button>
