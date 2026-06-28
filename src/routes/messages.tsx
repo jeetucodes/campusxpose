@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Send, MessageCircle, Globe, ArrowLeft, Ghost, Plus } from "lucide-react";
+import { Send, MessageCircle, Globe, ArrowLeft, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
