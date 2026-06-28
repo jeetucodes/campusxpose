@@ -219,7 +219,7 @@ function CollegeDetail() {
           <h2 className="mb-4 text-xl font-bold">Dark Secrets Feed</h2>
           <div className="space-y-3">
             {posts.map((p) => (
-              <PostCard key={p.id} post={p} onVoted={() => postsQ.refetch()} />
+              <PostCard key={p.id} post={p} userVote={myVotes[p.id] ?? null} onVoted={() => { postsQ.refetch(); myVotesQ.refetch(); }} />
             ))}
             {posts.length === 0 && <p className="text-sm text-muted-foreground">No posts yet. Be the first to share the truth.</p>}
           </div>
