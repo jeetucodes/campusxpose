@@ -10,6 +10,7 @@ import {
 import { useEffect, useMemo, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import favicon from "@/assets/favicon.png";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
