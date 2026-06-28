@@ -149,9 +149,14 @@ function CollegesPage() {
                         {c.incident_count} incidents
                       </span>
                     </div>
-                    <Button asChild variant="destructive" className="mt-5 w-full">
-                      <Link to="/colleges/$id" params={{ id: c.id }}>View Truth <ArrowRight className="ml-1 h-4 w-4" /></Link>
-                    </Button>
+                    <Link
+                      to="/colleges/$id"
+                      params={{ id: c.id }}
+                      className="mt-5 flex w-full items-center justify-center gap-1 border-2 border-border bg-accent px-4 py-2.5 text-sm font-bold text-accent-foreground shadow-ink transition-transform duration-100 hover:-translate-y-0.5 hover:shadow-ink-lg"
+                      style={{ borderRadius: "18px 6px 20px 6px / 6px 20px 6px 18px" }}
+                    >
+                      View Truth <ArrowRight className="h-4 w-4" />
+                    </Link>
                   </div>
                 </motion.div>
               ))}
