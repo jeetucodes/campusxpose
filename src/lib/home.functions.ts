@@ -19,6 +19,7 @@ export type HomeData = {
     category: string | null;
     created_at: string | null;
     college_id: string | null;
+    college_name: string | null;
   }>;
 };
 
