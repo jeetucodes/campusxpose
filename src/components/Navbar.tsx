@@ -21,7 +21,7 @@ export function Navbar() {
   }, [init]);
 
   return (
-    <header className="sticky top-0 z-40 border-b-2 border-dashed border-border bg-background/90 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b-2 border-dashed border-ink bg-paper">
       <nav className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
         <Logo />
         <div className="hidden items-center gap-3 text-lg md:flex">
@@ -34,8 +34,8 @@ export function Navbar() {
             <Link
               key={item.to}
               to={item.to}
-              className="px-3 py-1.5 transition-all duration-100 hover:-rotate-1 hover:text-accent"
-              activeProps={{ className: "border-2 border-border bg-white shadow-ink-soft text-accent -rotate-1" }}
+              className="px-3 py-1.5 font-display transition-all duration-100 hover:-rotate-1 hover:text-accent"
+              activeProps={{ className: "border-2 border-ink bg-white shadow-ink text-accent -rotate-1" }}
               inactiveProps={{ className: "text-foreground" }}
               style={{ borderRadius: "16px 6px 18px 6px / 6px 18px 6px 16px" }}
             >
@@ -46,7 +46,7 @@ export function Navbar() {
         <DropdownMenu open={open} onOpenChange={setOpen}>
           <DropdownMenuTrigger asChild>
             <button
-              className="flex items-center gap-2 border-2 border-border bg-white px-3 py-1.5 text-sm shadow-ink-soft transition-transform duration-100 hover:-rotate-2"
+              className="flex items-center gap-2 border-2 border-ink bg-white px-3 py-1.5 text-sm shadow-ink transition-transform duration-100 hover:-rotate-2"
               style={{ borderRadius: "20px 7px 22px 7px / 7px 22px 7px 20px" }}
             >
               <UserSymbol username={username} size="sm" />
@@ -56,7 +56,7 @@ export function Navbar() {
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
-            className="w-64 border-2 border-border bg-white p-3 shadow-ink"
+            className="w-64 border-2 border-ink bg-white p-3 shadow-ink"
             style={{ borderRadius: "18px 6px 20px 6px / 6px 20px 6px 18px" }}
           >
             <div className="mb-2 flex items-center gap-2">
