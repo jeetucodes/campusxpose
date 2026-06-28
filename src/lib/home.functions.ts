@@ -19,6 +19,7 @@ export type HomeData = {
     category: string | null;
     created_at: string | null;
     college_id: string | null;
+    college_name: string | null;
   }>;
 };
 
@@ -52,6 +53,11 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(
       if (cid) counts.set(cid, (counts.get(cid) ?? 0) + 1);
     }
 
+    const collegeNames = new Map<string, string>();
+    for (const c of allColleges.data ?? []) {
+      collegeNames.set(c.id as string, c.name as string);
+    }
+
     const top = (allColleges.data ?? [])
       .map((c) => ({
         id: c.id as string,
@@ -68,7 +74,15 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(
       postCount: posts.count ?? 0,
       incidentCount: incidents.count ?? 0,
       top,
-      recentPosts: recent.data ?? [],
+      recentPosts: (recent.data ?? []).map((p) => ({
+        id: p.id as string,
+        username: (p.username ?? null) as string | null,
+        content: (p.content ?? null) as string | null,
+        category: (p.category ?? null) as string | null,
+        created_at: (p.created_at ?? null) as string | null,
+        college_id: (p.college_id ?? null) as string | null,
+        college_name: collegeNames.get(p.college_id as string) ?? null,
+      })),
     };
   },
 );

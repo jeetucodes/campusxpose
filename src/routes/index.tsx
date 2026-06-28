@@ -269,6 +269,9 @@ function Home() {
                     {categoryEmoji(p.category ?? "general")} {categoryLabel(p.category ?? "general")}
                   </span>
                 </div>
+                {p.college_name && (
+                  <div className="mt-1 text-xs font-semibold text-accent">🏫 {p.college_name}</div>
+                )}
                 <p className="mt-2 line-clamp-3 text-sm">{p.content}</p>
               </div>
             );
