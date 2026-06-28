@@ -12,7 +12,7 @@ export function Footer() {
     <footer className="mt-20 border-t-2 border-dashed border-ink bg-surface-2/60">
       <div className="mx-auto max-w-5xl px-4 py-12">
         {/* Top section */}
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2">
           {/* Brand */}
           <div
             className="space-y-4 border-2 border-ink bg-white p-5 shadow-ink"
