@@ -79,19 +79,28 @@ function CollegesPage() {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by college name or city..." className="bg-surface pl-9" />
           </div>
-          <div className="flex flex-wrap gap-2">
-            {["All", ...CITIES].map((c) => (
-              <Pill key={c} active={city === c} onClick={() => setCity(c)}>{c}</Pill>
-            ))}
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {["All", ...COLLEGE_TYPES].map((t) => (
-              <Pill key={t} active={type === t} onClick={() => setType(t)} small>{t}</Pill>
-            ))}
-            <div className="ml-auto flex gap-2 text-xs">
-              <SortBtn active={sort === "reported"} onClick={() => setSort("reported")}>Most Reported</SortBtn>
-              <SortBtn active={sort === "rating"} onClick={() => setSort("rating")}>Lowest Rated</SortBtn>
-              <SortBtn active={sort === "reviews"} onClick={() => setSort("reviews")}>Most Reviews</SortBtn>
+          <button
+            onClick={() => setFiltersOpen((v) => !v)}
+            className="flex items-center gap-2 rounded-md border-2 border-border bg-white px-3 py-2 text-sm font-medium md:hidden"
+          >
+            <SlidersHorizontal className="h-4 w-4" />
+            Filters
+          </button>
+          <div className={cn("space-y-4", !filtersOpen && "hidden md:block")}>
+            <div className="flex flex-wrap gap-2">
+              {["All", ...CITIES].map((c) => (
+                <Pill key={c} active={city === c} onClick={() => setCity(c)}>{c}</Pill>
+              ))}
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {["All", ...COLLEGE_TYPES].map((t) => (
+                <Pillustr key={t} active={type === t} onClick={() => setType(t)} small>{t}</Pill>
+              ))}
+              <div className="ml-auto flex gap-2 text-xs">
+                <SortBtn active={sort === "reported"} onClick={() => setSort("reported")}>Most Reported</SortBtn>
+                <SortBtn active={sort === "rating"} onClick={() => setSort("rating")}>Lowest Rated</SortBtn>
+                <SortBtn active={sort === "reviews"} onClick={() => setSort("reviews")}>Most Reviews</SortBtn>
+              </div>
             </div>
           </div>
         </div>
