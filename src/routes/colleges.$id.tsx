@@ -82,6 +82,20 @@ function CollegeDetail() {
   const incidents = incidentsQ.data ?? [];
   const posts = postsQ.data ?? [];
 
+  const { hashedId } = useIdentity();
+  const myVotesQ = useQuery({
+    queryKey: ["my-votes", id, hashedId],
+    queryFn: async () => {
+      if (!hashedId) return {} as Record<string, "up" | "down">;
+      const { data } = await supabase.from("post_votes").select("post_id, dir").eq("anonymous_user_hash", hashedId);
+      const map: Record<string, "up" | "down"> = {};
+      (data ?? []).forEach((v: any) => { map[v.post_id] = v.dir; });
+      return map;
+    },
+    enabled: !!hashedId,
+  });
+  const myVotes = myVotesQ.data ?? {};
+
   return (
     <SiteShell hideFooter>
       <div className="mx-auto max-w-4xl px-4 py-8">
