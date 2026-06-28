@@ -93,7 +93,6 @@ function GlobalChat() {
         <Button
           variant="ghost"
           size="icon"
-          className="md:hidden"
           onClick={() => navigate({ to: "/" })}
         >
           <ArrowLeft className="h-5 w-5" />
