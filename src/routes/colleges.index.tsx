@@ -72,7 +72,6 @@ function CollegesPage() {
     <SiteShell>
       <div className="mx-auto max-w-6xl px-4 py-10">
         <h1 className="text-3xl font-bold">Find Your College's Truth</h1>
-        {detectedCity && <p className="mt-1 text-sm text-muted-foreground">Showing colleges near {detectedCity}</p>}
 
         <div className="mt-6 space-y-4">
           <div className="relative">
