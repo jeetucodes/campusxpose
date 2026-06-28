@@ -97,7 +97,7 @@ function ReportPage() {
                   <Input placeholder="Search colleges..." value={collegeSearch} onChange={(e) => setCollegeSearch(e.target.value)} className="bg-surface-2" />
                   <div className="mt-3 max-h-64 space-y-1 overflow-y-auto">
                     {filteredColleges.map((c) => (
-                      <button key={c.id} onClick={() => setCollegeId(c.id)} className={cn("w-full rounded-lg border px-3 py-2 text-left text-sm transition-colors", collegeId === c.id ? "border-primary bg-primary/10" : "border-border hover:bg-surface-2")}>
+                      <button key={c.id} onClick={() => setCollegeId(c.id)} className={cn("w-full border-2 px-3 py-2 text-left text-sm transition-all duration-100 hover:-rotate-1", collegeId === c.id ? "border-primary bg-primary/10 shadow-ink-soft" : "border-border bg-white hover:bg-surface-2")} style={{ borderRadius: "14px 5px 16px 5px / 5px 16px 5px 14px" }}>
                         <span className="font-medium">{c.name}</span> <span className="text-muted-foreground">· {c.city}</span>
                       </button>
                     ))}
