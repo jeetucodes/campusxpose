@@ -90,6 +90,14 @@ function GlobalChat() {
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col bg-background">
       <header className="flex items-center gap-3 border-b-2 border-dashed border-border bg-background px-4 py-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden"
+          onClick={() => navigate({ to: "/" })}
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
         <div
           className="flex h-10 w-10 items-center justify-center border-2 border-border bg-accent/15 text-accent"
           style={{ borderRadius: "18px 7px 20px 7px / 7px 20px 7px 18px" }}
