@@ -204,3 +204,59 @@ function CollegePanel({ open, onOpenChange, editing, onSave }: { open: boolean; 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return <div><label className="text-xs text-muted-foreground">{label}</label><div className="mt-1">{children}</div></div>;
 }
+
+function CollegeRequests({ token, onApproved }: { token: string; onApproved: () => void }) {
+  const listFn = useServerFn(adminListCollegeRequests);
+  const approveFn = useServerFn(adminApproveCollegeRequest);
+  const rejectFn = useServerFn(adminRejectCollegeRequest);
+  const [busy, setBusy] = useState<string | null>(null);
+
+  const rq = useQuery({
+    queryKey: ["admin-college-requests"],
+    queryFn: async () => (await listFn({ data: { token } })).requests as any[],
+  });
+
+  const pending = (rq.data ?? []).filter((r) => r.status === "pending");
+  if (rq.isLoading || pending.length === 0) return null;
+
+  const act = async (id: string, approve: boolean) => {
+    setBusy(id);
+    try {
+      if (approve) {
+        await approveFn({ data: { token, id } });
+        toast.success("College added");
+        onApproved();
+      } else {
+        await rejectFn({ data: { token, id } });
+        toast.success("Request rejected");
+      }
+      rq.refetch();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Action failed");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <div className="mt-6 rounded-xl border border-warning/40 bg-warning/5 p-4">
+      <h2 className="text-lg font-bold">Pending College Requests ({pending.length})</h2>
+      <div className="mt-3 space-y-2">
+        {pending.map((r) => (
+          <div key={r.id} className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3">
+            <div className="min-w-48 flex-1">
+              <div className="font-semibold">{r.name}</div>
+              <div className="text-xs text-muted-foreground">{r.city}, {r.state} · {r.type}{r.established ? ` · est. ${r.established}` : ""}</div>
+              {r.description && <div className="mt-1 text-xs text-muted-foreground">{r.description}</div>}
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" className="rounded-full bg-success text-background hover:bg-success/90" disabled={busy === r.id} onClick={() => act(r.id, true)}>Approve</Button>
+              <Button size="sm" variant="destructive" className="rounded-full" disabled={busy === r.id} onClick={() => act(r.id, false)}>Reject</Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
