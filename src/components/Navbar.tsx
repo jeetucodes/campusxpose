@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Ghost, Shield, ChevronDown, Trash2 } from "lucide-react";
+import { Shield, ChevronDown, Trash2 } from "lucide-react";
+import { UserSymbol } from "@/components/UserSymbol";
 import { toast } from "sonner";
 import { useIdentity } from "@/stores/identity";
 import { Logo } from "@/components/Logo";
@@ -48,7 +49,7 @@ export function Navbar() {
               className="flex items-center gap-2 border-2 border-border bg-white px-3 py-1.5 text-sm shadow-ink-soft transition-transform duration-100 hover:-rotate-2"
               style={{ borderRadius: "20px 7px 22px 7px / 7px 22px 7px 20px" }}
             >
-              <Ghost className="h-4 w-4 text-accent" strokeWidth={2.5} />
+              <UserSymbol username={username} size="sm" />
               <span className="max-w-[120px] truncate font-medium">{isReady ? username : "..."}</span>
               <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
             </button>
@@ -59,7 +60,7 @@ export function Navbar() {
             style={{ borderRadius: "18px 6px 20px 6px / 6px 20px 6px 18px" }}
           >
             <div className="mb-2 flex items-center gap-2">
-              <Ghost className="h-5 w-5 text-accent" strokeWidth={2.5} />
+              <UserSymbol username={username} size="sm" />
               <span className="font-display font-bold">{username}</span>
             </div>
             <div className="mb-3 flex items-center gap-2 border border-dashed border-success bg-success/10 px-3 py-2 text-xs text-success">
