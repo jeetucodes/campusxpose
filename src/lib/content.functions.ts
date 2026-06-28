@@ -203,6 +203,28 @@ export const submitDirectMessage = createServerFn({ method: "POST" })
     return { ok: true, shadow: false };
   });
 
+export const fetchDirectMessages = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        hashedId: z.string().min(8),
+        username: z.string().min(3).max(40),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Only return messages the caller sent (verified by their secret hash)
+    // or received (addressed to their username).
+    const { data: rows, error } = await supabaseAdmin
+      .from("direct_messages")
+      .select("*")
+      .or(`sender_hash.eq.${data.hashedId},recipient_username.eq.${data.username}`)
+      .order("created_at", { ascending: true });
+    if (error) throw new Error(error.message);
+    return { messages: rows ?? [] };
+  });
+
 const COLLEGE_TYPES = ["Engineering", "Medical", "Arts", "Commerce", "University", "Research"] as const;
 
 export const submitCollegeRequest = createServerFn({ method: "POST" })

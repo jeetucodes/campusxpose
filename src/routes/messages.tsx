@@ -2,11 +2,11 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Send, MessageCircle, Globe, ArrowLeft, Ghost, Plus } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useIdentity } from "@/stores/identity";
-import { submitDirectMessage } from "@/lib/content.functions";
+import { submitDirectMessage, fetchDirectMessages } from "@/lib/content.functions";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -50,34 +50,26 @@ function Messages() {
     init();
   }, [init]);
 
+  const load = useMemo(
+    () => async () => {
+      if (!hashedId || !username) return;
+      try {
+        const r = await fetchDirectMessages({ data: { hashedId, username } });
+        setAll((r.messages ?? []) as DM[]);
+      } catch {
+        /* ignore transient errors */
+      }
+    },
+    [hashedId, username],
+  );
+
   useEffect(() => {
     if (!username) return;
-    supabase
-      .from("direct_messages")
-      .select("*")
-      .or(`sender_username.eq.${username},recipient_username.eq.${username}`)
-      .order("created_at", { ascending: true })
-      .then(({ data }) => setAll((data ?? []) as DM[]));
+    load();
+    const interval = setInterval(load, 5000);
+    return () => clearInterval(interval);
+  }, [username, load]);
 
-    const ch = supabase
-      .channel(`dm-${username}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "direct_messages" },
-        (p) => {
-          const m = p.new as DM;
-          if (m.sender_username !== username && m.recipient_username !== username)
-            return;
-          setAll((prev) =>
-            prev.some((x) => x.id === m.id) ? prev : [...prev, m],
-          );
-        },
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(ch);
-    };
-  }, [username]);
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -123,6 +115,7 @@ function Messages() {
       await submitDirectMessage({
         data: { hashedId, username, recipientUsername: active, content },
       });
+      await load();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Message failed");
     }
