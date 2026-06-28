@@ -49,7 +49,7 @@ export function Navbar() {
               className="flex items-center gap-2 border-2 border-border bg-white px-3 py-1.5 text-sm shadow-ink-soft transition-transform duration-100 hover:-rotate-2"
               style={{ borderRadius: "20px 7px 22px 7px / 7px 22px 7px 20px" }}
             >
-              <Ghost className="h-4 w-4 text-accent" strokeWidth={2.5} />
+              <UserSymbol username={username} size="sm" />
               <span className="max-w-[120px] truncate font-medium">{isReady ? username : "..."}</span>
               <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
             </button>
