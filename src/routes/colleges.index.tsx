@@ -107,33 +107,34 @@ function CollegesPage() {
 
         <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {isLoading
-            ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-56 rounded-xl bg-surface" />)
+            ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-56 wobbly-md bg-surface-2" />)
             : filtered.map((c, i) => (
                 <motion.div key={c.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(i * 0.04, 0.4) }}>
-                  <div className="glow-card flex h-full flex-col rounded-xl border border-border bg-surface p-5">
-                    <h3 className="text-lg font-semibold leading-tight">{c.name}</h3>
+                  <div className={cn("sketch-card flex h-full flex-col p-5", i % 2 ? "rotate-1" : "-rotate-1")} style={{ borderRadius: "25px 8px 22px 8px / 8px 22px 8px 25px" }}>
+                    <h3 className="font-display text-lg font-bold leading-tight">{c.name}</h3>
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-2 py-0.5 text-muted-foreground">
+                      <span className="inline-flex items-center gap-1 border border-border bg-surface-2 px-2 py-0.5 text-muted-foreground">
                         <MapPin className="h-3 w-3" />{c.city}, {c.state}
                       </span>
-                      <span className={cn("rounded-full px-2 py-0.5 font-medium", TYPE_COLORS[c.type] ?? "bg-surface-2 text-muted-foreground")}>{c.type}</span>
+                      <span className={cn("border border-border px-2 py-0.5 font-semibold", TYPE_COLORS[c.type] ?? "bg-surface-2 text-muted-foreground")}>{c.type}</span>
                     </div>
                     <div className="mt-4 flex items-center justify-between">
                       <StarRating value={c.total_rating} />
                       <span className="text-xs text-muted-foreground">{c.total_reviews} reviews</span>
                     </div>
                     <div className="mt-3">
-                      <span className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium", c.incident_count > 50 ? "bg-destructive/15 text-destructive" : "bg-surface-2 text-muted-foreground")}>
+                      <span className={cn("inline-flex items-center gap-1 border-2 border-border px-2.5 py-1 text-xs font-bold", c.incident_count > 50 ? "bg-accent/15 text-accent" : "bg-surface-2 text-muted-foreground")}>
                         {c.incident_count > 50 && <Flame className="h-3.5 w-3.5" />}
                         {c.incident_count} incidents
                       </span>
                     </div>
-                    <Button asChild className="mt-5 w-full rounded-full">
+                    <Button asChild variant="destructive" className="mt-5 w-full">
                       <Link to="/colleges/$id" params={{ id: c.id }}>View Truth <ArrowRight className="ml-1 h-4 w-4" /></Link>
                     </Button>
                   </div>
                 </motion.div>
               ))}
+
         </div>
 
         {!isLoading && filtered.length === 0 && (
