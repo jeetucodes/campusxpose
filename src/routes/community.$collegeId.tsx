@@ -207,21 +207,22 @@ function Community() {
         </AnimatePresence>
 
         {/* input */}
-        <div className="border-t border-border bg-surface px-3 py-3 sm:px-4">
-          <div className="flex items-end gap-2">
+        <div className="border-t border-border bg-surface/80 px-3 py-3 backdrop-blur-sm sm:px-4">
+          <div className="flex items-center gap-2 rounded-full border border-border bg-surface-2 px-2 py-1.5 transition-colors focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15">
             <Input
               value={text}
               onChange={(e) => onType(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && send()}
-              placeholder="Message likho..."
+              placeholder="Write anonymously..."
               disabled={!hashedId || !username}
-              className="rounded-full bg-surface-2"
+              className="h-8 flex-1 border-0 bg-transparent px-2 shadow-none focus-visible:ring-0"
             />
-            <Button onClick={send} disabled={!text.trim()} size="icon" className="h-10 w-10 shrink-0 rounded-full">
+            <Button onClick={send} disabled={!text.trim()} size="icon" className="h-9 w-9 shrink-0 rounded-full">
               <Send className="h-4 w-4" />
             </Button>
           </div>
         </div>
+
       </div>
     </div>
   );
