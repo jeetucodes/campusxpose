@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { useAdmin } from "@/stores/admin";
-import { adminAddCollege, adminUpdateCollege, adminDeleteColleges } from "@/lib/admin.functions";
+import { adminAddCollege, adminUpdateCollege, adminDeleteColleges, adminListCollegeRequests, adminApproveCollegeRequest, adminRejectCollegeRequest } from "@/lib/admin.functions";
 import { COLLEGE_TYPES, INDIAN_STATES } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
