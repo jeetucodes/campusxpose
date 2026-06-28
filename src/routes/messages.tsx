@@ -217,12 +217,8 @@ function Messages() {
                   <ArrowLeft className="h-5 w-5" />
                 </Link>
               </Button>
-              <div
-                className="flex h-10 w-10 -rotate-2 items-center justify-center border-2 border-border bg-accent/15 text-accent shadow-ink-soft"
-                style={{ borderRadius: "18px 7px 20px 7px / 7px 20px 7px 18px" }}
-              >
-                <Ghost className="h-5 w-5" strokeWidth={2.5} />
-              </div>
+              <UserSymbol username={active} size="md" />
+
               <div>
                 <div className="font-display font-bold">{active}</div>
                 <div className="text-xs text-muted-foreground">
