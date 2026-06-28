@@ -181,11 +181,11 @@ function ReportPage() {
 
           {step < 5 && (
             <div className="mt-6 flex justify-between">
-              <Button variant="ghost" disabled={step === 1} onClick={() => setStep((s) => s - 1)} className="rounded-full"><ArrowLeft className="mr-1 h-4 w-4" /> Back</Button>
+              <Button variant="ghost" disabled={step === 1} onClick={() => setStep((s) => s - 1)}><ArrowLeft className="mr-1 h-4 w-4" /> Back</Button>
               {step === 4 ? (
-                <Button onClick={() => setStep(5)} variant="outline" className="rounded-full">Skip / Continue <ArrowRight className="ml-1 h-4 w-4" /></Button>
+                <Button onClick={() => setStep(5)} variant="outline">Skip / Continue <ArrowRight className="ml-1 h-4 w-4" /></Button>
               ) : (
-                <Button onClick={next} className="rounded-full">Next <ArrowRight className="ml-1 h-4 w-4" /></Button>
+                <Button onClick={next}>Next <ArrowRight className="ml-1 h-4 w-4" /></Button>
               )}
             </div>
           )}
