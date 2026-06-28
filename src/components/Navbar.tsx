@@ -34,8 +34,8 @@ export function Navbar() {
               key={item.to}
               to={item.to}
               className="px-3 py-1.5 transition-all duration-100 hover:-rotate-1 hover:text-accent"
-              activeProps={{ className: "px-3 py-1.5 border-2 border-border bg-white shadow-ink-soft text-accent -rotate-1" }}
-              inactiveProps={{ className: "px-3 py-1.5 text-foreground" }}
+              activeProps={{ className: "border-2 border-border bg-white shadow-ink-soft text-accent -rotate-1" }}
+              inactiveProps={{ className: "text-foreground" }}
               style={{ borderRadius: "16px 6px 18px 6px / 6px 18px 6px 16px" }}
             >
               {item.label}
