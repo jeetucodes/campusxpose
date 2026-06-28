@@ -38,6 +38,7 @@ function GlobalChat() {
   const [text, setText] = useState("");
   const [cooldown, setCooldown] = useState(0);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     init();
