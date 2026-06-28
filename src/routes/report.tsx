@@ -88,7 +88,7 @@ function ReportPage() {
         </div>
         <p className="mt-2 text-xs text-muted-foreground">Step {step} of 5</p>
 
-        <div className="mt-6 rounded-xl border border-border bg-surface p-6">
+        <div className="mt-6 border-2 border-border bg-white p-6 shadow-ink" style={{ borderRadius: "25px 8px 22px 8px / 8px 22px 8px 25px" }}>
           <AnimatePresence mode="wait">
             <motion.div key={step} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
               {step === 1 && (
