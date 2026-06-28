@@ -173,7 +173,7 @@ function ReportPage() {
                     <div className="mt-2 flex items-center gap-2 text-sm text-success"><Shield className="h-4 w-4" /> Your real identity is never stored</div>
                     <p className="mt-1 text-xs text-muted-foreground">Even we cannot identify you.</p>
                   </div>
-                  <Button disabled={busy} onClick={submit} className="w-full rounded-full">{busy ? "Submitting..." : "Submit Anonymously"}</Button>
+                  <Button disabled={busy} onClick={submit} className="w-full">{busy ? "Submitting..." : "Submit Anonymously"}</Button>
                 </div>
               )}
             </motion.div>
