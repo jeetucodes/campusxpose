@@ -84,10 +84,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "CampusXpose — College ka sach, bina darr ke" },
       { name: "description", content: "Anonymous platform for Indian college students to rate colleges and report fake fines, placement fraud, and harassment." },
       { name: "author", content: "CampusXpose" },
-      { property: "og:title", content: "CampusXpose — Anonymous College Accountability" },
-      { property: "og:description", content: "Apne college ki asli kahani share karo. 100% anonymous." },
+      { property: "og:title", content: "CampusXpose — College ka sach, bina darr ke" },
+      { property: "og:description", content: "Anonymous platform for Indian college students to rate colleges and report fake fines, placement fraud, and harassment." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "CampusXpose — College ka sach, bina darr ke" },
+      { name: "twitter:description", content: "Anonymous platform for Indian college students to rate colleges and report fake fines, placement fraud, and harassment." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4775d11f-2679-4112-a831-752842265928/id-preview-b47b8bb1--5e5e5f3c-9e18-4ded-bf54-ed3632d01563.lovable.app-1782677617743.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4775d11f-2679-4112-a831-752842265928/id-preview-b47b8bb1--5e5e5f3c-9e18-4ded-bf54-ed3632d01563.lovable.app-1782677617743.png" },
     ],
     links: [
       {
