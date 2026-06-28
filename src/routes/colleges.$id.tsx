@@ -315,7 +315,7 @@ function PostCard({ post, userVote, onVoted }: { post: any; userVote: "up" | "do
   return (
     <div className="rounded-xl border border-border bg-surface p-4">
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        <Ghost className="h-4 w-4 text-primary" />
+        <UserSymbol username={post.username} size="sm" />
         <span className="font-medium text-foreground">{post.username}</span>
         <span>· {timeAgo(post.created_at)}</span>
         <span className="ml-auto rounded-full bg-surface-2 px-2 py-0.5 capitalize">{categoryLabel(post.category ?? "general")}</span>
