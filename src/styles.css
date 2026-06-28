@@ -1,11 +1,10 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
-@import "@fontsource/inter/400.css";
-@import "@fontsource/inter/500.css";
-@import "@fontsource/inter/600.css";
-@import "@fontsource/inter/700.css";
-@import "@fontsource/inter/800.css";
+@import "@fontsource/kalam/300.css";
+@import "@fontsource/kalam/400.css";
+@import "@fontsource/kalam/700.css";
+@import "@fontsource/patrick-hand/400.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -42,37 +41,52 @@
   --color-ring: var(--ring);
   --color-ring-offset-background: var(--background);
 
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-postit: var(--postit);
+  --color-marker: var(--marker);
+  --color-pen: var(--pen);
+
+  --font-sans: "Patrick Hand", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Kalam", "Patrick Hand", ui-sans-serif, sans-serif;
 }
 
 :root {
   --radius: 0.75rem;
 
-  --background: oklch(0.145 0 0);          /* #0A0A0A */
-  --foreground: oklch(1 0 0);              /* #FFFFFF */
-  --surface: oklch(0.18 0 0);             /* #111111 */
-  --surface-2: oklch(0.22 0 0);          /* #1A1A1A */
-  --card: oklch(0.18 0 0);
-  --card-foreground: oklch(1 0 0);
-  --popover: oklch(0.18 0 0);
-  --popover-foreground: oklch(1 0 0);
+  /* Hand-Drawn palette (light mode) */
+  --background: #fdfbf7;        /* warm paper */
+  --foreground: #2d2d2d;        /* soft pencil black */
+  --surface: #ffffff;
+  --surface-2: #f5f1e8;
+  --card: #ffffff;
+  --card-foreground: #2d2d2d;
+  --popover: #ffffff;
+  --popover-foreground: #2d2d2d;
 
-  --primary: oklch(0.62 0.21 280);        /* #6C63FF */
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.22 0 0);
-  --secondary-foreground: oklch(1 0 0);
-  --muted: oklch(0.22 0 0);
-  --muted-foreground: oklch(0.65 0 0);    /* #888888 */
-  --accent: oklch(0.64 0.23 22);          /* #FF4757 */
-  --accent-foreground: oklch(1 0 0);
-  --success: oklch(0.74 0.19 152);        /* #2ED573 */
-  --warning: oklch(0.79 0.16 73);         /* #FFA502 */
-  --destructive: oklch(0.64 0.23 22);     /* #FF4757 */
-  --destructive-foreground: oklch(1 0 0);
+  --primary: #ff4d4d;           /* red correction marker */
+  --primary-foreground: #ffffff;
+  --secondary: #e5e0d8;         /* old paper / erased pencil */
+  --secondary-foreground: #2d2d2d;
+  --muted: #e5e0d8;
+  --muted-foreground: #6b6660;
+  --accent: #ff4d4d;
+  --accent-foreground: #ffffff;
+  --success: #3a8a4f;
+  --warning: #d98e00;
+  --destructive: #ff4d4d;
+  --destructive-foreground: #ffffff;
 
-  --border: oklch(0.26 0 0);              /* #1F1F1F */
-  --input: oklch(0.26 0 0);
-  --ring: oklch(0.62 0.21 280);
+  --border: #2d2d2d;            /* pencil lead */
+  --input: #2d2d2d;
+  --ring: #2d5da1;
+
+  /* hand-drawn named tokens */
+  --ink: #2d2d2d;
+  --paper: #fdfbf7;
+  --postit: #fff9c4;
+  --marker: #ff4d4d;
+  --pen: #2d5da1;
 }
 
 @layer base {
@@ -80,24 +94,62 @@
     border-color: var(--color-border);
   }
   html {
-    color-scheme: dark;
+    color-scheme: light;
   }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    background-image: radial-gradient(#e5e0d8 1px, transparent 1px);
+    background-size: 24px 24px;
     -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 700;
   }
 }
 
-@utility glow-card {
-  transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+/* Wobbly hand-drawn border-radius helpers */
+@utility wobbly {
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+}
+@utility wobbly-md {
+  border-radius: 25px 8px 22px 8px / 8px 22px 8px 25px;
+}
+@utility wobbly-sm {
+  border-radius: 12px 4px 14px 4px / 4px 14px 4px 12px;
+}
+@utility wobbly-oval {
+  border-radius: 50px 18px 48px 18px / 18px 48px 18px 50px;
+}
+
+/* Hard offset (cut-paper) shadows */
+@utility shadow-ink {
+  box-shadow: 4px 4px 0px 0px var(--ink);
+}
+@utility shadow-ink-lg {
+  box-shadow: 8px 8px 0px 0px var(--ink);
+}
+@utility shadow-ink-soft {
+  box-shadow: 3px 3px 0px 0px rgba(45, 45, 45, 0.12);
+}
+
+/* Sketchy card that lifts on hover */
+@utility sketch-card {
+  background-color: #ffffff;
+  border: 2px solid var(--ink);
+  box-shadow: 4px 4px 0px 0px var(--ink);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
   &:hover {
-    border-color: color-mix(in oklch, var(--primary) 60%, transparent);
-    box-shadow: 0 0 0 1px color-mix(in oklch, var(--primary) 40%, transparent),
-      0 8px 30px color-mix(in oklch, var(--primary) 25%, transparent);
-    transform: translateY(-2px);
+    transform: translate(-2px, -2px) rotate(-1deg);
+    box-shadow: 6px 6px 0px 0px var(--ink);
   }
+}
+
+@utility wavy-underline {
+  text-decoration: underline wavy var(--marker);
+  text-underline-offset: 4px;
 }
 
 @utility no-scrollbar {
@@ -106,4 +158,12 @@
   }
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+@keyframes gentle-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@utility animate-gentle-bounce {
+  animation: gentle-bounce 3s ease-in-out infinite;
 }
