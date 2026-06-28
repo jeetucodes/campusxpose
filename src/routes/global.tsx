@@ -122,8 +122,9 @@ function GlobalChat() {
           return (
             <div
               key={m.id}
-              className={cn("flex", own ? "justify-end" : "justify-start")}
+              className={cn("flex items-end gap-2", own ? "justify-end" : "justify-start")}
             >
+              {!own && <UserSymbol username={m.username} size="sm" />}
               <div
                 className={cn(
                   "max-w-[80%] border-2 border-border px-3 py-2 text-sm shadow-ink-soft",
