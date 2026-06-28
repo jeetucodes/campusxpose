@@ -51,16 +51,6 @@ function CollegesPage() {
   const [city, setCity] = useState("All");
   const [type, setType] = useState("All");
   const [sort, setSort] = useState<"reported" | "rating" | "reviews">("reported");
-  const [detectedCity, setDetectedCity] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-      () => setDetectedCity("Bhopal"),
-      () => setDetectedCity(null),
-      { timeout: 4000 },
-    );
-  }, []);
 
   const filtered = useMemo(() => {
     let rows = data ?? [];
