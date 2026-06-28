@@ -88,7 +88,7 @@ function ReportPage() {
         </div>
         <p className="mt-2 text-xs text-muted-foreground">Step {step} of 5</p>
 
-        <div className="mt-6 rounded-xl border border-border bg-surface p-6">
+        <div className="mt-6 border-2 border-border bg-white p-6 shadow-ink" style={{ borderRadius: "25px 8px 22px 8px / 8px 22px 8px 25px" }}>
           <AnimatePresence mode="wait">
             <motion.div key={step} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
               {step === 1 && (
@@ -97,7 +97,7 @@ function ReportPage() {
                   <Input placeholder="Search colleges..." value={collegeSearch} onChange={(e) => setCollegeSearch(e.target.value)} className="bg-surface-2" />
                   <div className="mt-3 max-h-64 space-y-1 overflow-y-auto">
                     {filteredColleges.map((c) => (
-                      <button key={c.id} onClick={() => setCollegeId(c.id)} className={cn("w-full rounded-lg border px-3 py-2 text-left text-sm transition-colors", collegeId === c.id ? "border-primary bg-primary/10" : "border-border hover:bg-surface-2")}>
+                      <button key={c.id} onClick={() => setCollegeId(c.id)} className={cn("w-full border-2 px-3 py-2 text-left text-sm transition-all duration-100 hover:-rotate-1", collegeId === c.id ? "border-primary bg-primary/10 shadow-ink-soft" : "border-border bg-white hover:bg-surface-2")} style={{ borderRadius: "14px 5px 16px 5px / 5px 16px 5px 14px" }}>
                         <span className="font-medium">{c.name}</span> <span className="text-muted-foreground">· {c.city}</span>
                       </button>
                     ))}
@@ -110,7 +110,7 @@ function ReportPage() {
                   <h2 className="mb-3 font-semibold">Choose Category</h2>
                   <div className="grid grid-cols-2 gap-2">
                     {REPORT_CATEGORIES.map((cat) => (
-                      <button key={cat.key} onClick={() => setCategory(cat.key)} className={cn("rounded-xl border p-4 text-left transition-colors", category === cat.key ? "border-primary bg-primary/10" : "border-border hover:bg-surface-2")}>
+                      <button key={cat.key} onClick={() => setCategory(cat.key)} className={cn("border-2 p-4 text-left transition-all duration-100 hover:-translate-y-0.5", category === cat.key ? "border-primary bg-primary/10 shadow-ink-soft" : "border-border bg-white hover:bg-surface-2")} style={{ borderRadius: "18px 6px 20px 6px / 6px 20px 6px 18px" }}>
                         <div className="text-2xl">{cat.emoji}</div>
                         <div className="mt-1 text-sm font-medium">{cat.label}</div>
                       </button>
@@ -173,7 +173,7 @@ function ReportPage() {
                     <div className="mt-2 flex items-center gap-2 text-sm text-success"><Shield className="h-4 w-4" /> Your real identity is never stored</div>
                     <p className="mt-1 text-xs text-muted-foreground">Even we cannot identify you.</p>
                   </div>
-                  <Button disabled={busy} onClick={submit} className="w-full rounded-full">{busy ? "Submitting..." : "Submit Anonymously"}</Button>
+                  <Button disabled={busy} onClick={submit} className="w-full">{busy ? "Submitting..." : "Submit Anonymously"}</Button>
                 </div>
               )}
             </motion.div>
@@ -181,11 +181,11 @@ function ReportPage() {
 
           {step < 5 && (
             <div className="mt-6 flex justify-between">
-              <Button variant="ghost" disabled={step === 1} onClick={() => setStep((s) => s - 1)} className="rounded-full"><ArrowLeft className="mr-1 h-4 w-4" /> Back</Button>
+              <Button variant="ghost" disabled={step === 1} onClick={() => setStep((s) => s - 1)}><ArrowLeft className="mr-1 h-4 w-4" /> Back</Button>
               {step === 4 ? (
-                <Button onClick={() => setStep(5)} variant="outline" className="rounded-full">Skip / Continue <ArrowRight className="ml-1 h-4 w-4" /></Button>
+                <Button onClick={() => setStep(5)} variant="outline">Skip / Continue <ArrowRight className="ml-1 h-4 w-4" /></Button>
               ) : (
-                <Button onClick={next} className="rounded-full">Next <ArrowRight className="ml-1 h-4 w-4" /></Button>
+                <Button onClick={next}>Next <ArrowRight className="ml-1 h-4 w-4" /></Button>
               )}
             </div>
           )}

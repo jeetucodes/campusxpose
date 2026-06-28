@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   LayoutDashboard, Building2, AlertTriangle, FileText, MessageSquare,
   Users, ShieldAlert, BarChart3, Bot, LogOut, Ghost,
@@ -23,12 +23,15 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const { token, logout } = useAdmin();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (!token) navigate({ to: "/admin/login" });
-  }, [token, navigate]);
+    setMounted(true);
+  }, []);
 
-  if (!token) return null;
+  useEffect(() => {
+    if (mounted && !token) navigate({ to: "/admin/login" });
+  }, [mounted, token, navigate]);
 
   return (
     <div className="min-h-screen bg-background md:flex">
