@@ -128,14 +128,17 @@ function RootComponent() {
   const pathname = router.state.location.pathname;
   const isCommunityChat = useMemo(() => pathname.startsWith("/community/"), [pathname]);
   const isAdmin = useMemo(() => pathname.startsWith("/admin/"), [pathname]);
+  const isGlobal = useMemo(() => pathname === "/global", [pathname]);
+  const isMessages = useMemo(() => pathname === "/messages", [pathname]);
+  const hideNav = isCommunityChat || isAdmin || isGlobal || isMessages;
 
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <div className={cn("md:pb-0", !isCommunityChat && !isAdmin && "pb-16")}>
+      <div className={cn("md:pb-0", !hideNav && "pb-16")}>
         <Outlet />
       </div>
-      {!isCommunityChat && !isAdmin && <MobileBottomNav />}
+      {!hideNav && <MobileBottomNav />}
       <Toaster position="top-center" theme="light" richColors />
 
     </QueryClientProvider>
