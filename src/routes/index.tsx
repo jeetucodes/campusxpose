@@ -85,10 +85,10 @@ function Home() {
             Apne college ki asli kahani share karo. Fake fines, placement fraud, faculty issues — sab kuch anonymously report karo.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Button asChild size="lg" variant="destructive">
+            <Button asChild size="lg">
               <Link to="/colleges">Apna College Dhundo <ArrowRight className="ml-1 h-4 w-4" /></Link>
             </Button>
-            <Button asChild size="lg">
+            <Button asChild size="lg" variant="outline">
               <Link to="/report">Issue Report Karo</Link>
             </Button>
           </div>
