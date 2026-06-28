@@ -16,7 +16,7 @@ export function MobileBottomNav() {
           <li key={to} className="flex-1">
             <Link
               to={to}
-              activeOptions={{ exact: Boolean(exact) }}
+              activeOptions={{ exact }}
               activeProps={{ className: "text-accent" }}
               inactiveProps={{ className: "text-muted-foreground" }}
               className="flex h-16 flex-col items-center justify-center gap-1 text-xs font-medium transition-colors"
