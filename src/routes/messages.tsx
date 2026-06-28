@@ -1,11 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Send, MessageCircle, Globe, ArrowLeft, Ghost, Plus } from "lucide-react";
+import { Send, MessageCircle, Globe, ArrowLeft, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useIdentity } from "@/stores/identity";
+import { UserSymbol } from "@/components/UserSymbol";
 import { submitDirectMessage, fetchDirectMessages } from "@/lib/content.functions";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -178,7 +179,7 @@ function Messages() {
                 active === c.name && "bg-accent/15",
               )}
             >
-              <Ghost className="h-5 w-5 shrink-0 text-accent" strokeWidth={2.5} />
+              <UserSymbol username={c.name} size="sm" />
               <div className="min-w-0 flex-1">
                 <div className="truncate font-medium">{c.name}</div>
                 <div className="truncate text-xs text-muted-foreground">
@@ -216,12 +217,8 @@ function Messages() {
                   <ArrowLeft className="h-5 w-5" />
                 </Link>
               </Button>
-              <div
-                className="flex h-10 w-10 -rotate-2 items-center justify-center border-2 border-border bg-accent/15 text-accent shadow-ink-soft"
-                style={{ borderRadius: "18px 7px 20px 7px / 7px 20px 7px 18px" }}
-              >
-                <Ghost className="h-5 w-5" strokeWidth={2.5} />
-              </div>
+              <UserSymbol username={active} size="md" />
+
               <div>
                 <div className="font-display font-bold">{active}</div>
                 <div className="text-xs text-muted-foreground">
