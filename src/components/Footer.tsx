@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Shield, MessageCircle, Megaphone, Home, FileText, Scale, Mail } from "lucide-react";
+import { Shield, MessageCircle, Megaphone, Home, FileText } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Navbar } from "@/components/Navbar";
 
@@ -12,7 +12,7 @@ export function Footer() {
     <footer className="mt-20 border-t-2 border-dashed border-ink bg-surface-2/60">
       <div className="mx-auto max-w-5xl px-4 py-12">
         {/* Top section */}
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2">
           {/* Brand */}
           <div
             className="space-y-4 border-2 border-ink bg-white p-5 shadow-ink"
@@ -57,31 +57,6 @@ export function Footer() {
                 <Link to="/global" className="inline-flex items-center gap-2 hover:text-foreground transition-colors">
                   <MessageCircle className="h-4 w-4" /> Global Chat
                 </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Legal / Info */}
-          <div
-            className="space-y-4 border-2 border-ink bg-white p-5 shadow-ink"
-            style={{ borderRadius: WOBBLY }}
-          >
-            <h3 className="text-lg font-display font-bold wavy-underline">Legal</h3>
-            <ul className="space-y-2.5 text-muted-foreground">
-              <li>
-                <span className="inline-flex items-center gap-2 hover:text-foreground transition-colors cursor-pointer">
-                  <Scale className="h-4 w-4" /> Terms of Service
-                </span>
-              </li>
-              <li>
-                <span className="inline-flex items-center gap-2 hover:text-foreground transition-colors cursor-pointer">
-                  <Shield className="h-4 w-4" /> Privacy Policy
-                </span>
-              </li>
-              <li>
-                <span className="inline-flex items-center gap-2 hover:text-foreground transition-colors cursor-pointer">
-                  <Mail className="h-4 w-4" /> Contact Us
-                </span>
               </li>
             </ul>
           </div>
