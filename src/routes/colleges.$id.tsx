@@ -96,6 +96,27 @@ function CollegeDetail() {
   });
   const myVotes = myVotesQ.data ?? {};
 
+  const evidenceQ = useQuery({
+    queryKey: ["verified-evidence", id, incidents.map((i) => i.id).join(","), posts.map((p) => p.id).join(",")],
+    queryFn: async () => {
+      const incidentIds = incidents.map((i) => i.id);
+      const postIds = posts.map((p) => p.id);
+      if (!incidentIds.length && !postIds.length) return [] as any[];
+      const ors: string[] = [];
+      if (incidentIds.length) ors.push(`incident_id.in.(${incidentIds.join(",")})`);
+      if (postIds.length) ors.push(`post_id.in.(${postIds.join(",")})`);
+      const { data } = await supabase
+        .from("evidence")
+        .select("*")
+        .eq("is_verified", true)
+        .or(ors.join(","))
+        .order("created_at", { ascending: false });
+      return data ?? [];
+    },
+    enabled: incidentsQ.isFetched && postsQ.isFetched,
+  });
+  const evidence = evidenceQ.data ?? [];
+
   return (
     <SiteShell hideFooter>
       <div className="mx-auto max-w-4xl px-4 py-8">
@@ -213,6 +234,28 @@ function CollegeDetail() {
             {incidents.length === 0 && <p className="text-sm text-muted-foreground">No incidents reported yet.</p>}
           </div>
         </section>
+
+        {/* Verified evidence */}
+        <section className="mt-8">
+          <h2 className="mb-4 flex items-center gap-2 text-xl font-bold">
+            Verified Evidence
+            <span className="rounded-full bg-success/15 px-2 py-0.5 text-sm text-success">{evidence.length}</span>
+          </h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {evidence.map((e) => (
+              <a key={e.id} href={e.file_url} target="_blank" rel="noreferrer" className="group rounded-xl border border-border bg-surface p-2">
+                {e.type === "image" ? (
+                  <img src={e.file_url} alt="Verified evidence" loading="lazy" className="h-32 w-full rounded-lg object-cover" />
+                ) : (
+                  <div className="flex h-32 w-full items-center justify-center rounded-lg bg-surface-2 text-sm text-muted-foreground">{e.type} file</div>
+                )}
+                <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-[11px] text-success">✓ Verified</div>
+              </a>
+            ))}
+            {evidence.length === 0 && <p className="text-sm text-muted-foreground">No verified evidence yet.</p>}
+          </div>
+        </section>
+
 
         {/* Dark secrets feed */}
         <section className="mt-8">
