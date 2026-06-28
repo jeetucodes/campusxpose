@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Send, Sparkles, RefreshCw, ChevronDown, ChevronUp, X, FileWarning } from "lucide-react";
+import { ArrowLeft, Send, Sparkles, RefreshCw, ChevronDown, ChevronUp, X, FileWarning, CheckCheck } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -143,10 +143,11 @@ function Community() {
         )}
 
         {/* messages */}
-        <div className="flex flex-1 flex-col-reverse gap-1.5 overflow-y-auto px-3 py-4 sm:px-4">
+        <div className="flex flex-1 flex-col-reverse gap-3 overflow-y-auto px-3 py-4 sm:px-4">
           <AnimatePresence initial={false}>
             {messages.map((m) => {
               const own = m.anonymous_user_hash === hashedId;
+              const avatar = (m.username ?? "?").trim().slice(0, 2).toUpperCase();
               return (
                 <motion.div
                   key={m.id}
@@ -154,27 +155,43 @@ function Community() {
                   initial={{ opacity: 0, y: 8, scale: 0.98 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   transition={{ duration: 0.18 }}
-                  className={cn("flex", own ? "justify-end" : "justify-start")}
+                  className={cn("flex items-end gap-2", own ? "flex-row-reverse" : "justify-start")}
                 >
-                  <div
-                    className={cn(
-                      "max-w-[85%] rounded-2xl px-3.5 py-2 text-sm shadow-sm sm:max-w-[75%]",
-                      own
-                        ? "rounded-br-md bg-primary text-primary-foreground"
-                        : "rounded-bl-md bg-surface-2",
-                      m.is_incident_signal && !own && "border-l-2 border-warning",
-                    )}
-                  >
-                    {!own && <div className="mb-0.5 text-xs font-semibold text-primary/80">{m.username}</div>}
-                    <div className="whitespace-pre-wrap break-words leading-relaxed">{m.content}</div>
-                    <div className={cn("mt-0.5 text-right text-[10px]", own ? "text-primary-foreground/60" : "text-muted-foreground")}>{timeAgo(m.created_at)}</div>
+                  {!own && (
+                    <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-surface-2 text-[10px] font-bold text-muted-foreground">
+                      {avatar}
+                    </div>
+                  )}
+                  <div className="flex max-w-[80%] flex-col gap-1">
+                    <div
+                      className={cn(
+                        "rounded-2xl px-3.5 py-2.5 text-sm shadow-sm",
+                        own
+                          ? "rounded-br-md bg-primary text-primary-foreground shadow-primary/15"
+                          : "rounded-bl-md border border-border bg-surface",
+                        m.is_incident_signal && !own && "border-l-2 border-l-warning",
+                      )}
+                    >
+                      {!own && <div className="mb-0.5 text-xs font-semibold text-primary/80">{m.username}</div>}
+                      <div className="whitespace-pre-wrap break-words leading-relaxed">{m.content}</div>
+                    </div>
+                    <div className={cn("flex items-center gap-1 text-[10px] text-muted-foreground", own ? "justify-end pr-1" : "pl-1")}>
+                      {timeAgo(m.created_at)}
+                      {own && <CheckCheck className="h-3 w-3 text-primary" />}
+                    </div>
                   </div>
                 </motion.div>
               );
             })}
           </AnimatePresence>
+          {messages.length > 0 && (
+            <div className="flex justify-center pb-1">
+              <span className="rounded-full bg-surface-2 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Today</span>
+            </div>
+          )}
           {messages.length === 0 && <p className="my-auto text-center text-sm text-muted-foreground">No messages yet. Start the conversation.</p>}
         </div>
+
 
         {/* incident prompt */}
         <AnimatePresence>
@@ -190,21 +207,22 @@ function Community() {
         </AnimatePresence>
 
         {/* input */}
-        <div className="border-t border-border bg-surface px-3 py-3 sm:px-4">
-          <div className="flex items-end gap-2">
+        <div className="border-t border-border bg-surface/80 px-3 py-3 backdrop-blur-sm sm:px-4">
+          <div className="flex items-center gap-2 rounded-full border border-border bg-surface-2 px-2 py-1.5 transition-colors focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15">
             <Input
               value={text}
               onChange={(e) => onType(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && send()}
-              placeholder="Message likho..."
+              placeholder="Write anonymously..."
               disabled={!hashedId || !username}
-              className="rounded-full bg-surface-2"
+              className="h-8 flex-1 border-0 bg-transparent px-2 shadow-none focus-visible:ring-0"
             />
-            <Button onClick={send} disabled={!text.trim()} size="icon" className="h-10 w-10 shrink-0 rounded-full">
+            <Button onClick={send} disabled={!text.trim()} size="icon" className="h-9 w-9 shrink-0 rounded-full">
               <Send className="h-4 w-4" />
             </Button>
           </div>
         </div>
+
       </div>
     </div>
   );
