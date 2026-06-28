@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Home, GraduationCap, Globe, MessageCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const items = [
   { to: "/", label: "Home", icon: Home, exact: true },
@@ -17,12 +18,22 @@ export function MobileBottomNav() {
             <Link
               to={to}
               activeOptions={{ exact }}
-              activeProps={{ className: "text-accent" }}
-              inactiveProps={{ className: "text-muted-foreground" }}
               className="flex h-16 flex-col items-center justify-center gap-1 text-xs font-medium transition-colors"
             >
-              <Icon className="h-5 w-5" strokeWidth={2.5} />
-              <span>{label}</span>
+              {({ isActive }) => (
+                <>
+                  <span className={cn(
+                    "relative flex items-center justify-center",
+                    isActive ? "text-accent" : "text-muted-foreground"
+                  )}>
+                    <Icon className="h-5 w-5" strokeWidth={2.5} />
+                    {isActive && (
+                      <span className="absolute -bottom-1.5 h-1 w-1 rounded-full bg-accent" />
+                    )}
+                  </span>
+                  <span className={cn(isActive ? "text-accent" : "text-muted-foreground")}>{label}</span>
+                </>
+              )}
             </Link>
           </li>
         ))}

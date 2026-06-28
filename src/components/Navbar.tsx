@@ -23,11 +23,24 @@ export function Navbar() {
     <header className="sticky top-0 z-40 border-b-2 border-dashed border-border bg-background/90 backdrop-blur">
       <nav className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
         <Logo />
-        <div className="hidden items-center gap-6 text-lg md:flex">
-          <Link to="/colleges" className="transition-colors hover:wavy-underline">Colleges</Link>
-          <Link to="/global" className="transition-colors hover:wavy-underline">Global</Link>
-          <Link to="/messages" className="transition-colors hover:wavy-underline">DMs</Link>
-          <Link to="/report" className="transition-colors hover:wavy-underline">Report</Link>
+        <div className="hidden items-center gap-3 text-lg md:flex">
+          {[
+            { to: "/colleges", label: "Colleges" },
+            { to: "/global", label: "Global" },
+            { to: "/messages", label: "DMs" },
+            { to: "/report", label: "Report" },
+          ].map((item) => (
+            <Link
+              key={item.to}
+              to={item.to}
+              className="px-3 py-1.5 transition-all duration-100 hover:-rotate-1 hover:text-accent"
+              activeProps={{ className: "px-3 py-1.5 border-2 border-border bg-white shadow-ink-soft text-accent -rotate-1" }}
+              inactiveProps={{ className: "px-3 py-1.5 text-foreground" }}
+              style={{ borderRadius: "16px 6px 18px 6px / 6px 18px 6px 16px" }}
+            >
+              {item.label}
+            </Link>
+          ))}
         </div>
         <DropdownMenu open={open} onOpenChange={setOpen}>
           <DropdownMenuTrigger asChild>

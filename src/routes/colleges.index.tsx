@@ -7,7 +7,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { SiteShell } from "@/components/Footer";
 import { StarRating } from "@/components/StarRating";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CITIES, COLLEGE_TYPES } from "@/lib/categories";
 import { cn } from "@/lib/utils";
@@ -98,16 +97,25 @@ function CollegesPage() {
           </div>
           {filtersOpen && (
             <div className="space-y-4">
-              <div className="flex flex-wrap gap-2">
-                {["All", ...CITIES].map((c) => (
-                  <Pill key={c} active={city === c} onClick={() => setCity(c)}>{c}</Pill>
-                ))}
+              <div>
+                <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">City</div>
+                <div className="flex flex-wrap gap-2">
+                  {["All", ...CITIES].map((c) => (
+                    <Pill key={c} active={city === c} onClick={() => setCity(c)}>{c}</Pill>
+                  ))}
+                </div>
               </div>
-              <div className="flex flex-wrap items-center gap-2">
-                {["All", ...COLLEGE_TYPES].map((t) => (
-                  <Pill key={t} active={type === t} onClick={() => setType(t)} small>{t}</Pill>
-                ))}
-                <div className="ml-auto flex gap-2 text-xs">
+              <div>
+                <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Type</div>
+                <div className="flex flex-wrap gap-2">
+                  {["All", ...COLLEGE_TYPES].map((t) => (
+                    <Pill key={t} active={type === t} onClick={() => setType(t)} small>{t}</Pill>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Sort by</div>
+                <div className="flex flex-wrap gap-2">
                   <SortBtn active={sort === "reported"} onClick={() => setSort("reported")}>Most Reported</SortBtn>
                   <SortBtn active={sort === "rating"} onClick={() => setSort("rating")}>Lowest Rated</SortBtn>
                   <SortBtn active={sort === "reviews"} onClick={() => setSort("reviews")}>Most Reviews</SortBtn>
@@ -140,9 +148,14 @@ function CollegesPage() {
                         {c.incident_count} incidents
                       </span>
                     </div>
-                    <Button asChild variant="destructive" className="mt-5 w-full">
-                      <Link to="/colleges/$id" params={{ id: c.id }}>View Truth <ArrowRight className="ml-1 h-4 w-4" /></Link>
-                    </Button>
+                    <Link
+                      to="/colleges/$id"
+                      params={{ id: c.id }}
+                      className="mt-5 flex w-full items-center justify-center gap-1 border-2 border-border bg-accent px-4 py-2.5 text-sm font-bold text-accent-foreground shadow-ink transition-transform duration-100 hover:-translate-y-0.5 hover:shadow-ink-lg"
+                      style={{ borderRadius: "18px 6px 20px 6px / 6px 20px 6px 18px" }}
+                    >
+                      View Truth <ArrowRight className="h-4 w-4" />
+                    </Link>
                   </div>
                 </motion.div>
               ))}
