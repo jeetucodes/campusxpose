@@ -1,14 +1,26 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Flame, MapPin, ArrowRight, SlidersHorizontal } from "lucide-react";
+import { toast } from "sonner";
+import { Search, Flame, MapPin, ArrowRight, SlidersHorizontal, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteShell } from "@/components/Footer";
 import { StarRating } from "@/components/StarRating";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CITIES, COLLEGE_TYPES } from "@/lib/categories";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { useIdentity } from "@/stores/identity";
+import { submitCollegeRequest } from "@/lib/content.functions";
+import { CITIES, COLLEGE_TYPES, INDIAN_STATES } from "@/lib/categories";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/colleges/")({
