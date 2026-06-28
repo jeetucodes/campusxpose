@@ -1,14 +1,26 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Flame, MapPin, ArrowRight, SlidersHorizontal } from "lucide-react";
+import { toast } from "sonner";
+import { Search, Flame, MapPin, ArrowRight, SlidersHorizontal, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteShell } from "@/components/Footer";
 import { StarRating } from "@/components/StarRating";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CITIES, COLLEGE_TYPES } from "@/lib/categories";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { useIdentity } from "@/stores/identity";
+import { submitCollegeRequest } from "@/lib/content.functions";
+import { CITIES, COLLEGE_TYPES, INDIAN_STATES } from "@/lib/categories";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/colleges/")({
@@ -71,7 +83,10 @@ function CollegesPage() {
   return (
     <SiteShell>
       <div className="mx-auto max-w-6xl px-4 py-10">
-        <h1 className="text-3xl font-bold">Find Your College's Truth</h1>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-3xl font-bold">Find Your College's Truth</h1>
+          <RequestCollegeDialog />
+        </div>
 
         <div className="mt-6 space-y-4">
           <div className="relative">
@@ -166,7 +181,8 @@ function CollegesPage() {
           <div className="mt-16 text-center">
             <div className="mx-auto inline-grid h-20 w-20 place-items-center border-2 border-border bg-postit text-4xl shadow-ink" style={{ borderRadius: "50% 42% 55% 45% / 45% 55% 42% 50%" }}>🔍</div>
             <h3 className="mt-4 font-display text-xl font-bold">No colleges found</h3>
-            <p className="mt-1 text-muted-foreground">Try a different search or filter.</p>
+            <p className="mt-1 text-muted-foreground">Try a different search, or request to add it.</p>
+            <div className="mt-4 flex justify-center"><RequestCollegeDialog /></div>
           </div>
         )}
       </div>
@@ -188,4 +204,91 @@ function SortBtn({ active, onClick, children }: { active: boolean; onClick: () =
     </button>
   );
 }
+
+function RequestCollegeDialog() {
+  const { hashedId } = useIdentity();
+  const submit = useServerFn(submitCollegeRequest);
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [form, setForm] = useState({
+    name: "", city: "", state: "Madhya Pradesh", type: "Engineering", established: "", description: "",
+  });
+
+  const set = (k: keyof typeof form, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  async function onSubmit() {
+    if (!hashedId) return;
+    if (form.name.trim().length < 2 || form.city.trim().length < 2 || form.state.trim().length < 2) {
+      toast.error("Please fill in name, city and state.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const res = await submit({
+        data: {
+          hashedId,
+          name: form.name.trim(),
+          city: form.city.trim(),
+          state: form.state.trim(),
+          type: form.type as any,
+          established: form.established ? Number(form.established) : null,
+          description: form.description.trim() || undefined,
+        },
+      });
+      if ((res as any).ok === false && (res as any).reason === "exists") {
+        toast.error("This college already exists — try searching for it.");
+      } else {
+        toast.success("Request sent! Admins will review and add it soon.");
+        setOpen(false);
+        setForm({ name: "", city: "", state: "Madhya Pradesh", type: "Engineering", established: "", description: "" });
+      }
+    } catch (e: any) {
+      toast.error(e?.message ?? "Something went wrong.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="gap-2">
+          <Plus className="h-4 w-4" /> Request a College
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[90dvh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Request to add a college</DialogTitle>
+          <DialogDescription>Can't find your college? Send it for review and we'll add it.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <Input placeholder="College name *" value={form.name} onChange={(e) => set("name", e.target.value)} />
+          <div className="grid grid-cols-2 gap-3">
+            <Input placeholder="City *" value={form.city} onChange={(e) => set("city", e.target.value)} />
+            <Select value={form.state} onValueChange={(v) => set("state", v)}>
+              <SelectTrigger><SelectValue placeholder="State" /></SelectTrigger>
+              <SelectContent>
+                {INDIAN_STATES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Select value={form.type} onValueChange={(v) => set("type", v)}>
+              <SelectTrigger><SelectValue placeholder="Type" /></SelectTrigger>
+              <SelectContent>
+                {COLLEGE_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Input type="number" placeholder="Established (year)" value={form.established} onChange={(e) => set("established", e.target.value)} />
+          </div>
+          <Textarea placeholder="Anything else? (optional)" value={form.description} onChange={(e) => set("description", e.target.value)} />
+        </div>
+        <DialogFooter>
+          <Button onClick={onSubmit} disabled={busy}>{busy ? "Sending..." : "Send Request"}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 

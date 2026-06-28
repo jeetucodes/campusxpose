@@ -321,3 +321,61 @@ export const adminGenerateReport = createServerFn({ method: "POST" })
     const j = await res.json();
     return { report: j.choices?.[0]?.message?.content ?? "No report generated." };
   });
+
+export const adminListCollegeRequests = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: z.string() }).parse(d))
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows } = await supabaseAdmin
+      .from("college_requests")
+      .select("*")
+      .order("created_at", { ascending: false });
+    return { requests: rows ?? [] };
+  });
+
+export const adminApproveCollegeRequest = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: z.string(), id: z.string().uuid() }).parse(d))
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: req, error: reqErr } = await supabaseAdmin
+      .from("college_requests")
+      .select("*")
+      .eq("id", data.id)
+      .single();
+    if (reqErr || !req) throw new Error("Request not found");
+    if (req.status === "approved") return { ok: true, alreadyDone: true };
+
+    const { data: col, error } = await supabaseAdmin
+      .from("colleges")
+      .insert({
+        name: req.name,
+        city: req.city,
+        state: req.state,
+        type: req.type,
+        established: req.established,
+        description: req.description,
+      })
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+
+    await supabaseAdmin
+      .from("college_requests")
+      .update({ status: "approved", reviewed_at: new Date().toISOString() })
+      .eq("id", data.id);
+    return { ok: true, collegeId: col.id as string };
+  });
+
+export const adminRejectCollegeRequest = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: z.string(), id: z.string().uuid() }).parse(d))
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin
+      .from("college_requests")
+      .update({ status: "rejected", reviewed_at: new Date().toISOString() })
+      .eq("id", data.id);
+    return { ok: true };
+  });

@@ -202,3 +202,44 @@ export const submitDirectMessage = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true, shadow: false };
   });
+
+const COLLEGE_TYPES = ["Engineering", "Medical", "Arts", "Commerce", "University", "Research"] as const;
+
+export const submitCollegeRequest = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        hashedId: z.string().min(8),
+        name: z.string().min(2).max(120),
+        city: z.string().min(2).max(80),
+        state: z.string().min(2).max(80),
+        type: z.enum(COLLEGE_TYPES),
+        established: z.number().int().min(1800).max(2100).nullable().optional(),
+        description: z.string().max(1000).optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (await isBanned(data.hashedId)) return { ok: true, shadow: true };
+
+    // Prevent duplicate college names (already exists)
+    const { data: existing } = await supabaseAdmin
+      .from("colleges")
+      .select("id")
+      .ilike("name", clean(data.name))
+      .maybeSingle();
+    if (existing) return { ok: false as const, reason: "exists" };
+
+    const { error } = await supabaseAdmin.from("college_requests").insert({
+      requester_hash: data.hashedId,
+      name: clean(data.name),
+      city: clean(data.city),
+      state: clean(data.state),
+      type: data.type,
+      established: data.established ?? null,
+      description: data.description ? clean(data.description) : null,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true as const, shadow: false };
+  });

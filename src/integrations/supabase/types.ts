@@ -38,6 +38,48 @@ export type Database = {
         }
         Relationships: []
       }
+      college_requests: {
+        Row: {
+          city: string
+          created_at: string
+          description: string | null
+          established: number | null
+          id: string
+          name: string
+          requester_hash: string
+          reviewed_at: string | null
+          state: string
+          status: string
+          type: Database["public"]["Enums"]["college_type"]
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          description?: string | null
+          established?: number | null
+          id?: string
+          name: string
+          requester_hash: string
+          reviewed_at?: string | null
+          state: string
+          status?: string
+          type: Database["public"]["Enums"]["college_type"]
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          description?: string | null
+          established?: number | null
+          id?: string
+          name?: string
+          requester_hash?: string
+          reviewed_at?: string | null
+          state?: string
+          status?: string
+          type?: Database["public"]["Enums"]["college_type"]
+        }
+        Relationships: []
+      }
       colleges: {
         Row: {
           city: string
