@@ -179,7 +179,7 @@ function Messages() {
                 active === c.name && "bg-accent/15",
               )}
             >
-              <Ghost className="h-5 w-5 shrink-0 text-accent" strokeWidth={2.5} />
+              <UserSymbol username={c.name} size="sm" />
               <div className="min-w-0 flex-1">
                 <div className="truncate font-medium">{c.name}</div>
                 <div className="truncate text-xs text-muted-foreground">
