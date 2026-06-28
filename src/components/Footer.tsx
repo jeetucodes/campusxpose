@@ -3,32 +3,40 @@ import { Shield, MessageCircle, Megaphone, Home, FileText, Scale, Mail } from "l
 import { Logo } from "@/components/Logo";
 import { Navbar } from "@/components/Navbar";
 
+const WOBBLY = "16px 6px 18px 6px / 6px 18px 6px 16px";
+
 export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="mt-20 border-t-2 border-dashed border-border bg-surface-2/60">
+    <footer className="mt-20 border-t-2 border-dashed border-ink bg-surface-2/60">
       <div className="mx-auto max-w-5xl px-4 py-12">
         {/* Top section */}
-        <div className="grid gap-10 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-3">
           {/* Brand */}
-          <div className="space-y-4">
+          <div
+            className="space-y-4 border-2 border-ink bg-white p-5 shadow-ink"
+            style={{ borderRadius: WOBBLY }}
+          >
             <Logo />
             <p className="text-sm leading-relaxed text-muted-foreground">
               CampusXpose — students speaking up, anonymously.
               Report incidents, share experiences, and find your community without fear.
             </p>
             <div
-              className="inline-flex items-center gap-2 border-2 border-border bg-success/15 px-3 py-1 text-xs font-semibold text-success"
-              style={{ borderRadius: "16px 6px 18px 6px / 6px 18px 6px 16px" }}
+              className="inline-flex items-center gap-2 border-2 border-ink bg-success/15 px-3 py-1 text-xs font-semibold text-success"
+              style={{ borderRadius: WOBBLY }}
             >
               <Shield className="h-3.5 w-3.5" /> 100% Anonymous
             </div>
           </div>
 
           {/* Navigation */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold">Navigate</h3>
+          <div
+            className="space-y-4 border-2 border-ink bg-white p-5 shadow-ink"
+            style={{ borderRadius: WOBBLY }}
+          >
+            <h3 className="text-lg font-display font-bold wavy-underline">Navigate</h3>
             <ul className="space-y-2.5 text-muted-foreground">
               <li>
                 <Link to="/" className="inline-flex items-center gap-2 hover:text-foreground transition-colors">
@@ -54,8 +62,11 @@ export function Footer() {
           </div>
 
           {/* Legal / Info */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold">Legal</h3>
+          <div
+            className="space-y-4 border-2 border-ink bg-white p-5 shadow-ink"
+            style={{ borderRadius: WOBBLY }}
+          >
+            <h3 className="text-lg font-display font-bold wavy-underline">Legal</h3>
             <ul className="space-y-2.5 text-muted-foreground">
               <li>
                 <span className="inline-flex items-center gap-2 hover:text-foreground transition-colors cursor-pointer">
@@ -77,8 +88,8 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t-2 border-dashed border-border pt-6 text-sm text-muted-foreground md:flex-row">
-          <p>No identity stored. Ever.</p>
+        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t-2 border-dashed border-ink pt-6 text-sm text-muted-foreground md:flex-row">
+          <p className="font-display font-bold text-foreground">No identity stored. Ever.</p>
           <p>© {year} CampusXpose. Built for students.</p>
         </div>
       </div>
