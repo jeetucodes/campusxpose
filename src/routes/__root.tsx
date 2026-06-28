@@ -7,10 +7,11 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useMemo, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 
@@ -116,14 +117,16 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+  const isCommunityChat = useMemo(() => router.state.location.pathname.startsWith("/community/"), [router.state.location.pathname]);
 
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <div className="pb-16 md:pb-0">
+      <div className={cn("md:pb-0", !isCommunityChat && "pb-16")}>
         <Outlet />
       </div>
-      <MobileBottomNav />
+      {!isCommunityChat && <MobileBottomNav />}
       <Toaster position="top-center" theme="light" richColors />
 
     </QueryClientProvider>
