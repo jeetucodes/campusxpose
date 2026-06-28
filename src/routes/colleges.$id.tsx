@@ -204,7 +204,7 @@ function CollegeDetail() {
       </div>
 
       {/* Floating community button */}
-      <Link to="/community/$collegeId" params={{ collegeId: id }} className="fixed bottom-5 right-5 z-30 inline-flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/30 transition-transform hover:scale-105">
+      <Link to="/community/$collegeId" params={{ collegeId: id }} className="fixed bottom-5 right-5 z-[60] inline-flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/30 transition-transform hover:scale-105 md:bottom-5 md:z-30">
         <MessageCircle className="h-4 w-4" /> Join Community Chat
       </Link>
 
