@@ -34,7 +34,7 @@ function Community() {
 
   const [messages, setMessages] = useState<Msg[]>([]);
   const [text, setText] = useState("");
-  const [cooldown, setCooldown] = useState(0);
+  
   const [summaryOpen, setSummaryOpen] = useState(true);
   const [summary, setSummary] = useState<{ key_issues: string[] } | null>(null);
   const [loadingSummary, setLoadingSummary] = useState(false);
@@ -57,11 +57,6 @@ function Community() {
     return () => { supabase.removeChannel(ch); };
   }, [collegeId]);
 
-  useEffect(() => {
-    if (cooldown <= 0) return;
-    const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
-    return () => clearTimeout(t);
-  }, [cooldown]);
 
   const onType = (v: string) => {
     setText(v);
@@ -73,11 +68,10 @@ function Community() {
   };
 
   const send = async () => {
-    if (!text.trim() || cooldown > 0 || !hashedId || !username) return;
+    if (!text.trim() || !hashedId || !username) return;
     const isSignal = DEFAULT_KEYWORDS.some((k) => text.toLowerCase().includes(k));
     const content = text.trim();
     setText("");
-    setCooldown(10);
     setIncidentPrompt(false);
     try {
       await sendFn({ data: { collegeId, hashedId, username, content, isIncidentSignal: isSignal } });
@@ -170,11 +164,11 @@ function Community() {
             value={text}
             onChange={(e) => onType(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send()}
-            placeholder={cooldown > 0 ? `${cooldown} seconds...` : "Message likho..."}
-            disabled={cooldown > 0}
+            placeholder="Message likho..."
+            disabled={!hashedId || !username}
             className="bg-surface-2"
           />
-          <Button onClick={send} disabled={cooldown > 0 || !text.trim()} size="icon" className="shrink-0 rounded-full">
+          <Button onClick={send} disabled={!text.trim()} size="icon" className="shrink-0 rounded-full">
             <Send className="h-4 w-4" />
           </Button>
         </div>
