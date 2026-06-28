@@ -51,6 +51,7 @@ function CollegesPage() {
   const [city, setCity] = useState("All");
   const [type, setType] = useState("All");
   const [sort, setSort] = useState<"reported" | "rating" | "reviews">("reported");
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const filtered = useMemo(() => {
     let rows = data ?? [];
