@@ -174,11 +174,12 @@ export function PostComments({ postId, onCount }: { postId: string; onCount?: (n
   );
 }
 
-function CommentNode({ node, depth, onReply, onDelete, myHash }: { node: Node; depth: number; onReply: (c: Comment) => void; onDelete: (c: Comment) => void; myHash: string | null }) {
+function CommentNode({ node, depth, onReply, onDelete, myHash, isAdmin }: { node: Node; depth: number; onReply: (c: Comment) => void; onDelete: (c: Comment) => void; myHash: string | null; isAdmin: boolean }) {
   const isReply = depth > 0;
   const hasChildren = node.children.length > 0;
   const verified = useVerifiedUsernames();
   const isMine = !!myHash && node.anonymous_user_hash === myHash;
+  const canDelete = isMine || isAdmin;
 
 
   return (
