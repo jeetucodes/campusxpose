@@ -91,6 +91,9 @@ function UsersAdmin() {
             })}
           </tbody>
         </table>
+        {q.isError && <p className="p-3 text-sm text-destructive">Couldn't load users: {(q.error as Error)?.message ?? "Unknown error"}. <button className="underline" onClick={() => q.refetch()}>Retry</button></p>}
+        {!q.isLoading && !q.isError && (q.data ?? []).length === 0 && <p className="p-3 text-sm text-muted-foreground">No users yet.</p>}
+
       </div>
     </div>
   );
