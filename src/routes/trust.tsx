@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { Shield, Ghost, EyeOff, Lock, Trash2, ArrowRight, ServerOff, FileWarning } from "lucide-react";
+import { Shield, Ghost, EyeOff, Lock, Trash2, ArrowRight, ServerOff, FileWarning, MapPinOff, ShieldOff, Check, X } from "lucide-react";
 import { SiteShell } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +24,16 @@ const PILLARS = [
     desc: "Tumhari personal pehchaan kahin save hi nahi hoti. Jo cheez exist hi nahi karti, woh leak bhi nahi ho sakti.",
   },
   {
+    icon: MapPinOff,
+    title: "No Location, No IP",
+    desc: "Hum tumhari GPS location ya IP address kabhi capture nahi karte. Tumhare physical location ka koi record hi nahi banta.",
+  },
+  {
+    icon: ShieldOff,
+    title: "Zero Permissions",
+    desc: "Camera, mic, contacts, location — kisi cheez ki permission app khud se nahi maangta. Sirf wahi hota hai jo tum karte ho.",
+  },
+  {
     icon: EyeOff,
     title: "Trace-Proof Reports",
     desc: "Har report content se judi hoti hai, identity se nahi. College, faculty ya admin tumhe trace nahi kar sakte.",
@@ -33,6 +43,23 @@ const PILLARS = [
     title: "Built-in Blur Tool",
     desc: "Proof upload karne se pehle naam, face ya sensitive detail blur kar do — bina kisi extra app ke.",
   },
+];
+
+const NEVER_COLLECT = [
+  "Email address",
+  "Phone number",
+  "Real naam",
+  "GPS / location",
+  "IP address",
+  "Device ID",
+  "Contacts",
+  "Camera / mic permission",
+];
+
+const ONLY_STORE = [
+  "Tumhari report ka text",
+  "Jo proof tum khud upload karte ho (blur ke baad)",
+  "Random ghost username (tumhare device pe banta hai)",
 ];
 
 const FAQS = [
@@ -49,8 +76,20 @@ const FAQS = [
     a: "Kyunki hum tumhari koi pehchaan rakhna hi nahi chahte. Auto anonymous identity se leak hone wala data hi nahi bachta.",
   },
   {
+    q: "Kya app meri location ya IP track karta hai?",
+    a: "Nahi. Hum GPS location, IP address ya device ID kabhi capture nahi karte. Iska matlab tumhare location ka koi record hi nahi banta.",
+  },
+  {
+    q: "Kya app koi permission maangta hai?",
+    a: "Nahi. App khud se camera, mic, contacts ya location ki permission nahi maangta. Sirf jab tum khud proof upload karna chaho, tab tum apni marzi se file choose karte ho.",
+  },
+  {
     q: "Mera data kahan jaata hai?",
     a: "Sirf report ka content (text/proof) save hota hai taaki dusre students dekh saken. Personal identity attached nahi hoti.",
+  },
+  {
+    q: "Kya police ya college mujhe legally trace kar sakte hain?",
+    a: "Trace karne ke liye personal data, IP ya login record chahiye — humare paas wahi nahi hai. Jo cheez exist hi nahi karti, woh kisi ko di bhi nahi ja sakti.",
   },
   {
     q: "Apna data delete kaise karun?",
@@ -138,6 +177,49 @@ function TrustPage() {
           ))}
         </div>
       </section>
+
+      {/* Data table: never collect vs only store */}
+      <section className="mx-auto max-w-5xl px-4 py-10">
+        <h2 className="mb-2 text-center font-display text-3xl font-bold">Saaf-saaf baat</h2>
+        <p className="mx-auto mb-8 max-w-xl text-center text-muted-foreground">
+          Kya hum kabhi nahi lete, aur kya humare paas hota hai — bilkul transparent.
+        </p>
+        <div className="grid gap-6 sm:grid-cols-2">
+          <div
+            className="border-2 border-border bg-white p-6 shadow-ink -rotate-1"
+            style={{ borderRadius: WOBBLY_MD }}
+          >
+            <h3 className="mb-4 flex items-center gap-2 font-display text-xl font-bold">
+              <ShieldOff className="h-5 w-5 text-accent" /> Kabhi Nahi Lete
+            </h3>
+            <ul className="space-y-2.5 text-sm">
+              {NEVER_COLLECT.map((item) => (
+                <li key={item} className="flex items-center gap-2">
+                  <X className="h-4 w-4 shrink-0 text-accent" strokeWidth={3} />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div
+            className="border-2 border-border bg-postit p-6 shadow-ink rotate-1"
+            style={{ borderRadius: WOBBLY_MD }}
+          >
+            <h3 className="mb-4 flex items-center gap-2 font-display text-xl font-bold">
+              <Check className="h-5 w-5 text-success" /> Sirf Itna Save Hota Hai
+            </h3>
+            <ul className="space-y-2.5 text-sm">
+              {ONLY_STORE.map((item) => (
+                <li key={item} className="flex items-center gap-2">
+                  <Check className="h-4 w-4 shrink-0 text-success" strokeWidth={3} />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
 
       {/* Promise */}
       <section className="mx-auto max-w-3xl px-4 py-10">

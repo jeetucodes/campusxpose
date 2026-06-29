@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { Shield, Ghost, EyeOff, Lock, Trash2, ArrowRight } from "lucide-react";
+import { Shield, Ghost, EyeOff, Lock, Trash2, ArrowRight, MapPinOff, ShieldOff } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -20,25 +20,39 @@ const PROOFS = [
     rot: "-rotate-1",
   },
   {
+    icon: MapPinOff,
+    title: "No Location, No IP",
+    desc: "Hum tumhari location ya IP address kabhi nahi maangte aur na hi store karte. Trace karne ke liye kuch hai hi nahi.",
+    bg: "bg-postit",
+    rot: "rotate-1",
+  },
+  {
+    icon: ShieldOff,
+    title: "Zero Permissions",
+    desc: "Camera, contacts, mic, GPS — kisi cheez ki permission nahi maangi jaati. App sirf wahi kaam karta hai jo tum karte ho.",
+    bg: "bg-white",
+    rot: "rotate-1",
+  },
+  {
     icon: EyeOff,
     title: "College Ko Pata Nahi",
     desc: "Tumhari report kisi college, faculty ya admin se link nahi hoti. Identity trace nahi ho sakti.",
     bg: "bg-postit",
-    rot: "rotate-1",
+    rot: "-rotate-1",
   },
   {
     icon: Lock,
     title: "Proof Pe Blur Tool",
     desc: "Screenshot ya document upload karne se pehle naam/face blur kar sakte ho — built-in tool se.",
     bg: "bg-white",
-    rot: "rotate-1",
+    rot: "-rotate-1",
   },
   {
     icon: Trash2,
     title: "Jab Chaho Mit Jao",
     desc: "'Forget Me' dabao aur tumhari identity gayab. Kuch bhi store nahi rehta.",
     bg: "bg-postit",
-    rot: "-rotate-1",
+    rot: "rotate-1",
   },
 ];
 
@@ -60,8 +74,20 @@ const FAQS = [
     a: "Sirf tumhari report ka content (text/proof) save hota hai taaki dusre students dekh saken. Koi personal identity attached nahi hoti.",
   },
   {
+    q: "Kya app meri location ya IP track karta hai?",
+    a: "Nahi. Hum tumhari GPS location, IP address ya device ID kabhi capture nahi karte. Iska matlab tumhare physical location ka koi record hi nahi banta.",
+  },
+  {
+    q: "Kya app koi permission maangta hai (camera, contacts, location)?",
+    a: "Nahi. App khud se koi permission nahi maangta. Sirf jab tum khud proof upload karte ho, tab tum apni marzi se file choose karte ho — wahi.",
+  },
+  {
     q: "Agar main apna data delete karna chahun to?",
     a: "Top-right menu me 'Forget Me' option hai. Ek click me tumhari local identity mit jaati hai. Kabhi bhi kar sakte ho.",
+  },
+  {
+    q: "Kya police ya college mujhe legally trace kar sakte hain?",
+    a: "Trace karne ke liye koi personal data, IP ya login record hona chahiye — humare paas wahi nahi hai. Jo cheez exist hi nahi karti, woh kisi ko di bhi nahi ja sakti.",
   },
 ];
 

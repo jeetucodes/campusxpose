@@ -2,13 +2,13 @@ import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Ghost, Search, Shield, FileWarning, Sparkles, ArrowRight, Flame, TrendingUp, ArrowBigUp } from "lucide-react";
+import { Ghost, Shield, FileWarning, ArrowRight, Flame, TrendingUp, ArrowBigUp, EyeOff, MapPinOff } from "lucide-react";
 import { UserSymbol } from "@/components/UserSymbol";
 import { SiteShell } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { getHomeData, type HomeData } from "@/lib/home.functions";
 import { supabase } from "@/integrations/supabase/client";
-import { INCIDENT_CATEGORIES, categoryLabel, categoryEmoji } from "@/lib/categories";
+import { categoryLabel, categoryEmoji } from "@/lib/categories";
 import { timeAgo } from "@/lib/format";
 import { HomeAds } from "@/components/HomeAds";
 import { TrustSection } from "@/components/TrustSection";
@@ -66,15 +66,10 @@ function Home() {
     return () => { supabase.removeChannel(ch); };
   }, [queryClient]);
 
-  const steps = [
-    { icon: Ghost, title: "Anonymous Login", desc: "App open karo — auto identity ban jaati hai", rot: "-rotate-2" },
-    { icon: Search, title: "College Dhundo", desc: "Apne city ke colleges dekho", rot: "rotate-1" },
-    { icon: Shield, title: "Sach Share Karo", desc: "Anonymously report karo, proof upload karo", rot: "-rotate-1" },
-  ];
   const features = [
-    { icon: Ghost, title: "Fully Anonymous", desc: "No email, no phone. Sirf ek ghost identity.", bg: "bg-white" },
-    { icon: FileWarning, title: "Evidence Based", desc: "Built-in blur tool for proof documents.", bg: "bg-postit" },
-    { icon: Sparkles, title: "AI Powered", desc: "Pattern detection aur incident analysis.", bg: "bg-white" },
+    { icon: EyeOff, title: "No Email, No Phone", desc: "Login me kuch nahi maangte. App khulte hi anonymous identity ban jaati hai.", bg: "bg-white" },
+    { icon: MapPinOff, title: "No Location, No IP", desc: "Tumhari location, IP ya device ki koi permission nahi li jaati — na store hoti hai.", bg: "bg-postit" },
+    { icon: FileWarning, title: "Built-in Blur Tool", desc: "Proof upload karne se pehle naam/face blur kar do — bina kisi extra app ke.", bg: "bg-white" },
   ];
 
 
@@ -138,34 +133,21 @@ function Home() {
 
       <HomeAds />
 
-      {/* How it works */}
-      <section className="mx-auto max-w-5xl px-4 py-16">
-        <h2 className="mb-10 text-center font-display text-4xl font-bold">How It Works</h2>
-        <div className="grid gap-8 md:grid-cols-3">
-          {steps.map((s, i) => (
-            <motion.div
-              key={i}
-              {...fadeUp}
-              transition={{ delay: i * 0.1 }}
-              className={`sketch-card p-6 ${s.rot}`}
-              style={{ borderRadius: WOBBLY_MD }}
-            >
-              <div
-                className="mb-4 grid h-12 w-12 place-items-center border-2 border-border bg-accent text-accent-foreground"
-                style={{ borderRadius: "50% 42% 55% 45% / 45% 55% 42% 50%" }}
-              >
-                <s.icon className="h-6 w-6" strokeWidth={2.5} />
-              </div>
-              <div className="mb-1 text-sm text-muted-foreground">Step {i + 1}</div>
-              <h3 className="mb-2 font-display text-xl font-bold">{s.title}</h3>
-              <p className="text-muted-foreground">{s.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
 
-      {/* Features */}
-      <section className="mx-auto max-w-5xl px-4 py-8">
+      {/* Trust proof badges */}
+      <section className="mx-auto max-w-5xl px-4 py-12">
+        <div className="mb-8 text-center">
+          <span
+            className="inline-flex -rotate-2 items-center gap-2 border-2 border-border bg-success/15 px-4 py-1.5 text-sm font-semibold text-success shadow-ink-soft"
+            style={{ borderRadius: WOBBLY_MD }}
+          >
+            <Shield className="h-3.5 w-3.5" /> Trust ke saath share karo
+          </span>
+          <h2 className="mt-4 font-display text-4xl font-bold">Tumhara data kabhi store nahi hota</h2>
+          <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
+            Na location, na IP, na device permission. Koi tumhe trace nahi kar sakta — guaranteed.
+          </p>
+        </div>
         <div className="grid gap-8 md:grid-cols-3">
           {features.map((f, i) => (
             <motion.div
@@ -235,24 +217,6 @@ function Home() {
         </div>
       </section>
 
-      {/* Browse by category */}
-      <section className="mx-auto max-w-5xl px-4 py-12">
-        <h2 className="mb-8 text-center font-display text-3xl font-bold">Kya Report Kar Sakte Ho?</h2>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-          {INCIDENT_CATEGORIES.map((cat, i) => (
-            <motion.div
-              key={cat.key}
-              {...fadeUp}
-              transition={{ delay: i * 0.05 }}
-              className={`sketch-card flex flex-col items-center gap-2 p-5 text-center ${i % 2 ? "rotate-1" : "-rotate-1"}`}
-              style={{ borderRadius: WOBBLY_MD }}
-            >
-              <span className="text-4xl">{cat.emoji}</span>
-              <span className="font-display font-bold">{cat.label}</span>
-            </motion.div>
-          ))}
-        </div>
-      </section>
 
       {/* Top voted reports */}
       <section className="mx-auto max-w-3xl px-4 py-16">
