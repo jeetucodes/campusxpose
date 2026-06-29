@@ -160,7 +160,7 @@ function CommentNode({ node, depth, onReply }: { node: Node; depth: number; onRe
 
         <div className="min-w-0 flex-1 pb-1">
           <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
-            <span className="font-medium text-foreground">{node.username}</span>
+            <span className="inline-flex items-center gap-1 font-medium text-foreground">{node.username}{node.username && verified.has(node.username) && <VerifiedBadge className="h-3.5 w-3.5" />}</span>
             <span>· {timeAgo(node.created_at)}</span>
           </div>
           <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-relaxed">{node.content}</p>
