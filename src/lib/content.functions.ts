@@ -202,13 +202,32 @@ export const submitGlobalMessage = createServerFn({ method: "POST" })
     return { ok: true, shadow: false };
   });
 
+const USERNAME_RE = /^[a-zA-Z0-9_]+$/;
+const HASH_RE = /^[a-f0-9]{8,128}$/;
+
+async function lookupHashForUsername(username: string): Promise<string | null> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  // Resolve a username to its secret identity hash using existing,
+  // identity-bearing records. Never trust a client-supplied recipient hash.
+  const post = await supabaseAdmin.from("posts").select("anonymous_user_hash").eq("username", username).order("created_at", { ascending: false }).limit(1);
+  if (post.data?.[0]?.anonymous_user_hash) return post.data[0].anonymous_user_hash;
+  const gm = await supabaseAdmin.from("global_messages").select("anonymous_user_hash").eq("username", username).order("created_at", { ascending: false }).limit(1);
+  if (gm.data?.[0]?.anonymous_user_hash) return gm.data[0].anonymous_user_hash;
+  const cm = await supabaseAdmin.from("community_messages").select("anonymous_user_hash").eq("username", username).order("created_at", { ascending: false }).limit(1);
+  if (cm.data?.[0]?.anonymous_user_hash) return cm.data[0].anonymous_user_hash;
+  const dm = await supabaseAdmin.from("direct_messages").select("sender_hash").eq("sender_username", username).order("created_at", { ascending: false }).limit(1);
+  if (dm.data?.[0]?.sender_hash) return dm.data[0].sender_hash;
+  return null;
+}
+
+
 export const submitDirectMessage = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z
       .object({
         hashedId: z.string().min(8),
-        username: z.string().min(3).max(40),
-        recipientUsername: z.string().min(3).max(40),
+        username: z.string().min(3).max(40).regex(USERNAME_RE),
+        recipientUsername: z.string().min(3).max(40).regex(USERNAME_RE),
         content: z.string().min(1).max(1000),
       })
       .parse(d),
@@ -219,10 +238,12 @@ export const submitDirectMessage = createServerFn({ method: "POST" })
     if (data.recipientUsername === data.username) {
       throw new Error("You cannot message yourself");
     }
+    const recipientHash = await lookupHashForUsername(data.recipientUsername);
     const { error } = await supabaseAdmin.from("direct_messages").insert({
       sender_hash: data.hashedId,
       sender_username: data.username,
       recipient_username: data.recipientUsername,
+      recipient_hash: recipientHash,
       content: clean(data.content),
     });
     if (error) throw new Error(error.message);
@@ -234,22 +255,35 @@ export const fetchDirectMessages = createServerFn({ method: "POST" })
     z
       .object({
         hashedId: z.string().min(8),
-        username: z.string().min(3).max(40),
+        username: z.string().min(3).max(40).optional(),
       })
       .parse(d),
   )
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    // Only return messages the caller sent (verified by their secret hash)
-    // or received (addressed to their username).
-    const { data: rows, error } = await supabaseAdmin
-      .from("direct_messages")
-      .select("*")
-      .or(`sender_hash.eq.${data.hashedId},recipient_username.eq.${data.username}`)
-      .order("created_at", { ascending: true });
-    if (error) throw new Error(error.message);
-    return { messages: rows ?? [] };
+    // Authorize strictly by the caller's secret identity hash. Never filter by
+    // the client-supplied username (it is public and spoofable). Run two
+    // parameterised .eq() queries instead of interpolating into a raw .or()
+    // filter string, which would allow PostgREST filter injection.
+    if (!HASH_RE.test(data.hashedId)) {
+      throw new Error("Invalid identity");
+    }
+    const [sent, received] = await Promise.all([
+      supabaseAdmin.from("direct_messages").select("*").eq("sender_hash", data.hashedId),
+      supabaseAdmin.from("direct_messages").select("*").eq("recipient_hash", data.hashedId),
+    ]);
+    if (sent.error) throw new Error(sent.error.message);
+    if (received.error) throw new Error(received.error.message);
+    const byId = new Map<string, (typeof sent.data)[number]>();
+    for (const row of [...(sent.data ?? []), ...(received.data ?? [])]) {
+      byId.set(row.id, row);
+    }
+    const rows = Array.from(byId.values()).sort((a, b) =>
+      a.created_at < b.created_at ? -1 : a.created_at > b.created_at ? 1 : 0,
+    );
+    return { messages: rows };
   });
+
 
 const COLLEGE_TYPES = ["Engineering", "Medical", "Arts", "Commerce", "University", "Research"] as const;
 
