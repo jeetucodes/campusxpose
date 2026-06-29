@@ -659,3 +659,81 @@ export const syncIdentity = createServerFn({ method: "POST" })
 
     return { username, verified };
   });
+
+/** Create a poll in the global room or a college community. Lives 24h. */
+export const createPoll = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        scope: z.enum(["global", "college"]),
+        collegeId: z.string().uuid().optional(),
+        hashedId: z.string().min(8),
+        username: z.string().min(3).max(40),
+        question: z.string().min(3).max(200),
+        options: z.array(z.string().min(1).max(80)).min(2).max(4),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (await isBanned(data.hashedId)) return { ok: true, shadow: true };
+    if (data.scope === "college" && !data.collegeId) {
+      throw new Error("collegeId required for college polls");
+    }
+    const options = data.options.map((o) => clean(o)).filter((o) => o.length > 0);
+    if (options.length < 2) throw new Error("Need at least 2 options");
+    const { data: poll, error } = await supabaseAdmin
+      .from("polls" as any)
+      .insert({
+        scope: data.scope,
+        college_id: data.scope === "college" ? data.collegeId : null,
+        anonymous_user_hash: data.hashedId,
+        username: data.username,
+        question: clean(data.question),
+        options,
+      })
+      .select("*")
+      .single();
+    if (error) throw new Error(error.message);
+    return { ok: true, shadow: false, poll };
+  });
+
+/** Cast (or change) a single vote on a poll. */
+export const votePoll = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        pollId: z.string().uuid(),
+        optionIndex: z.number().int().min(0).max(3),
+        hashedId: z.string().min(8),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (await isBanned(data.hashedId)) return { ok: true, shadow: true };
+
+    const { data: existing } = await supabaseAdmin
+      .from("poll_votes" as any)
+      .select("id, option_index")
+      .eq("poll_id", data.pollId)
+      .eq("anonymous_user_hash", data.hashedId)
+      .maybeSingle();
+
+    if (existing) {
+      await supabaseAdmin
+        .from("poll_votes" as any)
+        .update({ option_index: data.optionIndex })
+        .eq("id", (existing as any).id);
+    } else {
+      const { error } = await supabaseAdmin.from("poll_votes" as any).insert({
+        poll_id: data.pollId,
+        option_index: data.optionIndex,
+        anonymous_user_hash: data.hashedId,
+      });
+      if (error && (error as { code?: string }).code !== "23505") {
+        throw new Error(error.message);
+      }
+    }
+    return { ok: true };
+  });

@@ -23,6 +23,7 @@ import { TypingIndicator } from "@/components/ChatPresence";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { AdPin } from "@/components/AdPin";
+import { ChatPolls } from "@/components/ChatPolls";
 
 export const Route = createFileRoute("/community/$collegeId")({
   component: Community,
@@ -160,6 +161,8 @@ function Community() {
         </header>
 
         <AdPin placement="college" />
+
+        <ChatPolls scope="college" collegeId={collegeId} hashedId={hashedId} username={username} />
 
         {/* AI summary bar */}
         <div className="border-b border-border bg-surface-2/40">

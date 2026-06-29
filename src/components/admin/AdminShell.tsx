@@ -2,7 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import {
   LayoutDashboard, Building2, AlertTriangle, FileText, MessageSquare,
-  Users, ShieldAlert, BarChart3, Bot, LogOut, Ghost, Megaphone, MessagesSquare,
+  Users, ShieldAlert, BarChart3, Bot, LogOut, Ghost, Megaphone, MessagesSquare, Vote,
 } from "lucide-react";
 import { useAdmin } from "@/stores/admin";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,7 @@ const NAV = [
   { to: "/admin/incidents", label: "Incidents", icon: AlertTriangle },
   { to: "/admin/posts", label: "Posts", icon: FileText },
   { to: "/admin/comments", label: "Comments", icon: MessagesSquare },
+  { to: "/admin/polls", label: "Polls", icon: Vote },
   { to: "/admin/community", label: "Community", icon: MessageSquare },
   { to: "/admin/users", label: "Users", icon: Users },
   { to: "/admin/moderation", label: "Moderation", icon: ShieldAlert },
