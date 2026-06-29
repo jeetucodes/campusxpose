@@ -136,7 +136,7 @@ function GlobalChat() {
                 <div className="flex items-center gap-1">
                   {own && (
                     <MessageActions
-                      className="opacity-0 transition-opacity group-hover:opacity-100"
+                      className="opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100"
                       onToggle={(e) => toggle(m.id, e)}
                       onReply={() => setReplyTo(m)}
                     />
@@ -165,7 +165,7 @@ function GlobalChat() {
                   </div>
                   {!own && (
                     <MessageActions
-                      className="opacity-0 transition-opacity group-hover:opacity-100"
+                      className="opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100"
                       onToggle={(e) => toggle(m.id, e)}
                       onReply={() => setReplyTo(m)}
                     />

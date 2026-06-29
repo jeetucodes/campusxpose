@@ -307,7 +307,7 @@ function Messages() {
                   <div key={m.id} className={cn("group flex flex-col gap-1", own ? "items-end" : "items-start")}>
                     <div className={cn("flex items-center gap-1", own ? "flex-row" : "flex-row-reverse")}>
                       <MessageActions
-                        className="opacity-0 transition-opacity group-hover:opacity-100"
+                        className="opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100"
                         onToggle={(e) => toggle(m.id, e)}
                         onReply={() => setReplyTo(m)}
                       />
