@@ -122,6 +122,7 @@ export function ChatPolls({
   const { polls, votes } = usePolls(scope, collegeId);
   const createFn = useServerFn(createPoll);
   const [open, setOpen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState<string[]>(["", ""]);
   const [submitting, setSubmitting] = useState(false);
