@@ -127,8 +127,8 @@ function AdsAdmin() {
       ) : (
         <div className="grid gap-3">
           {ads.map((ad) => (
-            <div key={ad.id} className="flex items-start gap-3 rounded-xl border border-border bg-surface p-4">
-              {ad.media_url ? (
+            <div key={ad.id} className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4 sm:flex-row sm:items-start">
+        {ad.media_url ? (
                 <img src={ad.media_url} alt="" className="h-14 w-14 shrink-0 rounded-lg object-cover" />
               ) : (
                 <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-surface-2 text-muted-foreground"><Megaphone className="h-5 w-5" /></div>
@@ -149,14 +149,14 @@ function AdsAdmin() {
                   {ad.show_college && <span className="rounded bg-surface-2 px-1.5 py-0.5">College</span>}
                 </div>
                 {ad.link_url && (
-                  <a href={ad.link_url} target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1 text-xs text-primary">
-                    {ad.link_url} <ExternalLink className="h-3 w-3" />
+                  <a href={ad.link_url} target="_blank" rel="noreferrer" className="mt-1 inline-flex max-w-full items-center gap-1 truncate text-xs text-primary">
+                    {ad.link_url} <ExternalLink className="h-3 w-3 shrink-0" />
                   </a>
                 )}
               </div>
-              <div className="flex shrink-0 gap-1">
-                <Button size="icon" variant="ghost" onClick={() => setEditing(ad)}><Pencil className="h-4 w-4" /></Button>
-                <Button size="icon" variant="ghost" className="text-destructive" onClick={() => handleDelete(ad.id!)}><Trash2 className="h-4 w-4" /></Button>
+              <div className="flex shrink-0 gap-1 sm:self-start">
+                <Button size="icon" variant="ghost" className="h-10 w-10" onClick={() => setEditing(ad)}><Pencil className="h-4 w-4" /></Button>
+                <Button size="icon" variant="ghost" className="h-10 w-10 text-destructive" onClick={() => handleDelete(ad.id!)}><Trash2 className="h-4 w-4" /></Button>
               </div>
             </div>
           ))}
