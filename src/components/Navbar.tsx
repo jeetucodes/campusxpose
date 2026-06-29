@@ -36,12 +36,17 @@ export function Navbar() {
             <Link
               key={item.to}
               to={item.to}
-              className="px-3 py-1.5 font-display transition-all duration-100 hover:-rotate-1 hover:text-accent"
+              className="relative px-3 py-1.5 font-display transition-all duration-100 hover:-rotate-1 hover:text-accent"
               activeProps={{ className: "border-2 border-ink bg-white shadow-ink text-accent -rotate-1" }}
               inactiveProps={{ className: "text-foreground" }}
               style={{ borderRadius: "16px 6px 18px 6px / 6px 18px 6px 16px" }}
             >
               {item.label}
+              {item.to === "/messages" && unread > 0 && (
+                <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[10px] font-bold leading-none text-accent-foreground">
+                  {unread > 9 ? "9+" : unread}
+                </span>
+              )}
             </Link>
           ))}
         </div>
