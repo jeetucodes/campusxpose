@@ -15,20 +15,20 @@ export function ReactionChips({
 }) {
   if (!reactions.length) return null;
   return (
-    <div className={cn("flex flex-wrap gap-1", align === "end" ? "justify-end" : "justify-start")}>
+    <div className={cn("-mt-1 flex flex-wrap gap-1", align === "end" ? "justify-end" : "justify-start")}>
       {reactions.map((r) => (
         <button
           key={r.emoji}
           onClick={() => onToggle(r.emoji as ReactionEmoji)}
           className={cn(
-            "flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs transition-colors",
+            "flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs shadow-sm transition-all duration-150 active:scale-90",
             r.mine
-              ? "border-accent bg-accent/15 text-accent"
-              : "border-border bg-surface text-muted-foreground hover:bg-surface-2",
+              ? "border-accent bg-accent/15 text-accent hover:bg-accent/25"
+              : "border-border bg-white text-muted-foreground hover:-translate-y-0.5 hover:bg-surface-2",
           )}
         >
-          <span>{r.emoji}</span>
-          <span className="font-semibold">{r.count}</span>
+          <span className="text-sm leading-none">{r.emoji}</span>
+          <span className="font-semibold tabular-nums">{r.count}</span>
         </button>
       ))}
     </div>
@@ -57,18 +57,20 @@ export function MessageActions({
         </PopoverTrigger>
         <PopoverContent
           align="center"
-          className="flex w-auto gap-1 rounded-full border-2 border-border bg-white p-1.5 shadow-ink-soft"
+          sideOffset={6}
+          className="flex w-auto gap-0.5 rounded-full border-2 border-border bg-white p-1.5 shadow-ink-soft animate-in fade-in zoom-in-95 duration-150"
         >
           {REACTION_EMOJIS.map((emoji) => (
             <button
               key={emoji}
               onClick={() => onToggle(emoji)}
-              className="grid h-9 w-9 place-items-center rounded-full text-xl transition-transform hover:scale-125 hover:bg-surface-2"
+              className="grid h-9 w-9 place-items-center rounded-full text-xl transition-transform duration-150 hover:-translate-y-1 hover:scale-125 active:scale-95"
             >
               {emoji}
             </button>
           ))}
         </PopoverContent>
+
       </Popover>
       <button
         aria-label="Reply"
