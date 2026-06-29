@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Send, Sparkles, RefreshCw, ChevronDown, ChevronUp, X, FileWarning, CheckCheck } from "lucide-react";
+import { ArrowLeft, Send, X, FileWarning, CheckCheck } from "lucide-react";
 import { UserSymbol } from "@/components/UserSymbol";
 import { useVerifiedUsernames } from "@/hooks/useVerified";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useIdentity } from "@/stores/identity";
 import { submitMessage } from "@/lib/content.functions";
-import { chatSummary } from "@/lib/ai.functions";
+
 import { DEFAULT_KEYWORDS } from "@/lib/categories";
 import { useReactions } from "@/hooks/useReactions";
 import { ReactionChips, MessageActions, ReplyQuote } from "@/components/MessageReactions";
@@ -36,7 +36,7 @@ function Community() {
   const { hashedId, username } = useIdentity();
   const verified = useVerifiedUsernames();
   const sendFn = useServerFn(submitMessage);
-  const summaryFn = useServerFn(chatSummary);
+  
   const { byMessage, toggle } = useReactions("community", hashedId);
   const { typing, notifyTyping } = usePresence(`community-${collegeId}`, username, hashedId);
 
@@ -49,10 +49,6 @@ function Community() {
   const [text, setText] = useState("");
   const [replyTo, setReplyTo] = useState<Msg | null>(null);
   
-  const [summaryOpen, setSummaryOpen] = useState(false);
-  const [summary, setSummary] = useState<{ key_issues: string[] } | null>(null);
-  const [loadingSummary, setLoadingSummary] = useState(false);
-  const [showRules, setShowRules] = useState(true);
   const [incidentPrompt, setIncidentPrompt] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -124,13 +120,7 @@ function Community() {
   };
 
 
-  const loadSummary = async () => {
-    setLoadingSummary(true);
-    try {
-      const s = await summaryFn({ data: { collegeId } });
-      setSummary(s);
-    } catch { toast.error("Could not generate summary"); } finally { setLoadingSummary(false); }
-  };
+
 
   const initials = (collegeQ.data?.name ?? "Community").trim().slice(0, 2).toUpperCase();
 
@@ -164,34 +154,7 @@ function Community() {
 
         <ChatPolls scope="college" collegeId={collegeId} hashedId={hashedId} username={username} />
 
-        {/* AI summary bar */}
-        <div className="border-b border-border bg-surface-2/40">
-          <button onClick={() => setSummaryOpen((o) => !o)} className="flex w-full items-center gap-2 px-3 py-2.5 text-sm font-medium sm:px-4">
-            <Sparkles className="h-4 w-4 text-primary" /> Today's Key Issues
-            {summaryOpen ? <ChevronUp className="ml-auto h-4 w-4 text-muted-foreground" /> : <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground" />}
-          </button>
-          {summaryOpen && (
-            <div className="px-3 pb-3 text-sm sm:px-4">
-              {summary?.key_issues?.length ? (
-                <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
-                  {summary.key_issues.map((k, i) => <li key={i}>{k}</li>)}
-                </ul>
-              ) : (
-                <p className="text-muted-foreground">No summary yet.</p>
-              )}
-              <Button size="sm" variant="outline" className="mt-2 rounded-full" onClick={loadSummary} disabled={loadingSummary}>
-                <RefreshCw className={cn("mr-1 h-3.5 w-3.5", loadingSummary && "animate-spin")} /> {loadingSummary ? "Analyzing..." : "Refresh"}
-              </Button>
-            </div>
-          )}
-        </div>
 
-        {showRules && (
-          <div className="flex items-center gap-2 bg-primary/10 px-3 py-2 text-xs text-primary sm:px-4">
-            Stay anonymous. Share truth. No personal attacks.
-            <button className="ml-auto shrink-0" onClick={() => setShowRules(false)}><X className="h-4 w-4" /></button>
-          </div>
-        )}
 
         {/* messages */}
         <div className="flex flex-1 flex-col-reverse gap-3 overflow-y-auto px-3 py-4 sm:px-4">
