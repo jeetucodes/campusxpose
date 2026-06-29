@@ -15,6 +15,7 @@ import { HomeAds } from "@/components/HomeAds";
 const homeQueryOptions = queryOptions({
   queryKey: ["home"],
   queryFn: () => getHomeData(),
+  staleTime: 15000,
   refetchInterval: 15000,
   refetchOnWindowFocus: true,
 });
@@ -26,8 +27,6 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Anonymous platform for Indian students. Report fake fines, placement fraud, faculty issues — 100% anonymously." },
     ],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(homeQueryOptions),
-  errorComponent: ({ error }) => <div role="alert" className="p-8 text-center">{error.message}</div>,
   component: Home,
 });
 
