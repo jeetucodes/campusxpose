@@ -199,6 +199,18 @@ function CollegesPage() {
   );
 }
 
+function shareCollege(c: Col) {
+  const url = `${typeof window !== "undefined" ? window.location.origin : ""}/colleges/${c.id}`;
+  const text = `Check out ${c.name} on CampusXpose`;
+  if (typeof navigator !== "undefined" && navigator.share) {
+    navigator.share({ title: c.name, text, url });
+  } else if (typeof navigator !== "undefined" && navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => toast.success("Link copied!"));
+  } else {
+    toast.error("Sharing not supported on this device");
+  }
+}
+
 function Pill({ active, onClick, children, small }: { active: boolean; onClick: () => void; children: React.ReactNode; small?: boolean }) {
   return (
     <button onClick={onClick} style={{ borderRadius: "14px 5px 16px 5px / 5px 16px 5px 14px" }} className={cn("border-2 px-3 py-1 transition-transform duration-100 hover:-rotate-2", small ? "text-xs" : "text-sm", active ? "border-border bg-accent text-accent-foreground shadow-ink-soft" : "border-border bg-white text-muted-foreground hover:text-foreground")}>
