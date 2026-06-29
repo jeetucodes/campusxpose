@@ -224,11 +224,12 @@ export const adminListUsers = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const [posts, msgs, globals, banned] = await Promise.all([
+    const [posts, msgs, globals, banned, verified] = await Promise.all([
       supabaseAdmin.from("posts").select("anonymous_user_hash, username, created_at, is_incident"),
       supabaseAdmin.from("community_messages").select("anonymous_user_hash, username, created_at"),
       supabaseAdmin.from("global_messages").select("anonymous_user_hash, username, created_at"),
       supabaseAdmin.from("banned_users").select("user_hash"),
+      supabaseAdmin.from("verified_users" as any).select("username"),
     ]);
     // Surface real failures instead of silently returning an empty list
     // (which renders a misleading "No users yet").
@@ -236,6 +237,7 @@ export const adminListUsers = createServerFn({ method: "POST" })
     if (msgs.error) throw new Error(msgs.error.message);
     if (globals.error) throw new Error(globals.error.message);
     const bannedSet = new Set((banned.data ?? []).map((b) => b.user_hash));
+    const verifiedSet = new Set(((verified.data as any[]) ?? []).map((v) => v.username));
     const map = new Map<string, { hash: string; username: string; posts: number; messages: number; incidents: number; lastActive: string }>();
     const touch = (hash: string, username: string, createdAt: string) => {
       const e = map.get(hash) ?? { hash, username, posts: 0, messages: 0, incidents: 0, lastActive: createdAt };
