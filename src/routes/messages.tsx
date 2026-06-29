@@ -101,6 +101,20 @@ function Messages() {
     [all, active, username],
   );
 
+  const threadBoxRef = useRef<HTMLDivElement>(null);
+
+  // Jump to the latest message: instantly when switching chats, smoothly on new messages.
+  const prevActive = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    const box = threadBoxRef.current;
+    if (!box || !active) return;
+    const instant = prevActive.current !== active;
+    prevActive.current = active;
+    box.scrollTo({ top: box.scrollHeight, behavior: instant ? "auto" : "smooth" });
+  }, [active, thread.length]);
+
+
+
   const send = async () => {
     if (!text.trim() || !hashedId || !username || !active) return;
     const content = text.trim();
@@ -210,16 +224,8 @@ function Messages() {
                   {timeAgo(c.last.created_at)}
                 </div>
               </Link>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
-                aria-label={`Delete conversation with ${c.name}`}
-                onClick={() => deleteConversation(c.name)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
             </div>
+
           ))}
           {conversations.length === 0 && (
             <p className="px-4 py-8 text-center text-sm text-muted-foreground">
@@ -265,7 +271,7 @@ function Messages() {
               </Button>
             </header>
 
-            <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-2 overflow-y-auto px-4 py-4">
+            <div ref={threadBoxRef} className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-2 overflow-y-auto px-4 py-4">
               {thread.map((m) => {
                 const own = m.sender_username === username;
                 return (
