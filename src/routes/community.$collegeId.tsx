@@ -13,6 +13,8 @@ import { useIdentity } from "@/stores/identity";
 import { submitMessage } from "@/lib/content.functions";
 import { chatSummary } from "@/lib/ai.functions";
 import { DEFAULT_KEYWORDS } from "@/lib/categories";
+import { useReactions } from "@/hooks/useReactions";
+import { ReactionChips, MessageActions, ReplyQuote } from "@/components/MessageReactions";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -20,13 +22,14 @@ export const Route = createFileRoute("/community/$collegeId")({
   component: Community,
 });
 
-type Msg = { id: string; username: string; content: string; anonymous_user_hash: string; is_incident_signal: boolean; created_at: string };
+type Msg = { id: string; username: string; content: string; anonymous_user_hash: string; is_incident_signal: boolean; created_at: string; reply_to_id?: string | null; reply_to_username?: string | null; reply_to_content?: string | null };
 
 function Community() {
   const { collegeId } = Route.useParams();
   const { hashedId, username } = useIdentity();
   const sendFn = useServerFn(submitMessage);
   const summaryFn = useServerFn(chatSummary);
+  const { byMessage, toggle } = useReactions("community", hashedId);
 
   const collegeQ = useQuery({
     queryKey: ["college-name", collegeId],
@@ -35,6 +38,7 @@ function Community() {
 
   const [messages, setMessages] = useState<Msg[]>([]);
   const [text, setText] = useState("");
+  const [replyTo, setReplyTo] = useState<Msg | null>(null);
   
   const [summaryOpen, setSummaryOpen] = useState(true);
   const [summary, setSummary] = useState<{ key_issues: string[] } | null>(null);
@@ -72,10 +76,12 @@ function Community() {
     if (!text.trim() || !hashedId || !username) return;
     const isSignal = DEFAULT_KEYWORDS.some((k) => text.toLowerCase().includes(k));
     const content = text.trim();
+    const reply = replyTo;
     setText("");
+    setReplyTo(null);
     setIncidentPrompt(false);
     try {
-      await sendFn({ data: { collegeId, hashedId, username, content, isIncidentSignal: isSignal } });
+      await sendFn({ data: { collegeId, hashedId, username, content, isIncidentSignal: isSignal, replyToId: reply?.id, replyToUsername: reply?.username, replyToContent: reply?.content } });
     } catch {
       toast.error("Message failed");
     }
@@ -161,19 +167,28 @@ function Community() {
                   {!own && (
                     <UserSymbol username={m.username} size="sm" />
                   )}
-                  <div className="flex max-w-[80%] flex-col gap-1">
-                    <div
-                      className={cn(
-                        "rounded-2xl px-3.5 py-2.5 text-sm shadow-sm",
-                        own
-                          ? "rounded-br-md bg-primary text-primary-foreground shadow-primary/15"
-                          : "rounded-bl-md border border-border bg-surface",
-                        m.is_incident_signal && !own && "border-l-2 border-l-warning",
-                      )}
-                    >
-                      {!own && <div className="mb-0.5 text-xs font-semibold text-primary/80">{m.username}</div>}
-                      <div className="whitespace-pre-wrap break-words leading-relaxed">{m.content}</div>
+                  <div className={cn("group/msg flex max-w-[80%] flex-col gap-1", own ? "items-end" : "items-start")}>
+                    <div className={cn("flex items-center gap-1", own ? "flex-row" : "flex-row-reverse")}>
+                      <MessageActions
+                        className="opacity-0 transition-opacity group-hover/msg:opacity-100"
+                        onToggle={(e) => toggle(m.id, e)}
+                        onReply={() => setReplyTo(m)}
+                      />
+                      <div
+                        className={cn(
+                          "rounded-2xl px-3.5 py-2.5 text-sm shadow-sm",
+                          own
+                            ? "rounded-br-md bg-primary text-primary-foreground shadow-primary/15"
+                            : "rounded-bl-md border border-border bg-surface",
+                          m.is_incident_signal && !own && "border-l-2 border-l-warning",
+                        )}
+                      >
+                        {!own && <div className="mb-0.5 text-xs font-semibold text-primary/80">{m.username}</div>}
+                        <ReplyQuote username={m.reply_to_username} content={m.reply_to_content} align={own ? "end" : "start"} />
+                        <div className="whitespace-pre-wrap break-words leading-relaxed">{m.content}</div>
+                      </div>
                     </div>
+                    <ReactionChips reactions={byMessage.get(m.id) ?? []} onToggle={(e) => toggle(m.id, e)} align={own ? "end" : "start"} />
                     <div className={cn("flex items-center gap-1 text-[10px] text-muted-foreground", own ? "justify-end pr-1" : "pl-1")}>
                       {timeAgo(m.created_at)}
                       {own && <CheckCheck className="h-3 w-3 text-primary" />}
@@ -207,6 +222,15 @@ function Community() {
 
         {/* input */}
         <div className="border-t border-border bg-surface/80 px-3 py-3 backdrop-blur-sm sm:px-4">
+          {replyTo && (
+            <div className="mb-2 flex items-center gap-2 rounded-lg border border-border bg-surface-2/60 px-3 py-1.5 text-xs">
+              <div className="min-w-0 flex-1">
+                <span className="font-semibold text-primary">Replying to {replyTo.username}</span>
+                <div className="truncate text-muted-foreground">{replyTo.content}</div>
+              </div>
+              <button onClick={() => setReplyTo(null)} aria-label="Cancel reply"><X className="h-4 w-4 text-muted-foreground" /></button>
+            </div>
+          )}
           <div className="flex items-center gap-2 rounded-full border border-border bg-surface-2 px-2 py-1.5 transition-colors focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15">
             <Input
               value={text}
