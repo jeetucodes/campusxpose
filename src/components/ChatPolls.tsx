@@ -34,8 +34,26 @@ function PollItem({
   hashedId: string | null;
 }) {
   const voteFn = useServerFn(votePoll);
+  const deleteFn = useServerFn(deletePoll);
   const [pending, setPending] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [localChoice, setLocalChoice] = useState<number | null>(null);
+  const owned = !!hashedId && poll.anonymous_user_hash === hashedId;
+
+  const remove = async () => {
+    if (!hashedId || deleting) return;
+    if (!confirm("Delete this poll?")) return;
+    setDeleting(true);
+    try {
+      const res = await deleteFn({ data: { pollId: poll.id, hashedId } });
+      if (!res?.ok) toast.error("Could not delete poll");
+      else toast.success("Poll deleted");
+    } catch {
+      toast.error("Could not delete poll");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const mine = useMemo(
     () => votes.find((v) => v.anonymous_user_hash === hashedId)?.option_index ?? null,
