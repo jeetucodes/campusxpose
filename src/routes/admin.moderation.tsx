@@ -81,7 +81,7 @@ function Moderation() {
                   ? <img src={e.file_url} alt="evidence" className="h-32 w-full rounded-lg object-cover" />
                   : <a href={e.file_url} target="_blank" rel="noreferrer" className="grid h-32 place-items-center rounded-lg bg-surface-2 text-3xl">📄</a>}
                 {e.is_verified && (
-                  <span className="absolute left-1 top-1 rounded-full bg-success px-2 py-0.5 text-[10px] font-semibold text-success-foreground shadow">✓ Verified</span>
+                  <span className="absolute left-1 top-1 rounded-full border border-success/40 bg-success/20 px-2 py-0.5 text-[10px] font-semibold text-success shadow">✓ Verified</span>
                 )}
               </div>
               <div className="mt-2 flex gap-1">
