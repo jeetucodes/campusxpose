@@ -57,18 +57,20 @@ export function MessageActions({
         </PopoverTrigger>
         <PopoverContent
           align="center"
-          className="flex w-auto gap-1 rounded-full border-2 border-border bg-white p-1.5 shadow-ink-soft"
+          sideOffset={6}
+          className="flex w-auto gap-0.5 rounded-full border-2 border-border bg-white p-1.5 shadow-ink-soft animate-in fade-in zoom-in-95 duration-150"
         >
           {REACTION_EMOJIS.map((emoji) => (
             <button
               key={emoji}
               onClick={() => onToggle(emoji)}
-              className="grid h-9 w-9 place-items-center rounded-full text-xl transition-transform hover:scale-125 hover:bg-surface-2"
+              className="grid h-9 w-9 place-items-center rounded-full text-xl transition-transform duration-150 hover:-translate-y-1 hover:scale-125 active:scale-95"
             >
               {emoji}
             </button>
           ))}
         </PopoverContent>
+
       </Popover>
       <button
         aria-label="Reply"
