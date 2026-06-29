@@ -318,7 +318,6 @@ function RequestCollegeDialog() {
             <TypeMultiSelect value={types} onChange={setTypes} />
           </div>
           <Input type="number" placeholder="Established (year)" value={form.established} onChange={(e) => set("established", e.target.value)} />
-          </div>
           <Textarea placeholder="Anything else? (optional)" value={form.description} onChange={(e) => set("description", e.target.value)} />
         </div>
         <DialogFooter>
