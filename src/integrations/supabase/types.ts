@@ -654,7 +654,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      refresh_clustered_incidents: { Args: never; Returns: undefined }
     }
     Enums: {
       college_type:
