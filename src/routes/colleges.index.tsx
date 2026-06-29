@@ -313,14 +313,11 @@ function RequestCollegeDialog() {
               </SelectContent>
             </Select>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Select value={form.type} onValueChange={(v) => set("type", v)}>
-              <SelectTrigger><SelectValue placeholder="Type" /></SelectTrigger>
-              <SelectContent>
-                {COLLEGE_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            <Input type="number" placeholder="Established (year)" value={form.established} onChange={(e) => set("established", e.target.value)} />
+          <div>
+            <p className="mb-2 text-sm font-medium">Course types (select one or more)</p>
+            <TypeMultiSelect value={types} onChange={setTypes} />
+          </div>
+          <Input type="number" placeholder="Established (year)" value={form.established} onChange={(e) => set("established", e.target.value)} />
           </div>
           <Textarea placeholder="Anything else? (optional)" value={form.description} onChange={(e) => set("description", e.target.value)} />
         </div>
