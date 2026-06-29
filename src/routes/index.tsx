@@ -66,15 +66,10 @@ function Home() {
     return () => { supabase.removeChannel(ch); };
   }, [queryClient]);
 
-  const steps = [
-    { icon: Ghost, title: "Anonymous Login", desc: "App open karo — auto identity ban jaati hai", rot: "-rotate-2" },
-    { icon: Search, title: "College Dhundo", desc: "Apne city ke colleges dekho", rot: "rotate-1" },
-    { icon: Shield, title: "Sach Share Karo", desc: "Anonymously report karo, proof upload karo", rot: "-rotate-1" },
-  ];
   const features = [
-    { icon: Ghost, title: "Fully Anonymous", desc: "No email, no phone. Sirf ek ghost identity.", bg: "bg-white" },
-    { icon: FileWarning, title: "Evidence Based", desc: "Built-in blur tool for proof documents.", bg: "bg-postit" },
-    { icon: Sparkles, title: "AI Powered", desc: "Pattern detection aur incident analysis.", bg: "bg-white" },
+    { icon: EyeOff, title: "No Email, No Phone", desc: "Login me kuch nahi maangte. App khulte hi anonymous identity ban jaati hai.", bg: "bg-white" },
+    { icon: MapPinOff, title: "No Location, No IP", desc: "Tumhari location, IP ya device ki koi permission nahi li jaati — na store hoti hai.", bg: "bg-postit" },
+    { icon: FileWarning, title: "Built-in Blur Tool", desc: "Proof upload karne se pehle naam/face blur kar do — bina kisi extra app ke.", bg: "bg-white" },
   ];
 
 
