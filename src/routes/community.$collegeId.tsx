@@ -124,13 +124,7 @@ function Community() {
   };
 
 
-  const loadSummary = async () => {
-    setLoadingSummary(true);
-    try {
-      const s = await summaryFn({ data: { collegeId } });
-      setSummary(s);
-    } catch { toast.error("Could not generate summary"); } finally { setLoadingSummary(false); }
-  };
+
 
   const initials = (collegeQ.data?.name ?? "Community").trim().slice(0, 2).toUpperCase();
 
