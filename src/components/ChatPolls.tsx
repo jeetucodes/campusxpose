@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { BarChart3, Plus, Clock, X, Check, ChevronDown, Trash2 } from "lucide-react";
+import { BarChart3, Plus, Clock, X, Check, ChevronDown, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -175,6 +175,7 @@ export function ChatPolls({
   const createFn = useServerFn(createPoll);
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState<string[]>(["", ""]);
   const [submitting, setSubmitting] = useState(false);
@@ -194,6 +195,10 @@ export function ChatPolls({
     setSeenIds(currentIds);
     markSeen(currentIds);
   }, [expanded, polls, markSeen]);
+
+  useEffect(() => {
+    setCurrentIndex((i) => (i >= polls.length ? Math.max(0, polls.length - 1) : i));
+  }, [polls.length]);
 
   const reset = () => {
     setQuestion("");
@@ -336,15 +341,57 @@ export function ChatPolls({
             </Dialog>
           </div>
           {polls.length > 0 && (
-            <div className="max-h-72 space-y-2 overflow-y-auto px-3 pb-3 sm:px-4">
-              {polls.map((p) => (
-                <PollItem
-                  key={p.id}
-                  poll={p}
-                  votes={votes.filter((v) => v.poll_id === p.id)}
-                  hashedId={hashedId}
-                />
-              ))}
+            <div className="px-3 pb-3 sm:px-4">
+              <div className="mb-2 flex items-center justify-between">
+                <button
+                  onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))}
+                  disabled={currentIndex === 0}
+                  className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-muted disabled:opacity-30"
+                  aria-label="Previous poll"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <span className="text-xs font-medium tabular-nums text-muted-foreground">
+                  {currentIndex + 1}/{polls.length}
+                </span>
+                <button
+                  onClick={() => setCurrentIndex((i) => Math.min(polls.length - 1, i + 1))}
+                  disabled={currentIndex === polls.length - 1}
+                  className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-muted disabled:opacity-30"
+                  aria-label="Next poll"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="overflow-hidden">
+                <div
+                  className="flex transition-transform duration-300 ease-out"
+                  style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+                >
+                  {polls.map((p) => (
+                    <div key={p.id} className="w-full shrink-0">
+                      <PollItem
+                        poll={p}
+                        votes={votes.filter((v) => v.poll_id === p.id)}
+                        hashedId={hashedId}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-2 flex justify-center gap-1.5">
+                {polls.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrentIndex(i)}
+                    className={cn(
+                      "h-1.5 rounded-full transition-all",
+                      i === currentIndex ? "w-4 bg-primary" : "w-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                    )}
+                    aria-label={`Go to poll ${i + 1}`}
+                  />
+                ))}
+              </div>
             </div>
           )}
         </>
