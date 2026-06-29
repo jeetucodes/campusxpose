@@ -84,6 +84,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "CampusXpose — College ka sach, bina darr ke" },
       { name: "description", content: "Anonymous platform for Indian college students to rate colleges and report fake fines, placement fraud, and harassment." },
       { name: "author", content: "CampusXpose" },
+      { name: "google-site-verification", content: "1BCMAogu2qMCNHNGQjFcQxKKiAa8183Lt1iPNZ1Y7s8" },
       { property: "og:title", content: "CampusXpose — College ka sach, bina darr ke" },
       { property: "og:description", content: "Anonymous platform for Indian college students to rate colleges and report fake fines, placement fraud, and harassment." },
       { property: "og:type", content: "website" },
