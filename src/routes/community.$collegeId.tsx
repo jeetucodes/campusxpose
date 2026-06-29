@@ -33,6 +33,7 @@ function Community() {
   const sendFn = useServerFn(submitMessage);
   const summaryFn = useServerFn(chatSummary);
   const { byMessage, toggle } = useReactions("community", hashedId);
+  const { online, typing, notifyTyping } = usePresence(`community-${collegeId}`, username, hashedId);
 
   const collegeQ = useQuery({
     queryKey: ["college-name", collegeId],
