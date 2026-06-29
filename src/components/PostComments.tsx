@@ -136,26 +136,40 @@ export function PostComments({ postId, onCount }: { postId: string; onCount?: (n
 }
 
 function CommentNode({ node, depth, onReply }: { node: Node; depth: number; onReply: (c: Comment) => void }) {
+  const isReply = depth > 0;
   return (
-    <div className={cn(depth > 0 && "ml-3 border-l-2 border-border pl-3")}>
-      <div className="flex items-start gap-2">
-        <UserSymbol username={node.username} size="sm" />
+    <div className="relative">
+      {isReply && (
+        <div className="absolute -left-[9px] top-4 flex h-full flex-col items-center">
+          <div className="h-2 w-2 rounded-full bg-primary/70" />
+          <div className="mt-1 w-px flex-1 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMSIgaGVpZ2h0PSI4IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxsaW5lIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSI4IiBzdHJva2U9IiMyZDJkMmQiIHN0cm9rZS1kYXNoYXJyYXk9IjIgMyIgc3Ryb2tlLXdpZHRoPSIxIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=')] bg-repeat-y" />
+        </div>
+      )}
+      <div className={cn("flex items-start gap-2.5", isReply && "ml-4")}>
+        <div className="relative mt-0.5">
+          <UserSymbol username={node.username} size="sm" />
+          {node.children.length > 0 && (
+            <div className="absolute -bottom-2 left-1/2 h-2 w-px -translate-x-1/2 bg-primary/40" />
+          )}
+        </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
             <span className="font-medium text-foreground">{node.username}</span>
             <span>· {timeAgo(node.created_at)}</span>
           </div>
-          <p className="mt-0.5 whitespace-pre-wrap break-words text-sm">{node.content}</p>
+          <div className="relative mt-1">
+            <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">{node.content}</p>
+          </div>
           <button
             onClick={() => onReply(node)}
-            className="mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground transition-colors hover:text-primary"
+            className="mt-1.5 inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-surface-2 hover:text-primary"
           >
             <CornerDownRight className="h-3 w-3" /> Reply
           </button>
         </div>
       </div>
       {node.children.length > 0 && (
-        <div className="mt-3 space-y-3">
+        <div className="relative mt-2 space-y-3">
           {node.children.map((child) => (
             <CommentNode key={child.id} node={child} depth={depth + 1} onReply={onReply} />
           ))}
