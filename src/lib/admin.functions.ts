@@ -186,6 +186,28 @@ export const adminDeleteComment = createServerFn({ method: "POST" })
     return { ok: true as const, ids: Array.from(ids) };
   });
 
+/** Admin: list recent comments with their post context. */
+export const adminListComments = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: z.string(), search: z.string().optional() }).parse(d))
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let q = supabaseAdmin
+      .from("post_comments")
+      .select("id, post_id, parent_id, username, content, created_at, anonymous_user_hash")
+      .order("created_at", { ascending: false })
+      .limit(300);
+    if (data.search && data.search.trim()) {
+      const s = data.search.trim();
+      q = q.or(`content.ilike.%${s}%,username.ilike.%${s}%`);
+    }
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+
+
 export const adminMarkPostIncident = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ token: z.string(), id: z.string().uuid(), incidentId: z.string().uuid().nullable() }).parse(d))
   .handler(async ({ data }) => {
