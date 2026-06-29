@@ -113,11 +113,15 @@ export function PostComments({ postId, onCount }: { postId: string; onCount?: (n
   };
 
   const handleDelete = async (c: Comment) => {
-    if (!hashedId) return;
-    if (!window.confirm("Ye comment delete karein?")) return;
+    const isMine = !!hashedId && c.anonymous_user_hash === hashedId;
+    const asAdmin = !isMine && !!adminToken;
+    if (!isMine && !asAdmin) return;
+    if (!window.confirm(asAdmin ? "Admin: ye comment delete karein?" : "Ye comment delete karein?")) return;
     const prev = comments;
     try {
-      const res = await removeComment({ data: { commentId: c.id, hashedId } });
+      const res = asAdmin
+        ? await adminRemoveComment({ data: { token: adminToken!, commentId: c.id } })
+        : await removeComment({ data: { commentId: c.id, hashedId: hashedId! } });
       if (res?.ok && res.ids) {
         const removed = new Set(res.ids);
         setComments((cur) => cur.filter((x) => !removed.has(x.id)));
@@ -136,7 +140,7 @@ export function PostComments({ postId, onCount }: { postId: string; onCount?: (n
       {tree.length > 0 && (
         <div className="space-y-3">
           {tree.map((node) => (
-            <CommentNode key={node.id} node={node} depth={0} onReply={setReplyTo} onDelete={handleDelete} myHash={hashedId} />
+            <CommentNode key={node.id} node={node} depth={0} onReply={setReplyTo} onDelete={handleDelete} myHash={hashedId} isAdmin={!!adminToken} />
           ))}
         </div>
       )}
