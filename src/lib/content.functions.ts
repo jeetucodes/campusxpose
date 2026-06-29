@@ -397,7 +397,7 @@ export const submitCollegeRequest = createServerFn({ method: "POST" })
         name: z.string().min(2).max(120),
         city: z.string().min(2).max(80),
         state: z.string().min(2).max(80),
-        type: z.enum(COLLEGE_TYPES),
+        types: z.array(z.enum(COLLEGE_TYPES)).min(1).max(COLLEGE_TYPES.length),
         established: z.number().int().min(1800).max(2100).nullable().optional(),
         description: z.string().max(1000).optional(),
       })
@@ -415,16 +415,20 @@ export const submitCollegeRequest = createServerFn({ method: "POST" })
       .maybeSingle();
     if (existing) return { ok: false as const, reason: "exists" };
 
+    const types = Array.from(new Set(data.types));
     const { error } = await supabaseAdmin.from("college_requests").insert({
       requester_hash: data.hashedId,
       name: clean(data.name),
       city: clean(data.city),
       state: clean(data.state),
-      type: data.type,
+      type: types[0],
+      types,
       established: data.established ?? null,
       description: data.description ? clean(data.description) : null,
     });
     if (error) throw new Error(error.message);
+    return { ok: true as const, shadow: false };
+  });
     return { ok: true as const, shadow: false };
   });
 
