@@ -310,7 +310,7 @@ function Messages() {
               </Button>
               <UserSymbol username={active} size="md" />
               <div>
-                <div className="font-display font-bold">{active}</div>
+                <div className="inline-flex items-center gap-1 font-display font-bold">{active}{active && verified.has(active) && <VerifiedBadge />}</div>
                 {online >= 2 ? (
                   <span className="flex items-center gap-1 text-xs text-emerald-600">
                     <span className="relative flex h-2 w-2">
