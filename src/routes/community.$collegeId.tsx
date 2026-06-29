@@ -230,7 +230,7 @@ function Community() {
         </AnimatePresence>
 
         {/* input */}
-        <div className="border-t border-border bg-surface/80 px-3 py-3 backdrop-blur-sm sm:px-4">
+        <div className="border-t border-border bg-surface/80 px-3 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-sm sm:px-4">
           <TypingIndicator users={typing} className="mb-1.5 px-1" />
           {replyTo && (
             <div className="mb-2 flex items-center gap-2 rounded-lg border border-border bg-surface-2/60 px-3 py-1.5 text-xs">
