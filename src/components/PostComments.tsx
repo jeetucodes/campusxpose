@@ -1,13 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { MessageCircle, CornerDownRight, Send } from "lucide-react";
+import { MessageCircle, CornerDownRight, Send, MoreVertical, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { UserSymbol } from "@/components/UserSymbol";
 import { useIdentity } from "@/stores/identity";
-import { submitComment } from "@/lib/content.functions";
+import { submitComment, deleteComment } from "@/lib/content.functions";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useVerifiedUsernames } from "@/hooks/useVerified";
@@ -20,9 +26,11 @@ export type Comment = {
   username: string;
   content: string;
   created_at: string;
+  anonymous_user_hash?: string | null;
 };
 
 type Node = Comment & { children: Node[] };
+
 
 function buildTree(comments: Comment[]): Node[] {
   const map = new Map<string, Node>();
@@ -46,6 +54,7 @@ function buildTree(comments: Comment[]): Node[] {
 export function PostComments({ postId, onCount }: { postId: string; onCount?: (n: number) => void }) {
   const { hashedId, username } = useIdentity();
   const addComment = useServerFn(submitComment);
+  const removeComment = useServerFn(deleteComment);
   const [comments, setComments] = useState<Comment[]>([]);
   const [text, setText] = useState("");
   const [replyTo, setReplyTo] = useState<Comment | null>(null);
@@ -99,15 +108,35 @@ export function PostComments({ postId, onCount }: { postId: string; onCount?: (n
     }
   };
 
+  const handleDelete = async (c: Comment) => {
+    if (!hashedId) return;
+    if (!window.confirm("Ye comment delete karein?")) return;
+    const prev = comments;
+    try {
+      const res = await removeComment({ data: { commentId: c.id, hashedId } });
+      if (res?.ok && res.ids) {
+        const removed = new Set(res.ids);
+        setComments((cur) => cur.filter((x) => !removed.has(x.id)));
+        toast.success("Comment delete ho gaya");
+      } else {
+        toast.error("Ye comment delete nahi kar sakte");
+      }
+    } catch {
+      setComments(prev);
+      toast.error("Delete nahi ho paaya");
+    }
+  };
+
   return (
     <div className="mt-3 border-t border-border pt-3">
       {tree.length > 0 && (
         <div className="space-y-3">
           {tree.map((node) => (
-            <CommentNode key={node.id} node={node} depth={0} onReply={setReplyTo} />
+            <CommentNode key={node.id} node={node} depth={0} onReply={setReplyTo} onDelete={handleDelete} myHash={hashedId} />
           ))}
         </div>
       )}
+
 
       <div className="mt-3">
         {replyTo && (
@@ -137,10 +166,12 @@ export function PostComments({ postId, onCount }: { postId: string; onCount?: (n
   );
 }
 
-function CommentNode({ node, depth, onReply }: { node: Node; depth: number; onReply: (c: Comment) => void }) {
+function CommentNode({ node, depth, onReply, onDelete, myHash }: { node: Node; depth: number; onReply: (c: Comment) => void; onDelete: (c: Comment) => void; myHash: string | null }) {
   const isReply = depth > 0;
   const hasChildren = node.children.length > 0;
   const verified = useVerifiedUsernames();
+  const isMine = !!myHash && node.anonymous_user_hash === myHash;
+
 
   return (
     <div className={cn("animate-fade-in", isReply && "relative")}>
@@ -159,11 +190,28 @@ function CommentNode({ node, depth, onReply }: { node: Node; depth: number; onRe
         </div>
 
         <div className="min-w-0 flex-1 pb-1">
-          <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1 font-medium text-foreground">{node.username}{node.username && verified.has(node.username) && <VerifiedBadge className="h-3.5 w-3.5" />}</span>
-            <span>· {timeAgo(node.created_at)}</span>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+              <span className="inline-flex items-center gap-1 font-medium text-foreground">{node.username}{node.username && verified.has(node.username) && <VerifiedBadge className="h-3.5 w-3.5" />}</span>
+              <span>· {timeAgo(node.created_at)}</span>
+            </div>
+            {isMine && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="ml-auto shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground" aria-label="Comment options">
+                    <MoreVertical className="h-4 w-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => onDelete(node)}>
+                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
           <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-relaxed">{node.content}</p>
+
           <button
             onClick={() => onReply(node)}
             className="mt-1.5 inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
@@ -182,7 +230,7 @@ function CommentNode({ node, depth, onReply }: { node: Node; depth: number; onRe
             style={{ animation: "thread-draw 0.5s ease-out forwards" }}
           />
           {node.children.map((child) => (
-            <CommentNode key={child.id} node={child} depth={depth + 1} onReply={onReply} />
+            <CommentNode key={child.id} node={child} depth={depth + 1} onReply={onReply} onDelete={onDelete} myHash={myHash} />
           ))}
         </div>
       )}

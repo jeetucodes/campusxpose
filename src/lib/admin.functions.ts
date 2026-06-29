@@ -241,7 +241,7 @@ export const adminListUsers = createServerFn({ method: "POST" })
       supabaseAdmin.from("community_messages").select("anonymous_user_hash, username, created_at"),
       supabaseAdmin.from("global_messages").select("anonymous_user_hash, username, created_at"),
       supabaseAdmin.from("banned_users").select("user_hash"),
-      supabaseAdmin.from("verified_users" as any).select("username"),
+      supabaseAdmin.from("verified_users" as any).select("username, user_hash"),
     ]);
     // Surface real failures instead of silently returning an empty list
     // (which renders a misleading "No users yet").
@@ -267,6 +267,11 @@ export const adminListUsers = createServerFn({ method: "POST" })
     }
     for (const g of globals.data ?? []) {
       touch(g.anonymous_user_hash, g.username, g.created_at).messages++;
+    }
+    // Surface users that were allotted a username / verified by admin even if
+    // they have no other activity yet.
+    for (const v of (verified.data as any[]) ?? []) {
+      if (v.user_hash) touch(v.user_hash, v.username, new Date(0).toISOString());
     }
     return Array.from(map.values())
       .map((u) => ({ ...u, banned: bannedSet.has(u.hash), verified: verifiedSet.has(u.username) }))

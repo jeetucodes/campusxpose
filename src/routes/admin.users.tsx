@@ -65,9 +65,23 @@ function UsersAdmin() {
     toast.success(`Renamed to ${next.trim()}`); q.refetch();
   };
 
+  const total = (q.data ?? []).length;
+  const verifiedCount = (q.data ?? []).filter((u: any) => u.verified).length;
+
   return (
     <div>
-      <h1 className="text-2xl font-bold">Users</h1>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <h1 className="text-2xl font-bold">Users</h1>
+        <div className="flex gap-2">
+          <div className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm">
+            <span className="font-semibold">{total}</span> <span className="text-muted-foreground">total users</span>
+          </div>
+          <div className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm">
+            <span className="font-semibold">{verifiedCount}</span> <span className="text-muted-foreground">verified</span>
+          </div>
+        </div>
+      </div>
+
 
       {/* Mobile card list */}
       <div className="mt-4 space-y-3 md:hidden">
