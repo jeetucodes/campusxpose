@@ -1,12 +1,21 @@
 // Anonymous identity helpers. No real identity is ever collected or stored.
 
 const ADJECTIVES = [
-  "ghost", "shadow", "silent", "dark", "hidden", "secret",
-  "brave", "wild", "swift", "bold", "mystic", "rebel",
+  "ghostly", "sneaky", "spooky", "haunted", "phantom", "shadow",
+  "chibi", "kawaii", "rogue", "feral", "cosmic", "glitchy",
+  "moody", "drowsy", "grumpy", "derpy", "mythic", "cursed",
+  "neon", "midnight", "frosty", "fluffy", "wicked", "silent",
 ];
 const NOUNS = [
-  "tiger", "wolf", "eagle", "fox", "hawk", "storm",
-  "blade", "arrow", "flame", "night", "rider", "spark",
+  // animals
+  "panda", "axolotl", "raccoon", "otter", "narwhal", "octopus",
+  "fox", "wolf", "tiger", "penguin", "sloth", "capybara",
+  // spooky
+  "ghost", "phantom", "wraith", "specter", "goblin", "gremlin",
+  "reaper", "vampire", "skeleton", "banshee", "demon", "yokai",
+  // anime / character vibes
+  "senpai", "ninja", "samurai", "ronin", "otaku", "sensei",
+  "waifu", "shogun", "kitsune", "onibi", "tanuki", "shinobi",
 ];
 
 export const UID_KEY = "campusxpose_uid";
@@ -15,7 +24,7 @@ export const USERNAME_KEY = "campusxpose_username";
 export function generateUsername(): string {
   const adj = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
   const noun = NOUNS[Math.floor(Math.random() * NOUNS.length)];
-  const num = Math.floor(1000 + Math.random() * 9000);
+  const num = Math.floor(100 + Math.random() * 900);
   return `${adj}_${noun}_${num}`;
 }
 
