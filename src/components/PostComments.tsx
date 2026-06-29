@@ -137,38 +137,39 @@ export function PostComments({ postId, onCount }: { postId: string; onCount?: (n
 
 function CommentNode({ node, depth, onReply }: { node: Node; depth: number; onReply: (c: Comment) => void }) {
   const isReply = depth > 0;
-  const replyBg = depth === 1 ? "bg-primary/[0.04]" : depth === 2 ? "bg-primary/[0.03]" : "";
+  const indent = isReply ? "ml-6" : "";
+  const hasChildren = node.children.length > 0;
+
   return (
-    <div className={cn("relative rounded-xl", isReply && "ml-5", replyBg)}>
+    <div className={cn("animate-fade-in", indent)}>
+      {/* Reply connector line */}
       {isReply && (
-        <div className="absolute -left-[13px] top-5 flex h-[calc(100%-20px)] flex-col items-center">
-          <div className="h-2.5 w-2.5 rounded-full border-2 border-primary/60 bg-background" />
-          <div
-            className="mt-1 flex-1 w-[2px] rounded-full"
-            style={{
-              backgroundImage: `url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMiIgaGVpZ2h0PSIxMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48bGluZSB4MT0iMSIgeTE9IjAiIHgyPSIxIiB5Mj0iMTAiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1kYXNoYXJyYXk9IjMgMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+")`,
-              backgroundRepeat: "repeat-y",
-              backgroundPosition: "center top",
-              color: "hsl(var(--primary) / 0.35)",
-            }}
-          />
-        </div>
+        <div className="absolute -left-3 top-0 bottom-0 w-px bg-primary/15" />
       )}
-      <div className={cn("flex items-start gap-2.5", isReply && "px-3 py-2.5")}>
-        <div className="relative mt-0.5">
+
+      <div className="relative flex items-start gap-3">
+        {/* L-shaped connector for replies */}
+        {isReply && (
+          <div className="absolute -left-3 top-4 flex items-center">
+            <div className="h-px w-3 bg-primary/20" />
+            <div className="h-1.5 w-1.5 -ml-0.5 rounded-full bg-primary/40" />
+          </div>
+        )}
+
+        <div className="relative mt-0.5 shrink-0">
           <UserSymbol username={node.username} size="sm" />
-          {node.children.length > 0 && (
-            <div className="absolute -bottom-2.5 left-1/2 h-2.5 w-[2px] -translate-x-1/2 rounded-full bg-primary/50" />
+          {/* Vertical stem when this comment has children */}
+          {hasChildren && (
+            <div className="absolute top-full left-1/2 h-3 w-px -translate-x-1/2 bg-primary/15" />
           )}
         </div>
-        <div className="min-w-0 flex-1">
+
+        <div className="min-w-0 flex-1 pb-1">
           <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
             <span className="font-medium text-foreground">{node.username}</span>
             <span>· {timeAgo(node.created_at)}</span>
           </div>
-          <div className="relative mt-1">
-            <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">{node.content}</p>
-          </div>
+          <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-relaxed">{node.content}</p>
           <button
             onClick={() => onReply(node)}
             className="mt-1.5 inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
@@ -177,8 +178,10 @@ function CommentNode({ node, depth, onReply }: { node: Node; depth: number; onRe
           </button>
         </div>
       </div>
-      {node.children.length > 0 && (
-        <div className="relative mt-1 space-y-2">
+
+      {/* Children with branch line */}
+      {hasChildren && (
+        <div className="relative ml-[19px] mt-1 space-y-3 border-l border-primary/10 pl-5">
           {node.children.map((child) => (
             <CommentNode key={child.id} node={child} depth={depth + 1} onReply={onReply} />
           ))}
