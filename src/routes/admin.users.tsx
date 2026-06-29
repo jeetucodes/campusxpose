@@ -32,7 +32,35 @@ function UsersAdmin() {
   return (
     <div>
       <h1 className="text-2xl font-bold">Users</h1>
-      <div className="mt-4 overflow-x-auto rounded-xl border border-border">
+
+      {/* Mobile card list */}
+      <div className="mt-4 space-y-3 md:hidden">
+        {(q.data ?? []).map((u) => {
+          const r = risk(u);
+          return (
+            <div key={u.hash} className="rounded-xl border border-border bg-surface p-4">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-medium">{u.username}</span>
+                <span className={cn("text-xs font-medium", r.cls)}>{r.label}</span>
+              </div>
+              <div className="mt-1 font-mono text-xs text-muted-foreground">{u.hash.slice(0, 8)} · {timeAgo(u.lastActive)}</div>
+              <div className="mt-2 flex gap-4 text-sm text-muted-foreground">
+                <span>{u.posts} posts</span><span>{u.messages} msgs</span><span>{u.incidents} inc.</span>
+              </div>
+              <div className="mt-3 flex gap-2">
+                {u.banned
+                  ? <Button size="sm" variant="outline" className="flex-1 text-success" onClick={async () => { await unban({ data: { token: token!, userHash: u.hash } }); toast.success("Unbanned"); q.refetch(); }}>Unban</Button>
+                  : <Button size="sm" variant="outline" className="flex-1 text-warning" onClick={async () => { await ban({ data: { token: token!, userHash: u.hash, username: u.username, reason: "Admin action" } }); toast.success("Shadow banned"); q.refetch(); }}>Ban</Button>}
+                <Button size="sm" variant="outline" className="flex-1 text-destructive" onClick={async () => { if (!window.confirm("Delete ALL activity from this user?")) return; await wipe({ data: { token: token!, userHash: u.hash } }); toast.success("Wiped"); q.refetch(); }}>Wipe</Button>
+              </div>
+            </div>
+          );
+        })}
+        {(q.data ?? []).length === 0 && <p className="text-sm text-muted-foreground">No users yet.</p>}
+      </div>
+
+      {/* Desktop table */}
+      <div className="mt-4 hidden overflow-x-auto rounded-xl border border-border md:block">
         <table className="w-full text-sm">
           <thead className="bg-surface-2 text-left text-muted-foreground"><tr><th className="p-3">Username</th><th className="p-3">Hash</th><th className="p-3">Posts</th><th className="p-3">Messages</th><th className="p-3">Incidents</th><th className="p-3">Last Active</th><th className="p-3">Risk</th><th className="p-3">Actions</th></tr></thead>
           <tbody>

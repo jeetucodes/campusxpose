@@ -67,10 +67,13 @@ export function AdminShell({ children }: { children: ReactNode }) {
       {/* Bottom tab bar mobile */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 flex overflow-x-auto border-t border-border bg-surface md:hidden no-scrollbar">
         {NAV.map((n) => (
-          <Link key={n.to} to={n.to} className={cn("flex flex-1 shrink-0 flex-col items-center gap-0.5 px-3 py-2 text-[10px]", pathname === n.to ? "text-primary" : "text-muted-foreground")}>
+          <Link key={n.to} to={n.to} className={cn("flex shrink-0 basis-[68px] flex-col items-center gap-0.5 px-3 py-2 text-[10px]", pathname === n.to ? "text-primary" : "text-muted-foreground")}>
             <n.icon className="h-4 w-4" /> {n.label}
           </Link>
         ))}
+        <button onClick={() => { logout(); navigate({ to: "/admin/login" }); }} className="flex shrink-0 basis-[68px] flex-col items-center gap-0.5 px-3 py-2 text-[10px] text-destructive">
+          <LogOut className="h-4 w-4" /> Logout
+        </button>
       </nav>
     </div>
   );
