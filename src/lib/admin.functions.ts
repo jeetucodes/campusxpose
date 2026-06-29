@@ -163,6 +163,29 @@ export const adminDeletePosts = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+/** Admin: delete any comment plus all of its nested replies. */
+export const adminDeleteComment = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: z.string(), commentId: z.string().uuid() }).parse(d))
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: all } = await supabaseAdmin.from("post_comments").select("id, parent_id");
+    const ids = new Set<string>([data.commentId]);
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (const c of all ?? []) {
+        if (c.parent_id && ids.has(c.parent_id) && !ids.has(c.id)) {
+          ids.add(c.id);
+          changed = true;
+        }
+      }
+    }
+    const { error } = await supabaseAdmin.from("post_comments").delete().in("id", Array.from(ids));
+    if (error) throw new Error(error.message);
+    return { ok: true as const, ids: Array.from(ids) };
+  });
+
 export const adminMarkPostIncident = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ token: z.string(), id: z.string().uuid(), incidentId: z.string().uuid().nullable() }).parse(d))
   .handler(async ({ data }) => {
