@@ -204,7 +204,7 @@ function CommentNode({ node, depth, onReply, onDelete, myHash, isAdmin }: { node
               <span className="inline-flex items-center gap-1 font-medium text-foreground">{node.username}{node.username && verified.has(node.username) && <VerifiedBadge className="h-3.5 w-3.5" />}</span>
               <span>· {timeAgo(node.created_at)}</span>
             </div>
-            {isMine && (
+            {canDelete && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="ml-auto shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground" aria-label="Comment options">
