@@ -456,6 +456,36 @@ export const toggleReaction = createServerFn({ method: "POST" })
 
   });
 
+export const fetchDirectReactions = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z.object({ hashedId: z.string().min(8) }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (!HASH_RE.test(data.hashedId)) {
+      throw new Error("Invalid identity");
+    }
+    // Only return reactions for direct messages the caller participates in.
+    const [sent, received] = await Promise.all([
+      supabaseAdmin.from("direct_messages").select("id").eq("sender_hash", data.hashedId),
+      supabaseAdmin.from("direct_messages").select("id").eq("recipient_hash", data.hashedId),
+    ]);
+    if (sent.error) throw new Error(sent.error.message);
+    if (received.error) throw new Error(received.error.message);
+    const ids = Array.from(
+      new Set([...(sent.data ?? []), ...(received.data ?? [])].map((r) => r.id)),
+    );
+    if (ids.length === 0)
+      return { reactions: [] as Array<{ id: string; message_id: string; emoji: string; anonymous_user_hash: string }> };
+    const { data: reactions, error } = await supabaseAdmin
+      .from("message_reactions")
+      .select("id,message_id,emoji,anonymous_user_hash")
+      .eq("message_type", "direct")
+      .in("message_id", ids);
+    if (error) throw new Error(error.message);
+    return { reactions: reactions ?? [] };
+  });
+
 export const filterTakenUsernames = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z
