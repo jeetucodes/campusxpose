@@ -21,6 +21,7 @@ import { Route as CommunityCollegeIdRouteImport } from './routes/community.$coll
 import { Route as CollegesIdRouteImport } from './routes/colleges.$id'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminPostsRouteImport } from './routes/admin.posts'
+import { Route as AdminPollsRouteImport } from './routes/admin.polls'
 import { Route as AdminModerationRouteImport } from './routes/admin.moderation'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminIncidentsRouteImport } from './routes/admin.incidents'
@@ -92,6 +93,11 @@ const AdminPostsRoute = AdminPostsRouteImport.update({
   path: '/admin/posts',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminPollsRoute = AdminPollsRouteImport.update({
+  id: '/admin/polls',
+  path: '/admin/polls',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminModerationRoute = AdminModerationRouteImport.update({
   id: '/admin/moderation',
   path: '/admin/moderation',
@@ -160,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/admin/incidents': typeof AdminIncidentsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/moderation': typeof AdminModerationRoute
+  '/admin/polls': typeof AdminPollsRoute
   '/admin/posts': typeof AdminPostsRoute
   '/admin/users': typeof AdminUsersRoute
   '/colleges/$id': typeof CollegesIdRoute
@@ -184,6 +191,7 @@ export interface FileRoutesByTo {
   '/admin/incidents': typeof AdminIncidentsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/moderation': typeof AdminModerationRoute
+  '/admin/polls': typeof AdminPollsRoute
   '/admin/posts': typeof AdminPostsRoute
   '/admin/users': typeof AdminUsersRoute
   '/colleges/$id': typeof CollegesIdRoute
@@ -209,6 +217,7 @@ export interface FileRoutesById {
   '/admin/incidents': typeof AdminIncidentsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/moderation': typeof AdminModerationRoute
+  '/admin/polls': typeof AdminPollsRoute
   '/admin/posts': typeof AdminPostsRoute
   '/admin/users': typeof AdminUsersRoute
   '/colleges/$id': typeof CollegesIdRoute
@@ -235,6 +244,7 @@ export interface FileRouteTypes {
     | '/admin/incidents'
     | '/admin/login'
     | '/admin/moderation'
+    | '/admin/polls'
     | '/admin/posts'
     | '/admin/users'
     | '/colleges/$id'
@@ -259,6 +269,7 @@ export interface FileRouteTypes {
     | '/admin/incidents'
     | '/admin/login'
     | '/admin/moderation'
+    | '/admin/polls'
     | '/admin/posts'
     | '/admin/users'
     | '/colleges/$id'
@@ -283,6 +294,7 @@ export interface FileRouteTypes {
     | '/admin/incidents'
     | '/admin/login'
     | '/admin/moderation'
+    | '/admin/polls'
     | '/admin/posts'
     | '/admin/users'
     | '/colleges/$id'
@@ -308,6 +320,7 @@ export interface RootRouteChildren {
   AdminIncidentsRoute: typeof AdminIncidentsRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminModerationRoute: typeof AdminModerationRoute
+  AdminPollsRoute: typeof AdminPollsRoute
   AdminPostsRoute: typeof AdminPostsRoute
   AdminUsersRoute: typeof AdminUsersRoute
   CollegesIdRoute: typeof CollegesIdRoute
@@ -402,6 +415,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPostsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/polls': {
+      id: '/admin/polls'
+      path: '/admin/polls'
+      fullPath: '/admin/polls'
+      preLoaderRoute: typeof AdminPollsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/moderation': {
       id: '/admin/moderation'
       path: '/admin/moderation'
@@ -492,6 +512,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminIncidentsRoute: AdminIncidentsRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminModerationRoute: AdminModerationRoute,
+  AdminPollsRoute: AdminPollsRoute,
   AdminPostsRoute: AdminPostsRoute,
   AdminUsersRoute: AdminUsersRoute,
   CollegesIdRoute: CollegesIdRoute,
