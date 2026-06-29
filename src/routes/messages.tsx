@@ -371,7 +371,7 @@ function Messages() {
                     </button>
                   </div>
                 )}
-                <div className="flex items-center gap-2">
+                <div className="flex items-end gap-2 rounded-2xl border-2 border-border bg-white px-2 py-1.5 shadow-ink-soft transition-colors focus-within:border-accent">
                   <Input
                     value={text}
                     onChange={(e) => {
@@ -379,14 +379,16 @@ function Messages() {
                       notifyTyping();
                     }}
                     onKeyDown={(e) => e.key === "Enter" && send()}
-                    placeholder="Message..."
+                    placeholder={`Message ${active}...`}
                     maxLength={1000}
+                    className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
                   />
                   <Button
                     onClick={send}
                     disabled={!text.trim()}
                     size="icon"
-                    className="shrink-0"
+                    className="h-9 w-9 shrink-0 rounded-full transition-transform active:scale-90"
+                    aria-label="Send message"
                   >
                     <Send className="h-4 w-4" />
                   </Button>
