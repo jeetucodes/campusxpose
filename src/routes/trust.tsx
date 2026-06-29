@@ -178,6 +178,49 @@ function TrustPage() {
         </div>
       </section>
 
+      {/* Data table: never collect vs only store */}
+      <section className="mx-auto max-w-5xl px-4 py-10">
+        <h2 className="mb-2 text-center font-display text-3xl font-bold">Saaf-saaf baat</h2>
+        <p className="mx-auto mb-8 max-w-xl text-center text-muted-foreground">
+          Kya hum kabhi nahi lete, aur kya humare paas hota hai — bilkul transparent.
+        </p>
+        <div className="grid gap-6 sm:grid-cols-2">
+          <div
+            className="border-2 border-border bg-white p-6 shadow-ink -rotate-1"
+            style={{ borderRadius: WOBBLY_MD }}
+          >
+            <h3 className="mb-4 flex items-center gap-2 font-display text-xl font-bold">
+              <ShieldOff className="h-5 w-5 text-accent" /> Kabhi Nahi Lete
+            </h3>
+            <ul className="space-y-2.5 text-sm">
+              {NEVER_COLLECT.map((item) => (
+                <li key={item} className="flex items-center gap-2">
+                  <X className="h-4 w-4 shrink-0 text-accent" strokeWidth={3} />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div
+            className="border-2 border-border bg-postit p-6 shadow-ink rotate-1"
+            style={{ borderRadius: WOBBLY_MD }}
+          >
+            <h3 className="mb-4 flex items-center gap-2 font-display text-xl font-bold">
+              <Check className="h-5 w-5 text-success" /> Sirf Itna Save Hota Hai
+            </h3>
+            <ul className="space-y-2.5 text-sm">
+              {ONLY_STORE.map((item) => (
+                <li key={item} className="flex items-center gap-2">
+                  <Check className="h-4 w-4 shrink-0 text-success" strokeWidth={3} />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+
       {/* Promise */}
       <section className="mx-auto max-w-3xl px-4 py-10">
         <div
