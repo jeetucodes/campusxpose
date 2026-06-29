@@ -59,6 +59,7 @@ export const Route = createFileRoute("/colleges/$id")({
 function CollegeDetail() {
   const { id } = Route.useParams();
   const router = useRouter();
+  const verified = useVerifiedUsernames();
 
   const collegeQ = useQuery({
     queryKey: ["college", id],
