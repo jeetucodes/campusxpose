@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { BarChart3, Plus, Clock, X, Check, ChevronDown, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -136,6 +136,30 @@ function PollItem({
   );
 }
 
+function useSeenPolls(scope: "global" | "college", collegeId?: string) {
+  const key = useMemo(
+    () => `cx-seen-polls-${scope}-${collegeId ?? "none"}`,
+    [scope, collegeId]
+  );
+
+  const getSeenIds = (): string[] => {
+    try {
+      return JSON.parse(localStorage.getItem(key) || "[]");
+    } catch {
+      return [];
+    }
+  };
+
+  const markSeen = (ids: string[]) => {
+    if (!ids.length) return;
+    try {
+      localStorage.setItem(key, JSON.stringify(ids));
+    } catch {}
+  };
+
+  return { getSeenIds, markSeen };
+}
+
 export function ChatPolls({
   scope,
   collegeId,
@@ -154,6 +178,22 @@ export function ChatPolls({
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState<string[]>(["", ""]);
   const [submitting, setSubmitting] = useState(false);
+
+  const { getSeenIds, markSeen } = useSeenPolls(scope, collegeId);
+  const [seenIds, setSeenIds] = useState<string[]>(() => getSeenIds());
+
+  const latestPoll = polls[0];
+  const hasNew = useMemo(() => {
+    if (!latestPoll) return false;
+    return !seenIds.includes(latestPoll.id);
+  }, [latestPoll, seenIds]);
+
+  useEffect(() => {
+    if (!expanded) return;
+    const currentIds = polls.map((p) => p.id);
+    setSeenIds(currentIds);
+    markSeen(currentIds);
+  }, [expanded, polls, markSeen]);
 
   const reset = () => {
     setQuestion("");
@@ -189,18 +229,46 @@ export function ChatPolls({
       >
         <BarChart3 className="h-4 w-4 text-primary" />
         <span className="text-sm font-medium">Polls</span>
-        <span className="text-xs text-muted-foreground">· auto-deletes in 24h</span>
-        <span className="ml-auto text-xs text-muted-foreground">
-          {polls.length > 0 && `${polls.length} active`}
+        {!expanded && latestPoll && (
+          <span className="max-w-[180px] truncate text-xs text-muted-foreground sm:max-w-[280px]">
+            {latestPoll.question}
+          </span>
+        )}
+        <span className="ml-auto flex items-center gap-1.5">
+          {hasNew && (
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+            </span>
+          )}
+          <span className="text-xs text-muted-foreground">
+            {polls.length > 0 ? `${polls.length} active` : ""}
+          </span>
+          <ChevronDown
+            className={cn(
+              "h-4 w-4 text-muted-foreground transition-transform",
+              expanded && "rotate-180"
+            )}
+          />
         </span>
-        <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", expanded && "rotate-180")} />
       </button>
       {expanded && (
         <>
           <div className="flex items-center gap-2 px-3 pb-2 sm:px-4">
-            <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset(); }}>
+            <Dialog
+              open={open}
+              onOpenChange={(o) => {
+                setOpen(o);
+                if (!o) reset();
+              }}
+            >
               <DialogTrigger asChild>
-                <Button size="sm" variant="outline" className="ml-auto h-7 gap-1 rounded-full" disabled={!hashedId || !username}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="ml-auto h-7 gap-1 rounded-full"
+                  disabled={!hashedId || !username}
+                >
                   <Plus className="h-3.5 w-3.5" /> New
                 </Button>
               </DialogTrigger>
@@ -221,14 +289,22 @@ export function ChatPolls({
                         <Input
                           value={opt}
                           onChange={(e) =>
-                            setOptions((prev) => prev.map((o, idx) => (idx === i ? e.target.value : o)))
+                            setOptions((prev) =>
+                              prev.map((o, idx) =>
+                                idx === i ? e.target.value : o
+                              )
+                            )
                           }
                           placeholder={`Option ${i + 1}`}
                           maxLength={80}
                         />
                         {options.length > 2 && (
                           <button
-                            onClick={() => setOptions((prev) => prev.filter((_, idx) => idx !== i))}
+                            onClick={() =>
+                              setOptions((prev) =>
+                                prev.filter((_, idx) => idx !== i)
+                              )
+                            }
                             aria-label="Remove option"
                             className="shrink-0 text-muted-foreground hover:text-destructive"
                           >
@@ -248,7 +324,11 @@ export function ChatPolls({
                       <Plus className="h-3.5 w-3.5" /> Add option
                     </Button>
                   )}
-                  <Button className="w-full" onClick={submit} disabled={submitting}>
+                  <Button
+                    className="w-full"
+                    onClick={submit}
+                    disabled={submitting}
+                  >
                     {submitting ? "Posting..." : "Post poll"}
                   </Button>
                 </div>
