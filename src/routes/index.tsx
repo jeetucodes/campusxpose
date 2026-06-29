@@ -40,7 +40,7 @@ const WOBBLY = "255px 15px 225px 15px / 15px 225px 15px 255px";
 const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
 
 function Home() {
-  const { data } = useSuspenseQuery(homeQueryOptions);
+  const { data } = useQuery(homeQueryOptions);
   const queryClient = useQueryClient();
   const [showAllReports, setShowAllReports] = useState(false);
 
