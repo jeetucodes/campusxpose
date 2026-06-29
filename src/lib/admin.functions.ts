@@ -446,16 +446,18 @@ export const adminApproveCollegeRequest = createServerFn({ method: "POST" })
     if (reqErr || !req) throw new Error("Request not found");
     if (req.status === "approved") return { ok: true, alreadyDone: true };
 
+    const reqTypes = ((req as any).types && (req as any).types.length ? (req as any).types : [req.type]) as string[];
     const { data: col, error } = await supabaseAdmin
       .from("colleges")
       .insert({
         name: req.name,
         city: req.city,
         state: req.state,
-        type: req.type,
+        type: reqTypes[0],
+        types: reqTypes,
         established: req.established,
         description: req.description,
-      })
+      } as any)
       .select("id")
       .single();
     if (error) throw new Error(error.message);
