@@ -48,6 +48,7 @@ function GlobalChat() {
   const [replyTo, setReplyTo] = useState<Msg | null>(null);
   const navigate = useNavigate();
   const { byMessage, toggle } = useReactions("global", hashedId);
+  const { online, typing, notifyTyping } = usePresence("global", username, hashedId);
 
   useEffect(() => {
     init();
