@@ -92,26 +92,6 @@ function CollegeDetail() {
 
   const [ratingOpen, setRatingOpen] = useState(false);
   const [openCat, setOpenCat] = useState<string | null>(null);
-  const [chatVisible, setChatVisible] = useState(true);
-
-  useEffect(() => {
-    let ticking = false;
-    let lastY = window.scrollY;
-    const onScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const currentY = window.scrollY;
-          if (currentY > lastY + 8) setChatVisible(false);
-          else if (currentY < lastY - 8) setChatVisible(true);
-          lastY = currentY;
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   const c = collegeQ.data;
 
