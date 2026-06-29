@@ -242,7 +242,7 @@ function Home() {
               >
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <UserSymbol username={p.username} size="sm" />
-                  <span className="font-medium text-foreground">{p.username ?? "Anonymous"}</span>
+                  <span className="inline-flex items-center gap-1 font-medium text-foreground">{p.username ?? "Anonymous"}{p.username && verified.has(p.username) && <VerifiedBadge />}</span>
                   {p.created_at && <span suppressHydrationWarning>· {timeAgo(p.created_at)}</span>}
                   <span className="ml-auto inline-flex items-center gap-1 border-2 border-border bg-white px-2 py-0.5 text-[11px] font-bold text-accent">
                     <ArrowBigUp className="h-3.5 w-3.5" /> {p.upvotes ?? 0}
