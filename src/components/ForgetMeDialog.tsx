@@ -10,10 +10,9 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { UserSymbol } from "@/components/UserSymbol";
 import { useIdentity } from "@/stores/identity";
-import { generateUsernameCandidates, USERNAME_REGEX } from "@/lib/identity";
+import { generateUsernameCandidates } from "@/lib/identity";
 import { filterTakenUsernames } from "@/lib/content.functions";
 import { cn } from "@/lib/utils";
 
@@ -28,7 +27,6 @@ export function ForgetMeDialog({
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
-  const [custom, setCustom] = useState("");
   const [applying, setApplying] = useState(false);
 
   const shuffle = useCallback(async () => {
@@ -50,31 +48,17 @@ export function ForgetMeDialog({
 
   useEffect(() => {
     if (open) {
-      setCustom("");
       shuffle();
     }
   }, [open, shuffle]);
 
   const apply = async () => {
-    const customTrim = custom.trim();
-    const chosen = customTrim || selected;
-    if (!chosen) return toast.error("Pick a username first");
+    if (!selected) return toast.error("Pick a username first");
 
     setApplying(true);
     try {
-      if (customTrim) {
-        if (!USERNAME_REGEX.test(customTrim) || customTrim.length < 3 || customTrim.length > 40) {
-          toast.error("Use 3-40 letters, numbers or underscores only");
-          return;
-        }
-        const { available } = await filterTakenUsernames({ data: { names: [customTrim] } });
-        if (!available.includes(customTrim)) {
-          toast.error("That username is already taken");
-          return;
-        }
-      }
-      await resetWith(chosen);
-      toast.success(`You are now ${chosen}`);
+      await resetWith(selected);
+      toast.success(`You are now ${selected}`);
       onOpenChange(false);
     } catch {
       toast.error("Could not switch identity");
@@ -106,15 +90,12 @@ export function ForgetMeDialog({
               <p className="py-4 text-center text-sm text-muted-foreground">Finding free usernames…</p>
             )}
             {suggestions.map((name) => {
-              const active = selected === name && !custom.trim();
+              const active = selected === name;
               return (
                 <button
                   key={name}
                   type="button"
-                  onClick={() => {
-                    setSelected(name);
-                    setCustom("");
-                  }}
+                  onClick={() => setSelected(name)}
                   className={cn(
                     "flex items-center gap-2 border-2 px-3 py-2 text-left text-sm transition-colors",
                     active ? "border-accent bg-accent/10" : "border-border bg-white hover:bg-surface-2",
@@ -129,15 +110,6 @@ export function ForgetMeDialog({
             })}
           </div>
 
-          <div>
-            <label className="mb-1 block text-sm font-semibold">Or type your own</label>
-            <Input
-              value={custom}
-              onChange={(e) => setCustom(e.target.value)}
-              placeholder="cool_username_123"
-              maxLength={40}
-            />
-          </div>
 
           <div className="flex items-center gap-2 border border-dashed border-success bg-success/10 px-3 py-2 text-xs text-success">
             <Shield className="h-4 w-4 shrink-0" />
