@@ -465,6 +465,51 @@ export type Database = {
         }
         Relationships: []
       }
+      post_comments: {
+        Row: {
+          anonymous_user_hash: string
+          content: string
+          created_at: string
+          id: string
+          parent_id: string | null
+          post_id: string
+          username: string
+        }
+        Insert: {
+          anonymous_user_hash: string
+          content: string
+          created_at?: string
+          id?: string
+          parent_id?: string | null
+          post_id: string
+          username: string
+        }
+        Update: {
+          anonymous_user_hash?: string
+          content?: string
+          created_at?: string
+          id?: string
+          parent_id?: string | null
+          post_id?: string
+          username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "post_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_votes: {
         Row: {
           anonymous_user_hash: string
