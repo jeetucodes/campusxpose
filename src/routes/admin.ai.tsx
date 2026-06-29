@@ -37,7 +37,7 @@ function AIControl() {
 
       <section className="rounded-xl border border-border bg-surface p-5">
         <h2 className="mb-3 flex items-center gap-2 font-semibold"><Bot className="h-5 w-5 text-primary" /> Pending Analysis</h2>
-        <Button disabled={busy} className="rounded-full" onClick={async () => { setBusy(true); try { const r = await batch({ data: { token: token! } }); toast.success(`${r.processed} analyzed, ${r.failed} failed`); } catch { toast.error("Failed"); } finally { setBusy(false); } }}>
+        <Button disabled={busy} className="rounded-full" onClick={async () => { setBusy(true); try { const r = await batch({ data: { token: token! } }); toast.success(`${r.processed} analyzed, ${r.failed} failed${r.remaining ? " · more pending, run again" : ""}`); } catch (e) { toast.error((e as Error)?.message ?? "Failed"); } finally { setBusy(false); } }}>
           {busy ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : null} Analyze All Now
         </Button>
       </section>
