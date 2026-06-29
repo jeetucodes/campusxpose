@@ -73,7 +73,7 @@ export function Navbar() {
           >
             <div className="mb-2 flex items-center gap-2">
               <UserSymbol username={username} size="sm" />
-              <span className="font-display font-bold">{username}</span>
+              <span className="inline-flex items-center gap-1 font-display font-bold">{username}{verified && <VerifiedBadge className="h-4 w-4" />}</span>
             </div>
             <div className="mb-3 flex items-center gap-2 border border-dashed border-success bg-success/10 px-3 py-2 text-xs text-success">
               <Shield className="h-4 w-4" />
