@@ -289,9 +289,13 @@ function Messages() {
               <UserSymbol username={active} size="md" />
               <div>
                 <div className="font-display font-bold">{active}</div>
-                <div className="text-xs text-muted-foreground">
-                  Anonymous direct message
-                </div>
+                {online >= 2 ? (
+                  <OnlineBadge count={1} className="[&>span:last-child]:hidden" />
+                ) : (
+                  <div className="text-xs text-muted-foreground">
+                    Anonymous direct message
+                  </div>
+                )}
               </div>
               <Button
                 variant="ghost"
