@@ -119,8 +119,11 @@ function Community() {
           </div>
           <div className="min-w-0">
             <div className="truncate font-semibold leading-tight">{collegeQ.data?.name ?? "Community"}</div>
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span className="h-1.5 w-1.5 rounded-full bg-success" /> Anonymous live chat
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-success" /> Anonymous live chat
+              </span>
+              <OnlineBadge count={online} />
             </div>
           </div>
         </header>
