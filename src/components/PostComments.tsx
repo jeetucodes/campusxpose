@@ -72,7 +72,10 @@ export function PostComments({ postId, onCount }: { postId: string; onCount?: (n
     return () => { active = false; supabase.removeChannel(ch); };
   }, [postId]);
 
+  useEffect(() => { onCount?.(comments.length); }, [comments.length, onCount]);
+
   const tree = useMemo(() => buildTree(comments), [comments]);
+
 
   const send = async () => {
     if (!text.trim() || !hashedId || !username) return;
