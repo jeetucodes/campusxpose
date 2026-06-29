@@ -399,3 +399,86 @@ export const adminRejectCollegeRequest = createServerFn({ method: "POST" })
       .eq("id", data.id);
     return { ok: true };
   });
+
+// ----------------------- Ads system -----------------------
+
+const adInput = z.object({
+  id: z.string().uuid().optional(),
+  title: z.string().min(1),
+  kind: z.enum(["banner", "video"]).default("banner"),
+  body: z.string().optional().nullable(),
+  link_url: z.string().optional().nullable(),
+  media_url: z.string().optional().nullable(),
+  embed_url: z.string().optional().nullable(),
+  cta_label: z.string().optional().nullable(),
+  show_home: z.boolean().default(false),
+  show_global: z.boolean().default(false),
+  show_college: z.boolean().default(false),
+  active: z.boolean().default(false),
+  sort_order: z.number().int().default(0),
+});
+
+export const adminListAds = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: z.string() }).parse(d))
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: ads, error } = await supabaseAdmin
+      .from("ads" as any)
+      .select("*")
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    const { data: setting } = await supabaseAdmin
+      .from("app_settings" as any)
+      .select("value")
+      .eq("key", "ads_enabled")
+      .maybeSingle();
+    const enabled = (setting as any)?.value === true;
+    return { ads: ads ?? [], enabled };
+  });
+
+export const adminSaveAd = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: z.string() }).and(adInput).parse(d))
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { token, id, ...fields } = data as any;
+    if (id) {
+      const { error } = await supabaseAdmin
+        .from("ads" as any)
+        .update({ ...fields, updated_at: new Date().toISOString() })
+        .eq("id", id);
+      if (error) throw new Error(error.message);
+      return { ok: true, id };
+    }
+    const { data: row, error } = await supabaseAdmin
+      .from("ads" as any)
+      .insert(fields)
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    return { ok: true, id: (row as any).id };
+  });
+
+export const adminDeleteAd = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: z.string(), id: z.string().uuid() }).parse(d))
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("ads" as any).delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminSetAdsEnabled = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: z.string(), enabled: z.boolean() }).parse(d))
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("app_settings" as any)
+      .upsert({ key: "ads_enabled", value: data.enabled, updated_at: new Date().toISOString() }, { onConflict: "key" });
+    if (error) throw new Error(error.message);
+    return { ok: true, enabled: data.enabled };
+  });
