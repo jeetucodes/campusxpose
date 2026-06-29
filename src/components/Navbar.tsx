@@ -14,9 +14,10 @@ import {
 import { Button } from "@/components/ui/button";
 
 export function Navbar() {
-  const { username, isReady, init, reset } = useIdentity();
+  const { username, isReady, init } = useIdentity();
   const unread = useDmUnread();
   const [open, setOpen] = useState(false);
+  const [forgetOpen, setForgetOpen] = useState(false);
 
   useEffect(() => {
     init();
