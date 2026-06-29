@@ -249,7 +249,7 @@ function CollegeRequests({ token, onApproved }: { token: string; onApproved: () 
           <div key={r.id} className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3">
             <div className="min-w-48 flex-1">
               <div className="font-semibold">{r.name}</div>
-              <div className="text-xs text-muted-foreground">{r.city}, {r.state} · {r.type}{r.established ? ` · est. ${r.established}` : ""}</div>
+              <div className="text-xs text-muted-foreground">{r.city}, {r.state} · {((r as any).types?.length ? (r as any).types : [r.type]).join(", ")}{r.established ? ` · est. ${r.established}` : ""}</div>
               {r.description && <div className="mt-1 text-xs text-muted-foreground">{r.description}</div>}
             </div>
             <div className="flex gap-2">
