@@ -133,33 +133,8 @@ function Home() {
 
       <HomeAds />
 
-      {/* How it works */}
-      <section className="mx-auto max-w-5xl px-4 py-16">
-        <h2 className="mb-10 text-center font-display text-4xl font-bold">How It Works</h2>
-        <div className="grid gap-8 md:grid-cols-3">
-          {steps.map((s, i) => (
-            <motion.div
-              key={i}
-              {...fadeUp}
-              transition={{ delay: i * 0.1 }}
-              className={`sketch-card p-6 ${s.rot}`}
-              style={{ borderRadius: WOBBLY_MD }}
-            >
-              <div
-                className="mb-4 grid h-12 w-12 place-items-center border-2 border-border bg-accent text-accent-foreground"
-                style={{ borderRadius: "50% 42% 55% 45% / 45% 55% 42% 50%" }}
-              >
-                <s.icon className="h-6 w-6" strokeWidth={2.5} />
-              </div>
-              <div className="mb-1 text-sm text-muted-foreground">Step {i + 1}</div>
-              <h3 className="mb-2 font-display text-xl font-bold">{s.title}</h3>
-              <p className="text-muted-foreground">{s.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
 
-      {/* Features */}
+
       <section className="mx-auto max-w-5xl px-4 py-8">
         <div className="grid gap-8 md:grid-cols-3">
           {features.map((f, i) => (
