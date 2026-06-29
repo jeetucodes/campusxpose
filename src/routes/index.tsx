@@ -1,8 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Ghost, Search, Shield, FileWarning, Sparkles, ArrowRight, Flame, TrendingUp } from "lucide-react";
+import { Ghost, Search, Shield, FileWarning, Sparkles, ArrowRight, Flame, TrendingUp, ArrowBigUp } from "lucide-react";
 import { UserSymbol } from "@/components/UserSymbol";
 import { SiteShell } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -42,6 +42,7 @@ const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
 function Home() {
   const { data } = useSuspenseQuery(homeQueryOptions);
   const queryClient = useQueryClient();
+  const [showAllReports, setShowAllReports] = useState(false);
 
   // Auto-update top reported + stats when posts/incidents/colleges change.
   useEffect(() => {
