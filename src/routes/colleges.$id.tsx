@@ -336,7 +336,10 @@ function CollegeDetail() {
       <Link
         to="/community/$collegeId"
         params={{ collegeId: id }}
-        className="group fixed bottom-20 right-4 z-[60] inline-flex items-center gap-2 rounded-full bg-primary py-2.5 pl-3.5 pr-4 text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:scale-105 hover:shadow-xl active:scale-95 md:bottom-5"
+        className={cn(
+          "group fixed bottom-20 right-4 z-[60] inline-flex items-center gap-2 rounded-full bg-primary py-2.5 pl-3.5 pr-4 text-primary-foreground shadow-lg shadow-primary/30 transition-all duration-300 hover:scale-105 hover:shadow-xl active:scale-95 md:bottom-5",
+          chatVisible ? "translate-y-0 opacity-100" : "translate-y-24 opacity-0 pointer-events-none"
+        )}
       >
         <span className="relative flex h-3 w-3">
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
