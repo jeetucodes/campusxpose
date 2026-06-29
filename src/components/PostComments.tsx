@@ -10,6 +10,8 @@ import { useIdentity } from "@/stores/identity";
 import { submitComment } from "@/lib/content.functions";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { useVerifiedUsernames } from "@/hooks/useVerified";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 
 export type Comment = {
   id: string;
