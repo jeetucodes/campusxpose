@@ -140,6 +140,7 @@ export function PostComments({ postId, onCount }: { postId: string; onCount?: (n
 function CommentNode({ node, depth, onReply }: { node: Node; depth: number; onReply: (c: Comment) => void }) {
   const isReply = depth > 0;
   const hasChildren = node.children.length > 0;
+  const verified = useVerifiedUsernames();
 
   return (
     <div className={cn("animate-fade-in", isReply && "relative")}>
