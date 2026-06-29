@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Shield, ChevronDown, Trash2 } from "lucide-react";
 import { UserSymbol } from "@/components/UserSymbol";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { useIdentity } from "@/stores/identity";
 import { useDmUnread } from "@/stores/dm";
 import { ForgetMeDialog } from "@/components/ForgetMeDialog";
@@ -14,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 export function Navbar() {
-  const { username, isReady, init } = useIdentity();
+  const { username, verified, isReady, init } = useIdentity();
   const unread = useDmUnread();
   const [open, setOpen] = useState(false);
   const [forgetOpen, setForgetOpen] = useState(false);
@@ -58,7 +59,10 @@ export function Navbar() {
               style={{ borderRadius: "20px 7px 22px 7px / 7px 22px 7px 20px" }}
             >
               <UserSymbol username={username} size="sm" />
-              <span className="max-w-[120px] truncate font-medium">{isReady ? username : "..."}</span>
+              <span className="inline-flex max-w-[140px] items-center gap-1 truncate font-medium">
+                {isReady ? username : "..."}
+                {verified && <VerifiedBadge className="h-3.5 w-3.5" />}
+              </span>
               <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
             </button>
           </DropdownMenuTrigger>
@@ -69,7 +73,7 @@ export function Navbar() {
           >
             <div className="mb-2 flex items-center gap-2">
               <UserSymbol username={username} size="sm" />
-              <span className="font-display font-bold">{username}</span>
+              <span className="inline-flex items-center gap-1 font-display font-bold">{username}{verified && <VerifiedBadge className="h-4 w-4" />}</span>
             </div>
             <div className="mb-3 flex items-center gap-2 border border-dashed border-success bg-success/10 px-3 py-2 text-xs text-success">
               <Shield className="h-4 w-4" />
