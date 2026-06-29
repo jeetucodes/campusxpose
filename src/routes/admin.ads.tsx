@@ -110,8 +110,8 @@ function AdsAdmin() {
       </div>
 
       {/* Master switch */}
-      <div className="flex items-center justify-between rounded-xl border border-border bg-surface p-5">
-        <div>
+      <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface p-4 sm:p-5">
+        <div className="min-w-0">
           <div className="font-semibold">Show ads on the website</div>
           <p className="text-sm text-muted-foreground">
             Master switch. When off, no ad appears anywhere — home, global chat, or college chats.
