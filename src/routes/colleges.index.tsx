@@ -36,9 +36,12 @@ export const Route = createFileRoute("/colleges/")({
 });
 
 type Col = {
-  id: string; name: string; city: string; state: string; type: string;
+  id: string; name: string; city: string; state: string; type: string; types?: string[];
   total_rating: number; total_reviews: number; incident_count: number;
 };
+
+const colTypes = (c: Col): string[] => (c.types?.length ? c.types : [c.type]);
+
 
 const TYPE_COLORS: Record<string, string> = {
   Engineering: "bg-[#2d5da1]/15 text-[#2d5da1]",
