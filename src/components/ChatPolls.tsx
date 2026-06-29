@@ -196,6 +196,10 @@ export function ChatPolls({
     markSeen(currentIds);
   }, [expanded, polls, markSeen]);
 
+  useEffect(() => {
+    setCurrentIndex((i) => (i >= polls.length ? Math.max(0, polls.length - 1) : i));
+  }, [polls.length]);
+
   const reset = () => {
     setQuestion("");
     setOptions(["", ""]);
