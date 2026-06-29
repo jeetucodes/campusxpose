@@ -12,6 +12,8 @@ import { submitDirectMessage, fetchDirectMessages, deleteDirectConversation } fr
 import { useReactions } from "@/hooks/useReactions";
 import { ReactionChips, MessageActions, ReplyQuote } from "@/components/MessageReactions";
 import { MessageGestures } from "@/components/MessageGestures";
+import { usePresence } from "@/hooks/usePresence";
+import { OnlineBadge, TypingIndicator } from "@/components/ChatPresence";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
