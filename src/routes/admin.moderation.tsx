@@ -16,6 +16,7 @@ export const Route = createFileRoute("/admin/moderation")({
 
 function Moderation() {
   const { token } = useAdmin();
+  const [busy, setBusy] = useState<string | null>(null);
   const del = useServerFn(adminDeletePosts);
   const listEv = useServerFn(adminListEvidence);
   const verify = useServerFn(adminVerifyEvidence);
@@ -23,6 +24,32 @@ function Moderation() {
 
   const flagged = useQuery({ queryKey: ["flagged-posts"], queryFn: async () => (await supabase.from("posts").select("*").eq("is_incident", true).order("created_at", { ascending: false }).limit(50)).data ?? [] });
   const evidence = useQuery({ queryKey: ["admin-evidence"], enabled: !!token, queryFn: () => listEv({ data: { token: token! } }) });
+
+  const setVerified = async (id: string, verified: boolean) => {
+    setBusy(id);
+    try {
+      await verify({ data: { token: token!, id, verified } });
+      toast.success(verified ? "Marked verified" : "Marked unverified");
+      await evidence.refetch();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to update");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const removeEvidence = async (id: string) => {
+    setBusy(id);
+    try {
+      await delEv({ data: { token: token!, id } });
+      toast.success("Removed");
+      await evidence.refetch();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to remove");
+    } finally {
+      setBusy(null);
+    }
+  };
 
   return (
     <div className="space-y-8">
