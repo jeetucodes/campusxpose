@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { BarChart3, Plus, Clock, X, Check, ChevronDown, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
@@ -142,20 +142,20 @@ function useSeenPolls(scope: "global" | "college", collegeId?: string) {
     [scope, collegeId]
   );
 
-  const getSeenIds = (): string[] => {
+  const getSeenIds = useCallback((): string[] => {
     try {
       return JSON.parse(localStorage.getItem(key) || "[]");
     } catch {
       return [];
     }
-  };
+  }, [key]);
 
-  const markSeen = (ids: string[]) => {
+  const markSeen = useCallback((ids: string[]) => {
     if (!ids.length) return;
     try {
       localStorage.setItem(key, JSON.stringify(ids));
     } catch {}
-  };
+  }, [key]);
 
   return { getSeenIds, markSeen };
 }
