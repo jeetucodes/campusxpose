@@ -12,7 +12,7 @@ import { useReactions } from "@/hooks/useReactions";
 import { ReactionChips, MessageActions, ReplyQuote } from "@/components/MessageReactions";
 import { MessageGestures } from "@/components/MessageGestures";
 import { usePresence } from "@/hooks/usePresence";
-import { OnlineBadge, TypingIndicator } from "@/components/ChatPresence";
+import { TypingIndicator } from "@/components/ChatPresence";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { AdPin } from "@/components/AdPin";
@@ -49,7 +49,7 @@ function GlobalChat() {
   const [replyTo, setReplyTo] = useState<Msg | null>(null);
   const navigate = useNavigate();
   const { byMessage, toggle } = useReactions("global", hashedId);
-  const { online, typing, notifyTyping } = usePresence("global", username, hashedId);
+  const { typing, notifyTyping } = usePresence("global", username, hashedId);
 
   useEffect(() => {
     init();
@@ -115,10 +115,8 @@ function GlobalChat() {
           <Globe className="h-5 w-5" strokeWidth={2.5} />
         </div>
         <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <div className="font-display text-lg font-bold">Global Chat</div>
-            <OnlineBadge count={online} />
-          </div>
+          <div className="font-display text-lg font-bold">Global Chat</div>
+
           <div className="text-xs text-muted-foreground">
             Everyone on CampusXpose, one anonymous room
           </div>
