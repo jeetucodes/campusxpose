@@ -114,7 +114,10 @@ function GlobalChat() {
           <Globe className="h-5 w-5" strokeWidth={2.5} />
         </div>
         <div className="flex-1">
-          <div className="font-display text-lg font-bold">Global Chat</div>
+          <div className="flex items-center gap-2">
+            <div className="font-display text-lg font-bold">Global Chat</div>
+            <OnlineBadge count={online} />
+          </div>
           <div className="text-xs text-muted-foreground">
             Everyone on CampusXpose, one anonymous room
           </div>
