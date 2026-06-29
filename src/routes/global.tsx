@@ -209,7 +209,10 @@ function GlobalChat() {
           <div className="flex items-center gap-2">
             <Input
               value={text}
-              onChange={(e) => setText(e.target.value)}
+              onChange={(e) => {
+                setText(e.target.value);
+                notifyTyping();
+              }}
               onKeyDown={(e) => e.key === "Enter" && send()}
               placeholder="Message everyone..."
               maxLength={1000}
