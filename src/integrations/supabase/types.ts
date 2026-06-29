@@ -14,6 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
+      ads: {
+        Row: {
+          active: boolean
+          body: string | null
+          created_at: string
+          cta_label: string | null
+          embed_url: string | null
+          id: string
+          kind: string
+          link_url: string | null
+          media_url: string | null
+          show_college: boolean
+          show_global: boolean
+          show_home: boolean
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          body?: string | null
+          created_at?: string
+          cta_label?: string | null
+          embed_url?: string | null
+          id?: string
+          kind?: string
+          link_url?: string | null
+          media_url?: string | null
+          show_college?: boolean
+          show_global?: boolean
+          show_home?: boolean
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          body?: string | null
+          created_at?: string
+          cta_label?: string | null
+          embed_url?: string | null
+          id?: string
+          kind?: string
+          link_url?: string | null
+          media_url?: string | null
+          show_college?: boolean
+          show_global?: boolean
+          show_home?: boolean
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      app_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       banned_users: {
         Row: {
           banned_at: string
