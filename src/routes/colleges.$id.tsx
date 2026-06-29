@@ -92,26 +92,6 @@ function CollegeDetail() {
 
   const [ratingOpen, setRatingOpen] = useState(false);
   const [openCat, setOpenCat] = useState<string | null>(null);
-  const [chatVisible, setChatVisible] = useState(true);
-
-  useEffect(() => {
-    let ticking = false;
-    let lastY = window.scrollY;
-    const onScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const currentY = window.scrollY;
-          if (currentY > lastY + 8) setChatVisible(false);
-          else if (currentY < lastY - 8) setChatVisible(true);
-          lastY = currentY;
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   const c = collegeQ.data;
 
@@ -335,21 +315,14 @@ function CollegeDetail() {
         </section>
       </div>
 
-      {/* Floating community button */}
+      {/* Side chat icon */}
       <Link
         to="/community/$collegeId"
         params={{ collegeId: id }}
-        className={cn(
-          "group fixed bottom-20 right-4 z-[60] inline-flex items-center gap-2 rounded-full bg-primary py-2.5 pl-3.5 pr-4 text-primary-foreground shadow-lg shadow-primary/30 transition-all duration-300 hover:scale-105 hover:shadow-xl active:scale-95 md:bottom-5",
-          chatVisible ? "translate-y-0 opacity-100" : "translate-y-24 opacity-0 pointer-events-none"
-        )}
+        className="fixed right-0 top-1/2 z-[60] -translate-y-1/2 rounded-l-xl bg-primary p-3 text-primary-foreground shadow-lg shadow-primary/30 transition-transform duration-200 hover:-translate-x-1 active:scale-95"
+        title="Campus Students Chats"
       >
-        <span className="relative flex h-3 w-3">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
-          <span className="relative inline-flex h-3 w-3 rounded-full bg-success ring-2 ring-primary" />
-        </span>
-        <MessageCircle className="h-4 w-4" />
-        <span className="text-sm font-medium">Campus Students Chats</span>
+        <MessageCircle className="h-5 w-5" />
       </Link>
 
 
