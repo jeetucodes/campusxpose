@@ -6,7 +6,7 @@ export function useVerifiedUsernames(): Set<string> {
   const q = useQuery({
     queryKey: ["verified-usernames"],
     queryFn: () => listVerifiedUsernames(),
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000,
   });
   return new Set(q.data?.usernames ?? []);
 }

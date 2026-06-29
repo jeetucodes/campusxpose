@@ -658,17 +658,17 @@ export type Database = {
       verified_users: {
         Row: {
           created_at: string
-          user_hash: string | null
+          user_hash: string
           username: string
         }
         Insert: {
           created_at?: string
-          user_hash?: string | null
+          user_hash: string
           username: string
         }
         Update: {
           created_at?: string
-          user_hash?: string | null
+          user_hash?: string
           username?: string
         }
         Relationships: []
