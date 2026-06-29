@@ -37,8 +37,21 @@ export function useReactions(messageType: MessageType, hashedId: string | null) 
         { event: "INSERT", schema: "public", table: "message_reactions", filter: `message_type=eq.${messageType}` },
         (p) => {
           const r = p.new as ReactionRow;
-          setRows((prev) => (prev.some((x) => x.id === r.id) ? prev : [...prev, r]));
+          setRows((prev) => {
+            // Drop any optimistic placeholder for this user+message so the
+            // confirmed row never double-counts (the "1 reaction shows 2" bug).
+            const cleaned = prev.filter(
+              (x) =>
+                !(
+                  x.id.startsWith("optimistic-") &&
+                  x.message_id === r.message_id &&
+                  x.anonymous_user_hash === r.anonymous_user_hash
+                ),
+            );
+            return cleaned.some((x) => x.id === r.id) ? cleaned : [...cleaned, r];
+          });
         },
+
       )
       .on(
         "postgres_changes",
