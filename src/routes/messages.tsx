@@ -12,6 +12,8 @@ import { submitDirectMessage, fetchDirectMessages, deleteDirectConversation } fr
 import { useReactions } from "@/hooks/useReactions";
 import { ReactionChips, MessageActions, ReplyQuote } from "@/components/MessageReactions";
 import { MessageGestures } from "@/components/MessageGestures";
+import { usePresence } from "@/hooks/usePresence";
+import { TypingIndicator } from "@/components/ChatPresence";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -97,6 +99,8 @@ function Messages() {
   }, [all, username]);
 
   const active = to;
+  const dmRoom = active && username ? `dm-${[username, active].sort().join("|")}` : "";
+  const { online, typing, notifyTyping } = usePresence(dmRoom, username, hashedId);
   const thread = useMemo(
     () =>
       active
@@ -285,9 +289,19 @@ function Messages() {
               <UserSymbol username={active} size="md" />
               <div>
                 <div className="font-display font-bold">{active}</div>
-                <div className="text-xs text-muted-foreground">
-                  Anonymous direct message
-                </div>
+                {online >= 2 ? (
+                  <span className="flex items-center gap-1 text-xs text-emerald-600">
+                    <span className="relative flex h-2 w-2">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-70" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                    </span>
+                    online
+                  </span>
+                ) : (
+                  <div className="text-xs text-muted-foreground">
+                    Anonymous direct message
+                  </div>
+                )}
               </div>
               <Button
                 variant="ghost"
@@ -345,6 +359,7 @@ function Messages() {
 
             <div className="border-t-2 border-dashed border-border px-4 py-3">
               <div className="mx-auto w-full max-w-2xl">
+                <TypingIndicator users={typing} className="mb-1.5 px-1" />
                 {replyTo && (
                   <div className="mb-2 flex items-center gap-2 rounded-md border border-border bg-surface-2/60 px-3 py-1.5 text-xs">
                     <div className="min-w-0 flex-1">
@@ -359,7 +374,10 @@ function Messages() {
                 <div className="flex items-center gap-2">
                   <Input
                     value={text}
-                    onChange={(e) => setText(e.target.value)}
+                    onChange={(e) => {
+                      setText(e.target.value);
+                      notifyTyping();
+                    }}
                     onKeyDown={(e) => e.key === "Enter" && send()}
                     placeholder="Message..."
                     maxLength={1000}

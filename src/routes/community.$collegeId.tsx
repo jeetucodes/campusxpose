@@ -16,6 +16,8 @@ import { DEFAULT_KEYWORDS } from "@/lib/categories";
 import { useReactions } from "@/hooks/useReactions";
 import { ReactionChips, MessageActions, ReplyQuote } from "@/components/MessageReactions";
 import { MessageGestures } from "@/components/MessageGestures";
+import { usePresence } from "@/hooks/usePresence";
+import { OnlineBadge, TypingIndicator } from "@/components/ChatPresence";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -31,6 +33,7 @@ function Community() {
   const sendFn = useServerFn(submitMessage);
   const summaryFn = useServerFn(chatSummary);
   const { byMessage, toggle } = useReactions("community", hashedId);
+  const { online, typing, notifyTyping } = usePresence(`community-${collegeId}`, username, hashedId);
 
   const collegeQ = useQuery({
     queryKey: ["college-name", collegeId],
@@ -66,6 +69,7 @@ function Community() {
 
   const onType = (v: string) => {
     setText(v);
+    notifyTyping();
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       const hit = DEFAULT_KEYWORDS.some((k) => v.toLowerCase().includes(k));
@@ -115,8 +119,11 @@ function Community() {
           </div>
           <div className="min-w-0">
             <div className="truncate font-semibold leading-tight">{collegeQ.data?.name ?? "Community"}</div>
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span className="h-1.5 w-1.5 rounded-full bg-success" /> Anonymous live chat
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-success" /> Anonymous live chat
+              </span>
+              <OnlineBadge count={online} />
             </div>
           </div>
         </header>
@@ -225,6 +232,7 @@ function Community() {
 
         {/* input */}
         <div className="border-t border-border bg-surface/80 px-3 py-3 backdrop-blur-sm sm:px-4">
+          <TypingIndicator users={typing} className="mb-1.5 px-1" />
           {replyTo && (
             <div className="mb-2 flex items-center gap-2 rounded-lg border border-border bg-surface-2/60 px-3 py-1.5 text-xs">
               <div className="min-w-0 flex-1">

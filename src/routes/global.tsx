@@ -11,6 +11,8 @@ import { submitGlobalMessage } from "@/lib/content.functions";
 import { useReactions } from "@/hooks/useReactions";
 import { ReactionChips, MessageActions, ReplyQuote } from "@/components/MessageReactions";
 import { MessageGestures } from "@/components/MessageGestures";
+import { usePresence } from "@/hooks/usePresence";
+import { OnlineBadge, TypingIndicator } from "@/components/ChatPresence";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -46,6 +48,7 @@ function GlobalChat() {
   const [replyTo, setReplyTo] = useState<Msg | null>(null);
   const navigate = useNavigate();
   const { byMessage, toggle } = useReactions("global", hashedId);
+  const { online, typing, notifyTyping } = usePresence("global", username, hashedId);
 
   useEffect(() => {
     init();
@@ -111,7 +114,10 @@ function GlobalChat() {
           <Globe className="h-5 w-5" strokeWidth={2.5} />
         </div>
         <div className="flex-1">
-          <div className="font-display text-lg font-bold">Global Chat</div>
+          <div className="flex items-center gap-2">
+            <div className="font-display text-lg font-bold">Global Chat</div>
+            <OnlineBadge count={online} />
+          </div>
           <div className="text-xs text-muted-foreground">
             Everyone on CampusXpose, one anonymous room
           </div>
@@ -188,6 +194,7 @@ function GlobalChat() {
 
       <div className="border-t-2 border-dashed border-border bg-background px-4 py-3">
         <div className="mx-auto w-full max-w-3xl">
+          <TypingIndicator users={typing} className="mb-1.5 px-1" />
           {replyTo && (
             <div className="mb-2 flex items-center gap-2 rounded-md border border-border bg-surface-2/60 px-3 py-1.5 text-xs">
               <div className="min-w-0 flex-1">
@@ -202,7 +209,10 @@ function GlobalChat() {
           <div className="flex items-center gap-2">
             <Input
               value={text}
-              onChange={(e) => setText(e.target.value)}
+              onChange={(e) => {
+                setText(e.target.value);
+                notifyTyping();
+              }}
               onKeyDown={(e) => e.key === "Enter" && send()}
               placeholder="Message everyone..."
               maxLength={1000}
