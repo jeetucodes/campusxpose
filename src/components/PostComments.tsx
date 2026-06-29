@@ -14,6 +14,8 @@ import {
 import { UserSymbol } from "@/components/UserSymbol";
 import { useIdentity } from "@/stores/identity";
 import { submitComment, deleteComment } from "@/lib/content.functions";
+import { adminDeleteComment } from "@/lib/admin.functions";
+import { useAdmin } from "@/stores/admin";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useVerifiedUsernames } from "@/hooks/useVerified";
