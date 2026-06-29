@@ -360,11 +360,17 @@ function RatingModal({ open, onOpenChange, collegeId, onDone }: { open: boolean;
     if (Object.values(vals).some((v) => v < 1)) { toast.error("Please rate all categories"); return; }
     setBusy(true);
     try {
-      await rate({ data: { collegeId, hashedId, faculty: vals.faculty, placement: vals.placement, infrastructure: vals.infrastructure, campusLife: vals.campusLife, value: vals.value } });
+      const res = await rate({ data: { collegeId, hashedId, faculty: vals.faculty, placement: vals.placement, infrastructure: vals.infrastructure, campusLife: vals.campusLife, value: vals.value } });
+      if (res && "alreadyRated" in res && res.alreadyRated) {
+        toast.error("You've already rated this college.");
+        onOpenChange(false);
+        return;
+      }
       toast.success("Thanks! Your anonymous rating was submitted.");
       onOpenChange(false);
       onDone();
     } catch { toast.error("Could not submit rating"); } finally { setBusy(false); }
+
   };
 
   return (
