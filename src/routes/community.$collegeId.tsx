@@ -17,7 +17,7 @@ import { useReactions } from "@/hooks/useReactions";
 import { ReactionChips, MessageActions, ReplyQuote } from "@/components/MessageReactions";
 import { MessageGestures } from "@/components/MessageGestures";
 import { usePresence } from "@/hooks/usePresence";
-import { OnlineBadge, TypingIndicator } from "@/components/ChatPresence";
+import { TypingIndicator } from "@/components/ChatPresence";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { AdPin } from "@/components/AdPin";
@@ -34,7 +34,7 @@ function Community() {
   const sendFn = useServerFn(submitMessage);
   const summaryFn = useServerFn(chatSummary);
   const { byMessage, toggle } = useReactions("community", hashedId);
-  const { online, typing, notifyTyping } = usePresence(`community-${collegeId}`, username, hashedId);
+  const { typing, notifyTyping } = usePresence(`community-${collegeId}`, username, hashedId);
 
   const collegeQ = useQuery({
     queryKey: ["college-name", collegeId],
@@ -124,8 +124,8 @@ function Community() {
               <span className="flex items-center gap-1.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-success" /> Anonymous live chat
               </span>
-              <OnlineBadge count={online} />
             </div>
+
           </div>
         </header>
 
