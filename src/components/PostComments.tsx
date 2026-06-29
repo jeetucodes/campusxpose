@@ -41,7 +41,7 @@ function buildTree(comments: Comment[]): Node[] {
   return roots;
 }
 
-export function PostComments({ postId }: { postId: string }) {
+export function PostComments({ postId, onCount }: { postId: string; onCount?: (n: number) => void }) {
   const { hashedId, username } = useIdentity();
   const addComment = useServerFn(submitComment);
   const [comments, setComments] = useState<Comment[]>([]);
