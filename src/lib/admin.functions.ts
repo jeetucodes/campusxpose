@@ -224,27 +224,41 @@ export const adminListUsers = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const [posts, msgs, banned] = await Promise.all([
+    const [posts, msgs, globals, banned] = await Promise.all([
       supabaseAdmin.from("posts").select("anonymous_user_hash, username, created_at, is_incident"),
       supabaseAdmin.from("community_messages").select("anonymous_user_hash, username, created_at"),
+      supabaseAdmin.from("global_messages").select("anonymous_user_hash, username, created_at"),
       supabaseAdmin.from("banned_users").select("user_hash"),
     ]);
+    // Surface real failures instead of silently returning an empty list
+    // (which renders a misleading "No users yet").
+    if (posts.error) throw new Error(posts.error.message);
+    if (msgs.error) throw new Error(msgs.error.message);
+    if (globals.error) throw new Error(globals.error.message);
     const bannedSet = new Set((banned.data ?? []).map((b) => b.user_hash));
     const map = new Map<string, { hash: string; username: string; posts: number; messages: number; incidents: number; lastActive: string }>();
+    const touch = (hash: string, username: string, createdAt: string) => {
+      const e = map.get(hash) ?? { hash, username, posts: 0, messages: 0, incidents: 0, lastActive: createdAt };
+      if (createdAt > e.lastActive) e.lastActive = createdAt;
+      if (!e.username && username) e.username = username;
+      map.set(hash, e);
+      return e;
+    };
     for (const p of posts.data ?? []) {
-      const e = map.get(p.anonymous_user_hash) ?? { hash: p.anonymous_user_hash, username: p.username, posts: 0, messages: 0, incidents: 0, lastActive: p.created_at };
+      const e = touch(p.anonymous_user_hash, p.username, p.created_at);
       e.posts++; if (p.is_incident) e.incidents++;
-      if (p.created_at > e.lastActive) e.lastActive = p.created_at;
-      map.set(p.anonymous_user_hash, e);
     }
     for (const m of msgs.data ?? []) {
-      const e = map.get(m.anonymous_user_hash) ?? { hash: m.anonymous_user_hash, username: m.username, posts: 0, messages: 0, incidents: 0, lastActive: m.created_at };
-      e.messages++;
-      if (m.created_at > e.lastActive) e.lastActive = m.created_at;
-      map.set(m.anonymous_user_hash, e);
+      touch(m.anonymous_user_hash, m.username, m.created_at).messages++;
     }
-    return Array.from(map.values()).map((u) => ({ ...u, banned: bannedSet.has(u.hash) }));
+    for (const g of globals.data ?? []) {
+      touch(g.anonymous_user_hash, g.username, g.created_at).messages++;
+    }
+    return Array.from(map.values())
+      .map((u) => ({ ...u, banned: bannedSet.has(u.hash) }))
+      .sort((a, b) => (a.lastActive < b.lastActive ? 1 : -1));
   });
+
 
 export const adminListEvidence = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ token: z.string() }).parse(d))
@@ -279,19 +293,25 @@ export const adminAnalyzeBatch = createServerFn({ method: "POST" })
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { analyzePost } = await import("@/lib/ai.functions");
-    const { data: pending } = await supabaseAdmin.from("posts").select("id").eq("ai_analyzed", false).limit(20);
-    let processed = 0, failed = 0;
-    for (const p of pending ?? []) {
-      try {
-        await analyzePost({ data: { postId: p.id } });
-        processed++;
-      } catch {
-        failed++;
-      }
-      await new Promise((r) => setTimeout(r, 1000));
-    }
-    return { processed, failed };
+    // Keep the batch small and run without artificial delays so the whole
+    // request finishes well within the edge runtime time limit. The admin can
+    // press the button again to process the next batch.
+    const { data: pending, error } = await supabaseAdmin
+      .from("posts")
+      .select("id")
+      .eq("ai_analyzed", false)
+      .limit(5);
+    if (error) throw new Error(error.message);
+    const ids = (pending ?? []).map((p) => p.id);
+    const results = await Promise.allSettled(
+      ids.map((id) => analyzePost({ data: { postId: id } })),
+    );
+    const processed = results.filter((r) => r.status === "fulfilled").length;
+    const failed = results.length - processed;
+    const remaining = Math.max((ids.length === 5 ? 1 : 0), 0); // hint there may be more
+    return { processed, failed, remaining };
   });
+
 
 export const adminGenerateReport = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ token: z.string() }).parse(d))
