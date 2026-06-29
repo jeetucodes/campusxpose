@@ -41,7 +41,7 @@ function buildTree(comments: Comment[]): Node[] {
   return roots;
 }
 
-export function PostComments({ postId }: { postId: string }) {
+export function PostComments({ postId, onCount }: { postId: string; onCount?: (n: number) => void }) {
   const { hashedId, username } = useIdentity();
   const addComment = useServerFn(submitComment);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -72,7 +72,10 @@ export function PostComments({ postId }: { postId: string }) {
     return () => { active = false; supabase.removeChannel(ch); };
   }, [postId]);
 
+  useEffect(() => { onCount?.(comments.length); }, [comments.length, onCount]);
+
   const tree = useMemo(() => buildTree(comments), [comments]);
+
 
   const send = async () => {
     if (!text.trim() || !hashedId || !username) return;
