@@ -44,7 +44,7 @@ function AIControl() {
 
       <section className="rounded-xl border border-border bg-surface p-5">
         <h2 className="mb-3 flex items-center gap-2 font-semibold"><FileText className="h-5 w-5 text-primary" /> Daily Report</h2>
-        <Button disabled={busy} variant="outline" className="rounded-full" onClick={async () => { setBusy(true); try { const r = await report({ data: { token: token! } }); setReportText(r.report); } catch { toast.error("Failed"); } finally { setBusy(false); } }}>Generate Today's Report</Button>
+        <Button disabled={busy} variant="outline" className="rounded-full" onClick={async () => { setBusy(true); try { const r = await report({ data: { token: token! } }); setReportText(r.report); } catch (e) { toast.error((e as Error)?.message ?? "Failed"); } finally { setBusy(false); } }}>Generate Today's Report</Button>
         {reportText && (
           <div className="mt-3">
             <pre className="max-h-80 overflow-auto whitespace-pre-wrap rounded-lg bg-surface-2 p-4 text-xs">{reportText}</pre>
