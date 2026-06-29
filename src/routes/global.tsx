@@ -133,44 +133,46 @@ function GlobalChat() {
             >
               {!own && <UserSymbol username={m.username} size="sm" />}
               <div className={cn("flex max-w-[80%] flex-col gap-1", own ? "items-end" : "items-start")}>
-                <div className="flex items-center gap-1">
-                  {own && (
-                    <MessageActions
-                      className="opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100"
-                      onToggle={(e) => toggle(m.id, e)}
-                      onReply={() => setReplyTo(m)}
-                    />
-                  )}
-                  <div
-                    className={cn(
-                      "border-2 border-border px-3 py-2 text-sm shadow-ink-soft",
-                      own ? "bg-accent/15" : "bg-white",
+                <MessageGestures onReply={() => setReplyTo(m)} onReact={(e) => toggle(m.id, e)} align={own ? "end" : "start"}>
+                  <div className="flex items-center gap-1">
+                    {own && (
+                      <MessageActions
+                        className="hidden transition-opacity md:flex md:opacity-0 md:group-hover:opacity-100"
+                        onToggle={(e) => toggle(m.id, e)}
+                        onReply={() => setReplyTo(m)}
+                      />
                     )}
-                    style={{ borderRadius: "16px 6px 18px 6px / 6px 18px 6px 16px" }}
-                  >
-                    {!own && (
-                      <Link
-                        to="/messages"
-                        search={{ to: m.username }}
-                        className="mb-0.5 block text-xs font-bold text-accent hover:wavy-underline"
-                      >
-                        {m.username}
-                      </Link>
-                    )}
-                    <ReplyQuote username={m.reply_to_username} content={m.reply_to_content} align={own ? "end" : "start"} />
-                    <div className="whitespace-pre-wrap break-words">{m.content}</div>
-                    <div className="mt-0.5 text-[10px] text-muted-foreground">
-                      {timeAgo(m.created_at)}
+                    <div
+                      className={cn(
+                        "border-2 border-border px-3 py-2 text-sm shadow-ink-soft",
+                        own ? "bg-accent/15" : "bg-white",
+                      )}
+                      style={{ borderRadius: "16px 6px 18px 6px / 6px 18px 6px 16px" }}
+                    >
+                      {!own && (
+                        <Link
+                          to="/messages"
+                          search={{ to: m.username }}
+                          className="mb-0.5 block text-xs font-bold text-accent hover:wavy-underline"
+                        >
+                          {m.username}
+                        </Link>
+                      )}
+                      <ReplyQuote username={m.reply_to_username} content={m.reply_to_content} align={own ? "end" : "start"} />
+                      <div className="whitespace-pre-wrap break-words">{m.content}</div>
+                      <div className="mt-0.5 text-[10px] text-muted-foreground">
+                        {timeAgo(m.created_at)}
+                      </div>
                     </div>
+                    {!own && (
+                      <MessageActions
+                        className="hidden transition-opacity md:flex md:opacity-0 md:group-hover:opacity-100"
+                        onToggle={(e) => toggle(m.id, e)}
+                        onReply={() => setReplyTo(m)}
+                      />
+                    )}
                   </div>
-                  {!own && (
-                    <MessageActions
-                      className="opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100"
-                      onToggle={(e) => toggle(m.id, e)}
-                      onReply={() => setReplyTo(m)}
-                    />
-                  )}
-                </div>
+                </MessageGestures>
                 <ReactionChips reactions={reactions} onToggle={(e) => toggle(m.id, e)} align={own ? "end" : "start"} />
               </div>
             </div>
