@@ -84,6 +84,7 @@ export const adminAddCollege = createServerFn({ method: "POST" })
       city: z.string().min(2),
       state: z.string().min(2),
       type: z.string(),
+      types: z.array(z.string()).min(1).optional(),
       established: z.number().nullable().optional(),
       description: z.string().optional(),
       latitude: z.number().nullable().optional(),
@@ -94,7 +95,12 @@ export const adminAddCollege = createServerFn({ method: "POST" })
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { token, ...fields } = data;
-    const { data: col, error } = await supabaseAdmin.from("colleges").insert(fields as any).select().single();
+    const types = Array.from(new Set(fields.types && fields.types.length ? fields.types : [fields.type]));
+    const { data: col, error } = await supabaseAdmin
+      .from("colleges")
+      .insert({ ...fields, type: types[0], types } as any)
+      .select()
+      .single();
     if (error) throw new Error(error.message);
     return col;
   });
