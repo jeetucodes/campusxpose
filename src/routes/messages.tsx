@@ -30,7 +30,9 @@ export const Route = createFileRoute("/messages")({
         name: "description",
         content: "Anonymous one-to-one conversations between CampusXpose users.",
       },
+      { property: "og:url", content: "https://campusxpose.online/messages" },
     ],
+    links: [{ rel: "canonical", href: "https://campusxpose.online/messages" }],
   }),
   component: Messages,
 });
