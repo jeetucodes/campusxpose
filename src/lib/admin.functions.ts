@@ -84,6 +84,7 @@ export const adminAddCollege = createServerFn({ method: "POST" })
       city: z.string().min(2),
       state: z.string().min(2),
       type: z.string(),
+      types: z.array(z.string()).min(1).optional(),
       established: z.number().nullable().optional(),
       description: z.string().optional(),
       latitude: z.number().nullable().optional(),
@@ -94,7 +95,12 @@ export const adminAddCollege = createServerFn({ method: "POST" })
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { token, ...fields } = data;
-    const { data: col, error } = await supabaseAdmin.from("colleges").insert(fields as any).select().single();
+    const types = Array.from(new Set(fields.types && fields.types.length ? fields.types : [fields.type]));
+    const { data: col, error } = await supabaseAdmin
+      .from("colleges")
+      .insert({ ...fields, type: types[0], types } as any)
+      .select()
+      .single();
     if (error) throw new Error(error.message);
     return col;
   });
@@ -106,7 +112,13 @@ export const adminUpdateCollege = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("colleges").update(data.patch as any).eq("id", data.id);
+    const patch: Record<string, any> = { ...data.patch };
+    // Keep the primary `type` in sync with the multi-select `types`.
+    if (Array.isArray(patch.types)) {
+      const types = Array.from(new Set(patch.types));
+      if (types.length) { patch.types = types; patch.type = types[0]; }
+    }
+    const { error } = await supabaseAdmin.from("colleges").update(patch as any).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -434,16 +446,18 @@ export const adminApproveCollegeRequest = createServerFn({ method: "POST" })
     if (reqErr || !req) throw new Error("Request not found");
     if (req.status === "approved") return { ok: true, alreadyDone: true };
 
+    const reqTypes = ((req as any).types && (req as any).types.length ? (req as any).types : [req.type]) as string[];
     const { data: col, error } = await supabaseAdmin
       .from("colleges")
       .insert({
         name: req.name,
         city: req.city,
         state: req.state,
-        type: req.type,
+        type: reqTypes[0],
+        types: reqTypes,
         established: req.established,
         description: req.description,
-      })
+      } as any)
       .select("id")
       .single();
     if (error) throw new Error(error.message);

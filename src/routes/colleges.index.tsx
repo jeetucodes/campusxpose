@@ -22,6 +22,7 @@ import { useIdentity } from "@/stores/identity";
 import { submitCollegeRequest } from "@/lib/content.functions";
 import { CITIES, COLLEGE_TYPES, INDIAN_STATES } from "@/lib/categories";
 import { cn } from "@/lib/utils";
+import { TypeMultiSelect } from "@/components/TypeMultiSelect";
 
 export const Route = createFileRoute("/colleges/")({
   head: () => ({
@@ -36,9 +37,12 @@ export const Route = createFileRoute("/colleges/")({
 });
 
 type Col = {
-  id: string; name: string; city: string; state: string; type: string;
+  id: string; name: string; city: string; state: string; type: string; types?: string[];
   total_rating: number; total_reviews: number; incident_count: number;
 };
+
+const colTypes = (c: Col): string[] => (c.types?.length ? c.types : [c.type]);
+
 
 const TYPE_COLORS: Record<string, string> = {
   Engineering: "bg-[#2d5da1]/15 text-[#2d5da1]",
@@ -73,7 +77,7 @@ function CollegesPage() {
       rows = rows.filter((c) => c.name.toLowerCase().includes(s) || c.city.toLowerCase().includes(s));
     }
     if (city !== "All") rows = rows.filter((c) => c.city === city);
-    if (type !== "All") rows = rows.filter((c) => c.type === type);
+    if (type !== "All") rows = rows.filter((c) => colTypes(c).includes(type));
     rows = [...rows].sort((a, b) => {
       if (sort === "reported") return b.incident_count - a.incident_count;
       if (sort === "rating") return a.total_rating - b.total_rating;
@@ -162,7 +166,9 @@ function CollegesPage() {
                       <span className="inline-flex items-center gap-1 border border-border bg-surface-2 px-2 py-0.5 text-muted-foreground">
                         <MapPin className="h-3 w-3" />{c.city}, {c.state}
                       </span>
-                      <span className={cn("border border-border px-2 py-0.5 font-semibold", TYPE_COLORS[c.type] ?? "bg-surface-2 text-muted-foreground")}>{c.type}</span>
+                      {colTypes(c).map((t) => (
+                        <span key={t} className={cn("border border-border px-2 py-0.5 font-semibold", TYPE_COLORS[t] ?? "bg-surface-2 text-muted-foreground")}>{t}</span>
+                      ))}
                     </div>
                     <div className="mt-4 flex items-center justify-between">
                       <StarRating value={c.total_rating} />
@@ -244,10 +250,12 @@ function RequestCollegeDialog() {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({
-    name: "", city: "", state: "Madhya Pradesh", type: "Engineering", established: "", description: "",
+    name: "", city: "", state: "Madhya Pradesh", established: "", description: "",
   });
+  const [types, setTypes] = useState<string[]>(["Engineering"]);
 
   const set = (k: keyof typeof form, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
 
   async function onSubmit() {
     if (!hashedId) return;
@@ -263,7 +271,7 @@ function RequestCollegeDialog() {
           name: form.name.trim(),
           city: form.city.trim(),
           state: form.state.trim(),
-          type: form.type as any,
+          types: types as any,
           established: form.established ? Number(form.established) : null,
           description: form.description.trim() || undefined,
         },
@@ -273,7 +281,8 @@ function RequestCollegeDialog() {
       } else {
         toast.success("Request sent! Admins will review and add it soon.");
         setOpen(false);
-        setForm({ name: "", city: "", state: "Madhya Pradesh", type: "Engineering", established: "", description: "" });
+        setForm({ name: "", city: "", state: "Madhya Pradesh", established: "", description: "" });
+        setTypes(["Engineering"]);
       }
     } catch (e: any) {
       toast.error(e?.message ?? "Something went wrong.");
@@ -305,15 +314,11 @@ function RequestCollegeDialog() {
               </SelectContent>
             </Select>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Select value={form.type} onValueChange={(v) => set("type", v)}>
-              <SelectTrigger><SelectValue placeholder="Type" /></SelectTrigger>
-              <SelectContent>
-                {COLLEGE_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            <Input type="number" placeholder="Established (year)" value={form.established} onChange={(e) => set("established", e.target.value)} />
+          <div>
+            <p className="mb-2 text-sm font-medium">Course types (select one or more)</p>
+            <TypeMultiSelect value={types} onChange={setTypes} />
           </div>
+          <Input type="number" placeholder="Established (year)" value={form.established} onChange={(e) => set("established", e.target.value)} />
           <Textarea placeholder="Anything else? (optional)" value={form.description} onChange={(e) => set("description", e.target.value)} />
         </div>
         <DialogFooter>

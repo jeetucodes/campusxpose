@@ -162,7 +162,7 @@ function CollegeDetail() {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold">{c.name}</h1>
-              <p className="mt-1 text-sm text-muted-foreground">{c.city}, {c.state} · {c.type} · Est. {c.established ?? "—"}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{c.city}, {c.state} · {((c as any).types?.length ? (c as any).types : [c.type]).join(", ")} · Est. {c.established ?? "—"}</p>
             </div>
             <div className="text-right">
               <div className={cn("text-5xl font-extrabold", ratingColor(c.total_rating ?? 0))}>{(c.total_rating ?? 0).toFixed(1)}</div>
