@@ -101,8 +101,8 @@ function Messages() {
     [all, active, username],
   );
 
-  const threadEndRef = useRef<HTMLDivElement>(null);
   const threadBoxRef = useRef<HTMLDivElement>(null);
+
   // Jump to the latest message: instantly when switching chats, smoothly on new messages.
   const prevActive = useRef<string | undefined>(undefined);
   useEffect(() => {
