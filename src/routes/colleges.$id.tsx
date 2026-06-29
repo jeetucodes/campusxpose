@@ -381,7 +381,7 @@ function PostCard({ post, userVote, onVoted }: { post: any; userVote: "up" | "do
     <div className="rounded-xl border border-border bg-surface p-4">
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
         <UserSymbol username={post.username} size="sm" />
-        <span className="font-medium text-foreground">{post.username}</span>
+        <span className="inline-flex items-center gap-1 font-medium text-foreground">{post.username}{post.username && verified.has(post.username) && <VerifiedBadge />}</span>
         <span>· {timeAgo(post.created_at)}</span>
         <span className="ml-auto rounded-full bg-surface-2 px-2 py-0.5 capitalize">{categoryLabel(post.category ?? "general")}</span>
       </div>
