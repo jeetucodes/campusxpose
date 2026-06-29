@@ -26,7 +26,9 @@ export const Route = createFileRoute("/global")({
         content:
           "One anonymous platform-wide room where students from every campus talk freely.",
       },
+      { property: "og:url", content: "https://campusxpose.online/global" },
     ],
+    links: [{ rel: "canonical", href: "https://campusxpose.online/global" }],
   }),
   component: GlobalChat,
 });
