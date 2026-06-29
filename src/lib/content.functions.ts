@@ -235,6 +235,40 @@ export const submitComment = createServerFn({ method: "POST" })
     return { ok: true, shadow: false, comment };
   });
 
+export const deleteComment = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z.object({ commentId: z.string().uuid(), hashedId: z.string().min(8) }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Delete the comment and all of its nested replies, but only if it belongs
+    // to the requesting user.
+    const { data: row, error: getErr } = await supabaseAdmin
+      .from("post_comments")
+      .select("id, anonymous_user_hash")
+      .eq("id", data.commentId)
+      .single();
+    if (getErr || !row) return { ok: false as const };
+    if (row.anonymous_user_hash !== data.hashedId) return { ok: false as const };
+
+    // Collect descendant ids (replies) recursively.
+    const { data: all } = await supabaseAdmin.from("post_comments").select("id, parent_id");
+    const ids = new Set<string>([data.commentId]);
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (const c of all ?? []) {
+        if (c.parent_id && ids.has(c.parent_id) && !ids.has(c.id)) {
+          ids.add(c.id);
+          changed = true;
+        }
+      }
+    }
+    const { error } = await supabaseAdmin.from("post_comments").delete().in("id", Array.from(ids));
+    if (error) throw new Error(error.message);
+    return { ok: true as const, ids: Array.from(ids) };
+  });
+
 export const submitGlobalMessage = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z
