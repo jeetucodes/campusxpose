@@ -330,17 +330,19 @@ function Messages() {
                       <div
                         className={cn(
                           "max-w-[80%] border-2 border-border px-3 py-2 text-sm shadow-ink-soft",
-                          own ? "bg-accent/15" : "bg-white",
+                          own ? "bg-accent text-accent-foreground" : "bg-white",
                         )}
                         style={{
-                          borderRadius: "16px 6px 18px 6px / 6px 18px 6px 16px",
+                          borderRadius: own
+                            ? "18px 6px 18px 18px"
+                            : "6px 18px 18px 18px",
                         }}
                       >
                         <ReplyQuote username={m.reply_to_username} content={m.reply_to_content} align={own ? "end" : "start"} />
-                        <div className="whitespace-pre-wrap break-words">
+                        <div className="whitespace-pre-wrap break-words leading-relaxed">
                           {m.content}
                         </div>
-                        <div className="mt-0.5 text-[10px] text-muted-foreground">
+                        <div className={cn("mt-0.5 text-[10px]", own ? "text-accent-foreground/70" : "text-muted-foreground")}>
                           {timeAgo(m.created_at)}
                         </div>
                       </div>
