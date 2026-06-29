@@ -68,9 +68,18 @@ function GlobalChat() {
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "global_messages" },
         (p) => {
+          const incoming = p.new as Msg;
           setMessages((prev) => [
-            p.new as Msg,
-            ...prev.filter((m) => m.id !== (p.new as Msg).id),
+            incoming,
+            ...prev.filter(
+              (m) =>
+                m.id !== incoming.id &&
+                !(
+                  m.id.startsWith("temp-") &&
+                  m.username === incoming.username &&
+                  m.content === incoming.content
+                ),
+            ),
           ]);
         },
       )
@@ -86,6 +95,21 @@ function GlobalChat() {
     const reply = replyTo;
     setText("");
     setReplyTo(null);
+    // Optimistic insert for an instant, real-time feel.
+    const tempId = `temp-${Date.now()}`;
+    setMessages((prev) => [
+      {
+        id: tempId,
+        username,
+        content,
+        anonymous_user_hash: hashedId,
+        created_at: new Date().toISOString(),
+        reply_to_id: reply?.id ?? null,
+        reply_to_username: reply?.username ?? null,
+        reply_to_content: reply?.content ?? null,
+      } as Msg,
+      ...prev,
+    ]);
     try {
       await submitGlobalMessage({
         data: {
@@ -98,9 +122,11 @@ function GlobalChat() {
         },
       });
     } catch {
+      setMessages((prev) => prev.filter((m) => m.id !== tempId));
       toast.error("Message failed");
     }
   };
+
 
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col bg-background">
