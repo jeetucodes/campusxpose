@@ -174,6 +174,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          recipient_hash: string | null
           recipient_username: string
           sender_hash: string
           sender_username: string
@@ -182,6 +183,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          recipient_hash?: string | null
           recipient_username: string
           sender_hash: string
           sender_username: string
@@ -190,6 +192,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          recipient_hash?: string | null
           recipient_username?: string
           sender_hash?: string
           sender_username?: string
