@@ -429,8 +429,6 @@ export const submitCollegeRequest = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true as const, shadow: false };
   });
-    return { ok: true as const, shadow: false };
-  });
 
 const REACTION_EMOJIS = ["👍", "👎", "❤️", "😂", "😮"] as const;
 
