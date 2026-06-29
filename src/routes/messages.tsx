@@ -16,6 +16,8 @@ import { usePresence } from "@/hooks/usePresence";
 import { TypingIndicator } from "@/components/ChatPresence";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { useVerifiedUsernames } from "@/hooks/useVerified";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 
 type Search = { to?: string };
 
