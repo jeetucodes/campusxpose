@@ -391,10 +391,10 @@ function PostCard({ post, userVote, onVoted }: { post: any; userVote: "up" | "do
           <ArrowDown className="h-3.5 w-3.5" /> {post.downvotes}
         </button>
         <button onClick={() => setCommentsOpen((o) => !o)} className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs", commentsOpen ? "bg-primary/15 text-primary" : "bg-surface-2 hover:text-primary")}>
-          <MessageCircle className="h-3.5 w-3.5" /> Comments
+          <MessageCircle className="h-3.5 w-3.5" /> {commentCount} {commentCount === 1 ? "Comment" : "Comments"}
         </button>
       </div>
-      {commentsOpen && <PostComments postId={post.id} />}
+      {commentsOpen && <PostComments postId={post.id} onCount={setCommentCount} />}
     </div>
   );
 }
