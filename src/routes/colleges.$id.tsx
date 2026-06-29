@@ -194,6 +194,9 @@ function CollegeDetail() {
           <Button asChild variant="destructive" className="mt-5 w-full rounded-full">
             <Link to="/report" search={{ college: id }}><Zap className="mr-1 h-4 w-4" /> Report Incident</Link>
           </Button>
+          <Button asChild variant="outline" className="mt-3 w-full rounded-full">
+            <Link to="/community/$collegeId" params={{ collegeId: id }}><MessageCircle className="mr-1 h-4 w-4" /> Campus Students Chats</Link>
+          </Button>
         </div>
 
         {/* Ratings breakdown */}
