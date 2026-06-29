@@ -41,6 +41,8 @@ const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
 
 function Home() {
   const { data } = useQuery(homeQueryOptions);
+  const top: HomeData["top"] = data?.top ?? [];
+  const recentPosts: HomeData["recentPosts"] = data?.recentPosts ?? [];
   const queryClient = useQueryClient();
   const [showAllReports, setShowAllReports] = useState(false);
 
