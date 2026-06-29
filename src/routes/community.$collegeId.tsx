@@ -58,8 +58,17 @@ function Community() {
     const ch = supabase
       .channel(`chat-${collegeId}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "community_messages", filter: `college_id=eq.${collegeId}` }, (p) => {
-        setMessages((prev) => [p.new as Msg, ...prev.filter((m) => m.id !== (p.new as Msg).id)]);
+        const incoming = p.new as Msg;
+        setMessages((prev) => [
+          incoming,
+          ...prev.filter(
+            (m) =>
+              m.id !== incoming.id &&
+              !(m.id.startsWith("temp-") && m.username === incoming.username && m.content === incoming.content),
+          ),
+        ]);
       })
+
       .on("postgres_changes", { event: "DELETE", schema: "public", table: "community_messages" }, (p) => {
         setMessages((prev) => prev.filter((m) => m.id !== (p.old as any).id));
       })
