@@ -169,75 +169,77 @@ export function ChatPolls({
       </button>
       {expanded && (
         <>
-      <div className="flex items-center gap-2 px-3 pb-2 sm:px-4">
-        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset(); }}>
-          <DialogTrigger asChild>
-            <Button size="sm" variant="outline" className="ml-auto h-7 gap-1 rounded-full" disabled={!hashedId || !username}>
-              <Plus className="h-3.5 w-3.5" /> New
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create a poll</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-3">
-              <Input
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
-                placeholder="Poll question..."
-                maxLength={200}
-              />
-              <div className="space-y-2">
-                {options.map((opt, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <Input
-                      value={opt}
-                      onChange={(e) =>
-                        setOptions((prev) => prev.map((o, idx) => (idx === i ? e.target.value : o)))
-                      }
-                      placeholder={`Option ${i + 1}`}
-                      maxLength={80}
-                    />
-                    {options.length > 2 && (
-                      <button
-                        onClick={() => setOptions((prev) => prev.filter((_, idx) => idx !== i))}
-                        aria-label="Remove option"
-                        className="shrink-0 text-muted-foreground hover:text-destructive"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-              {options.length < 4 && (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="gap-1"
-                  onClick={() => setOptions((prev) => [...prev, ""])}
-                >
-                  <Plus className="h-3.5 w-3.5" /> Add option
+          <div className="flex items-center gap-2 px-3 pb-2 sm:px-4">
+            <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset(); }}>
+              <DialogTrigger asChild>
+                <Button size="sm" variant="outline" className="ml-auto h-7 gap-1 rounded-full" disabled={!hashedId || !username}>
+                  <Plus className="h-3.5 w-3.5" /> New
                 </Button>
-              )}
-              <Button className="w-full" onClick={submit} disabled={submitting}>
-                {submitting ? "Posting..." : "Post poll"}
-              </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create a poll</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-3">
+                  <Input
+                    value={question}
+                    onChange={(e) => setQuestion(e.target.value)}
+                    placeholder="Poll question..."
+                    maxLength={200}
+                  />
+                  <div className="space-y-2">
+                    {options.map((opt, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <Input
+                          value={opt}
+                          onChange={(e) =>
+                            setOptions((prev) => prev.map((o, idx) => (idx === i ? e.target.value : o)))
+                          }
+                          placeholder={`Option ${i + 1}`}
+                          maxLength={80}
+                        />
+                        {options.length > 2 && (
+                          <button
+                            onClick={() => setOptions((prev) => prev.filter((_, idx) => idx !== i))}
+                            aria-label="Remove option"
+                            className="shrink-0 text-muted-foreground hover:text-destructive"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  {options.length < 4 && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="gap-1"
+                      onClick={() => setOptions((prev) => [...prev, ""])}
+                    >
+                      <Plus className="h-3.5 w-3.5" /> Add option
+                    </Button>
+                  )}
+                  <Button className="w-full" onClick={submit} disabled={submitting}>
+                    {submitting ? "Posting..." : "Post poll"}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+          {polls.length > 0 && (
+            <div className="max-h-72 space-y-2 overflow-y-auto px-3 pb-3 sm:px-4">
+              {polls.map((p) => (
+                <PollItem
+                  key={p.id}
+                  poll={p}
+                  votes={votes.filter((v) => v.poll_id === p.id)}
+                  hashedId={hashedId}
+                />
+              ))}
             </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-      {polls.length > 0 && (
-        <div className="max-h-72 space-y-2 overflow-y-auto px-3 pb-3 sm:px-4">
-          {polls.map((p) => (
-            <PollItem
-              key={p.id}
-              poll={p}
-              votes={votes.filter((v) => v.poll_id === p.id)}
-              hashedId={hashedId}
-            />
-          ))}
-        </div>
+          )}
+        </>
       )}
     </div>
   );
