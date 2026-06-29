@@ -137,6 +137,9 @@ export type Database = {
           id: string
           incident_id: string | null
           is_incident_signal: boolean | null
+          reply_to_content: string | null
+          reply_to_id: string | null
+          reply_to_username: string | null
           username: string
         }
         Insert: {
@@ -147,6 +150,9 @@ export type Database = {
           id?: string
           incident_id?: string | null
           is_incident_signal?: boolean | null
+          reply_to_content?: string | null
+          reply_to_id?: string | null
+          reply_to_username?: string | null
           username: string
         }
         Update: {
@@ -157,6 +163,9 @@ export type Database = {
           id?: string
           incident_id?: string | null
           is_incident_signal?: boolean | null
+          reply_to_content?: string | null
+          reply_to_id?: string | null
+          reply_to_username?: string | null
           username?: string
         }
         Relationships: [
@@ -176,6 +185,9 @@ export type Database = {
           id: string
           recipient_hash: string | null
           recipient_username: string
+          reply_to_content: string | null
+          reply_to_id: string | null
+          reply_to_username: string | null
           sender_hash: string
           sender_username: string
         }
@@ -185,6 +197,9 @@ export type Database = {
           id?: string
           recipient_hash?: string | null
           recipient_username: string
+          reply_to_content?: string | null
+          reply_to_id?: string | null
+          reply_to_username?: string | null
           sender_hash: string
           sender_username: string
         }
@@ -194,6 +209,9 @@ export type Database = {
           id?: string
           recipient_hash?: string | null
           recipient_username?: string
+          reply_to_content?: string | null
+          reply_to_id?: string | null
+          reply_to_username?: string | null
           sender_hash?: string
           sender_username?: string
         }
@@ -256,6 +274,9 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          reply_to_content: string | null
+          reply_to_id: string | null
+          reply_to_username: string | null
           username: string
         }
         Insert: {
@@ -263,6 +284,9 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          reply_to_content?: string | null
+          reply_to_id?: string | null
+          reply_to_username?: string | null
           username: string
         }
         Update: {
@@ -270,6 +294,9 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          reply_to_content?: string | null
+          reply_to_id?: string | null
+          reply_to_username?: string | null
           username?: string
         }
         Relationships: []
@@ -338,6 +365,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      message_reactions: {
+        Row: {
+          anonymous_user_hash: string
+          created_at: string
+          emoji: string
+          id: string
+          message_id: string
+          message_type: string
+        }
+        Insert: {
+          anonymous_user_hash: string
+          created_at?: string
+          emoji: string
+          id?: string
+          message_id: string
+          message_type: string
+        }
+        Update: {
+          anonymous_user_hash?: string
+          created_at?: string
+          emoji?: string
+          id?: string
+          message_id?: string
+          message_type?: string
+        }
+        Relationships: []
       }
       post_votes: {
         Row: {
