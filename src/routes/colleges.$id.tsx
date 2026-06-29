@@ -350,6 +350,7 @@ function Trend({ t }: { t?: string | null }) {
 
 function PostCard({ post, userVote, onVoted }: { post: any; userVote: "up" | "down" | null; onVoted: () => void }) {
   const { hashedId } = useIdentity();
+  const verified = useVerifiedUsernames();
   const vote = useServerFn(votePost);
   const [voting, setVoting] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
