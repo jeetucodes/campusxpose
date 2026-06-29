@@ -298,7 +298,7 @@ export function ChatPolls({
                           placeholder={`Option ${i + 1}`}
                           maxLength={80}
                         />
-                        {options.length >provider > 2 && (
+                        {options.length > 2 && (
                           <button
                             onClick={() =>
                               setOptions((prev) =>
