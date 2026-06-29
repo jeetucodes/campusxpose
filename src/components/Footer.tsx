@@ -58,6 +58,11 @@ export function Footer() {
                   <MessageCircle className="h-4 w-4" /> Global Chat
                 </Link>
               </li>
+              <li>
+                <Link to="/trust" className="inline-flex items-center gap-2 hover:text-foreground transition-colors">
+                  <Shield className="h-4 w-4" /> Privacy & Trust
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
