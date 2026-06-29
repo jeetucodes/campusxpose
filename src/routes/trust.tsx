@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { Shield, Ghost, EyeOff, Lock, Trash2, ArrowRight, ServerOff, FileWarning } from "lucide-react";
+import { Shield, Ghost, EyeOff, Lock, Trash2, ArrowRight, ServerOff, FileWarning, MapPinOff, ShieldOff, Check, X } from "lucide-react";
 import { SiteShell } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import {
