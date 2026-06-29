@@ -249,10 +249,12 @@ function RequestCollegeDialog() {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({
-    name: "", city: "", state: "Madhya Pradesh", type: "Engineering", established: "", description: "",
+    name: "", city: "", state: "Madhya Pradesh", established: "", description: "",
   });
+  const [types, setTypes] = useState<string[]>(["Engineering"]);
 
   const set = (k: keyof typeof form, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
 
   async function onSubmit() {
     if (!hashedId) return;
