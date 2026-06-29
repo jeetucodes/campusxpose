@@ -8,7 +8,7 @@ import { SiteShell } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { getHomeData, type HomeData } from "@/lib/home.functions";
 import { supabase } from "@/integrations/supabase/client";
-import { INCIDENT_CATEGORIES, categoryLabel, categoryEmoji } from "@/lib/categories";
+import { categoryLabel, categoryEmoji } from "@/lib/categories";
 import { timeAgo } from "@/lib/format";
 import { HomeAds } from "@/components/HomeAds";
 import { TrustSection } from "@/components/TrustSection";
