@@ -95,12 +95,30 @@ function Community() {
     setText("");
     setReplyTo(null);
     setIncidentPrompt(false);
+    // Optimistic insert for an instant, real-time feel.
+    const tempId = `temp-${Date.now()}`;
+    setMessages((prev) => [
+      {
+        id: tempId,
+        username,
+        content,
+        anonymous_user_hash: hashedId,
+        is_incident_signal: isSignal,
+        created_at: new Date().toISOString(),
+        reply_to_id: reply?.id ?? null,
+        reply_to_username: reply?.username ?? null,
+        reply_to_content: reply?.content ?? null,
+      } as Msg,
+      ...prev,
+    ]);
     try {
       await sendFn({ data: { collegeId, hashedId, username, content, isIncidentSignal: isSignal, replyToId: reply?.id, replyToUsername: reply?.username, replyToContent: reply?.content } });
     } catch {
+      setMessages((prev) => prev.filter((m) => m.id !== tempId));
       toast.error("Message failed");
     }
   };
+
 
   const loadSummary = async () => {
     setLoadingSummary(true);
