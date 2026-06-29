@@ -99,16 +99,37 @@ export function ReplyQuote({
   align?: "start" | "end";
 }) {
   if (!content) return null;
+  const onAccent = align === "end";
   return (
     <div
       className={cn(
-        "mb-1 border-l-2 border-accent/60 bg-surface-2/60 px-2 py-1 text-xs",
+        "mb-1 max-w-full overflow-hidden border-l-2 px-2 py-1 text-xs",
         align === "end" ? "text-right" : "text-left",
+        onAccent
+          ? "border-accent-foreground/50 bg-accent-foreground/15"
+          : "border-accent/60 bg-surface-2/60",
       )}
       style={{ borderRadius: "8px" }}
     >
-      {username && <div className="font-semibold text-accent/90">{username}</div>}
-      <div className="line-clamp-2 text-muted-foreground">{content}</div>
+      {username && (
+        <div
+          className={cn(
+            "truncate font-semibold",
+            onAccent ? "text-accent-foreground/90" : "text-accent/90",
+          )}
+        >
+          {username}
+        </div>
+      )}
+      <div
+        className={cn(
+          "line-clamp-2 break-words",
+          onAccent ? "text-accent-foreground/80" : "text-muted-foreground",
+        )}
+      >
+        {content}
+      </div>
     </div>
   );
 }
+
