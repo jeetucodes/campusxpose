@@ -205,6 +205,36 @@ export const votePost = createServerFn({ method: "POST" })
     return { ok: true, userVote };
   });
 
+export const submitComment = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        postId: z.string().uuid(),
+        parentId: z.string().uuid().optional(),
+        hashedId: z.string().min(8),
+        username: z.string().min(3).max(40),
+        content: z.string().min(1).max(2000),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (await isBanned(data.hashedId)) return { ok: true, shadow: true };
+    const { data: comment, error } = await supabaseAdmin
+      .from("post_comments")
+      .insert({
+        post_id: data.postId,
+        parent_id: data.parentId ?? null,
+        anonymous_user_hash: data.hashedId,
+        username: data.username,
+        content: clean(data.content),
+      })
+      .select("*")
+      .single();
+    if (error) throw new Error(error.message);
+    return { ok: true, shadow: false, comment };
+  });
+
 export const submitGlobalMessage = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z
