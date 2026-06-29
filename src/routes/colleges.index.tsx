@@ -280,7 +280,8 @@ function RequestCollegeDialog() {
       } else {
         toast.success("Request sent! Admins will review and add it soon.");
         setOpen(false);
-        setForm({ name: "", city: "", state: "Madhya Pradesh", type: "Engineering", established: "", description: "" });
+        setForm({ name: "", city: "", state: "Madhya Pradesh", established: "", description: "" });
+        setTypes(["Engineering"]);
       }
     } catch (e: any) {
       toast.error(e?.message ?? "Something went wrong.");
