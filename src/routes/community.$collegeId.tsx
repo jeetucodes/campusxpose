@@ -49,10 +49,6 @@ function Community() {
   const [text, setText] = useState("");
   const [replyTo, setReplyTo] = useState<Msg | null>(null);
   
-  const [summaryOpen, setSummaryOpen] = useState(false);
-  const [summary, setSummary] = useState<{ key_issues: string[] } | null>(null);
-  const [loadingSummary, setLoadingSummary] = useState(false);
-  const [showRules, setShowRules] = useState(true);
   const [incidentPrompt, setIncidentPrompt] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
