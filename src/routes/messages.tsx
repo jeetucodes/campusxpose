@@ -99,6 +99,8 @@ function Messages() {
   }, [all, username]);
 
   const active = to;
+  const dmRoom = active && username ? `dm-${[username, active].sort().join("|")}` : "";
+  const { online, typing, notifyTyping } = usePresence(dmRoom, username, hashedId);
   const thread = useMemo(
     () =>
       active
