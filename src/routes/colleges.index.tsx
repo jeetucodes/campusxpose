@@ -165,7 +165,9 @@ function CollegesPage() {
                       <span className="inline-flex items-center gap-1 border border-border bg-surface-2 px-2 py-0.5 text-muted-foreground">
                         <MapPin className="h-3 w-3" />{c.city}, {c.state}
                       </span>
-                      <span className={cn("border border-border px-2 py-0.5 font-semibold", TYPE_COLORS[c.type] ?? "bg-surface-2 text-muted-foreground")}>{c.type}</span>
+                      {colTypes(c).map((t) => (
+                        <span key={t} className={cn("border border-border px-2 py-0.5 font-semibold", TYPE_COLORS[t] ?? "bg-surface-2 text-muted-foreground")}>{t}</span>
+                      ))}
                     </div>
                     <div className="mt-4 flex items-center justify-between">
                       <StarRating value={c.total_rating} />
