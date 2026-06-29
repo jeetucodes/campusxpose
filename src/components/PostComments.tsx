@@ -108,15 +108,35 @@ export function PostComments({ postId, onCount }: { postId: string; onCount?: (n
     }
   };
 
+  const handleDelete = async (c: Comment) => {
+    if (!hashedId) return;
+    if (!window.confirm("Ye comment delete karein?")) return;
+    const prev = comments;
+    try {
+      const res = await removeComment({ data: { commentId: c.id, hashedId } });
+      if (res?.ok && res.ids) {
+        const removed = new Set(res.ids);
+        setComments((cur) => cur.filter((x) => !removed.has(x.id)));
+        toast.success("Comment delete ho gaya");
+      } else {
+        toast.error("Ye comment delete nahi kar sakte");
+      }
+    } catch {
+      setComments(prev);
+      toast.error("Delete nahi ho paaya");
+    }
+  };
+
   return (
     <div className="mt-3 border-t border-border pt-3">
       {tree.length > 0 && (
         <div className="space-y-3">
           {tree.map((node) => (
-            <CommentNode key={node.id} node={node} depth={0} onReply={setReplyTo} />
+            <CommentNode key={node.id} node={node} depth={0} onReply={setReplyTo} onDelete={handleDelete} myHash={hashedId} />
           ))}
         </div>
       )}
+
 
       <div className="mt-3">
         {replyTo && (
