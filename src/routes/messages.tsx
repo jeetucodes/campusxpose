@@ -306,9 +306,10 @@ function Messages() {
                 const reactions = byMessage.get(m.id) ?? [];
                 return (
                   <div key={m.id} className={cn("group flex flex-col gap-1", own ? "items-end" : "items-start")}>
+                    <MessageGestures onReply={() => setReplyTo(m)} onReact={(e) => toggle(m.id, e)} align={own ? "end" : "start"}>
                     <div className={cn("flex items-center gap-1", own ? "flex-row" : "flex-row-reverse")}>
                       <MessageActions
-                        className="opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100"
+                        className="hidden transition-opacity md:flex md:opacity-0 md:group-hover:opacity-100"
                         onToggle={(e) => toggle(m.id, e)}
                         onReply={() => setReplyTo(m)}
                       />
@@ -330,6 +331,7 @@ function Messages() {
                         </div>
                       </div>
                     </div>
+                    </MessageGestures>
                     <ReactionChips reactions={reactions} onToggle={(e) => toggle(m.id, e)} align={own ? "end" : "start"} />
                   </div>
                 );
