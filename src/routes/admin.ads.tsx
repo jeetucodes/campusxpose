@@ -193,7 +193,7 @@ function AdsAdmin() {
                 <Input value={editing.embed_url ?? ""} onChange={(e) => setEditing({ ...editing, embed_url: e.target.value })} placeholder="https://www.youtube.com/embed/..." />
                 <p className="mt-1 text-xs text-muted-foreground">Use an embeddable link (e.g. YouTube /embed/ URL).</p>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                   <Label>Button link</Label>
                   <Input value={editing.link_url ?? ""} onChange={(e) => setEditing({ ...editing, link_url: e.target.value })} placeholder="https://..." />
