@@ -175,6 +175,7 @@ export function ChatPolls({
   const createFn = useServerFn(createPoll);
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState<string[]>(["", ""]);
   const [submitting, setSubmitting] = useState(false);
