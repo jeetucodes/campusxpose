@@ -268,6 +268,11 @@ export const adminListUsers = createServerFn({ method: "POST" })
     for (const g of globals.data ?? []) {
       touch(g.anonymous_user_hash, g.username, g.created_at).messages++;
     }
+    // Surface users that were allotted a username / verified by admin even if
+    // they have no other activity yet.
+    for (const v of (verified.data as any[]) ?? []) {
+      if (v.user_hash) touch(v.user_hash, v.username, new Date(0).toISOString());
+    }
     return Array.from(map.values())
       .map((u) => ({ ...u, banned: bannedSet.has(u.hash), verified: verifiedSet.has(u.username) }))
       .sort((a, b) => (a.lastActive < b.lastActive ? 1 : -1));
