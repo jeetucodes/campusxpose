@@ -71,19 +71,34 @@ function Moderation() {
 
       <section>
         <h2 className="mb-3 font-semibold">Evidence Review</h2>
+        {evidence.isLoading && <p className="text-sm text-muted-foreground">Loading evidence…</p>}
+        {evidence.isError && <p className="text-sm text-destructive">Failed to load evidence: {(evidence.error as any)?.message ?? "Unknown error"}</p>}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {(evidence.data ?? []).map((e: any) => (
             <div key={e.id} className="rounded-xl border border-border bg-surface p-2">
-              {e.type === "image"
-                ? <img src={e.file_url} alt="evidence" className="h-32 w-full rounded-lg object-cover" />
-                : <div className="grid h-32 place-items-center rounded-lg bg-surface-2 text-3xl">📄</div>}
+              <div className="relative">
+                {e.type === "image"
+                  ? <img src={e.file_url} alt="evidence" className="h-32 w-full rounded-lg object-cover" />
+                  : <a href={e.file_url} target="_blank" rel="noreferrer" className="grid h-32 place-items-center rounded-lg bg-surface-2 text-3xl">📄</a>}
+                {e.is_verified && (
+                  <span className="absolute left-1 top-1 rounded-full bg-success px-2 py-0.5 text-[10px] font-semibold text-success-foreground shadow">✓ Verified</span>
+                )}
+              </div>
               <div className="mt-2 flex gap-1">
-                <Button size="sm" variant="ghost" className="flex-1 text-success" onClick={async () => { await verify({ data: { token: token!, id: e.id, verified: !e.is_verified } }); toast.success("Updated"); evidence.refetch(); }}>{e.is_verified ? "Verified" : "Verify"}</Button>
-                <Button size="sm" variant="ghost" className="text-destructive" onClick={async () => { await delEv({ data: { token: token!, id: e.id } }); toast.success("Removed"); evidence.refetch(); }}>Remove</Button>
+                {e.is_verified ? (
+                  <Button size="sm" variant="ghost" disabled={busy === e.id} className="flex-1 text-warning" onClick={() => setVerified(e.id, false)}>
+                    {busy === e.id ? "…" : "Unverify"}
+                  </Button>
+                ) : (
+                  <Button size="sm" variant="ghost" disabled={busy === e.id} className="flex-1 text-success" onClick={() => setVerified(e.id, true)}>
+                    {busy === e.id ? "…" : "Verify"}
+                  </Button>
+                )}
+                <Button size="sm" variant="ghost" disabled={busy === e.id} className="text-destructive" onClick={() => removeEvidence(e.id)}>Remove</Button>
               </div>
             </div>
           ))}
-          {(evidence.data ?? []).length === 0 && <p className="text-sm text-muted-foreground">No evidence uploaded.</p>}
+          {!evidence.isLoading && (evidence.data ?? []).length === 0 && <p className="text-sm text-muted-foreground">No evidence uploaded.</p>}
         </div>
       </section>
     </div>
