@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
-  Zap, MessageCircle, ArrowUp, ArrowDown, Star, TrendingUp, TrendingDown, Minus,
+  Zap, MessageCircle, ArrowUp, ArrowDown, Star, TrendingUp, TrendingDown, Minus, Users,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteShell } from "@/components/Footer";
