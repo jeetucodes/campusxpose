@@ -65,7 +65,7 @@ function AdsAdmin() {
     setLoading(true);
     try {
       const r = await list({ data: { token } });
-      setAds(r.ads as Ad[]);
+      setAds(r.ads as unknown as Ad[]);
       setEnabledState(r.enabled);
     } catch (e) { toast.error((e as Error)?.message ?? "Failed"); }
     finally { setLoading(false); }
