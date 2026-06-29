@@ -33,6 +33,7 @@ type Msg = { id: string; username: string; content: string; anonymous_user_hash:
 function Community() {
   const { collegeId } = Route.useParams();
   const { hashedId, username } = useIdentity();
+  const verified = useVerifiedUsernames();
   const sendFn = useServerFn(submitMessage);
   const summaryFn = useServerFn(chatSummary);
   const { byMessage, toggle } = useReactions("community", hashedId);
