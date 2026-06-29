@@ -20,6 +20,36 @@ import { cn } from "@/lib/utils";
 import { UserSymbol } from "@/components/UserSymbol";
 
 export const Route = createFileRoute("/colleges/$id")({
+  loader: async ({ params }) => {
+    const { data } = await supabase
+      .from("colleges")
+      .select("name, city, state")
+      .eq("id", params.id)
+      .maybeSingle();
+    return { college: data };
+  },
+  head: ({ params, loaderData }) => {
+    const c = loaderData?.college;
+    const canonical = `https://campusxpose.online/colleges/${params.id}`;
+    const title = c?.name
+      ? `${c.name} — Reviews & Reports | CampusXpose`.slice(0, 60)
+      : "College Reviews & Reports | CampusXpose";
+    const location = c ? [c.city, c.state].filter(Boolean).join(", ") : "";
+    const description = c?.name
+      ? `Anonymous student reviews, ratings and incident reports for ${c.name}${location ? `, ${location}` : ""}. Read the real campus story.`.slice(0, 160)
+      : "Anonymous student reviews, ratings and incident reports for Indian colleges on CampusXpose.";
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: canonical },
+      ],
+      links: [{ rel: "canonical", href: canonical }],
+    };
+  },
   component: CollegeDetail,
 });
 

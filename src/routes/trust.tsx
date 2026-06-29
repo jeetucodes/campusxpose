@@ -76,7 +76,9 @@ export const Route = createFileRoute("/trust")({
         property: "og:description",
         content: "No identity stored, ever. Jaano kaise tumhari reports 100% anonymous rehti hain.",
       },
+      { property: "og:url", content: "https://campusxpose.online/trust" },
     ],
+    links: [{ rel: "canonical", href: "https://campusxpose.online/trust" }],
   }),
   component: TrustPage,
 });
