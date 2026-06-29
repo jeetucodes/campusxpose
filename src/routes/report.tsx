@@ -20,7 +20,14 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/report")({
   validateSearch: z.object({ college: z.string().optional() }),
-  head: () => ({ meta: [{ title: "Report an Incident — CampusXpose" }] }),
+  head: () => ({
+    meta: [
+      { title: "Report an Incident — CampusXpose" },
+      { name: "description", content: "Anonymously report fake fines, placement fraud, harassment and other campus issues with evidence on CampusXpose." },
+      { property: "og:url", content: "https://campusxpose.online/report" },
+    ],
+    links: [{ rel: "canonical", href: "https://campusxpose.online/report" }],
+  }),
   component: ReportPage,
 });
 
