@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { toggleReaction } from "@/lib/content.functions";
+import { toggleReaction, fetchDirectReactions } from "@/lib/content.functions";
+
 import type { MessageType, ReactionEmoji } from "@/lib/reactions";
 
 type ReactionRow = {
