@@ -162,6 +162,8 @@ function GlobalChat() {
 
       <AdPin placement="global" />
 
+      <ChatPolls scope="global" hashedId={hashedId} username={username} />
+
       <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col-reverse gap-2 overflow-y-auto px-4 py-4">
         {messages.map((m) => {
           const own = m.anonymous_user_hash === hashedId;
