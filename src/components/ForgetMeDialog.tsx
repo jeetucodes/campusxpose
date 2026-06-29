@@ -27,7 +27,6 @@ export function ForgetMeDialog({
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
-  const [custom, setCustom] = useState("");
   const [applying, setApplying] = useState(false);
 
   const shuffle = useCallback(async () => {
