@@ -241,7 +241,7 @@ export const adminListUsers = createServerFn({ method: "POST" })
       supabaseAdmin.from("community_messages").select("anonymous_user_hash, username, created_at"),
       supabaseAdmin.from("global_messages").select("anonymous_user_hash, username, created_at"),
       supabaseAdmin.from("banned_users").select("user_hash"),
-      supabaseAdmin.from("verified_users" as any).select("username"),
+      supabaseAdmin.from("verified_users" as any).select("username, user_hash"),
     ]);
     // Surface real failures instead of silently returning an empty list
     // (which renders a misleading "No users yet").
