@@ -10,6 +10,7 @@ import { getHomeData } from "@/lib/home.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { INCIDENT_CATEGORIES, categoryLabel, categoryEmoji } from "@/lib/categories";
 import { timeAgo } from "@/lib/format";
+import { HomeAds } from "@/components/HomeAds";
 
 const homeQueryOptions = queryOptions({
   queryKey: ["home"],
