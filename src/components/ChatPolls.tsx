@@ -155,10 +155,21 @@ export function ChatPolls({
 
   return (
     <div className="border-b border-border bg-surface-2/40">
-      <div className="flex items-center gap-2 px-3 py-2 sm:px-4">
+      <button
+        onClick={() => setExpanded((e) => !e)}
+        className="flex w-full items-center gap-2 px-3 py-2 text-left sm:px-4"
+      >
         <BarChart3 className="h-4 w-4 text-primary" />
         <span className="text-sm font-medium">Polls</span>
         <span className="text-xs text-muted-foreground">· auto-deletes in 24h</span>
+        <span className="ml-auto text-xs text-muted-foreground">
+          {polls.length > 0 && `${polls.length} active`}
+        </span>
+        <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", expanded && "rotate-180")} />
+      </button>
+      {expanded && (
+        <>
+      <div className="flex items-center gap-2 px-3 pb-2 sm:px-4">
         <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset(); }}>
           <DialogTrigger asChild>
             <Button size="sm" variant="outline" className="ml-auto h-7 gap-1 rounded-full" disabled={!hashedId || !username}>
