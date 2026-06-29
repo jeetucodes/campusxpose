@@ -1,13 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Send, MessageCircle, Globe, ArrowLeft, Plus } from "lucide-react";
+import { Send, MessageCircle, Globe, ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useIdentity } from "@/stores/identity";
 import { UserSymbol } from "@/components/UserSymbol";
-import { submitDirectMessage, fetchDirectMessages } from "@/lib/content.functions";
+import { submitDirectMessage, fetchDirectMessages, deleteDirectConversation } from "@/lib/content.functions";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
