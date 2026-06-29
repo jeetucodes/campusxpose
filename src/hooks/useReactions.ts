@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { toggleReaction } from "@/lib/content.functions";
+import { toggleReaction, fetchDirectReactions } from "@/lib/content.functions";
+
 import type { MessageType, ReactionEmoji } from "@/lib/reactions";
 
 type ReactionRow = {
@@ -20,7 +21,25 @@ export type ReactionSummary = { emoji: string; count: number; mine: boolean };
 export function useReactions(messageType: MessageType, hashedId: string | null) {
   const [rows, setRows] = useState<ReactionRow[]>([]);
 
+  // Direct-message reactions are not publicly readable (they would leak DM IDs).
+  // They are fetched through a server function scoped to the participant.
+  const isDirect = messageType === "direct";
+
+  const refreshDirect = useCallback(() => {
+    if (!isDirect || !hashedId) return;
+    fetchDirectReactions({ data: { hashedId } })
+      .then((res) => setRows(res.reactions as ReactionRow[]))
+      .catch(() => {
+        /* keep current optimistic state on failure */
+      });
+  }, [isDirect, hashedId]);
+
   useEffect(() => {
+    if (isDirect) {
+      refreshDirect();
+      return;
+    }
+
     let active = true;
     supabase
       .from("message_reactions")
@@ -67,7 +86,8 @@ export function useReactions(messageType: MessageType, hashedId: string | null) 
       active = false;
       supabase.removeChannel(ch);
     };
-  }, [messageType]);
+  }, [messageType, isDirect, refreshDirect]);
+
 
   const byMessage = useMemo(() => {
     const map = new Map<string, ReactionSummary[]>();
@@ -116,11 +136,15 @@ export function useReactions(messageType: MessageType, hashedId: string | null) 
 
       try {
         await toggleReaction({ data: { hashedId, messageId, messageType, emoji } });
+        // Direct reactions have no realtime channel; reconcile from the server.
+        if (isDirect) refreshDirect();
       } catch {
         /* realtime resync will correct any divergence */
+        if (isDirect) refreshDirect();
       }
     },
-    [hashedId, messageType],
+    [hashedId, messageType, isDirect, refreshDirect],
+
   );
 
   return { byMessage, toggle };
