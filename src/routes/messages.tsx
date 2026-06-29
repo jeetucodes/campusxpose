@@ -101,6 +101,20 @@ function Messages() {
     [all, active, username],
   );
 
+  const threadEndRef = useRef<HTMLDivElement>(null);
+  const threadBoxRef = useRef<HTMLDivElement>(null);
+  // Jump to the latest message: instantly when switching chats, smoothly on new messages.
+  const prevActive = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    const box = threadBoxRef.current;
+    if (!box || !active) return;
+    const instant = prevActive.current !== active;
+    prevActive.current = active;
+    box.scrollTo({ top: box.scrollHeight, behavior: instant ? "auto" : "smooth" });
+  }, [active, thread.length]);
+
+
+
   const send = async () => {
     if (!text.trim() || !hashedId || !username || !active) return;
     const content = text.trim();
