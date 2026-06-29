@@ -6,7 +6,7 @@ import { Ghost, Search, Shield, FileWarning, Sparkles, ArrowRight, Flame, Trendi
 import { UserSymbol } from "@/components/UserSymbol";
 import { SiteShell } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { getHomeData } from "@/lib/home.functions";
+import { getHomeData, type HomeData } from "@/lib/home.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { INCIDENT_CATEGORIES, categoryLabel, categoryEmoji } from "@/lib/categories";
 import { timeAgo } from "@/lib/format";
