@@ -68,6 +68,9 @@ export const submitMessage = createServerFn({ method: "POST" })
         username: z.string().min(3).max(40),
         content: z.string().min(1).max(1000),
         isIncidentSignal: z.boolean().default(false),
+        replyToId: z.string().uuid().optional(),
+        replyToUsername: z.string().max(40).optional(),
+        replyToContent: z.string().max(280).optional(),
       })
       .parse(d),
   )
@@ -80,6 +83,9 @@ export const submitMessage = createServerFn({ method: "POST" })
       username: data.username,
       content: clean(data.content),
       is_incident_signal: data.isIncidentSignal,
+      reply_to_id: data.replyToId ?? null,
+      reply_to_username: data.replyToUsername ?? null,
+      reply_to_content: data.replyToContent ? clean(data.replyToContent).slice(0, 280) : null,
     });
     if (error) throw new Error(error.message);
     return { ok: true, shadow: false };
@@ -206,6 +212,9 @@ export const submitGlobalMessage = createServerFn({ method: "POST" })
         hashedId: z.string().min(8),
         username: z.string().min(3).max(40),
         content: z.string().min(1).max(1000),
+        replyToId: z.string().uuid().optional(),
+        replyToUsername: z.string().max(40).optional(),
+        replyToContent: z.string().max(280).optional(),
       })
       .parse(d),
   )
@@ -216,6 +225,9 @@ export const submitGlobalMessage = createServerFn({ method: "POST" })
       anonymous_user_hash: data.hashedId,
       username: data.username,
       content: clean(data.content),
+      reply_to_id: data.replyToId ?? null,
+      reply_to_username: data.replyToUsername ?? null,
+      reply_to_content: data.replyToContent ? clean(data.replyToContent).slice(0, 280) : null,
     });
     if (error) throw new Error(error.message);
     return { ok: true, shadow: false };
@@ -248,6 +260,9 @@ export const submitDirectMessage = createServerFn({ method: "POST" })
         username: z.string().min(3).max(40).regex(USERNAME_RE),
         recipientUsername: z.string().min(3).max(40).regex(USERNAME_RE),
         content: z.string().min(1).max(1000),
+        replyToId: z.string().uuid().optional(),
+        replyToUsername: z.string().max(40).optional(),
+        replyToContent: z.string().max(280).optional(),
       })
       .parse(d),
   )
@@ -264,6 +279,9 @@ export const submitDirectMessage = createServerFn({ method: "POST" })
       recipient_username: data.recipientUsername,
       recipient_hash: recipientHash,
       content: clean(data.content),
+      reply_to_id: data.replyToId ?? null,
+      reply_to_username: data.replyToUsername ?? null,
+      reply_to_content: data.replyToContent ? clean(data.replyToContent).slice(0, 280) : null,
     });
     if (error) throw new Error(error.message);
     return { ok: true, shadow: false };
