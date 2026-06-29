@@ -613,3 +613,49 @@ export const purgeMyActivity = createServerFn({ method: "POST" })
     ]);
     return { ok: true };
   });
+
+/**
+ * Sync the caller's identity with the server: returns the username an admin may
+ * have assigned (verified-name or latest content name) and whether the account
+ * carries a verified tick. Lets admin renames/verification reflect on the
+ * user's own device.
+ */
+export const syncIdentity = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ hashedId: z.string().min(8) }).parse(d))
+  .handler(async ({ data }) => {
+    if (!HASH_RE.test(data.hashedId)) return { username: null as string | null, verified: false };
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const h = data.hashedId;
+
+    // Verified row is authoritative for both the tick and the assigned name.
+    const { data: v } = await supabaseAdmin
+      .from("verified_users" as any)
+      .select("username")
+      .eq("user_hash", h)
+      .maybeSingle();
+    const verified = !!v;
+    let username: string | null = (v as any)?.username ?? null;
+
+    // Not verified: fall back to the most recent username used by this person,
+    // which reflects an admin rename across their content.
+    if (!username) {
+      const latest = await Promise.all([
+        supabaseAdmin.from("posts").select("username, created_at").eq("anonymous_user_hash", h).order("created_at", { ascending: false }).limit(1),
+        supabaseAdmin.from("post_comments").select("username, created_at").eq("anonymous_user_hash", h).order("created_at", { ascending: false }).limit(1),
+        supabaseAdmin.from("global_messages").select("username, created_at").eq("anonymous_user_hash", h).order("created_at", { ascending: false }).limit(1),
+        supabaseAdmin.from("community_messages").select("username, created_at").eq("anonymous_user_hash", h).order("created_at", { ascending: false }).limit(1),
+        supabaseAdmin.from("direct_messages").select("sender_username, created_at").eq("sender_hash", h).order("created_at", { ascending: false }).limit(1),
+      ]);
+      const rows: { name: string; at: string }[] = [];
+      const push = (r: any, key: string) => { const x = r.data?.[0]; if (x?.[key]) rows.push({ name: x[key], at: x.created_at }); };
+      push(latest[0], "username");
+      push(latest[1], "username");
+      push(latest[2], "username");
+      push(latest[3], "username");
+      push(latest[4], "sender_username");
+      rows.sort((a, b) => +new Date(b.at) - +new Date(a.at));
+      username = rows[0]?.name ?? null;
+    }
+
+    return { username, verified };
+  });
