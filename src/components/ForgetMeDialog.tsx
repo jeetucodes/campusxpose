@@ -90,15 +90,12 @@ export function ForgetMeDialog({
               <p className="py-4 text-center text-sm text-muted-foreground">Finding free usernames…</p>
             )}
             {suggestions.map((name) => {
-              const active = selected === name && !custom.trim();
+              const active = selected === name;
               return (
                 <button
                   key={name}
                   type="button"
-                  onClick={() => {
-                    setSelected(name);
-                    setCustom("");
-                  }}
+                  onClick={() => setSelected(name)}
                   className={cn(
                     "flex items-center gap-2 border-2 px-3 py-2 text-left text-sm transition-colors",
                     active ? "border-accent bg-accent/10" : "border-border bg-white hover:bg-surface-2",
@@ -113,15 +110,6 @@ export function ForgetMeDialog({
             })}
           </div>
 
-          <div>
-            <label className="mb-1 block text-sm font-semibold">Or type your own</label>
-            <Input
-              value={custom}
-              onChange={(e) => setCustom(e.target.value)}
-              placeholder="cool_username_123"
-              maxLength={40}
-            />
-          </div>
 
           <div className="flex items-center gap-2 border border-dashed border-success bg-success/10 px-3 py-2 text-xs text-success">
             <Shield className="h-4 w-4 shrink-0" />
