@@ -123,6 +123,7 @@ export type Database = {
           state: string
           status: string
           type: Database["public"]["Enums"]["college_type"]
+          types: Database["public"]["Enums"]["college_type"][]
         }
         Insert: {
           city: string
@@ -136,6 +137,7 @@ export type Database = {
           state: string
           status?: string
           type: Database["public"]["Enums"]["college_type"]
+          types?: Database["public"]["Enums"]["college_type"][]
         }
         Update: {
           city?: string
@@ -149,6 +151,7 @@ export type Database = {
           state?: string
           status?: string
           type?: Database["public"]["Enums"]["college_type"]
+          types?: Database["public"]["Enums"]["college_type"][]
         }
         Relationships: []
       }
@@ -167,6 +170,7 @@ export type Database = {
           total_rating: number | null
           total_reviews: number | null
           type: Database["public"]["Enums"]["college_type"]
+          types: Database["public"]["Enums"]["college_type"][]
         }
         Insert: {
           city: string
@@ -182,6 +186,7 @@ export type Database = {
           total_rating?: number | null
           total_reviews?: number | null
           type: Database["public"]["Enums"]["college_type"]
+          types?: Database["public"]["Enums"]["college_type"][]
         }
         Update: {
           city?: string
@@ -197,6 +202,7 @@ export type Database = {
           total_rating?: number | null
           total_reviews?: number | null
           type?: Database["public"]["Enums"]["college_type"]
+          types?: Database["public"]["Enums"]["college_type"][]
         }
         Relationships: []
       }
