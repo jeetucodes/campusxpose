@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useIdentity } from "@/stores/identity";
 import { submitMessage } from "@/lib/content.functions";
-import { chatSummary } from "@/lib/ai.functions";
+
 import { DEFAULT_KEYWORDS } from "@/lib/categories";
 import { useReactions } from "@/hooks/useReactions";
 import { ReactionChips, MessageActions, ReplyQuote } from "@/components/MessageReactions";
