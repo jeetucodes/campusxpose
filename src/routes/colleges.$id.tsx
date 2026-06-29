@@ -349,6 +349,7 @@ function PostCard({ post, userVote, onVoted }: { post: any; userVote: "up" | "do
   const { hashedId } = useIdentity();
   const vote = useServerFn(votePost);
   const [voting, setVoting] = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState(false);
   const doVote = async (dir: "up" | "down") => {
     if (!hashedId) return;
     setVoting(true);
