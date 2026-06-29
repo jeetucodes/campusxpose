@@ -168,11 +168,13 @@ function CollegesAdmin() {
 function CollegePanel({ open, onOpenChange, editing, onSave }: { open: boolean; onOpenChange: (v: boolean) => void; editing: Col | null; onSave: (v: any) => void }) {
   const [f, setF] = useState<any>({});
   const v = { name: "", city: "", state: "MP", type: "Engineering", established: "", description: "", latitude: "", longitude: "", ...(editing ?? {}), ...f };
+  const types: string[] = v.types && v.types.length ? v.types : [v.type];
   const set = (k: string, val: any) => setF((p: any) => ({ ...p, [k]: val }));
   const save = () => {
     if (!v.name || !v.city) { toast.error("Name and city required"); return; }
+    const selected = types.length ? types : [v.type];
     onSave({
-      name: v.name, city: v.city, state: v.state, type: v.type,
+      name: v.name, city: v.city, state: v.state, type: selected[0], types: selected,
       established: v.established ? Number(v.established) : null,
       description: v.description || null,
       latitude: v.latitude ? Number(v.latitude) : null,
