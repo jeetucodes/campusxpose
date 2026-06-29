@@ -136,11 +136,15 @@ export function useReactions(messageType: MessageType, hashedId: string | null) 
 
       try {
         await toggleReaction({ data: { hashedId, messageId, messageType, emoji } });
+        // Direct reactions have no realtime channel; reconcile from the server.
+        if (isDirect) refreshDirect();
       } catch {
         /* realtime resync will correct any divergence */
+        if (isDirect) refreshDirect();
       }
     },
-    [hashedId, messageType],
+    [hashedId, messageType, isDirect, refreshDirect],
+
   );
 
   return { byMessage, toggle };
