@@ -613,3 +613,46 @@ export const adminSetAdsEnabled = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true, enabled: data.enabled };
   });
+
+/** Admin: list recent polls (global + college) with vote counts. */
+export const adminListPolls = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: z.string(), search: z.string().optional() }).parse(d))
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let q = supabaseAdmin
+      .from("polls" as any)
+      .select("id, scope, college_id, username, question, options, created_at, expires_at")
+      .order("created_at", { ascending: false })
+      .limit(300);
+    if (data.search && data.search.trim()) {
+      const s = data.search.trim();
+      q = q.or(`question.ilike.%${s}%,username.ilike.%${s}%`);
+    }
+    const { data: polls, error } = await q;
+    if (error) throw new Error(error.message);
+    const list = (polls as any[]) ?? [];
+    const ids = list.map((p) => p.id);
+    let counts: Record<string, number> = {};
+    if (ids.length) {
+      const { data: votes } = await supabaseAdmin
+        .from("poll_votes" as any)
+        .select("poll_id")
+        .in("poll_id", ids);
+      for (const v of (votes as any[]) ?? []) {
+        counts[v.poll_id] = (counts[v.poll_id] ?? 0) + 1;
+      }
+    }
+    return list.map((p) => ({ ...p, vote_count: counts[p.id] ?? 0 }));
+  });
+
+/** Admin: delete a poll and all its votes. */
+export const adminDeletePoll = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: z.string(), pollId: z.string().uuid() }).parse(d))
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("polls" as any).delete().eq("id", data.pollId);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
