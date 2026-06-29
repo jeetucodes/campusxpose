@@ -146,7 +146,16 @@ function CollegesPage() {
             : filtered.map((c, i) => (
                 <motion.div key={c.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(i * 0.04, 0.4) }}>
                   <div className={cn("sketch-card flex h-full flex-col p-5", i % 2 ? "rotate-1" : "-rotate-1")} style={{ borderRadius: "25px 8px 22px 8px / 8px 22px 8px 25px" }}>
-                    <h3 className="font-display text-lg font-bold leading-tight">{c.name}</h3>
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="font-display text-lg font-bold leading-tight">{c.name}</h3>
+                      <button
+                        onClick={() => shareCollege(c)}
+                        className="inline-flex shrink-0 items-center justify-center rounded-md border-2 border-border bg-surface-2 p-1.5 text-muted-foreground transition-transform hover:-translate-y-0.5 hover:text-foreground"
+                        title="Share"
+                      >
+                        <Share2 className="h-4 w-4" />
+                      </button>
+                    </div>
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
                       <span className="inline-flex items-center gap-1 border border-border bg-surface-2 px-2 py-0.5 text-muted-foreground">
                         <MapPin className="h-3 w-3" />{c.city}, {c.state}
