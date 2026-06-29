@@ -22,6 +22,7 @@ import { useIdentity } from "@/stores/identity";
 import { submitCollegeRequest } from "@/lib/content.functions";
 import { CITIES, COLLEGE_TYPES, INDIAN_STATES } from "@/lib/categories";
 import { cn } from "@/lib/utils";
+import { TypeMultiSelect } from "@/components/TypeMultiSelect";
 
 export const Route = createFileRoute("/colleges/")({
   head: () => ({
