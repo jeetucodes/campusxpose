@@ -737,3 +737,23 @@ export const votePoll = createServerFn({ method: "POST" })
     }
     return { ok: true };
   });
+
+/** Delete a poll — only the user who created it can. */
+export const deletePoll = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z.object({ pollId: z.string().uuid(), hashedId: z.string().min(8) }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: poll } = await supabaseAdmin
+      .from("polls" as any)
+      .select("anonymous_user_hash")
+      .eq("id", data.pollId)
+      .maybeSingle();
+    if (!poll) return { ok: false as const };
+    if ((poll as any).anonymous_user_hash !== data.hashedId) return { ok: false as const };
+    await supabaseAdmin.from("poll_votes" as any).delete().eq("poll_id", data.pollId);
+    const { error } = await supabaseAdmin.from("polls" as any).delete().eq("id", data.pollId);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
