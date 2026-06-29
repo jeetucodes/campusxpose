@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { forgetMe, loadOrCreateIdentity } from "@/lib/identity";
+import { forgetMe, forgetMeWithUsername, loadOrCreateIdentity } from "@/lib/identity";
 
 interface IdentityState {
   hashedId: string | null;
@@ -7,6 +7,7 @@ interface IdentityState {
   isReady: boolean;
   init: () => Promise<void>;
   reset: () => Promise<void>;
+  resetWith: (username: string) => Promise<void>;
 }
 
 export const useIdentity = create<IdentityState>((set, get) => ({
@@ -20,6 +21,10 @@ export const useIdentity = create<IdentityState>((set, get) => ({
   },
   reset: async () => {
     const { hashedId, username } = await forgetMe();
+    set({ hashedId, username, isReady: true });
+  },
+  resetWith: async (chosen: string) => {
+    const { hashedId, username } = await forgetMeWithUsername(chosen);
     set({ hashedId, username, isReady: true });
   },
 }));

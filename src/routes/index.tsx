@@ -1,8 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Ghost, Search, Shield, FileWarning, Sparkles, ArrowRight, Flame, TrendingUp } from "lucide-react";
+import { Ghost, Search, Shield, FileWarning, Sparkles, ArrowRight, Flame, TrendingUp, ArrowBigUp } from "lucide-react";
 import { UserSymbol } from "@/components/UserSymbol";
 import { SiteShell } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -42,6 +42,7 @@ const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
 function Home() {
   const { data } = useSuspenseQuery(homeQueryOptions);
   const queryClient = useQueryClient();
+  const [showAllReports, setShowAllReports] = useState(false);
 
   // Auto-update top reported + stats when posts/incidents/colleges change.
   useEffect(() => {
@@ -243,7 +244,7 @@ function Home() {
         </div>
       </section>
 
-      {/* Live latest reports */}
+      {/* Top voted reports */}
       <section className="mx-auto max-w-3xl px-4 py-16">
         <div className="mb-6 flex items-center justify-between gap-3">
           <h2 className="font-display text-3xl font-bold">📰 Latest Reports</h2>
@@ -256,7 +257,7 @@ function Home() {
           </span>
         </div>
         <div className="space-y-4">
-          {(data?.recentPosts ?? []).map((p, i) => {
+          {(showAllReports ? (data?.recentPosts ?? []) : (data?.recentPosts ?? []).slice(0, 3)).map((p, i) => {
             const card = (
               <div
                 className={`sketch-card p-4 ${i % 2 ? "rotate-1" : "-rotate-1"}`}
@@ -266,7 +267,10 @@ function Home() {
                   <UserSymbol username={p.username} size="sm" />
                   <span className="font-medium text-foreground">{p.username ?? "Anonymous"}</span>
                   {p.created_at && <span suppressHydrationWarning>· {timeAgo(p.created_at)}</span>}
-                  <span className="ml-auto border border-border bg-white px-2 py-0.5 text-[11px]">
+                  <span className="ml-auto inline-flex items-center gap-1 border-2 border-border bg-white px-2 py-0.5 text-[11px] font-bold text-accent">
+                    <ArrowBigUp className="h-3.5 w-3.5" /> {p.upvotes ?? 0}
+                  </span>
+                  <span className="border border-border bg-white px-2 py-0.5 text-[11px]">
                     {categoryEmoji(p.category ?? "general")} {categoryLabel(p.category ?? "general")}
                   </span>
                 </div>
@@ -288,7 +292,15 @@ function Home() {
             <p className="text-center text-muted-foreground">Abhi koi report nahi aayi.</p>
           )}
         </div>
+        {(data?.recentPosts ?? []).length > 3 && (
+          <div className="mt-6 text-center">
+            <Button variant="outline" onClick={() => setShowAllReports((v) => !v)}>
+              {showAllReports ? "Show less" : "Read more"}
+            </Button>
+          </div>
+        )}
       </section>
+
 
       {/* Final CTA */}
       <section className="mx-auto max-w-3xl px-4 pb-20 pt-4 text-center">

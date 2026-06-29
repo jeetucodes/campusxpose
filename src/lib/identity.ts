@@ -19,6 +19,19 @@ export function generateUsername(): string {
   return `${adj}_${noun}_${num}`;
 }
 
+/** Generates `count` distinct random username candidates. */
+export function generateUsernameCandidates(count: number): string[] {
+  const out = new Set<string>();
+  let guard = 0;
+  while (out.size < count && guard < count * 20) {
+    out.add(generateUsername());
+    guard++;
+  }
+  return Array.from(out);
+}
+
+export const USERNAME_REGEX = /^[a-zA-Z0-9_]+$/;
+
 export async function sha256(input: string): Promise<string> {
   const data = new TextEncoder().encode(input);
   const buf = await crypto.subtle.digest("SHA-256", data);
@@ -53,4 +66,13 @@ export async function forgetMe(): Promise<Identity> {
   localStorage.removeItem(UID_KEY);
   localStorage.removeItem(USERNAME_KEY);
   return loadOrCreateIdentity();
+}
+
+/** Wipes the current identity and creates a new one with a chosen username. */
+export async function forgetMeWithUsername(username: string): Promise<Identity> {
+  const uid = crypto.randomUUID();
+  localStorage.setItem(UID_KEY, uid);
+  localStorage.setItem(USERNAME_KEY, username);
+  const hashedId = await sha256(uid);
+  return { hashedId, username };
 }

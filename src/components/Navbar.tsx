@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Shield, ChevronDown, Trash2 } from "lucide-react";
 import { UserSymbol } from "@/components/UserSymbol";
-import { toast } from "sonner";
 import { useIdentity } from "@/stores/identity";
 import { useDmUnread } from "@/stores/dm";
+import { ForgetMeDialog } from "@/components/ForgetMeDialog";
 import { Logo } from "@/components/Logo";
 import {
   DropdownMenu,
@@ -14,9 +14,10 @@ import {
 import { Button } from "@/components/ui/button";
 
 export function Navbar() {
-  const { username, isReady, init, reset } = useIdentity();
+  const { username, isReady, init } = useIdentity();
   const unread = useDmUnread();
   const [open, setOpen] = useState(false);
+  const [forgetOpen, setForgetOpen] = useState(false);
 
   useEffect(() => {
     init();
@@ -78,10 +79,9 @@ export function Navbar() {
               variant="destructive"
               size="sm"
               className="w-full justify-start gap-2"
-              onClick={async () => {
-                await reset();
-                toast.success("New anonymous identity generated");
+              onClick={() => {
                 setOpen(false);
+                setForgetOpen(true);
               }}
             >
               <Trash2 className="h-4 w-4" />
@@ -89,6 +89,7 @@ export function Navbar() {
             </Button>
           </DropdownMenuContent>
         </DropdownMenu>
+        <ForgetMeDialog open={forgetOpen} onOpenChange={setForgetOpen} />
       </nav>
     </header>
   );
