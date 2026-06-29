@@ -15,6 +15,7 @@ import { usePresence } from "@/hooks/usePresence";
 import { OnlineBadge, TypingIndicator } from "@/components/ChatPresence";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { AdPin } from "@/components/AdPin";
 
 export const Route = createFileRoute("/global")({
   head: () => ({
@@ -128,6 +129,8 @@ function GlobalChat() {
           </Link>
         </Button>
       </header>
+
+      <AdPin placement="global" />
 
       <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col-reverse gap-2 overflow-y-auto px-4 py-4">
         {messages.map((m) => {

@@ -28,6 +28,7 @@ import { Route as AdminCommunityRouteImport } from './routes/admin.community'
 import { Route as AdminCollegesRouteImport } from './routes/admin.colleges'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAiRouteImport } from './routes/admin.ai'
+import { Route as AdminAdsRouteImport } from './routes/admin.ads'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -124,6 +125,11 @@ const AdminAiRoute = AdminAiRouteImport.update({
   path: '/admin/ai',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAdsRoute = AdminAdsRouteImport.update({
+  id: '/admin/ads',
+  path: '/admin/ads',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -131,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/messages': typeof MessagesRoute
   '/report': typeof ReportRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/ads': typeof AdminAdsRoute
   '/admin/ai': typeof AdminAiRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/colleges': typeof AdminCollegesRoute
@@ -152,6 +159,7 @@ export interface FileRoutesByTo {
   '/messages': typeof MessagesRoute
   '/report': typeof ReportRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/ads': typeof AdminAdsRoute
   '/admin/ai': typeof AdminAiRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/colleges': typeof AdminCollegesRoute
@@ -174,6 +182,7 @@ export interface FileRoutesById {
   '/messages': typeof MessagesRoute
   '/report': typeof ReportRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/ads': typeof AdminAdsRoute
   '/admin/ai': typeof AdminAiRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/colleges': typeof AdminCollegesRoute
@@ -197,6 +206,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/report'
     | '/sitemap.xml'
+    | '/admin/ads'
     | '/admin/ai'
     | '/admin/analytics'
     | '/admin/colleges'
@@ -218,6 +228,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/report'
     | '/sitemap.xml'
+    | '/admin/ads'
     | '/admin/ai'
     | '/admin/analytics'
     | '/admin/colleges'
@@ -239,6 +250,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/report'
     | '/sitemap.xml'
+    | '/admin/ads'
     | '/admin/ai'
     | '/admin/analytics'
     | '/admin/colleges'
@@ -261,6 +273,7 @@ export interface RootRouteChildren {
   MessagesRoute: typeof MessagesRoute
   ReportRoute: typeof ReportRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  AdminAdsRoute: typeof AdminAdsRoute
   AdminAiRoute: typeof AdminAiRoute
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminCollegesRoute: typeof AdminCollegesRoute
@@ -412,6 +425,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAiRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/ads': {
+      id: '/admin/ads'
+      path: '/admin/ads'
+      fullPath: '/admin/ads'
+      preLoaderRoute: typeof AdminAdsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -421,6 +441,7 @@ const rootRouteChildren: RootRouteChildren = {
   MessagesRoute: MessagesRoute,
   ReportRoute: ReportRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  AdminAdsRoute: AdminAdsRoute,
   AdminAiRoute: AdminAiRoute,
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminCollegesRoute: AdminCollegesRoute,
