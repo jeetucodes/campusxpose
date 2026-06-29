@@ -76,7 +76,7 @@ function CollegesPage() {
       rows = rows.filter((c) => c.name.toLowerCase().includes(s) || c.city.toLowerCase().includes(s));
     }
     if (city !== "All") rows = rows.filter((c) => c.city === city);
-    if (type !== "All") rows = rows.filter((c) => c.type === type);
+    if (type !== "All") rows = rows.filter((c) => colTypes(c).includes(type));
     rows = [...rows].sort((a, b) => {
       if (sort === "reported") return b.incident_count - a.incident_count;
       if (sort === "rating") return a.total_rating - b.total_rating;
