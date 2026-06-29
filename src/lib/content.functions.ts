@@ -397,3 +397,46 @@ export const submitCollegeRequest = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true as const, shadow: false };
   });
+
+const REACTION_EMOJIS = ["👍", "👎", "❤️", "😂", "😮"] as const;
+
+export const toggleReaction = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        hashedId: z.string().min(8),
+        messageId: z.string().uuid(),
+        messageType: z.enum(["global", "community", "direct"]),
+        emoji: z.enum(REACTION_EMOJIS),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (await isBanned(data.hashedId)) return { ok: true, shadow: true };
+
+    const { data: existing } = await supabaseAdmin
+      .from("message_reactions")
+      .select("id")
+      .eq("message_id", data.messageId)
+      .eq("anonymous_user_hash", data.hashedId)
+      .eq("emoji", data.emoji)
+      .maybeSingle();
+
+    if (existing) {
+      await supabaseAdmin.from("message_reactions").delete().eq("id", existing.id);
+      return { ok: true, active: false };
+    }
+
+    const { error } = await supabaseAdmin.from("message_reactions").insert({
+      message_id: data.messageId,
+      message_type: data.messageType,
+      anonymous_user_hash: data.hashedId,
+      emoji: data.emoji,
+    });
+    // Ignore unique-violation races (already reacted)
+    if (error && (error as { code?: string }).code !== "23505") {
+      throw new Error(error.message);
+    }
+    return { ok: true, active: true };
+  });
