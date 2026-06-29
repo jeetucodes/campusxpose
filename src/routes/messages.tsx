@@ -50,6 +50,7 @@ function Messages() {
   const { hashedId, username, init } = useIdentity();
   const markRead = useDmStore((s) => s.markRead);
   const refreshUnread = useDmStore((s) => s.refresh);
+  const unreadBy = useDmStore((s) => s.unreadBy);
   const [all, setAll] = useState<DM[]>([]);
   const [text, setText] = useState("");
   const [newName, setNewName] = useState("");
@@ -223,7 +224,7 @@ function Messages() {
 
         <div className="flex-1 overflow-y-auto">
           {conversations.map((c) => {
-            const unread = useDmStore.getState().unreadBy[c.name] ?? 0;
+            const unread = unreadBy[c.name] ?? 0;
             return (
               <div
                 key={c.name}
