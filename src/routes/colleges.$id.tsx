@@ -92,6 +92,8 @@ function CollegeDetail() {
 
   const [ratingOpen, setRatingOpen] = useState(false);
   const [openCat, setOpenCat] = useState<string | null>(null);
+  const [chatVisible, setChatVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   const c = collegeQ.data;
 
