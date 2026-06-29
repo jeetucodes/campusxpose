@@ -67,3 +67,12 @@ export async function forgetMe(): Promise<Identity> {
   localStorage.removeItem(USERNAME_KEY);
   return loadOrCreateIdentity();
 }
+
+/** Wipes the current identity and creates a new one with a chosen username. */
+export async function forgetMeWithUsername(username: string): Promise<Identity> {
+  const uid = crypto.randomUUID();
+  localStorage.setItem(UID_KEY, uid);
+  localStorage.setItem(USERNAME_KEY, username);
+  const hashedId = await sha256(uid);
+  return { hashedId, username };
+}
