@@ -194,6 +194,7 @@ function GlobalChat() {
 
       <div className="border-t-2 border-dashed border-border bg-background px-4 py-3">
         <div className="mx-auto w-full max-w-3xl">
+          <TypingIndicator users={typing} className="mb-1.5 px-1" />
           {replyTo && (
             <div className="mb-2 flex items-center gap-2 rounded-md border border-border bg-surface-2/60 px-3 py-1.5 text-xs">
               <div className="min-w-0 flex-1">
