@@ -94,6 +94,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4775d11f-2679-4112-a831-752842265928/id-preview-b47b8bb1--5e5e5f3c-9e18-4ded-bf54-ed3632d01563.lovable.app-1782677617743.png" },
     ],
     links: [
+      { rel: "preconnect", href: "https://mcobkriudveoevbrmrwi.supabase.co", crossOrigin: "anonymous" },
+      { rel: "dns-prefetch", href: "https://mcobkriudveoevbrmrwi.supabase.co" },
       {
         rel: "stylesheet",
         href: appCss,
