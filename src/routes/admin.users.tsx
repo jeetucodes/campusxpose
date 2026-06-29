@@ -56,7 +56,10 @@ function UsersAdmin() {
             </div>
           );
         })}
-        {(q.data ?? []).length === 0 && <p className="text-sm text-muted-foreground">No users yet.</p>}
+        {q.isLoading && <p className="text-sm text-muted-foreground">Loading users…</p>}
+        {q.isError && <p className="text-sm text-destructive">Couldn't load users: {(q.error as Error)?.message ?? "Unknown error"}. <button className="underline" onClick={() => q.refetch()}>Retry</button></p>}
+        {!q.isLoading && !q.isError && (q.data ?? []).length === 0 && <p className="text-sm text-muted-foreground">No users yet.</p>}
+
       </div>
 
       {/* Desktop table */}
