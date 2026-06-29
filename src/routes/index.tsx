@@ -131,6 +131,8 @@ function Home() {
         </motion.div>
       </section>
 
+      <HomeAds />
+
       {/* How it works */}
       <section className="mx-auto max-w-5xl px-4 py-16">
         <h2 className="mb-10 text-center font-display text-4xl font-bold">How It Works</h2>
