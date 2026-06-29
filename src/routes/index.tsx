@@ -12,6 +12,8 @@ import { categoryLabel, categoryEmoji } from "@/lib/categories";
 import { timeAgo } from "@/lib/format";
 import { HomeAds } from "@/components/HomeAds";
 import { TrustSection } from "@/components/TrustSection";
+import { useVerifiedUsernames } from "@/hooks/useVerified";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 
 const homeQueryOptions = queryOptions({
   queryKey: ["home"],
