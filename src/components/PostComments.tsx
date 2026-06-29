@@ -166,10 +166,12 @@ export function PostComments({ postId, onCount }: { postId: string; onCount?: (n
   );
 }
 
-function CommentNode({ node, depth, onReply }: { node: Node; depth: number; onReply: (c: Comment) => void }) {
+function CommentNode({ node, depth, onReply, onDelete, myHash }: { node: Node; depth: number; onReply: (c: Comment) => void; onDelete: (c: Comment) => void; myHash: string | null }) {
   const isReply = depth > 0;
   const hasChildren = node.children.length > 0;
   const verified = useVerifiedUsernames();
+  const isMine = !!myHash && node.anonymous_user_hash === myHash;
+
 
   return (
     <div className={cn("animate-fade-in", isReply && "relative")}>
