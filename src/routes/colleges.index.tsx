@@ -270,7 +270,7 @@ function RequestCollegeDialog() {
           name: form.name.trim(),
           city: form.city.trim(),
           state: form.state.trim(),
-          type: form.type as any,
+          types: types as any,
           established: form.established ? Number(form.established) : null,
           description: form.description.trim() || undefined,
         },
