@@ -251,7 +251,7 @@ function CollegeDetail() {
                       {catPosts.map((p) => (
                         <div key={p.id} className="rounded-lg border border-border bg-surface-2 p-3 text-sm">
                           <div className="line-clamp-2">{p.content}</div>
-                          <div className="text-xs text-muted-foreground">{p.username} · {timeAgo(p.created_at)}</div>
+                          <div className="inline-flex items-center gap-1 text-xs text-muted-foreground">{p.username}{p.username && verified.has(p.username) && <VerifiedBadge className="h-3.5 w-3.5" />} · {timeAgo(p.created_at)}</div>
                         </div>
                       ))}
                       {count === 0 && <p className="text-sm text-muted-foreground">No reports in this category.</p>}
