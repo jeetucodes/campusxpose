@@ -176,11 +176,13 @@ function CollegeDetail() {
         <section className="mt-8">
           <h2 className="mb-4 flex items-center gap-2 text-xl font-bold">
             Incident Reports
-            <span className="rounded-full bg-destructive/15 px-2 py-0.5 text-sm text-destructive">{incidents.length}</span>
+            <span className="rounded-full bg-destructive/15 px-2 py-0.5 text-sm text-destructive">{incidents.length + posts.length}</span>
           </h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {INCIDENT_CATEGORIES.map((cat) => {
               const list = incidents.filter((i) => i.category === cat.key);
+              const catPosts = posts.filter((p) => (p.category ?? "general") === cat.key);
+              const count = list.length + catPosts.length;
               const sev = list.length ? Math.max(...list.map((i) => i.severity ?? 1)) : 0;
               const open = openCat === cat.key;
               return (
@@ -196,7 +198,7 @@ function CollegeDetail() {
                     <div className="text-2xl">{cat.emoji}</div>
                     <div className="mt-1 text-sm font-medium">{cat.label}</div>
                     <div className="mt-2 flex items-center gap-2">
-                      <span className="text-lg font-bold">{list.length}</span>
+                      <span className="text-lg font-bold">{count}</span>
                       {sev > 0 && <span className={cn("rounded-full border px-1.5 py-0.5 text-[10px]", severityColor(sev))}>S{sev}</span>}
                       <Trend t={list[0]?.trend} />
                     </div>
@@ -209,7 +211,13 @@ function CollegeDetail() {
                           <div className="text-xs text-muted-foreground">{i.affected_count} affected · severity {i.severity}</div>
                         </div>
                       ))}
-                      {list.length === 0 && <p className="text-sm text-muted-foreground">No incidents in this category.</p>}
+                      {catPosts.map((p) => (
+                        <div key={p.id} className="rounded-lg border border-border bg-surface-2 p-3 text-sm">
+                          <div className="line-clamp-2">{p.content}</div>
+                          <div className="text-xs text-muted-foreground">{p.username} · {timeAgo(p.created_at)}</div>
+                        </div>
+                      ))}
+                      {count === 0 && <p className="text-sm text-muted-foreground">No reports in this category.</p>}
                     </div>
                   )}
                 </div>
@@ -217,6 +225,7 @@ function CollegeDetail() {
             })}
           </div>
         </section>
+
 
         {/* Clustered incidents */}
         <section className="mt-8">
