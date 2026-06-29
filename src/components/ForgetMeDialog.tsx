@@ -56,25 +56,12 @@ export function ForgetMeDialog({
   }, [open, shuffle]);
 
   const apply = async () => {
-    const customTrim = custom.trim();
-    const chosen = customTrim || selected;
-    if (!chosen) return toast.error("Pick a username first");
+    if (!selected) return toast.error("Pick a username first");
 
     setApplying(true);
     try {
-      if (customTrim) {
-        if (!USERNAME_REGEX.test(customTrim) || customTrim.length < 3 || customTrim.length > 40) {
-          toast.error("Use 3-40 letters, numbers or underscores only");
-          return;
-        }
-        const { available } = await filterTakenUsernames({ data: { names: [customTrim] } });
-        if (!available.includes(customTrim)) {
-          toast.error("That username is already taken");
-          return;
-        }
-      }
-      await resetWith(chosen);
-      toast.success(`You are now ${chosen}`);
+      await resetWith(selected);
+      toast.success(`You are now ${selected}`);
       onOpenChange(false);
     } catch {
       toast.error("Could not switch identity");
