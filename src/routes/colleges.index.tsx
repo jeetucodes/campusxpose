@@ -28,7 +28,9 @@ export const Route = createFileRoute("/colleges/")({
     meta: [
       { title: "Find Your College's Truth — CampusXpose" },
       { name: "description", content: "Browse Indian colleges, see ratings and incident reports. Search by name or city." },
+      { property: "og:url", content: "https://campusxpose.online/colleges" },
     ],
+    links: [{ rel: "canonical", href: "https://campusxpose.online/colleges" }],
   }),
   component: CollegesPage,
 });
