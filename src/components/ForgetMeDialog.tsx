@@ -48,7 +48,6 @@ export function ForgetMeDialog({
 
   useEffect(() => {
     if (open) {
-      setCustom("");
       shuffle();
     }
   }, [open, shuffle]);
