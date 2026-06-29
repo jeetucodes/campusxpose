@@ -190,11 +190,28 @@ function CommentNode({ node, depth, onReply, onDelete, myHash }: { node: Node; d
         </div>
 
         <div className="min-w-0 flex-1 pb-1">
-          <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1 font-medium text-foreground">{node.username}{node.username && verified.has(node.username) && <VerifiedBadge className="h-3.5 w-3.5" />}</span>
-            <span>· {timeAgo(node.created_at)}</span>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+              <span className="inline-flex items-center gap-1 font-medium text-foreground">{node.username}{node.username && verified.has(node.username) && <VerifiedBadge className="h-3.5 w-3.5" />}</span>
+              <span>· {timeAgo(node.created_at)}</span>
+            </div>
+            {isMine && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="ml-auto shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground" aria-label="Comment options">
+                    <MoreVertical className="h-4 w-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => onDelete(node)}>
+                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
           <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-relaxed">{node.content}</p>
+
           <button
             onClick={() => onReply(node)}
             className="mt-1.5 inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
