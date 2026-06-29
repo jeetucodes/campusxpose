@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import { Search, Flame, MapPin, ArrowRight, SlidersHorizontal, Plus } from "lucide-react";
+import { Search, Flame, MapPin, ArrowRight, SlidersHorizontal, Plus, Share2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteShell } from "@/components/Footer";
 import { StarRating } from "@/components/StarRating";
