@@ -55,6 +55,7 @@ function Messages() {
   const { to } = Route.useSearch();
   const navigate = useNavigate();
   const { hashedId, username, init } = useIdentity();
+  const verified = useVerifiedUsernames();
   const markRead = useDmStore((s) => s.markRead);
   const refreshUnread = useDmStore((s) => s.refresh);
   const unreadBy = useDmStore((s) => s.unreadBy);
