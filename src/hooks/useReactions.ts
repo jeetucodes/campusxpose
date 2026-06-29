@@ -92,14 +92,19 @@ export function useReactions(messageType: MessageType, hashedId: string | null) 
   const toggle = useCallback(
     async (messageId: string, emoji: ReactionEmoji) => {
       if (!hashedId) return;
-      // Optimistic update
+      // Optimistic update — one reaction per user per message.
       setRows((prev) => {
-        const mine = prev.find(
+        const sameEmoji = prev.find(
           (r) => r.message_id === messageId && r.emoji === emoji && r.anonymous_user_hash === hashedId,
         );
-        if (mine) return prev.filter((r) => r.id !== mine.id);
+        // Toggling the same emoji removes it.
+        if (sameEmoji) return prev.filter((r) => r.id !== sameEmoji.id);
+        // Otherwise drop any other reaction of mine on this message, then add.
+        const withoutMine = prev.filter(
+          (r) => !(r.message_id === messageId && r.anonymous_user_hash === hashedId),
+        );
         return [
-          ...prev,
+          ...withoutMine,
           {
             id: `optimistic-${messageId}-${emoji}-${hashedId}`,
             message_id: messageId,
@@ -108,6 +113,7 @@ export function useReactions(messageType: MessageType, hashedId: string | null) 
           },
         ];
       });
+
       try {
         await toggleReaction({ data: { hashedId, messageId, messageType, emoji } });
       } catch {
