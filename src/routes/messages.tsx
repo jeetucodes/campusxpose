@@ -329,7 +329,7 @@ function Messages() {
                       />
                       <div
                         className={cn(
-                          "max-w-[80%] border-2 border-border px-3 py-2 text-sm shadow-ink-soft",
+                          "w-fit max-w-[85%] border-2 border-border px-3 py-2 text-sm shadow-ink-soft",
                           own ? "bg-accent text-accent-foreground" : "bg-white",
                         )}
                         style={{
@@ -338,14 +338,22 @@ function Messages() {
                             : "6px 18px 18px 18px",
                         }}
                       >
+                        {!own && (
+                          <div className="mb-0.5 text-xs font-bold text-accent">
+                            {m.sender_username}
+                          </div>
+                        )}
                         <ReplyQuote username={m.reply_to_username} content={m.reply_to_content} align={own ? "end" : "start"} />
-                        <div className="whitespace-pre-wrap break-words leading-relaxed">
-                          {m.content}
-                        </div>
-                        <div className={cn("mt-0.5 text-[10px]", own ? "text-accent-foreground/70" : "text-muted-foreground")}>
-                          {timeAgo(m.created_at)}
+                        <div className="flex flex-wrap items-end justify-end gap-x-2">
+                          <span className="whitespace-pre-wrap break-words leading-relaxed">
+                            {m.content}
+                          </span>
+                          <span className={cn("shrink-0 text-[10px]", own ? "text-accent-foreground/70" : "text-muted-foreground")}>
+                            {timeAgo(m.created_at)}
+                          </span>
                         </div>
                       </div>
+
                     </div>
                     </MessageGestures>
                     <ReactionChips reactions={reactions} onToggle={(e) => toggle(m.id, e)} align={own ? "end" : "start"} />
