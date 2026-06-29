@@ -265,7 +265,7 @@ function Home() {
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <UserSymbol username={p.username} size="sm" />
                   <span className="font-medium text-foreground">{p.username ?? "Anonymous"}</span>
-                  {p.created_at && <span>· {timeAgo(p.created_at)}</span>}
+                  {p.created_at && <span suppressHydrationWarning>· {timeAgo(p.created_at)}</span>}
                   <span className="ml-auto border border-border bg-white px-2 py-0.5 text-[11px]">
                     {categoryEmoji(p.category ?? "general")} {categoryLabel(p.category ?? "general")}
                   </span>

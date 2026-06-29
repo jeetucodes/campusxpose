@@ -102,6 +102,18 @@ export const submitRating = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     if (await isBanned(data.hashedId)) return { ok: true, shadow: true };
+
+    // One rating per user per college.
+    const { data: existing } = await supabaseAdmin
+      .from("ratings")
+      .select("id")
+      .eq("college_id", data.collegeId)
+      .eq("anonymous_user_hash", data.hashedId)
+      .maybeSingle();
+    if (existing) {
+      return { ok: false, alreadyRated: true };
+    }
+
     const overall =
       (data.faculty + data.placement + data.infrastructure + data.campusLife + data.value) / 5;
     const { error } = await supabaseAdmin.from("ratings").insert({
@@ -114,7 +126,13 @@ export const submitRating = createServerFn({ method: "POST" })
       value_rating: data.value,
       overall,
     });
-    if (error) throw new Error(error.message);
+    if (error) {
+      // Unique-constraint violation -> already rated (race condition safe).
+      if ((error as { code?: string }).code === "23505") {
+        return { ok: false, alreadyRated: true };
+      }
+      throw new Error(error.message);
+    }
 
     // Recompute college aggregate
     const { data: col } = await supabaseAdmin
@@ -133,6 +151,7 @@ export const submitRating = createServerFn({ method: "POST" })
     }
     return { ok: true, shadow: false };
   });
+
 
 export const votePost = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
