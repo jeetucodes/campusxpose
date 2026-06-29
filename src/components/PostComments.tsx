@@ -239,7 +239,7 @@ function CommentNode({ node, depth, onReply, onDelete, myHash, isAdmin }: { node
             style={{ animation: "thread-draw 0.5s ease-out forwards" }}
           />
           {node.children.map((child) => (
-            <CommentNode key={child.id} node={child} depth={depth + 1} onReply={onReply} onDelete={onDelete} myHash={myHash} />
+            <CommentNode key={child.id} node={child} depth={depth + 1} onReply={onReply} onDelete={onDelete} myHash={myHash} isAdmin={isAdmin} />>
           ))}
         </div>
       )}
