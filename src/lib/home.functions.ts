@@ -20,6 +20,7 @@ export type HomeData = {
     created_at: string | null;
     college_id: string | null;
     college_name: string | null;
+    upvotes: number | null;
   }>;
 };
 
@@ -41,9 +42,10 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(
         supabase.from("incidents").select("college_id"),
         supabase
           .from("posts")
-          .select("id, username, content, category, created_at, college_id")
+          .select("id, username, content, category, created_at, college_id, upvotes")
+          .order("upvotes", { ascending: false })
           .order("created_at", { ascending: false })
-          .limit(6),
+          .limit(12),
       ]);
 
     // Live report counts per college (posts + incidents).
@@ -82,6 +84,7 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(
         created_at: (p.created_at ?? null) as string | null,
         college_id: (p.college_id ?? null) as string | null,
         college_name: collegeNames.get(p.college_id as string) ?? null,
+        upvotes: (p.upvotes ?? 0) as number | null,
       })),
     };
   },
