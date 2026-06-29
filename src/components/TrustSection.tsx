@@ -74,8 +74,20 @@ const FAQS = [
     a: "Sirf tumhari report ka content (text/proof) save hota hai taaki dusre students dekh saken. Koi personal identity attached nahi hoti.",
   },
   {
+    q: "Kya app meri location ya IP track karta hai?",
+    a: "Nahi. Hum tumhari GPS location, IP address ya device ID kabhi capture nahi karte. Iska matlab tumhare physical location ka koi record hi nahi banta.",
+  },
+  {
+    q: "Kya app koi permission maangta hai (camera, contacts, location)?",
+    a: "Nahi. App khud se koi permission nahi maangta. Sirf jab tum khud proof upload karte ho, tab tum apni marzi se file choose karte ho — wahi.",
+  },
+  {
     q: "Agar main apna data delete karna chahun to?",
     a: "Top-right menu me 'Forget Me' option hai. Ek click me tumhari local identity mit jaati hai. Kabhi bhi kar sakte ho.",
+  },
+  {
+    q: "Kya police ya college mujhe legally trace kar sakte hain?",
+    a: "Trace karne ke liye koi personal data, IP ya login record hona chahiye — humare paas wahi nahi hai. Jo cheez exist hi nahi karti, woh kisi ko di bhi nahi ja sakti.",
   },
 ];
 
