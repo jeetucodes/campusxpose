@@ -18,6 +18,7 @@ import { TypingIndicator } from "@/components/ChatPresence";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { AdPin } from "@/components/AdPin";
+import { ChatPolls } from "@/components/ChatPolls";
 
 export const Route = createFileRoute("/global")({
   head: () => ({
