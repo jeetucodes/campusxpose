@@ -190,7 +190,7 @@ function CollegePanel({ open, onOpenChange, editing, onSave }: { open: boolean; 
           <Field label="Name *"><Input value={v.name} onChange={(e) => set("name", e.target.value)} className="bg-surface-2" /></Field>
           <Field label="City *"><Input value={v.city} onChange={(e) => set("city", e.target.value)} className="bg-surface-2" /></Field>
           <Field label="State"><Select value={v.state} onValueChange={(x) => set("state", x)}><SelectTrigger className="bg-surface-2"><SelectValue /></SelectTrigger><SelectContent>{INDIAN_STATES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent></Select></Field>
-          <Field label="Type"><Select value={v.type} onValueChange={(x) => set("type", x)}><SelectTrigger className="bg-surface-2"><SelectValue /></SelectTrigger><SelectContent>{COLLEGE_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></Field>
+          <Field label="Types (select one or more)"><TypeMultiSelect value={types} onChange={(next) => set("types", next)} /></Field>
           <Field label="Established"><Input type="number" value={v.established} onChange={(e) => set("established", e.target.value)} className="bg-surface-2" /></Field>
           <Field label="Description"><Textarea value={v.description} onChange={(e) => set("description", e.target.value)} className="bg-surface-2" /></Field>
           <div className="grid grid-cols-2 gap-2">
