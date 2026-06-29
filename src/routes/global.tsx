@@ -12,6 +12,8 @@ import { useReactions } from "@/hooks/useReactions";
 import { ReactionChips, MessageActions, ReplyQuote } from "@/components/MessageReactions";
 import { MessageGestures } from "@/components/MessageGestures";
 import { usePresence } from "@/hooks/usePresence";
+import { useVerifiedUsernames } from "@/hooks/useVerified";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { TypingIndicator } from "@/components/ChatPresence";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
