@@ -268,7 +268,7 @@ function Messages() {
                   <UserSymbol username={c.name} size="sm" />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 truncate font-medium">
-                      {c.name}
+                      {c.name}{c.name && verified.has(c.name) && <VerifiedBadge className="h-3.5 w-3.5" />}
                       {unread > 0 && active !== c.name && (
                         <span className="grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[10px] font-bold leading-none text-accent-foreground">
                           {unread > 9 ? "9+" : unread}
