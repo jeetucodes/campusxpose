@@ -164,34 +164,7 @@ function Community() {
 
         <ChatPolls scope="college" collegeId={collegeId} hashedId={hashedId} username={username} />
 
-        {/* AI summary bar */}
-        <div className="border-b border-border bg-surface-2/40">
-          <button onClick={() => setSummaryOpen((o) => !o)} className="flex w-full items-center gap-2 px-3 py-2.5 text-sm font-medium sm:px-4">
-            <Sparkles className="h-4 w-4 text-primary" /> Today's Key Issues
-            {summaryOpen ? <ChevronUp className="ml-auto h-4 w-4 text-muted-foreground" /> : <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground" />}
-          </button>
-          {summaryOpen && (
-            <div className="px-3 pb-3 text-sm sm:px-4">
-              {summary?.key_issues?.length ? (
-                <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
-                  {summary.key_issues.map((k, i) => <li key={i}>{k}</li>)}
-                </ul>
-              ) : (
-                <p className="text-muted-foreground">No summary yet.</p>
-              )}
-              <Button size="sm" variant="outline" className="mt-2 rounded-full" onClick={loadSummary} disabled={loadingSummary}>
-                <RefreshCw className={cn("mr-1 h-3.5 w-3.5", loadingSummary && "animate-spin")} /> {loadingSummary ? "Analyzing..." : "Refresh"}
-              </Button>
-            </div>
-          )}
-        </div>
 
-        {showRules && (
-          <div className="flex items-center gap-2 bg-primary/10 px-3 py-2 text-xs text-primary sm:px-4">
-            Stay anonymous. Share truth. No personal attacks.
-            <button className="ml-auto shrink-0" onClick={() => setShowRules(false)}><X className="h-4 w-4" /></button>
-          </div>
-        )}
 
         {/* messages */}
         <div className="flex flex-1 flex-col-reverse gap-3 overflow-y-auto px-3 py-4 sm:px-4">
