@@ -9,7 +9,7 @@ type PresenceMeta = { username: string; hash: string };
  * - `typing`: usernames (excluding self) currently typing.
  * - `notifyTyping`: call on every keystroke; auto-clears after a pause.
  */
-export function usePresence(room: string, username?: string, hash?: string) {
+export function usePresence(room: string, username?: string | null, hash?: string | null) {
   const [online, setOnline] = useState(0);
   const [typing, setTyping] = useState<string[]>([]);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
