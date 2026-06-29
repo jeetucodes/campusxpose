@@ -79,10 +79,9 @@ export function Navbar() {
               variant="destructive"
               size="sm"
               className="w-full justify-start gap-2"
-              onClick={async () => {
-                await reset();
-                toast.success("New anonymous identity generated");
+              onClick={() => {
                 setOpen(false);
+                setForgetOpen(true);
               }}
             >
               <Trash2 className="h-4 w-4" />
@@ -90,6 +89,7 @@ export function Navbar() {
             </Button>
           </DropdownMenuContent>
         </DropdownMenu>
+        <ForgetMeDialog open={forgetOpen} onOpenChange={setForgetOpen} />
       </nav>
     </header>
   );
