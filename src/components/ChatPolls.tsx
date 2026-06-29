@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { BarChart3, Plus, Clock, X, Check, ChevronDown } from "lucide-react";
+import { BarChart3, Plus, Clock, X, Check, ChevronDown, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { createPoll, votePoll } from "@/lib/content.functions";
+import { createPoll, votePoll, deletePoll } from "@/lib/content.functions";
 import { usePolls, type Poll, type PollVote } from "@/hooks/usePolls";
 import { cn } from "@/lib/utils";
 
@@ -34,8 +34,26 @@ function PollItem({
   hashedId: string | null;
 }) {
   const voteFn = useServerFn(votePoll);
+  const deleteFn = useServerFn(deletePoll);
   const [pending, setPending] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [localChoice, setLocalChoice] = useState<number | null>(null);
+  const owned = !!hashedId && poll.anonymous_user_hash === hashedId;
+
+  const remove = async () => {
+    if (!hashedId || deleting) return;
+    if (!confirm("Delete this poll?")) return;
+    setDeleting(true);
+    try {
+      const res = await deleteFn({ data: { pollId: poll.id, hashedId } });
+      if (!res?.ok) toast.error("Could not delete poll");
+      else toast.success("Poll deleted");
+    } catch {
+      toast.error("Could not delete poll");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const mine = useMemo(
     () => votes.find((v) => v.anonymous_user_hash === hashedId)?.option_index ?? null,
@@ -72,6 +90,16 @@ function PollItem({
         <span className="ml-auto inline-flex items-center gap-1">
           <Clock className="h-3 w-3" /> {timeLeft(poll.expires_at)}
         </span>
+        {owned && (
+          <button
+            onClick={remove}
+            disabled={deleting}
+            aria-label="Delete poll"
+            className="shrink-0 text-muted-foreground hover:text-destructive disabled:opacity-50"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
       <div className="mb-2 text-sm font-semibold">{poll.question}</div>
       <div className="space-y-1.5">
