@@ -210,16 +210,8 @@ function Messages() {
                   {timeAgo(c.last.created_at)}
                 </div>
               </Link>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
-                aria-label={`Delete conversation with ${c.name}`}
-                onClick={() => deleteConversation(c.name)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
             </div>
+
           ))}
           {conversations.length === 0 && (
             <p className="px-4 py-8 text-center text-sm text-muted-foreground">
