@@ -90,6 +90,16 @@ function PollItem({
         <span className="ml-auto inline-flex items-center gap-1">
           <Clock className="h-3 w-3" /> {timeLeft(poll.expires_at)}
         </span>
+        {owned && (
+          <button
+            onClick={remove}
+            disabled={deleting}
+            aria-label="Delete poll"
+            className="shrink-0 text-muted-foreground hover:text-destructive disabled:opacity-50"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
       <div className="mb-2 text-sm font-semibold">{poll.question}</div>
       <div className="space-y-1.5">
