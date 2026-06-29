@@ -440,3 +440,36 @@ export const toggleReaction = createServerFn({ method: "POST" })
     }
     return { ok: true, active: true };
   });
+
+export const filterTakenUsernames = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        names: z.array(z.string().min(3).max(40).regex(USERNAME_RE)).min(1).max(40),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const names = Array.from(new Set(data.names));
+    const taken = new Set<string>();
+
+    const [posts, global, community, dmSent, dmRecv] = await Promise.all([
+      supabaseAdmin.from("posts").select("username").in("username", names),
+      supabaseAdmin.from("global_messages").select("username").in("username", names),
+      supabaseAdmin.from("community_messages").select("username").in("username", names),
+      supabaseAdmin.from("direct_messages").select("sender_username").in("sender_username", names),
+      supabaseAdmin.from("direct_messages").select("recipient_username").in("recipient_username", names),
+    ]);
+
+    for (const r of posts.data ?? []) if (r.username) taken.add(r.username);
+    for (const r of global.data ?? []) if (r.username) taken.add(r.username);
+    for (const r of community.data ?? []) if (r.username) taken.add(r.username);
+    for (const r of dmSent.data ?? []) if (r.sender_username) taken.add(r.sender_username);
+    for (const r of dmRecv.data ?? []) if (r.recipient_username) taken.add(r.recipient_username);
+
+    return {
+      taken: Array.from(taken),
+      available: names.filter((n) => !taken.has(n)),
+    };
+  });
