@@ -19,6 +19,8 @@ import { submitRating, votePost } from "@/lib/content.functions";
 import { cn } from "@/lib/utils";
 import { UserSymbol } from "@/components/UserSymbol";
 import { PostComments } from "@/components/PostComments";
+import { useVerifiedUsernames } from "@/hooks/useVerified";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 
 export const Route = createFileRoute("/colleges/$id")({
   loader: async ({ params }) => {
