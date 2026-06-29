@@ -303,6 +303,41 @@ export const fetchDirectMessages = createServerFn({ method: "POST" })
     return { messages: rows };
   });
 
+export const deleteDirectConversation = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        hashedId: z.string().min(8),
+        otherUsername: z.string().min(3).max(40).regex(USERNAME_RE),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Authorize strictly by the caller's secret identity hash. Only delete
+    // messages in the conversation between the caller and the other party.
+    if (!HASH_RE.test(data.hashedId)) {
+      throw new Error("Invalid identity");
+    }
+    const [sent, received] = await Promise.all([
+      supabaseAdmin
+        .from("direct_messages")
+        .delete()
+        .eq("sender_hash", data.hashedId)
+        .eq("recipient_username", data.otherUsername),
+      supabaseAdmin
+        .from("direct_messages")
+        .delete()
+        .eq("recipient_hash", data.hashedId)
+        .eq("sender_username", data.otherUsername),
+    ]);
+    if (sent.error) throw new Error(sent.error.message);
+    if (received.error) throw new Error(received.error.message);
+    return { ok: true };
+  });
+
+
+
 
 const COLLEGE_TYPES = ["Engineering", "Medical", "Arts", "Commerce", "University", "Research"] as const;
 

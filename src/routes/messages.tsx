@@ -1,13 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Send, MessageCircle, Globe, ArrowLeft, Plus } from "lucide-react";
+import { Send, MessageCircle, Globe, ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useIdentity } from "@/stores/identity";
 import { UserSymbol } from "@/components/UserSymbol";
-import { submitDirectMessage, fetchDirectMessages } from "@/lib/content.functions";
+import { submitDirectMessage, fetchDirectMessages, deleteDirectConversation } from "@/lib/content.functions";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -123,6 +123,29 @@ function Messages() {
     navigate({ to: "/messages", search: { to: name } });
   };
 
+  const deleteConversation = async (other: string) => {
+    if (!hashedId) return;
+    if (!window.confirm(`Delete all messages with ${other}? This can't be undone.`)) return;
+    setAll((prev) =>
+      prev.filter(
+        (m) =>
+          !(
+            (m.sender_username === username && m.recipient_username === other) ||
+            (m.sender_username === other && m.recipient_username === username)
+          ),
+      ),
+    );
+    try {
+      await deleteDirectConversation({ data: { hashedId, otherUsername: other } });
+      toast.success("Conversation deleted");
+      if (active === other) navigate({ to: "/messages", search: {} });
+      await load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Delete failed");
+      await load();
+    }
+  };
+
   return (
     <div className="flex h-[calc(100vh-4rem)] bg-background">
       {/* Conversation list */}
@@ -163,27 +186,40 @@ function Messages() {
 
         <div className="flex-1 overflow-y-auto">
           {conversations.map((c) => (
-            <Link
+            <div
               key={c.name}
-              to="/messages"
-              search={{ to: c.name }}
               className={cn(
-                "flex items-center gap-3 border-b border-dashed border-border px-4 py-3 transition-colors hover:bg-accent/10",
+                "group flex items-center gap-3 border-b border-dashed border-border px-4 py-3 transition-colors hover:bg-accent/10",
                 active === c.name && "bg-accent/15",
               )}
             >
-              <UserSymbol username={c.name} size="sm" />
-              <div className="min-w-0 flex-1">
-                <div className="truncate font-medium">{c.name}</div>
-                <div className="truncate text-xs text-muted-foreground">
-                  {c.last.sender_username === username ? "You: " : ""}
-                  {c.last.content}
+              <Link
+                to="/messages"
+                search={{ to: c.name }}
+                className="flex min-w-0 flex-1 items-center gap-3"
+              >
+                <UserSymbol username={c.name} size="sm" />
+                <div className="min-w-0 flex-1">
+                  <div className="truncate font-medium">{c.name}</div>
+                  <div className="truncate text-xs text-muted-foreground">
+                    {c.last.sender_username === username ? "You: " : ""}
+                    {c.last.content}
+                  </div>
                 </div>
-              </div>
-              <div className="shrink-0 text-[10px] text-muted-foreground">
-                {timeAgo(c.last.created_at)}
-              </div>
-            </Link>
+                <div className="shrink-0 text-[10px] text-muted-foreground">
+                  {timeAgo(c.last.created_at)}
+                </div>
+              </Link>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
+                aria-label={`Delete conversation with ${c.name}`}
+                onClick={() => deleteConversation(c.name)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
           ))}
           {conversations.length === 0 && (
             <p className="px-4 py-8 text-center text-sm text-muted-foreground">
@@ -218,6 +254,15 @@ function Messages() {
                   Anonymous direct message
                 </div>
               </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="ml-auto text-muted-foreground hover:text-destructive"
+                aria-label={`Delete conversation with ${active}`}
+                onClick={() => deleteConversation(active)}
+              >
+                <Trash2 className="h-5 w-5" />
+              </Button>
             </header>
 
             <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-2 overflow-y-auto px-4 py-4">
