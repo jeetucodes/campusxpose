@@ -151,8 +151,8 @@ function GlobalChat() {
                     )}
                     <div
                       className={cn(
-                        "border-2 border-border px-3 py-2 text-sm shadow-ink-soft",
-                        own ? "bg-accent/15" : "bg-white",
+                        "w-fit max-w-full border-2 border-border px-3 py-2 text-sm shadow-ink-soft",
+                        own ? "bg-accent text-accent-foreground" : "bg-white",
                       )}
                       style={{ borderRadius: "16px 6px 18px 6px / 6px 18px 6px 16px" }}
                     >
@@ -166,11 +166,14 @@ function GlobalChat() {
                         </Link>
                       )}
                       <ReplyQuote username={m.reply_to_username} content={m.reply_to_content} align={own ? "end" : "start"} />
-                      <div className="whitespace-pre-wrap break-words">{m.content}</div>
-                      <div className="mt-0.5 text-[10px] text-muted-foreground">
-                        {timeAgo(m.created_at)}
+                      <div className="flex flex-wrap items-end justify-end gap-x-2">
+                        <span className="whitespace-pre-wrap break-words">{m.content}</span>
+                        <span className={cn("shrink-0 text-[10px]", own ? "text-accent-foreground/70" : "text-muted-foreground")}>
+                          {timeAgo(m.created_at)}
+                        </span>
                       </div>
                     </div>
+
                     {!own && (
                       <MessageActions
                         className="hidden transition-opacity md:flex md:opacity-0 md:group-hover:opacity-100"
