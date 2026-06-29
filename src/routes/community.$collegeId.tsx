@@ -225,7 +225,7 @@ function Community() {
                           m.is_incident_signal && !own && "border-l-2 border-l-warning",
                         )}
                       >
-                        {!own && <div className="mb-0.5 text-xs font-semibold text-primary/80">{m.username}</div>}
+                        {!own && <div className="mb-0.5 inline-flex items-center gap-1 text-xs font-semibold text-primary/80">{m.username}{m.username && verified.has(m.username) && <VerifiedBadge className="h-3.5 w-3.5" />}</div>}
                         <ReplyQuote username={m.reply_to_username} content={m.reply_to_content} align={own ? "end" : "start"} />
                         <div className="whitespace-pre-wrap break-words leading-relaxed">{m.content}</div>
                       </div>
