@@ -26,6 +26,7 @@ import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminIncidentsRouteImport } from './routes/admin.incidents'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminCommunityRouteImport } from './routes/admin.community'
+import { Route as AdminCommentsRouteImport } from './routes/admin.comments'
 import { Route as AdminCollegesRouteImport } from './routes/admin.colleges'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAiRouteImport } from './routes/admin.ai'
@@ -116,6 +117,11 @@ const AdminCommunityRoute = AdminCommunityRouteImport.update({
   path: '/admin/community',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminCommentsRoute = AdminCommentsRouteImport.update({
+  id: '/admin/comments',
+  path: '/admin/comments',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminCollegesRoute = AdminCollegesRouteImport.update({
   id: '/admin/colleges',
   path: '/admin/colleges',
@@ -148,6 +154,7 @@ export interface FileRoutesByFullPath {
   '/admin/ai': typeof AdminAiRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/colleges': typeof AdminCollegesRoute
+  '/admin/comments': typeof AdminCommentsRoute
   '/admin/community': typeof AdminCommunityRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/incidents': typeof AdminIncidentsRoute
@@ -171,6 +178,7 @@ export interface FileRoutesByTo {
   '/admin/ai': typeof AdminAiRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/colleges': typeof AdminCollegesRoute
+  '/admin/comments': typeof AdminCommentsRoute
   '/admin/community': typeof AdminCommunityRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/incidents': typeof AdminIncidentsRoute
@@ -195,6 +203,7 @@ export interface FileRoutesById {
   '/admin/ai': typeof AdminAiRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/colleges': typeof AdminCollegesRoute
+  '/admin/comments': typeof AdminCommentsRoute
   '/admin/community': typeof AdminCommunityRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/incidents': typeof AdminIncidentsRoute
@@ -220,6 +229,7 @@ export interface FileRouteTypes {
     | '/admin/ai'
     | '/admin/analytics'
     | '/admin/colleges'
+    | '/admin/comments'
     | '/admin/community'
     | '/admin/dashboard'
     | '/admin/incidents'
@@ -243,6 +253,7 @@ export interface FileRouteTypes {
     | '/admin/ai'
     | '/admin/analytics'
     | '/admin/colleges'
+    | '/admin/comments'
     | '/admin/community'
     | '/admin/dashboard'
     | '/admin/incidents'
@@ -266,6 +277,7 @@ export interface FileRouteTypes {
     | '/admin/ai'
     | '/admin/analytics'
     | '/admin/colleges'
+    | '/admin/comments'
     | '/admin/community'
     | '/admin/dashboard'
     | '/admin/incidents'
@@ -290,6 +302,7 @@ export interface RootRouteChildren {
   AdminAiRoute: typeof AdminAiRoute
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminCollegesRoute: typeof AdminCollegesRoute
+  AdminCommentsRoute: typeof AdminCommentsRoute
   AdminCommunityRoute: typeof AdminCommunityRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminIncidentsRoute: typeof AdminIncidentsRoute
@@ -424,6 +437,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCommunityRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/comments': {
+      id: '/admin/comments'
+      path: '/admin/comments'
+      fullPath: '/admin/comments'
+      preLoaderRoute: typeof AdminCommentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/colleges': {
       id: '/admin/colleges'
       path: '/admin/colleges'
@@ -466,6 +486,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminAiRoute: AdminAiRoute,
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminCollegesRoute: AdminCollegesRoute,
+  AdminCommentsRoute: AdminCommentsRoute,
   AdminCommunityRoute: AdminCommunityRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminIncidentsRoute: AdminIncidentsRoute,
