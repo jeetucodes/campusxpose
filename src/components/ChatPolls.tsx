@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { createPoll, votePoll } from "@/lib/content.functions";
+import { createPoll, votePoll, deletePoll } from "@/lib/content.functions";
 import { usePolls, type Poll, type PollVote } from "@/hooks/usePolls";
 import { cn } from "@/lib/utils";
 
