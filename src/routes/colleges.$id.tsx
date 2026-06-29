@@ -351,6 +351,17 @@ function PostCard({ post, userVote, onVoted }: { post: any; userVote: "up" | "do
   const vote = useServerFn(votePost);
   const [voting, setVoting] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
+  const [commentCount, setCommentCount] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    supabase
+      .from("post_comments")
+      .select("id", { count: "exact", head: true })
+      .eq("post_id", post.id)
+      .then(({ count }) => { if (active) setCommentCount(count ?? 0); });
+    return () => { active = false; };
+  }, [post.id]);
   const doVote = async (dir: "up" | "down") => {
     if (!hashedId) return;
     setVoting(true);
