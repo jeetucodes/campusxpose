@@ -10,6 +10,7 @@ import { UserSymbol } from "@/components/UserSymbol";
 import { submitGlobalMessage } from "@/lib/content.functions";
 import { useReactions } from "@/hooks/useReactions";
 import { ReactionChips, MessageActions, ReplyQuote } from "@/components/MessageReactions";
+import { MessageGestures } from "@/components/MessageGestures";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
