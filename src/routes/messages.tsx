@@ -290,7 +290,13 @@ function Messages() {
               <div>
                 <div className="font-display font-bold">{active}</div>
                 {online >= 2 ? (
-                  <OnlineBadge count={1} className="[&>span:last-child]:hidden" />
+                  <span className="flex items-center gap-1 text-xs text-emerald-600">
+                    <span className="relative flex h-2 w-2">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-70" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                    </span>
+                    online
+                  </span>
                 ) : (
                   <div className="text-xs text-muted-foreground">
                     Anonymous direct message
