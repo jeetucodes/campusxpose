@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { INCIDENT_CATEGORIES, categoryLabel, categoryEmoji } from "@/lib/categories";
 import { timeAgo } from "@/lib/format";
 import { HomeAds } from "@/components/HomeAds";
+import { TrustSection } from "@/components/TrustSection";
 
 const homeQueryOptions = queryOptions({
   queryKey: ["home"],
@@ -186,6 +187,9 @@ function Home() {
           ))}
         </div>
       </section>
+
+      {/* Trust & safety */}
+      <TrustSection />
 
       {/* Top reported */}
       <section className="mx-auto max-w-3xl px-4 py-16">
