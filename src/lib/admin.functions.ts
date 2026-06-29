@@ -289,10 +289,10 @@ export const adminSetVerified = createServerFn({ method: "POST" })
     if (data.verified) {
       const { error } = await supabaseAdmin
         .from("verified_users" as any)
-        .upsert({ username: data.username, user_hash: data.userHash }, { onConflict: "username" });
+        .upsert({ username: data.username, user_hash: data.userHash }, { onConflict: "user_hash" });
       if (error) throw new Error(error.message);
     } else {
-      const { error } = await supabaseAdmin.from("verified_users" as any).delete().eq("username", data.username);
+      const { error } = await supabaseAdmin.from("verified_users" as any).delete().eq("user_hash", data.userHash);
       if (error) throw new Error(error.message);
     }
     return { ok: true };
