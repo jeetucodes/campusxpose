@@ -199,15 +199,25 @@ function CollegesPage() {
   );
 }
 
-function shareCollege(c: Col) {
+async function shareCollege(c: Col) {
   const url = `${typeof window !== "undefined" ? window.location.origin : ""}/colleges/${c.id}`;
   const text = `Check out ${c.name} on CampusXpose`;
+  const copyFallback = () => {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(() => toast.success("Link copied!")).catch(() => toast.error("Couldn't copy link"));
+    } else {
+      toast.error("Sharing not supported on this device");
+    }
+  };
   if (typeof navigator !== "undefined" && navigator.share) {
-    navigator.share({ title: c.name, text, url });
-  } else if (typeof navigator !== "undefined" && navigator.clipboard) {
-    navigator.clipboard.writeText(url).then(() => toast.success("Link copied!"));
+    try {
+      await navigator.share({ title: c.name, text, url });
+    } catch (e: any) {
+      // User cancelled or permission denied (e.g. inside an iframe) — fall back to copy.
+      if (e?.name !== "AbortError") copyFallback();
+    }
   } else {
-    toast.error("Sharing not supported on this device");
+    copyFallback();
   }
 }
 
