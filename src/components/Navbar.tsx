@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Shield, ChevronDown, Trash2 } from "lucide-react";
 import { UserSymbol } from "@/components/UserSymbol";
-import { toast } from "sonner";
 import { useIdentity } from "@/stores/identity";
 import { useDmUnread } from "@/stores/dm";
+import { ForgetMeDialog } from "@/components/ForgetMeDialog";
 import { Logo } from "@/components/Logo";
 import {
   DropdownMenu,
