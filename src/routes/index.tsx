@@ -134,8 +134,20 @@ function Home() {
       <HomeAds />
 
 
-
-      <section className="mx-auto max-w-5xl px-4 py-8">
+      {/* Trust proof badges */}
+      <section className="mx-auto max-w-5xl px-4 py-12">
+        <div className="mb-8 text-center">
+          <span
+            className="inline-flex -rotate-2 items-center gap-2 border-2 border-border bg-success/15 px-4 py-1.5 text-sm font-semibold text-success shadow-ink-soft"
+            style={{ borderRadius: WOBBLY_MD }}
+          >
+            <Shield className="h-3.5 w-3.5" /> Trust ke saath share karo
+          </span>
+          <h2 className="mt-4 font-display text-4xl font-bold">Tumhara data kabhi store nahi hota</h2>
+          <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
+            Na location, na IP, na device permission. Koi tumhe trace nahi kar sakta — guaranteed.
+          </p>
+        </div>
         <div className="grid gap-8 md:grid-cols-3">
           {features.map((f, i) => (
             <motion.div
