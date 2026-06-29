@@ -217,24 +217,6 @@ function Home() {
         </div>
       </section>
 
-      {/* Browse by category */}
-      <section className="mx-auto max-w-5xl px-4 py-12">
-        <h2 className="mb-8 text-center font-display text-3xl font-bold">Kya Report Kar Sakte Ho?</h2>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-          {INCIDENT_CATEGORIES.map((cat, i) => (
-            <motion.div
-              key={cat.key}
-              {...fadeUp}
-              transition={{ delay: i * 0.05 }}
-              className={`sketch-card flex flex-col items-center gap-2 p-5 text-center ${i % 2 ? "rotate-1" : "-rotate-1"}`}
-              style={{ borderRadius: WOBBLY_MD }}
-            >
-              <span className="text-4xl">{cat.emoji}</span>
-              <span className="font-display font-bold">{cat.label}</span>
-            </motion.div>
-          ))}
-        </div>
-      </section>
 
       {/* Top voted reports */}
       <section className="mx-auto max-w-3xl px-4 py-16">
