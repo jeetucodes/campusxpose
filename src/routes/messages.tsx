@@ -338,11 +338,6 @@ function Messages() {
                             : "6px 18px 18px 18px",
                         }}
                       >
-                        {!own && (
-                          <div className="mb-0.5 text-xs font-bold text-accent">
-                            {m.sender_username}
-                          </div>
-                        )}
                         <ReplyQuote username={m.reply_to_username} content={m.reply_to_content} align={own ? "end" : "start"} />
                         <div className="flex flex-wrap items-end justify-end gap-x-2">
                           <span className="whitespace-pre-wrap break-words leading-relaxed">
