@@ -54,6 +54,7 @@ function buildTree(comments: Comment[]): Node[] {
 export function PostComments({ postId, onCount }: { postId: string; onCount?: (n: number) => void }) {
   const { hashedId, username } = useIdentity();
   const addComment = useServerFn(submitComment);
+  const removeComment = useServerFn(deleteComment);
   const [comments, setComments] = useState<Comment[]>([]);
   const [text, setText] = useState("");
   const [replyTo, setReplyTo] = useState<Comment | null>(null);
