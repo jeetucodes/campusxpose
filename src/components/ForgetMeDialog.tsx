@@ -10,10 +10,9 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { UserSymbol } from "@/components/UserSymbol";
 import { useIdentity } from "@/stores/identity";
-import { generateUsernameCandidates, USERNAME_REGEX } from "@/lib/identity";
+import { generateUsernameCandidates } from "@/lib/identity";
 import { filterTakenUsernames } from "@/lib/content.functions";
 import { cn } from "@/lib/utils";
 
