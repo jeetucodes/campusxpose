@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Ghost, Search, Shield, FileWarning, Sparkles, ArrowRight, Flame, TrendingUp, ArrowBigUp } from "lucide-react";
 import { UserSymbol } from "@/components/UserSymbol";
 import { SiteShell } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { getHomeData } from "@/lib/home.functions";
+import { getHomeData, type HomeData } from "@/lib/home.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { INCIDENT_CATEGORIES, categoryLabel, categoryEmoji } from "@/lib/categories";
 import { timeAgo } from "@/lib/format";
@@ -15,6 +15,7 @@ import { HomeAds } from "@/components/HomeAds";
 const homeQueryOptions = queryOptions({
   queryKey: ["home"],
   queryFn: () => getHomeData(),
+  staleTime: 15000,
   refetchInterval: 15000,
   refetchOnWindowFocus: true,
 });
@@ -26,8 +27,6 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Anonymous platform for Indian students. Report fake fines, placement fraud, faculty issues — 100% anonymously." },
     ],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(homeQueryOptions),
-  errorComponent: ({ error }) => <div role="alert" className="p-8 text-center">{error.message}</div>,
   component: Home,
 });
 
@@ -41,7 +40,9 @@ const WOBBLY = "255px 15px 225px 15px / 15px 225px 15px 255px";
 const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
 
 function Home() {
-  const { data } = useSuspenseQuery(homeQueryOptions);
+  const { data } = useQuery(homeQueryOptions);
+  const top: HomeData["top"] = data?.top ?? [];
+  const recentPosts: HomeData["recentPosts"] = data?.recentPosts ?? [];
   const queryClient = useQueryClient();
   const [showAllReports, setShowAllReports] = useState(false);
 
@@ -199,7 +200,7 @@ function Home() {
           </span>
         </div>
         <div className="space-y-4">
-          {(data?.top ?? []).map((c, i) => (
+          {top.map((c, i) => (
             <Link
               key={c.id}
               to="/colleges/$id"
@@ -222,7 +223,7 @@ function Home() {
               </div>
             </Link>
           ))}
-          {(data?.top ?? []).length === 0 && (
+          {top.length === 0 && (
             <p className="text-center text-muted-foreground">Abhi tak koi report nahi. Pehle aap karo!</p>
           )}
         </div>
@@ -260,7 +261,7 @@ function Home() {
           </span>
         </div>
         <div className="space-y-4">
-          {(showAllReports ? (data?.recentPosts ?? []) : (data?.recentPosts ?? []).slice(0, 3)).map((p, i) => {
+          {(showAllReports ? recentPosts : recentPosts.slice(0, 3)).map((p, i) => {
             const card = (
               <div
                 className={`sketch-card p-4 ${i % 2 ? "rotate-1" : "-rotate-1"}`}
@@ -291,11 +292,11 @@ function Home() {
               <div key={p.id}>{card}</div>
             );
           })}
-          {(data?.recentPosts ?? []).length === 0 && (
+          {recentPosts.length === 0 && (
             <p className="text-center text-muted-foreground">Abhi koi report nahi aayi.</p>
           )}
         </div>
-        {(data?.recentPosts ?? []).length > 3 && (
+        {recentPosts.length > 3 && (
           <div className="mt-6 text-center">
             <Button variant="outline" onClick={() => setShowAllReports((v) => !v)}>
               {showAllReports ? "Show less" : "Read more"}
