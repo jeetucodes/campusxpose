@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { Shield, Ghost, EyeOff, Lock, Trash2, ArrowRight } from "lucide-react";
+import { Shield, Ghost, EyeOff, Lock, Trash2, ArrowRight, MapPinOff, ShieldOff } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
