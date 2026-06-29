@@ -112,7 +112,13 @@ export const adminUpdateCollege = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("colleges").update(data.patch as any).eq("id", data.id);
+    const patch: Record<string, any> = { ...data.patch };
+    // Keep the primary `type` in sync with the multi-select `types`.
+    if (Array.isArray(patch.types)) {
+      const types = Array.from(new Set(patch.types));
+      if (types.length) { patch.types = types; patch.type = types[0]; }
+    }
+    const { error } = await supabaseAdmin.from("colleges").update(patch as any).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
