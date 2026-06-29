@@ -26,7 +26,9 @@ export const Route = createFileRoute("/")({
     meta: [
       { title: "CampusXpose — College ka sach, bina darr ke" },
       { name: "description", content: "Anonymous platform for Indian students. Report fake fines, placement fraud, faculty issues — 100% anonymously." },
+      { property: "og:url", content: "https://campusxpose.online/" },
     ],
+    links: [{ rel: "canonical", href: "https://campusxpose.online/" }],
   }),
   component: Home,
 });
