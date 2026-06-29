@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { BarChart3, Plus, Clock, X, Check, ChevronDown, Trash2 } from "lucide-react";
 import { toast } from "sonner";
