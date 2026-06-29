@@ -11,6 +11,7 @@ export const INCIDENT_CATEGORIES: CategoryDef[] = [
   { key: "hostel", label: "Hostel Problems", emoji: "🏠" },
   { key: "harassment", label: "Harassment", emoji: "⚖️" },
   { key: "exam", label: "Exam Issues", emoji: "📚" },
+  { key: "general", label: "Other Issues", emoji: "📋" },
 ];
 
 export const REPORT_CATEGORIES: CategoryDef[] = [
