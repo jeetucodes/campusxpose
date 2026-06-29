@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 function AdMedia({ ad }: { ad: Ad }) {
-  if (ad.embed_url) {
+  if (ad.kind === "video" && ad.embed_url) {
     return (
       <div className="aspect-video w-full overflow-hidden rounded-lg bg-black">
         <iframe

@@ -184,25 +184,62 @@ function AdsAdmin() {
                 <Label>Description</Label>
                 <Textarea value={editing.body ?? ""} onChange={(e) => setEditing({ ...editing, body: e.target.value })} placeholder="Shown when the ad is opened" />
               </div>
+
+              {editing.kind === "banner" ? (
+                <>
+                  <div>
+                    <Label>Banner image link (photo)</Label>
+                    <Input value={editing.media_url ?? ""} onChange={(e) => setEditing({ ...editing, media_url: e.target.value })} placeholder="https://...jpg" />
+                    {editing.media_url?.trim() && (
+                      <div className="mt-2 overflow-hidden rounded-lg border border-border bg-surface-2">
+                        <img
+                          src={editing.media_url}
+                          alt="Banner preview"
+                          className="max-h-48 w-full object-cover"
+                          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                          onLoad={(e) => { (e.currentTarget as HTMLImageElement).style.display = "block"; }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <Label>Banner link (where it opens)</Label>
+                    <Input value={editing.link_url ?? ""} onChange={(e) => setEditing({ ...editing, link_url: e.target.value })} placeholder="https://..." />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <Label>Video link (embed / iframe URL)</Label>
+                    <Input value={editing.embed_url ?? ""} onChange={(e) => setEditing({ ...editing, embed_url: e.target.value })} placeholder="https://www.youtube.com/embed/..." />
+                    <p className="mt-1 text-xs text-muted-foreground">Use an embeddable link (e.g. YouTube /embed/ URL).</p>
+                  </div>
+                  <div>
+                    <Label>Video cover image link</Label>
+                    <Input value={editing.media_url ?? ""} onChange={(e) => setEditing({ ...editing, media_url: e.target.value })} placeholder="https://...jpg" />
+                    {editing.media_url?.trim() && (
+                      <div className="mt-2 overflow-hidden rounded-lg border border-border bg-surface-2">
+                        <img
+                          src={editing.media_url}
+                          alt="Cover preview"
+                          className="max-h-48 w-full object-cover"
+                          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                          onLoad={(e) => { (e.currentTarget as HTMLImageElement).style.display = "block"; }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <Label>Video button link (optional)</Label>
+                    <Input value={editing.link_url ?? ""} onChange={(e) => setEditing({ ...editing, link_url: e.target.value })} placeholder="https://..." />
+                  </div>
+                </>
+              )}
               <div>
-                <Label>Image URL</Label>
-                <Input value={editing.media_url ?? ""} onChange={(e) => setEditing({ ...editing, media_url: e.target.value })} placeholder="https://...jpg" />
+                <Label>Button label (optional)</Label>
+                <Input value={editing.cta_label ?? ""} onChange={(e) => setEditing({ ...editing, cta_label: e.target.value })} placeholder="Learn more" />
               </div>
-              <div>
-                <Label>Video / Embed URL (iframe)</Label>
-                <Input value={editing.embed_url ?? ""} onChange={(e) => setEditing({ ...editing, embed_url: e.target.value })} placeholder="https://www.youtube.com/embed/..." />
-                <p className="mt-1 text-xs text-muted-foreground">Use an embeddable link (e.g. YouTube /embed/ URL).</p>
-              </div>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div>
-                  <Label>Button link</Label>
-                  <Input value={editing.link_url ?? ""} onChange={(e) => setEditing({ ...editing, link_url: e.target.value })} placeholder="https://..." />
-                </div>
-                <div>
-                  <Label>Button label</Label>
-                  <Input value={editing.cta_label ?? ""} onChange={(e) => setEditing({ ...editing, cta_label: e.target.value })} placeholder="Learn more" />
-                </div>
-              </div>
+
               <div className="space-y-2 rounded-lg border border-border p-3">
                 <div className="text-sm font-medium">Where to show</div>
                 {([["show_home", "Home page"], ["show_global", "Global chat"], ["show_college", "College chats"]] as const).map(([key, label]) => (
