@@ -36,7 +36,7 @@ function Community() {
   const { hashedId, username } = useIdentity();
   const verified = useVerifiedUsernames();
   const sendFn = useServerFn(submitMessage);
-  const summaryFn = useServerFn(chatSummary);
+  
   const { byMessage, toggle } = useReactions("community", hashedId);
   const { typing, notifyTyping } = usePresence(`community-${collegeId}`, username, hashedId);
 
