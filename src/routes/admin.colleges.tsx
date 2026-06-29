@@ -115,7 +115,7 @@ function CollegesAdmin() {
                 <td className="p-3"><Checkbox checked={selected.has(c.id)} onCheckedChange={() => toggle(c.id)} /></td>
                 <td className="p-3 font-medium">{c.name}</td>
                 <td className="p-3">{c.city}</td>
-                <td className="p-3">{c.type}</td>
+                <td className="p-3">{((c as any).types?.length ? (c as any).types : [c.type]).join(", ")}</td>
                 <td className="p-3">{(c.total_rating ?? 0).toFixed(1)}</td>
                 <td className="p-3">{c.total_reviews}</td>
                 <td className="p-3">{c.incident_count}</td>
