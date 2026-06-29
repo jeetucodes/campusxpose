@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
-  Zap, MessageCircle, ArrowUp, ArrowDown, Star, TrendingUp, TrendingDown, Minus,
+  Zap, MessageCircle, ArrowUp, ArrowDown, Star, TrendingUp, TrendingDown, Minus, Users,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteShell } from "@/components/Footer";
@@ -282,9 +282,26 @@ function CollegeDetail() {
       </div>
 
       {/* Floating community button */}
-      <Link to="/community/$collegeId" params={{ collegeId: id }} className="fixed bottom-20 right-5 z-[60] inline-flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/30 transition-transform hover:scale-105 md:bottom-5 md:z-30">
-        <MessageCircle className="h-4 w-4" /> Clg Live Chats
+      <Link
+        to="/community/$collegeId"
+        params={{ collegeId: id }}
+        className="group fixed bottom-20 right-5 z-[60] inline-flex items-center gap-2.5 rounded-full bg-primary py-3 pl-3 pr-4 text-primary-foreground shadow-lg shadow-primary/40 ring-2 ring-primary/20 transition-all hover:scale-105 hover:shadow-xl hover:shadow-primary/50 active:scale-95 md:bottom-5 md:z-30"
+      >
+        <span className="relative grid h-7 w-7 place-items-center rounded-full bg-primary-foreground/15">
+          <MessageCircle className="h-4 w-4" />
+          <span className="absolute -right-0.5 -top-0.5 flex h-2.5 w-2.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-success ring-2 ring-primary" />
+          </span>
+        </span>
+        <span className="flex flex-col leading-tight">
+          <span className="text-sm font-semibold">Live Chat</span>
+          <span className="flex items-center gap-1 text-[10px] font-medium text-primary-foreground/80">
+            <Users className="h-2.5 w-2.5" /> Join your campus now
+          </span>
+        </span>
       </Link>
+
 
       <RatingModal open={ratingOpen} onOpenChange={setRatingOpen} collegeId={id} onDone={() => { ratingsQ.refetch(); collegeQ.refetch(); router.invalidate(); }} />
     </SiteShell>
