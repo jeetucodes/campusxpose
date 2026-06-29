@@ -20,6 +20,7 @@ import { usePresence } from "@/hooks/usePresence";
 import { OnlineBadge, TypingIndicator } from "@/components/ChatPresence";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { AdPin } from "@/components/AdPin";
 
 export const Route = createFileRoute("/community/$collegeId")({
   component: Community,
