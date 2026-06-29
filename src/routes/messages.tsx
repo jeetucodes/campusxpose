@@ -123,6 +123,29 @@ function Messages() {
     navigate({ to: "/messages", search: { to: name } });
   };
 
+  const deleteConversation = async (other: string) => {
+    if (!hashedId) return;
+    if (!window.confirm(`Delete all messages with ${other}? This can't be undone.`)) return;
+    setAll((prev) =>
+      prev.filter(
+        (m) =>
+          !(
+            (m.sender_username === username && m.recipient_username === other) ||
+            (m.sender_username === other && m.recipient_username === username)
+          ),
+      ),
+    );
+    try {
+      await deleteDirectConversation({ data: { hashedId, otherUsername: other } });
+      toast.success("Conversation deleted");
+      if (active === other) navigate({ to: "/messages", search: {} });
+      await load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Delete failed");
+      await load();
+    }
+  };
+
   return (
     <div className="flex h-[calc(100vh-4rem)] bg-background">
       {/* Conversation list */}
