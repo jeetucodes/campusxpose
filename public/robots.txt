@@ -1,3 +1,7 @@
 User-agent: *
 Allow: /
 Disallow: /admin
+Disallow: /admin/ads
+Disallow: /admin/ai
+
+Sitemap: https://campusxpose.online/sitemap.xml
