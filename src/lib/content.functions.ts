@@ -209,19 +209,17 @@ async function lookupHashForUsername(username: string): Promise<string | null> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   // Resolve a username to its secret identity hash using existing,
   // identity-bearing records. Never trust a client-supplied recipient hash.
-  const sources: Array<Promise<{ data: { hash: string | null }[] | null }>> = [
-    supabaseAdmin.from("posts").select("hash:anonymous_user_hash").eq("username", username).order("created_at", { ascending: false }).limit(1),
-    supabaseAdmin.from("global_messages").select("hash:anonymous_user_hash").eq("username", username).order("created_at", { ascending: false }).limit(1),
-    supabaseAdmin.from("community_messages").select("hash:anonymous_user_hash").eq("username", username).order("created_at", { ascending: false }).limit(1),
-    supabaseAdmin.from("direct_messages").select("hash:sender_hash").eq("sender_username", username).order("created_at", { ascending: false }).limit(1),
-  ];
-  for (const p of sources) {
-    const { data } = await p;
-    const hash = data?.[0]?.hash;
-    if (hash) return hash;
-  }
+  const post = await supabaseAdmin.from("posts").select("anonymous_user_hash").eq("username", username).order("created_at", { ascending: false }).limit(1);
+  if (post.data?.[0]?.anonymous_user_hash) return post.data[0].anonymous_user_hash;
+  const gm = await supabaseAdmin.from("global_messages").select("anonymous_user_hash").eq("username", username).order("created_at", { ascending: false }).limit(1);
+  if (gm.data?.[0]?.anonymous_user_hash) return gm.data[0].anonymous_user_hash;
+  const cm = await supabaseAdmin.from("community_messages").select("anonymous_user_hash").eq("username", username).order("created_at", { ascending: false }).limit(1);
+  if (cm.data?.[0]?.anonymous_user_hash) return cm.data[0].anonymous_user_hash;
+  const dm = await supabaseAdmin.from("direct_messages").select("sender_hash").eq("sender_username", username).order("created_at", { ascending: false }).limit(1);
+  if (dm.data?.[0]?.sender_hash) return dm.data[0].sender_hash;
   return null;
 }
+
 
 export const submitDirectMessage = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
