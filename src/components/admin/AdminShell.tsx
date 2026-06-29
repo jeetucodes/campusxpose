@@ -33,6 +33,14 @@ export function AdminShell({ children }: { children: ReactNode }) {
     if (mounted && !token) navigate({ to: "/admin/login" });
   }, [mounted, token, navigate]);
 
+  // Never render the admin shell (even briefly) until we've confirmed, on the
+  // client, that an admin token exists. During SSR and the first client render
+  // this returns null, so the admin layout is never present without auth.
+  if (!mounted || !token) {
+    return <div className="min-h-screen bg-background" />;
+  }
+
+
   return (
     <div className="min-h-screen bg-background md:flex">
       {/* Sidebar desktop */}
