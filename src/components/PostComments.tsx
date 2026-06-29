@@ -137,31 +137,22 @@ export function PostComments({ postId, onCount }: { postId: string; onCount?: (n
 
 function CommentNode({ node, depth, onReply }: { node: Node; depth: number; onReply: (c: Comment) => void }) {
   const isReply = depth > 0;
-  const indent = isReply ? "ml-6" : "";
   const hasChildren = node.children.length > 0;
 
   return (
-    <div className={cn("animate-fade-in", indent)}>
-      {/* Reply connector line */}
-      {isReply && (
-        <div className="absolute -left-3 top-0 bottom-0 w-px bg-primary/15" />
-      )}
-
-      <div className="relative flex items-start gap-3">
-        {/* L-shaped connector for replies */}
+    <div className={cn("animate-fade-in", isReply && "relative")}>
+      {/* Content row */}
+      <div className="flex items-start gap-3">
+        {/* Connector: horizontal line + dot for replies */}
         {isReply && (
-          <div className="absolute -left-3 top-4 flex items-center">
-            <div className="h-px w-3 bg-primary/20" />
-            <div className="h-1.5 w-1.5 -ml-0.5 rounded-full bg-primary/40" />
+          <div className="absolute -left-5 top-5 flex items-center">
+            <div className="h-px w-4 bg-primary/25" />
+            <div className="h-2 w-2 -ml-1 rounded-full bg-primary/50" />
           </div>
         )}
 
         <div className="relative mt-0.5 shrink-0">
           <UserSymbol username={node.username} size="sm" />
-          {/* Vertical stem when this comment has children */}
-          {hasChildren && (
-            <div className="absolute top-full left-1/2 h-3 w-px -translate-x-1/2 bg-primary/15" />
-          )}
         </div>
 
         <div className="min-w-0 flex-1 pb-1">
@@ -179,9 +170,14 @@ function CommentNode({ node, depth, onReply }: { node: Node; depth: number; onRe
         </div>
       </div>
 
-      {/* Children with branch line */}
+      {/* Children: vertical thread line + replies */}
       {hasChildren && (
-        <div className="relative ml-[19px] mt-1 space-y-3 border-l border-primary/10 pl-5">
+        <div className="relative mt-2 space-y-3 pl-5">
+          {/* Animated vertical thread line */}
+          <div
+            className="absolute left-0 top-0 h-full w-px origin-top bg-primary/15"
+            style={{ animation: "thread-draw 0.5s ease-out forwards" }}
+          />
           {node.children.map((child) => (
             <CommentNode key={child.id} node={child} depth={depth + 1} onReply={onReply} />
           ))}

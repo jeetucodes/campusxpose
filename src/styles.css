@@ -167,3 +167,8 @@
 @utility animate-gentle-bounce {
   animation: gentle-bounce 3s ease-in-out infinite;
 }
+
+@keyframes thread-draw {
+  from { opacity: 0; transform: scaleY(0); }
+  to { opacity: 1; transform: scaleY(1); }
+}
