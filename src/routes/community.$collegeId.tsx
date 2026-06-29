@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Send, Sparkles, RefreshCw, ChevronDown, ChevronUp, X, FileWarning, CheckCheck } from "lucide-react";
 import { UserSymbol } from "@/components/UserSymbol";
+import { useVerifiedUsernames } from "@/hooks/useVerified";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
