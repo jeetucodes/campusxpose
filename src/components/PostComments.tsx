@@ -1,13 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { MessageCircle, CornerDownRight, Send } from "lucide-react";
+import { MessageCircle, CornerDownRight, Send, MoreVertical, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { UserSymbol } from "@/components/UserSymbol";
 import { useIdentity } from "@/stores/identity";
-import { submitComment } from "@/lib/content.functions";
+import { submitComment, deleteComment } from "@/lib/content.functions";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useVerifiedUsernames } from "@/hooks/useVerified";
@@ -20,9 +26,11 @@ export type Comment = {
   username: string;
   content: string;
   created_at: string;
+  anonymous_user_hash?: string | null;
 };
 
 type Node = Comment & { children: Node[] };
+
 
 function buildTree(comments: Comment[]): Node[] {
   const map = new Map<string, Node>();
