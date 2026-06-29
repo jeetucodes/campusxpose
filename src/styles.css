@@ -176,3 +176,18 @@
 @utility animate-gentle-bounce {
   animation: gentle-bounce 3s ease-in-out infinite;
 }
+
+/* CampusXpose redesign helpers */
+@utility cx-dotgrid {
+  background-color: #ffffff;
+  background-image: radial-gradient(#f0f0f0 1.5px, transparent 1.5px);
+  background-size: 18px 18px;
+}
+
+@keyframes cx-pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.6); opacity: 0.45; }
+}
+@utility cx-pulse-dot {
+  animation: cx-pulse-dot 1.4s ease-in-out infinite;
+}
