@@ -69,6 +69,7 @@ function Community() {
 
   const onType = (v: string) => {
     setText(v);
+    notifyTyping();
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       const hit = DEFAULT_KEYWORDS.some((k) => v.toLowerCase().includes(k));
