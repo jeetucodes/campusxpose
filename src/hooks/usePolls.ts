@@ -38,7 +38,7 @@ export function usePolls(scope: "global" | "college", collegeId?: string) {
       .limit(30);
     if (scope === "college" && collegeId) q = q.eq("college_id", collegeId);
     const { data } = await q;
-    const list = ((data ?? []) as unknown as Poll[]) ?? [];
+    const list = (data ?? []) as unknown as Poll[];
     setPolls(list);
     const ids = list.map((p) => p.id);
     if (ids.length) {
@@ -46,7 +46,7 @@ export function usePolls(scope: "global" | "college", collegeId?: string) {
         .from("poll_votes" as any)
         .select("*")
         .in("poll_id", ids);
-      setVotes(((v ?? []) as unknown as PollVote[]) ?? []);
+      setVotes((v ?? []) as unknown as PollVote[]);
     } else {
       setVotes([]);
     }
