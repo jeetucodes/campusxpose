@@ -58,7 +58,10 @@ export function Navbar() {
               style={{ borderRadius: "20px 7px 22px 7px / 7px 22px 7px 20px" }}
             >
               <UserSymbol username={username} size="sm" />
-              <span className="max-w-[120px] truncate font-medium">{isReady ? username : "..."}</span>
+              <span className="inline-flex max-w-[140px] items-center gap-1 truncate font-medium">
+                {isReady ? username : "..."}
+                {verified && <VerifiedBadge className="h-3.5 w-3.5" />}
+              </span>
               <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
             </button>
           </DropdownMenuTrigger>
