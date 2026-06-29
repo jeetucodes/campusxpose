@@ -128,6 +128,8 @@ function Community() {
           </div>
         </header>
 
+        <AdPin placement="college" />
+
         {/* AI summary bar */}
         <div className="border-b border-border bg-surface-2/40">
           <button onClick={() => setSummaryOpen((o) => !o)} className="flex w-full items-center gap-2 px-3 py-2.5 text-sm font-medium sm:px-4">
