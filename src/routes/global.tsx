@@ -48,6 +48,7 @@ type Msg = {
 
 function GlobalChat() {
   const { hashedId, username, init } = useIdentity();
+  const verified = useVerifiedUsernames();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [text, setText] = useState("");
   const [replyTo, setReplyTo] = useState<Msg | null>(null);
