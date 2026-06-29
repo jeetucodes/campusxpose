@@ -415,17 +415,31 @@ export const toggleReaction = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     if (await isBanned(data.hashedId)) return { ok: true, shadow: true };
 
+    // A user can hold only ONE reaction per message.
     const { data: existing } = await supabaseAdmin
       .from("message_reactions")
-      .select("id")
+      .select("id,emoji")
       .eq("message_id", data.messageId)
-      .eq("anonymous_user_hash", data.hashedId)
-      .eq("emoji", data.emoji)
-      .maybeSingle();
+      .eq("anonymous_user_hash", data.hashedId);
 
-    if (existing) {
-      await supabaseAdmin.from("message_reactions").delete().eq("id", existing.id);
+    const mine = existing ?? [];
+    const sameEmoji = mine.find((r) => r.emoji === data.emoji);
+
+    // Clicking the same emoji again removes the reaction entirely.
+    if (sameEmoji) {
+      await supabaseAdmin.from("message_reactions").delete().eq("id", sameEmoji.id);
       return { ok: true, active: false };
+    }
+
+    // Switching emoji: drop any previous reaction(s) by this user first.
+    if (mine.length) {
+      await supabaseAdmin
+        .from("message_reactions")
+        .delete()
+        .in(
+          "id",
+          mine.map((r) => r.id),
+        );
     }
 
     const { error } = await supabaseAdmin.from("message_reactions").insert({
@@ -439,6 +453,7 @@ export const toggleReaction = createServerFn({ method: "POST" })
       throw new Error(error.message);
     }
     return { ok: true, active: true };
+
   });
 
 export const filterTakenUsernames = createServerFn({ method: "POST" })
