@@ -9,6 +9,7 @@ import { AdminShell } from "@/components/admin/AdminShell";
 import { useAdmin } from "@/stores/admin";
 import { adminAddCollege, adminUpdateCollege, adminDeleteColleges, adminListCollegeRequests, adminApproveCollegeRequest, adminRejectCollegeRequest } from "@/lib/admin.functions";
 import { COLLEGE_TYPES, INDIAN_STATES } from "@/lib/categories";
+import { TypeMultiSelect } from "@/components/TypeMultiSelect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
