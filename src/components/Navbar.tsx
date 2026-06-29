@@ -4,6 +4,7 @@ import { Shield, ChevronDown, Trash2 } from "lucide-react";
 import { UserSymbol } from "@/components/UserSymbol";
 import { toast } from "sonner";
 import { useIdentity } from "@/stores/identity";
+import { useDmUnread } from "@/stores/dm";
 import { Logo } from "@/components/Logo";
 import {
   DropdownMenu,
