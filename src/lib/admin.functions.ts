@@ -224,11 +224,12 @@ export const adminListUsers = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const [posts, msgs, globals, banned] = await Promise.all([
+    const [posts, msgs, globals, banned, verified] = await Promise.all([
       supabaseAdmin.from("posts").select("anonymous_user_hash, username, created_at, is_incident"),
       supabaseAdmin.from("community_messages").select("anonymous_user_hash, username, created_at"),
       supabaseAdmin.from("global_messages").select("anonymous_user_hash, username, created_at"),
       supabaseAdmin.from("banned_users").select("user_hash"),
+      supabaseAdmin.from("verified_users" as any).select("username"),
     ]);
     // Surface real failures instead of silently returning an empty list
     // (which renders a misleading "No users yet").
@@ -236,6 +237,7 @@ export const adminListUsers = createServerFn({ method: "POST" })
     if (msgs.error) throw new Error(msgs.error.message);
     if (globals.error) throw new Error(globals.error.message);
     const bannedSet = new Set((banned.data ?? []).map((b) => b.user_hash));
+    const verifiedSet = new Set(((verified.data as any[]) ?? []).map((v) => v.username));
     const map = new Map<string, { hash: string; username: string; posts: number; messages: number; incidents: number; lastActive: string }>();
     const touch = (hash: string, username: string, createdAt: string) => {
       const e = map.get(hash) ?? { hash, username, posts: 0, messages: 0, incidents: 0, lastActive: createdAt };
@@ -255,8 +257,73 @@ export const adminListUsers = createServerFn({ method: "POST" })
       touch(g.anonymous_user_hash, g.username, g.created_at).messages++;
     }
     return Array.from(map.values())
-      .map((u) => ({ ...u, banned: bannedSet.has(u.hash) }))
+      .map((u) => ({ ...u, banned: bannedSet.has(u.hash), verified: verifiedSet.has(u.username) }))
       .sort((a, b) => (a.lastActive < b.lastActive ? 1 : -1));
+  });
+
+const RENAME_RE = /^[a-zA-Z0-9_]+$/;
+
+/** Grant or revoke a verified tick for a user (keyed by their current username). */
+export const adminSetVerified = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: z.string(), userHash: z.string().min(1), username: z.string().min(1), verified: z.boolean() }).parse(d))
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (data.verified) {
+      const { error } = await supabaseAdmin
+        .from("verified_users" as any)
+        .upsert({ username: data.username, user_hash: data.userHash }, { onConflict: "username" });
+      if (error) throw new Error(error.message);
+    } else {
+      const { error } = await supabaseAdmin.from("verified_users" as any).delete().eq("username", data.username);
+      if (error) throw new Error(error.message);
+    }
+    return { ok: true };
+  });
+
+/** Assign a brand-new unique username to a user across all their content. */
+export const adminRenameUser = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z.object({ token: z.string(), userHash: z.string().min(1), oldUsername: z.string().min(1), newUsername: z.string().min(3).max(40).regex(RENAME_RE) }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const next = data.newUsername;
+
+    // Ensure the new username is not already taken by anyone else.
+    const [p, g, c, ds, dr] = await Promise.all([
+      supabaseAdmin.from("posts").select("anonymous_user_hash").eq("username", next).limit(1),
+      supabaseAdmin.from("global_messages").select("anonymous_user_hash").eq("username", next).limit(1),
+      supabaseAdmin.from("community_messages").select("anonymous_user_hash").eq("username", next).limit(1),
+      supabaseAdmin.from("direct_messages").select("sender_hash").eq("sender_username", next).limit(1),
+      supabaseAdmin.from("direct_messages").select("recipient_hash").eq("recipient_username", next).limit(1),
+    ]);
+    const clash =
+      (p.data ?? []).some((r) => r.anonymous_user_hash !== data.userHash) ||
+      (g.data ?? []).some((r) => r.anonymous_user_hash !== data.userHash) ||
+      (c.data ?? []).some((r) => r.anonymous_user_hash !== data.userHash) ||
+      (ds.data ?? []).some((r) => r.sender_hash !== data.userHash) ||
+      (dr.data ?? []).length > 0;
+    if (clash) return { ok: false as const, reason: "taken" as const };
+
+    // Rewrite the username everywhere this user appears.
+    await Promise.all([
+      supabaseAdmin.from("posts").update({ username: next }).eq("anonymous_user_hash", data.userHash),
+      supabaseAdmin.from("post_comments").update({ username: next }).eq("anonymous_user_hash", data.userHash),
+      supabaseAdmin.from("community_messages").update({ username: next }).eq("anonymous_user_hash", data.userHash),
+      supabaseAdmin.from("global_messages").update({ username: next }).eq("anonymous_user_hash", data.userHash),
+      supabaseAdmin.from("direct_messages").update({ sender_username: next }).eq("sender_hash", data.userHash),
+      supabaseAdmin.from("direct_messages").update({ recipient_username: next }).eq("recipient_hash", data.userHash),
+    ]);
+
+    // Keep verification row in sync with the new username if one exists.
+    await supabaseAdmin
+      .from("verified_users" as any)
+      .update({ username: next })
+      .eq("username", data.oldUsername);
+
+    return { ok: true as const };
   });
 
 

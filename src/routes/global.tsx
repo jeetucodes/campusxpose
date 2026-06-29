@@ -12,6 +12,8 @@ import { useReactions } from "@/hooks/useReactions";
 import { ReactionChips, MessageActions, ReplyQuote } from "@/components/MessageReactions";
 import { MessageGestures } from "@/components/MessageGestures";
 import { usePresence } from "@/hooks/usePresence";
+import { useVerifiedUsernames } from "@/hooks/useVerified";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { TypingIndicator } from "@/components/ChatPresence";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -46,6 +48,7 @@ type Msg = {
 
 function GlobalChat() {
   const { hashedId, username, init } = useIdentity();
+  const verified = useVerifiedUsernames();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [text, setText] = useState("");
   const [replyTo, setReplyTo] = useState<Msg | null>(null);
@@ -189,9 +192,9 @@ function GlobalChat() {
                         <Link
                           to="/messages"
                           search={{ to: m.username }}
-                          className="mb-0.5 block text-xs font-bold text-accent hover:wavy-underline"
+                          className="mb-0.5 inline-flex items-center gap-1 text-xs font-bold text-accent hover:wavy-underline"
                         >
-                          {m.username}
+                          {m.username}{m.username && verified.has(m.username) && <VerifiedBadge className="h-3.5 w-3.5" />}
                         </Link>
                       )}
                       <ReplyQuote username={m.reply_to_username} content={m.reply_to_content} align={own ? "end" : "start"} />

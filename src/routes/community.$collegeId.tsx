@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Send, Sparkles, RefreshCw, ChevronDown, ChevronUp, X, FileWarning, CheckCheck } from "lucide-react";
 import { UserSymbol } from "@/components/UserSymbol";
+import { useVerifiedUsernames } from "@/hooks/useVerified";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -31,6 +33,7 @@ type Msg = { id: string; username: string; content: string; anonymous_user_hash:
 function Community() {
   const { collegeId } = Route.useParams();
   const { hashedId, username } = useIdentity();
+  const verified = useVerifiedUsernames();
   const sendFn = useServerFn(submitMessage);
   const summaryFn = useServerFn(chatSummary);
   const { byMessage, toggle } = useReactions("community", hashedId);
@@ -222,7 +225,7 @@ function Community() {
                           m.is_incident_signal && !own && "border-l-2 border-l-warning",
                         )}
                       >
-                        {!own && <div className="mb-0.5 text-xs font-semibold text-primary/80">{m.username}</div>}
+                        {!own && <div className="mb-0.5 inline-flex items-center gap-1 text-xs font-semibold text-primary/80">{m.username}{m.username && verified.has(m.username) && <VerifiedBadge className="h-3.5 w-3.5" />}</div>}
                         <ReplyQuote username={m.reply_to_username} content={m.reply_to_content} align={own ? "end" : "start"} />
                         <div className="whitespace-pre-wrap break-words leading-relaxed">{m.content}</div>
                       </div>

@@ -548,3 +548,32 @@ export const filterTakenUsernames = createServerFn({ method: "POST" })
       available: names.filter((n) => !taken.has(n)),
     };
   });
+
+/** Public list of usernames that carry a verified tick. */
+export const listVerifiedUsernames = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin.from("verified_users" as any).select("username");
+    return { usernames: ((data as any[]) ?? []).map((r) => r.username as string) };
+  });
+
+/** Wipe every trace of the caller's activity. Used by "Forget Me". */
+export const purgeMyActivity = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ hashedId: z.string().min(8) }).parse(d))
+  .handler(async ({ data }) => {
+    if (!HASH_RE.test(data.hashedId)) throw new Error("Invalid identity");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const h = data.hashedId;
+    await Promise.all([
+      supabaseAdmin.from("posts").delete().eq("anonymous_user_hash", h),
+      supabaseAdmin.from("post_comments").delete().eq("anonymous_user_hash", h),
+      supabaseAdmin.from("post_votes").delete().eq("anonymous_user_hash", h),
+      supabaseAdmin.from("community_messages").delete().eq("anonymous_user_hash", h),
+      supabaseAdmin.from("global_messages").delete().eq("anonymous_user_hash", h),
+      supabaseAdmin.from("ratings").delete().eq("anonymous_user_hash", h),
+      supabaseAdmin.from("message_reactions").delete().eq("anonymous_user_hash", h),
+      supabaseAdmin.from("direct_messages").delete().eq("sender_hash", h),
+      supabaseAdmin.from("direct_messages").delete().eq("recipient_hash", h),
+    ]);
+    return { ok: true };
+  });

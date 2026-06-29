@@ -12,6 +12,8 @@ import { categoryLabel, categoryEmoji } from "@/lib/categories";
 import { timeAgo } from "@/lib/format";
 import { HomeAds } from "@/components/HomeAds";
 import { TrustSection } from "@/components/TrustSection";
+import { useVerifiedUsernames } from "@/hooks/useVerified";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 
 const homeQueryOptions = queryOptions({
   queryKey: ["home"],
@@ -44,6 +46,7 @@ const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
 
 function Home() {
   const { data } = useQuery(homeQueryOptions);
+  const verified = useVerifiedUsernames();
   const top: HomeData["top"] = data?.top ?? [];
   const recentPosts: HomeData["recentPosts"] = data?.recentPosts ?? [];
   const queryClient = useQueryClient();
@@ -239,7 +242,7 @@ function Home() {
               >
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <UserSymbol username={p.username} size="sm" />
-                  <span className="font-medium text-foreground">{p.username ?? "Anonymous"}</span>
+                  <span className="inline-flex items-center gap-1 font-medium text-foreground">{p.username ?? "Anonymous"}{p.username && verified.has(p.username) && <VerifiedBadge />}</span>
                   {p.created_at && <span suppressHydrationWarning>· {timeAgo(p.created_at)}</span>}
                   <span className="ml-auto inline-flex items-center gap-1 border-2 border-border bg-white px-2 py-0.5 text-[11px] font-bold text-accent">
                     <ArrowBigUp className="h-3.5 w-3.5" /> {p.upvotes ?? 0}

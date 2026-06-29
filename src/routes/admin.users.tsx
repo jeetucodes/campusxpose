@@ -2,9 +2,17 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
+import { BadgeCheck } from "lucide-react";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { useAdmin } from "@/stores/admin";
-import { adminListUsers, adminBanUser, adminUnbanUser, adminDeleteUserActivity } from "@/lib/admin.functions";
+import {
+  adminListUsers,
+  adminBanUser,
+  adminUnbanUser,
+  adminDeleteUserActivity,
+  adminSetVerified,
+  adminRenameUser,
+} from "@/lib/admin.functions";
 import { timeAgo } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -27,7 +35,35 @@ function UsersAdmin() {
   const ban = useServerFn(adminBanUser);
   const unban = useServerFn(adminUnbanUser);
   const wipe = useServerFn(adminDeleteUserActivity);
+  const setVerified = useServerFn(adminSetVerified);
+  const rename = useServerFn(adminRenameUser);
   const q = useQuery({ queryKey: ["admin-users"], enabled: !!token, queryFn: () => list({ data: { token: token! } }) });
+
+  const doBan = async (u: any) => {
+    await ban({ data: { token: token!, userHash: u.hash, username: u.username, reason: "Admin action" } });
+    toast.success("Shadow banned"); q.refetch();
+  };
+  const doUnban = async (u: any) => {
+    await unban({ data: { token: token!, userHash: u.hash } });
+    toast.success("Unbanned"); q.refetch();
+  };
+  const doWipe = async (u: any) => {
+    if (!window.confirm("Delete ALL activity from this user?")) return;
+    await wipe({ data: { token: token!, userHash: u.hash } });
+    toast.success("Wiped"); q.refetch();
+  };
+  const doVerify = async (u: any) => {
+    await setVerified({ data: { token: token!, userHash: u.hash, username: u.username, verified: !u.verified } });
+    toast.success(u.verified ? "Verification removed" : "User verified");
+    q.refetch();
+  };
+  const doRename = async (u: any) => {
+    const next = window.prompt(`New username for ${u.username} (letters, numbers, _ only):`, u.username);
+    if (!next || next === u.username) return;
+    const res = await rename({ data: { token: token!, userHash: u.hash, oldUsername: u.username, newUsername: next.trim() } });
+    if (!res.ok) { toast.error("That username is already taken"); return; }
+    toast.success(`Renamed to ${next.trim()}`); q.refetch();
+  };
 
   return (
     <div>
@@ -40,18 +76,25 @@ function UsersAdmin() {
           return (
             <div key={u.hash} className="rounded-xl border border-border bg-surface p-4">
               <div className="flex items-center justify-between gap-2">
-                <span className="font-medium">{u.username}</span>
+                <span className="flex items-center gap-1 font-medium">
+                  {u.username}
+                  {u.verified && <BadgeCheck className="h-4 w-4 fill-accent text-white" />}
+                </span>
                 <span className={cn("text-xs font-medium", r.cls)}>{r.label}</span>
               </div>
               <div className="mt-1 font-mono text-xs text-muted-foreground">{u.hash.slice(0, 8)} · {timeAgo(u.lastActive)}</div>
               <div className="mt-2 flex gap-4 text-sm text-muted-foreground">
                 <span>{u.posts} posts</span><span>{u.messages} msgs</span><span>{u.incidents} inc.</span>
               </div>
-              <div className="mt-3 flex gap-2">
+              <div className="mt-3 grid grid-cols-2 gap-2">
                 {u.banned
-                  ? <Button size="sm" variant="outline" className="flex-1 text-success" onClick={async () => { await unban({ data: { token: token!, userHash: u.hash } }); toast.success("Unbanned"); q.refetch(); }}>Unban</Button>
-                  : <Button size="sm" variant="outline" className="flex-1 text-warning" onClick={async () => { await ban({ data: { token: token!, userHash: u.hash, username: u.username, reason: "Admin action" } }); toast.success("Shadow banned"); q.refetch(); }}>Ban</Button>}
-                <Button size="sm" variant="outline" className="flex-1 text-destructive" onClick={async () => { if (!window.confirm("Delete ALL activity from this user?")) return; await wipe({ data: { token: token!, userHash: u.hash } }); toast.success("Wiped"); q.refetch(); }}>Wipe</Button>
+                  ? <Button size="sm" variant="outline" className="text-success" onClick={() => doUnban(u)}>Unban</Button>
+                  : <Button size="sm" variant="outline" className="text-warning" onClick={() => doBan(u)}>Ban</Button>}
+                <Button size="sm" variant="outline" className="text-destructive" onClick={() => doWipe(u)}>Wipe</Button>
+                <Button size="sm" variant="outline" className={u.verified ? "text-muted-foreground" : "text-accent"} onClick={() => doVerify(u)}>
+                  {u.verified ? "Unverify" : "Verify"}
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => doRename(u)}>Rename</Button>
               </div>
             </div>
           );
@@ -71,7 +114,12 @@ function UsersAdmin() {
               const r = risk(u);
               return (
                 <tr key={u.hash} className="border-t border-border">
-                  <td className="p-3 font-medium">{u.username}</td>
+                  <td className="p-3 font-medium">
+                    <span className="flex items-center gap-1">
+                      {u.username}
+                      {u.verified && <BadgeCheck className="h-4 w-4 fill-accent text-white" />}
+                    </span>
+                  </td>
                   <td className="p-3 font-mono text-xs text-muted-foreground">{u.hash.slice(0, 8)}</td>
                   <td className="p-3">{u.posts}</td>
                   <td className="p-3">{u.messages}</td>
@@ -79,11 +127,15 @@ function UsersAdmin() {
                   <td className="p-3 text-xs text-muted-foreground">{timeAgo(u.lastActive)}</td>
                   <td className={cn("p-3 font-medium", r.cls)}>{r.label}</td>
                   <td className="p-3">
-                    <div className="flex gap-1">
+                    <div className="flex flex-wrap gap-1">
                       {u.banned
-                        ? <Button size="sm" variant="ghost" className="text-success" onClick={async () => { await unban({ data: { token: token!, userHash: u.hash } }); toast.success("Unbanned"); q.refetch(); }}>Unban</Button>
-                        : <Button size="sm" variant="ghost" className="text-warning" onClick={async () => { await ban({ data: { token: token!, userHash: u.hash, username: u.username, reason: "Admin action" } }); toast.success("Shadow banned"); q.refetch(); }}>Ban</Button>}
-                      <Button size="sm" variant="ghost" className="text-destructive" onClick={async () => { if (!window.confirm("Delete ALL activity from this user?")) return; await wipe({ data: { token: token!, userHash: u.hash } }); toast.success("Wiped"); q.refetch(); }}>Wipe</Button>
+                        ? <Button size="sm" variant="ghost" className="text-success" onClick={() => doUnban(u)}>Unban</Button>
+                        : <Button size="sm" variant="ghost" className="text-warning" onClick={() => doBan(u)}>Ban</Button>}
+                      <Button size="sm" variant="ghost" className={u.verified ? "text-muted-foreground" : "text-accent"} onClick={() => doVerify(u)}>
+                        {u.verified ? "Unverify" : "Verify"}
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => doRename(u)}>Rename</Button>
+                      <Button size="sm" variant="ghost" className="text-destructive" onClick={() => doWipe(u)}>Wipe</Button>
                     </div>
                   </td>
                 </tr>

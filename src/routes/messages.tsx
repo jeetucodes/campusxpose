@@ -16,6 +16,8 @@ import { usePresence } from "@/hooks/usePresence";
 import { TypingIndicator } from "@/components/ChatPresence";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { useVerifiedUsernames } from "@/hooks/useVerified";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 
 type Search = { to?: string };
 
@@ -53,6 +55,7 @@ function Messages() {
   const { to } = Route.useSearch();
   const navigate = useNavigate();
   const { hashedId, username, init } = useIdentity();
+  const verified = useVerifiedUsernames();
   const markRead = useDmStore((s) => s.markRead);
   const refreshUnread = useDmStore((s) => s.refresh);
   const unreadBy = useDmStore((s) => s.unreadBy);
@@ -265,7 +268,7 @@ function Messages() {
                   <UserSymbol username={c.name} size="sm" />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 truncate font-medium">
-                      {c.name}
+                      {c.name}{c.name && verified.has(c.name) && <VerifiedBadge className="h-3.5 w-3.5" />}
                       {unread > 0 && active !== c.name && (
                         <span className="grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[10px] font-bold leading-none text-accent-foreground">
                           {unread > 9 ? "9+" : unread}
@@ -307,7 +310,7 @@ function Messages() {
               </Button>
               <UserSymbol username={active} size="md" />
               <div>
-                <div className="font-display font-bold">{active}</div>
+                <div className="inline-flex items-center gap-1 font-display font-bold">{active}{active && verified.has(active) && <VerifiedBadge />}</div>
                 {online >= 2 ? (
                   <span className="flex items-center gap-1 text-xs text-emerald-600">
                     <span className="relative flex h-2 w-2">

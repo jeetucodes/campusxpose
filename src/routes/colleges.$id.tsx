@@ -19,6 +19,8 @@ import { submitRating, votePost } from "@/lib/content.functions";
 import { cn } from "@/lib/utils";
 import { UserSymbol } from "@/components/UserSymbol";
 import { PostComments } from "@/components/PostComments";
+import { useVerifiedUsernames } from "@/hooks/useVerified";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 
 export const Route = createFileRoute("/colleges/$id")({
   loader: async ({ params }) => {
@@ -57,6 +59,7 @@ export const Route = createFileRoute("/colleges/$id")({
 function CollegeDetail() {
   const { id } = Route.useParams();
   const router = useRouter();
+  const verified = useVerifiedUsernames();
 
   const collegeQ = useQuery({
     queryKey: ["college", id],
@@ -248,7 +251,7 @@ function CollegeDetail() {
                       {catPosts.map((p) => (
                         <div key={p.id} className="rounded-lg border border-border bg-surface-2 p-3 text-sm">
                           <div className="line-clamp-2">{p.content}</div>
-                          <div className="text-xs text-muted-foreground">{p.username} · {timeAgo(p.created_at)}</div>
+                          <div className="inline-flex items-center gap-1 text-xs text-muted-foreground">{p.username}{p.username && verified.has(p.username) && <VerifiedBadge className="h-3.5 w-3.5" />} · {timeAgo(p.created_at)}</div>
                         </div>
                       ))}
                       {count === 0 && <p className="text-sm text-muted-foreground">No reports in this category.</p>}
@@ -347,6 +350,7 @@ function Trend({ t }: { t?: string | null }) {
 
 function PostCard({ post, userVote, onVoted }: { post: any; userVote: "up" | "down" | null; onVoted: () => void }) {
   const { hashedId } = useIdentity();
+  const verified = useVerifiedUsernames();
   const vote = useServerFn(votePost);
   const [voting, setVoting] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
@@ -377,7 +381,7 @@ function PostCard({ post, userVote, onVoted }: { post: any; userVote: "up" | "do
     <div className="rounded-xl border border-border bg-surface p-4">
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
         <UserSymbol username={post.username} size="sm" />
-        <span className="font-medium text-foreground">{post.username}</span>
+        <span className="inline-flex items-center gap-1 font-medium text-foreground">{post.username}{post.username && verified.has(post.username) && <VerifiedBadge />}</span>
         <span>· {timeAgo(post.created_at)}</span>
         <span className="ml-auto rounded-full bg-surface-2 px-2 py-0.5 capitalize">{categoryLabel(post.category ?? "general")}</span>
       </div>

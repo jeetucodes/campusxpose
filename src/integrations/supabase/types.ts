@@ -649,6 +649,24 @@ export type Database = {
           },
         ]
       }
+      verified_users: {
+        Row: {
+          created_at: string
+          user_hash: string | null
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          user_hash?: string | null
+          username: string
+        }
+        Update: {
+          created_at?: string
+          user_hash?: string | null
+          username?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

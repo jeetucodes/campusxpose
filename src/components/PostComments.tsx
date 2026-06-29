@@ -10,6 +10,8 @@ import { useIdentity } from "@/stores/identity";
 import { submitComment } from "@/lib/content.functions";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { useVerifiedUsernames } from "@/hooks/useVerified";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 
 export type Comment = {
   id: string;
@@ -138,6 +140,7 @@ export function PostComments({ postId, onCount }: { postId: string; onCount?: (n
 function CommentNode({ node, depth, onReply }: { node: Node; depth: number; onReply: (c: Comment) => void }) {
   const isReply = depth > 0;
   const hasChildren = node.children.length > 0;
+  const verified = useVerifiedUsernames();
 
   return (
     <div className={cn("animate-fade-in", isReply && "relative")}>
@@ -157,7 +160,7 @@ function CommentNode({ node, depth, onReply }: { node: Node; depth: number; onRe
 
         <div className="min-w-0 flex-1 pb-1">
           <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
-            <span className="font-medium text-foreground">{node.username}</span>
+            <span className="inline-flex items-center gap-1 font-medium text-foreground">{node.username}{node.username && verified.has(node.username) && <VerifiedBadge className="h-3.5 w-3.5" />}</span>
             <span>· {timeAgo(node.created_at)}</span>
           </div>
           <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-relaxed">{node.content}</p>
