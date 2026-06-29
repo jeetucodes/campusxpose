@@ -140,6 +140,20 @@ function Messages() {
     const reply = replyTo;
     setText("");
     setReplyTo(null);
+    // Optimistic insert so the message appears instantly (real-time feel).
+    const tempId = `temp-${Date.now()}`;
+    const optimistic: DM = {
+      id: tempId,
+      sender_username: username,
+      recipient_username: active,
+      sender_hash: hashedId,
+      content,
+      created_at: new Date().toISOString(),
+      reply_to_id: reply?.id ?? null,
+      reply_to_username: reply?.sender_username ?? null,
+      reply_to_content: reply?.content ?? null,
+    };
+    setAll((prev) => [...prev, optimistic]);
     try {
       await submitDirectMessage({
         data: {
@@ -154,9 +168,12 @@ function Messages() {
       });
       await load();
     } catch (e) {
+      // Roll back the optimistic message on failure.
+      setAll((prev) => prev.filter((m) => m.id !== tempId));
       toast.error(e instanceof Error ? e.message : "Message failed");
     }
   };
+
 
   const startNew = () => {
     const name = newName.trim();
