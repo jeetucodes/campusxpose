@@ -471,6 +471,82 @@ export type Database = {
         }
         Relationships: []
       }
+      poll_votes: {
+        Row: {
+          anonymous_user_hash: string
+          created_at: string
+          id: string
+          option_index: number
+          poll_id: string
+        }
+        Insert: {
+          anonymous_user_hash: string
+          created_at?: string
+          id?: string
+          option_index: number
+          poll_id: string
+        }
+        Update: {
+          anonymous_user_hash?: string
+          created_at?: string
+          id?: string
+          option_index?: number
+          poll_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      polls: {
+        Row: {
+          anonymous_user_hash: string
+          college_id: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          options: string[]
+          question: string
+          scope: string
+          username: string
+        }
+        Insert: {
+          anonymous_user_hash: string
+          college_id?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          options: string[]
+          question: string
+          scope?: string
+          username: string
+        }
+        Update: {
+          anonymous_user_hash?: string
+          college_id?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          options?: string[]
+          question?: string
+          scope?: string
+          username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "polls_college_id_fkey"
+            columns: ["college_id"]
+            isOneToOne: false
+            referencedRelation: "colleges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_comments: {
         Row: {
           anonymous_user_hash: string
@@ -678,6 +754,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      delete_expired_polls: { Args: never; Returns: undefined }
       refresh_clustered_incidents: { Args: never; Returns: undefined }
     }
     Enums: {
