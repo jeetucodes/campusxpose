@@ -200,7 +200,7 @@ function Home() {
           </span>
         </div>
         <div className="space-y-4">
-          {(data?.top ?? []).map((c, i) => (
+          {top.map((c, i) => (
             <Link
               key={c.id}
               to="/colleges/$id"
@@ -223,7 +223,7 @@ function Home() {
               </div>
             </Link>
           ))}
-          {(data?.top ?? []).length === 0 && (
+          {top.length === 0 && (
             <p className="text-center text-muted-foreground">Abhi tak koi report nahi. Pehle aap karo!</p>
           )}
         </div>
@@ -261,7 +261,7 @@ function Home() {
           </span>
         </div>
         <div className="space-y-4">
-          {(showAllReports ? (data?.recentPosts ?? []) : (data?.recentPosts ?? []).slice(0, 3)).map((p, i) => {
+          {(showAllReports ? recentPosts : recentPosts.slice(0, 3)).map((p, i) => {
             const card = (
               <div
                 className={`sketch-card p-4 ${i % 2 ? "rotate-1" : "-rotate-1"}`}
@@ -292,11 +292,11 @@ function Home() {
               <div key={p.id}>{card}</div>
             );
           })}
-          {(data?.recentPosts ?? []).length === 0 && (
+          {recentPosts.length === 0 && (
             <p className="text-center text-muted-foreground">Abhi koi report nahi aayi.</p>
           )}
         </div>
-        {(data?.recentPosts ?? []).length > 3 && (
+        {recentPosts.length > 3 && (
           <div className="mt-6 text-center">
             <Button variant="outline" onClick={() => setShowAllReports((v) => !v)}>
               {showAllReports ? "Show less" : "Read more"}
