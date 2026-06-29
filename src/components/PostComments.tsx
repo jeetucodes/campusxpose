@@ -137,19 +137,28 @@ export function PostComments({ postId, onCount }: { postId: string; onCount?: (n
 
 function CommentNode({ node, depth, onReply }: { node: Node; depth: number; onReply: (c: Comment) => void }) {
   const isReply = depth > 0;
+  const replyBg = depth === 1 ? "bg-primary/[0.04]" : depth === 2 ? "bg-primary/[0.03]" : "";
   return (
-    <div className="relative">
+    <div className={cn("relative rounded-xl", isReply && "ml-5", replyBg)}>
       {isReply && (
-        <div className="absolute -left-[9px] top-4 flex h-full flex-col items-center">
-          <div className="h-2 w-2 rounded-full bg-primary/70" />
-          <div className="mt-1 w-px flex-1 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMSIgaGVpZ2h0PSI4IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxsaW5lIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSI4IiBzdHJva2U9IiMyZDJkMmQiIHN0cm9rZS1kYXNoYXJyYXk9IjIgMyIgc3Ryb2tlLXdpZHRoPSIxIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=')] bg-repeat-y" />
+        <div className="absolute -left-[13px] top-5 flex h-[calc(100%-20px)] flex-col items-center">
+          <div className="h-2.5 w-2.5 rounded-full border-2 border-primary/60 bg-background" />
+          <div
+            className="mt-1 flex-1 w-[2px] rounded-full"
+            style={{
+              backgroundImage: `url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMiIgaGVpZ2h0PSIxMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48bGluZSB4MT0iMSIgeTE9IjAiIHgyPSIxIiB5Mj0iMTAiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1kYXNoYXJyYXk9IjMgMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+")`,
+              backgroundRepeat: "repeat-y",
+              backgroundPosition: "center top",
+              color: "hsl(var(--primary) / 0.35)",
+            }}
+          />
         </div>
       )}
-      <div className={cn("flex items-start gap-2.5", isReply && "ml-4")}>
+      <div className={cn("flex items-start gap-2.5", isReply && "px-3 py-2.5")}>
         <div className="relative mt-0.5">
           <UserSymbol username={node.username} size="sm" />
           {node.children.length > 0 && (
-            <div className="absolute -bottom-2 left-1/2 h-2 w-px -translate-x-1/2 bg-primary/40" />
+            <div className="absolute -bottom-2.5 left-1/2 h-2.5 w-[2px] -translate-x-1/2 rounded-full bg-primary/50" />
           )}
         </div>
         <div className="min-w-0 flex-1">
@@ -162,14 +171,14 @@ function CommentNode({ node, depth, onReply }: { node: Node; depth: number; onRe
           </div>
           <button
             onClick={() => onReply(node)}
-            className="mt-1.5 inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-surface-2 hover:text-primary"
+            className="mt-1.5 inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
           >
             <CornerDownRight className="h-3 w-3" /> Reply
           </button>
         </div>
       </div>
       {node.children.length > 0 && (
-        <div className="relative mt-2 space-y-3">
+        <div className="relative mt-1 space-y-2">
           {node.children.map((child) => (
             <CommentNode key={child.id} node={child} depth={depth + 1} onReply={onReply} />
           ))}
