@@ -188,6 +188,9 @@ function Home() {
         </div>
       </section>
 
+      {/* Trust & safety */}
+      <TrustSection />
+
       {/* Top reported */}
       <section className="mx-auto max-w-3xl px-4 py-16">
         <div className="mb-6 flex items-center justify-between gap-3">
