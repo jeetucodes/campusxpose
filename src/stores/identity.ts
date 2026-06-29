@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { forgetMe, loadOrCreateIdentity } from "@/lib/identity";
+import { forgetMe, forgetMeWithUsername, loadOrCreateIdentity } from "@/lib/identity";
 
 interface IdentityState {
   hashedId: string | null;
