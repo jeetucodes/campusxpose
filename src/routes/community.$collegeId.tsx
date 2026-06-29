@@ -15,6 +15,7 @@ import { chatSummary } from "@/lib/ai.functions";
 import { DEFAULT_KEYWORDS } from "@/lib/categories";
 import { useReactions } from "@/hooks/useReactions";
 import { ReactionChips, MessageActions, ReplyQuote } from "@/components/MessageReactions";
+import { MessageGestures } from "@/components/MessageGestures";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -168,9 +169,10 @@ function Community() {
                     <UserSymbol username={m.username} size="sm" />
                   )}
                   <div className={cn("group/msg flex max-w-[80%] flex-col gap-1", own ? "items-end" : "items-start")}>
+                    <MessageGestures onReply={() => setReplyTo(m)} onReact={(e) => toggle(m.id, e)} align={own ? "end" : "start"}>
                     <div className={cn("flex items-center gap-1", own ? "flex-row" : "flex-row-reverse")}>
                       <MessageActions
-                        className="opacity-100 transition-opacity md:opacity-0 md:group-hover/msg:opacity-100"
+                        className="hidden transition-opacity md:flex md:opacity-0 md:group-hover/msg:opacity-100"
                         onToggle={(e) => toggle(m.id, e)}
                         onReply={() => setReplyTo(m)}
                       />
@@ -188,6 +190,7 @@ function Community() {
                         <div className="whitespace-pre-wrap break-words leading-relaxed">{m.content}</div>
                       </div>
                     </div>
+                    </MessageGestures>
                     <ReactionChips reactions={byMessage.get(m.id) ?? []} onToggle={(e) => toggle(m.id, e)} align={own ? "end" : "start"} />
                     <div className={cn("flex items-center gap-1 text-[10px] text-muted-foreground", own ? "justify-end pr-1" : "pl-1")}>
                       {timeAgo(m.created_at)}
