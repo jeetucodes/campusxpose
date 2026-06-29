@@ -254,6 +254,15 @@ function Messages() {
                   Anonymous direct message
                 </div>
               </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="ml-auto text-muted-foreground hover:text-destructive"
+                aria-label={`Delete conversation with ${active}`}
+                onClick={() => deleteConversation(active)}
+              >
+                <Trash2 className="h-5 w-5" />
+              </Button>
             </header>
 
             <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-2 overflow-y-auto px-4 py-4">
