@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.refresh_clustered_incidents() FROM PUBLIC, anon, authenticated;
