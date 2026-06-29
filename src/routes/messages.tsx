@@ -271,7 +271,7 @@ function Messages() {
               </Button>
             </header>
 
-            <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-2 overflow-y-auto px-4 py-4">
+            <div ref={threadBoxRef} className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-2 overflow-y-auto px-4 py-4">
               {thread.map((m) => {
                 const own = m.sender_username === username;
                 return (
