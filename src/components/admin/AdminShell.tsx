@@ -12,6 +12,7 @@ const NAV = [
   { to: "/admin/colleges", label: "Colleges", icon: Building2 },
   { to: "/admin/incidents", label: "Incidents", icon: AlertTriangle },
   { to: "/admin/posts", label: "Posts", icon: FileText },
+  { to: "/admin/comments", label: "Comments", icon: MessagesSquare },
   { to: "/admin/community", label: "Community", icon: MessageSquare },
   { to: "/admin/users", label: "Users", icon: Users },
   { to: "/admin/moderation", label: "Moderation", icon: ShieldAlert },
