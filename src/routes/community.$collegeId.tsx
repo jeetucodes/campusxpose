@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Send, Sparkles, RefreshCw, ChevronDown, ChevronUp, X, FileWarning, CheckCheck } from "lucide-react";
+import { ArrowLeft, Send, X, FileWarning, CheckCheck } from "lucide-react";
 import { UserSymbol } from "@/components/UserSymbol";
 import { useVerifiedUsernames } from "@/hooks/useVerified";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
