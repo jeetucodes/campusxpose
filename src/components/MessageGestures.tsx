@@ -13,11 +13,15 @@ export function MessageGestures({
   children,
   onReply,
   onReact,
+  onPin,
+  pinned,
   align = "start",
 }: {
   children: ReactNode;
   onReply: () => void;
   onReact: (emoji: ReactionEmoji) => void;
+  onPin?: () => void;
+  pinned?: boolean;
   align?: "start" | "end";
 }) {
   const [dx, setDx] = useState(0);
