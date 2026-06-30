@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Shield, ChevronDown, Trash2 } from "lucide-react";
+import { Shield, ChevronDown, Trash2, UserRound } from "lucide-react";
 import { UserSymbol } from "@/components/UserSymbol";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { useIdentity } from "@/stores/identity";
