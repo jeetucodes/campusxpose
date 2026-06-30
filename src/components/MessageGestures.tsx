@@ -101,7 +101,8 @@ export function MessageGestures({
           <div className="fixed inset-0 z-40" onClick={() => setShowReactions(false)} />
           <div
             className={cn(
-              "absolute -top-12 z-50 flex gap-1 rounded-full border-2 border-border bg-white p-1.5 shadow-ink-soft",
+              "absolute z-50 flex gap-1 rounded-full border-2 border-border bg-white p-1.5 shadow-ink-soft",
+              placeBelow ? "top-full mt-1" : "-top-12",
               align === "end" ? "right-0" : "left-0",
             )}
           >
