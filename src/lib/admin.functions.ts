@@ -703,3 +703,70 @@ export const adminDeletePoll = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
+
+/** Admin: list feedback submissions, newest first. */
+export const adminListFeedback = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: z.string() }).parse(d))
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows, error } = await supabaseAdmin
+      .from("feedback" as any)
+      .select("id, name, message, user_username, user_hash, status, admin_reply, replied_at, created_at")
+      .order("created_at", { ascending: false })
+      .limit(300);
+    if (error) throw new Error(error.message);
+    return (rows as any[]) ?? [];
+  });
+
+/** Admin: reply to a feedback item by sending the user a direct message as "admin". */
+export const adminReplyFeedback = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z.object({ token: z.string(), id: z.string().uuid(), reply: z.string().min(1).max(1000) }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: fb, error: fErr } = await supabaseAdmin
+      .from("feedback" as any)
+      .select("user_username, user_hash")
+      .eq("id", data.id)
+      .single();
+    if (fErr) throw new Error(fErr.message);
+
+    const username = (fb as any)?.user_username as string | null;
+    const recipientHash = (fb as any)?.user_hash as string | null;
+    if (!username) {
+      throw new Error("This feedback has no identity attached, so a DM reply can't be sent.");
+    }
+
+    const reply = data.reply.replace(/<[^>]*>/g, "").trim();
+    const { error: dmErr } = await supabaseAdmin.from("direct_messages").insert({
+      sender_hash: "admin",
+      sender_username: "admin",
+      recipient_username: username,
+      recipient_hash: recipientHash,
+      content: reply,
+    });
+    if (dmErr) throw new Error(dmErr.message);
+
+    const { error: uErr } = await supabaseAdmin
+      .from("feedback" as any)
+      .update({ status: "replied", admin_reply: reply, replied_at: new Date().toISOString() })
+      .eq("id", data.id);
+    if (uErr) throw new Error(uErr.message);
+
+    return { ok: true as const };
+  });
+
+/** Admin: delete a feedback item. */
+export const adminDeleteFeedback = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: z.string(), id: z.string().uuid() }).parse(d))
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("feedback" as any).delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
