@@ -114,6 +114,17 @@ export function Navbar() {
                 Edit profile & avatar
               </Link>
             </Button>
+            {canEnablePush && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="mb-2 w-full justify-start gap-2"
+                onClick={handleEnablePush}
+              >
+                <BellRing className="h-4 w-4" />
+                Enable notifications
+              </Button>
+            )}
             <Button
               variant="destructive"
               size="sm"
