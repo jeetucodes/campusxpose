@@ -94,7 +94,7 @@ export function FeedbackForm({ compact = false }: { compact?: boolean }) {
       <Textarea
         value={message}
         onChange={(e) => setMessage(e.target.value)}
-        placeholder="Apni baat likho — suggestion, bug, ya koi shikayat…"
+        placeholder="Honest review likho — app kaisa laga, kya add karein, kya sudhar sakta hai…"
         maxLength={2000}
         rows={compact ? 3 : 4}
         required
