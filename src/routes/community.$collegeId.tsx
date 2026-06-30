@@ -30,7 +30,7 @@ export const Route = createFileRoute("/community/$collegeId")({
   component: Community,
 });
 
-type Msg = { id: string; username: string; content: string; anonymous_user_hash: string; is_incident_signal: boolean; created_at: string; reply_to_id?: string | null; reply_to_username?: string | null; reply_to_content?: string | null };
+type Msg = { id: string; username: string; content: string; anonymous_user_hash: string; is_incident_signal: boolean; created_at: string; pinned?: boolean; reply_to_id?: string | null; reply_to_username?: string | null; reply_to_content?: string | null };
 
 function Community() {
   const { collegeId } = Route.useParams();
