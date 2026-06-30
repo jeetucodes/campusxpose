@@ -1,4 +1,4 @@
-import { Smile, Reply } from "lucide-react";
+import { Smile, Reply, Pin, PinOff } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { REACTION_EMOJIS, type ReactionEmoji } from "@/lib/reactions";
 import type { ReactionSummary } from "@/hooks/useReactions";
@@ -17,7 +17,7 @@ export function ReactionChips({
   return (
     <div
       className={cn(
-        "relative z-10 -mt-3 flex flex-wrap gap-1",
+        "relative z-20 -mt-2 flex flex-wrap gap-1",
         align === "end" ? "mr-2 justify-end" : "ml-2 justify-start",
       )}
     >
@@ -44,10 +44,14 @@ export function ReactionChips({
 export function MessageActions({
   onToggle,
   onReply,
+  onPin,
+  pinned,
   className,
 }: {
   onToggle: (emoji: ReactionEmoji) => void;
   onReply: () => void;
+  onPin?: () => void;
+  pinned?: boolean;
   className?: string;
 }) {
   return (
@@ -85,9 +89,22 @@ export function MessageActions({
       >
         <Reply className="h-4 w-4" />
       </button>
+      {onPin && (
+        <button
+          aria-label={pinned ? "Unpin message" : "Pin message"}
+          onClick={onPin}
+          className={cn(
+            "grid h-7 w-7 place-items-center rounded-full transition-colors hover:bg-surface-2 hover:text-accent",
+            pinned ? "text-accent" : "text-muted-foreground",
+          )}
+        >
+          {pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
+        </button>
+      )}
     </div>
   );
 }
+
 
 export function ReplyQuote({
   username,

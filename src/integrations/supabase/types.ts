@@ -215,6 +215,7 @@ export type Database = {
           id: string
           incident_id: string | null
           is_incident_signal: boolean | null
+          pinned: boolean
           reply_to_content: string | null
           reply_to_id: string | null
           reply_to_username: string | null
@@ -228,6 +229,7 @@ export type Database = {
           id?: string
           incident_id?: string | null
           is_incident_signal?: boolean | null
+          pinned?: boolean
           reply_to_content?: string | null
           reply_to_id?: string | null
           reply_to_username?: string | null
@@ -241,6 +243,7 @@ export type Database = {
           id?: string
           incident_id?: string | null
           is_incident_signal?: boolean | null
+          pinned?: boolean
           reply_to_content?: string | null
           reply_to_id?: string | null
           reply_to_username?: string | null
@@ -261,6 +264,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          pinned: boolean
           recipient_hash: string | null
           recipient_username: string
           reply_to_content: string | null
@@ -273,6 +277,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          pinned?: boolean
           recipient_hash?: string | null
           recipient_username: string
           reply_to_content?: string | null
@@ -285,6 +290,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          pinned?: boolean
           recipient_hash?: string | null
           recipient_username?: string
           reply_to_content?: string | null
@@ -352,6 +358,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          pinned: boolean
           reply_to_content: string | null
           reply_to_id: string | null
           reply_to_username: string | null
@@ -362,6 +369,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          pinned?: boolean
           reply_to_content?: string | null
           reply_to_id?: string | null
           reply_to_username?: string | null
@@ -372,6 +380,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          pinned?: boolean
           reply_to_content?: string | null
           reply_to_id?: string | null
           reply_to_username?: string | null

@@ -351,6 +351,37 @@ export const submitDirectMessage = createServerFn({ method: "POST" })
     return { ok: true, shadow: false };
   });
 
+const PIN_TABLE = {
+  global: "global_messages",
+  community: "community_messages",
+  direct: "direct_messages",
+} as const;
+
+/** Pin or unpin a chat message. Works for global, community and direct chats. */
+export const togglePinMessage = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        messageId: z.string().uuid(),
+        messageType: z.enum(["global", "community", "direct"]),
+        hashedId: z.string().min(8),
+        pinned: z.boolean(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (await isBanned(data.hashedId)) return { ok: true, shadow: true };
+    const table = PIN_TABLE[data.messageType];
+    const { error } = await supabaseAdmin
+      .from(table)
+      .update({ pinned: data.pinned })
+      .eq("id", data.messageId);
+    if (error) throw new Error(error.message);
+    return { ok: true, pinned: data.pinned };
+  });
+
+
 export const fetchDirectMessages = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z

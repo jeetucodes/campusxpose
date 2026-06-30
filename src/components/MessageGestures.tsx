@@ -1,5 +1,5 @@
 import { useRef, useState, type ReactNode } from "react";
-import { Reply } from "lucide-react";
+import { Reply, Pin, PinOff } from "lucide-react";
 import { REACTION_EMOJIS, type ReactionEmoji } from "@/lib/reactions";
 import { cn } from "@/lib/utils";
 
@@ -13,11 +13,15 @@ export function MessageGestures({
   children,
   onReply,
   onReact,
+  onPin,
+  pinned,
   align = "start",
 }: {
   children: ReactNode;
   onReply: () => void;
   onReact: (emoji: ReactionEmoji) => void;
+  onPin?: () => void;
+  pinned?: boolean;
   align?: "start" | "end";
 }) {
   const [dx, setDx] = useState(0);
@@ -44,7 +48,7 @@ export function MessageGestures({
     moved.current = false;
     longTimer.current = setTimeout(() => {
       const top = wrapRef.current?.getBoundingClientRect().top ?? 200;
-      setPlaceBelow(top < 80);
+      setPlaceBelow(top < 140);
       setShowReactions(true);
       if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(12);
     }, 420);
@@ -118,6 +122,18 @@ export function MessageGestures({
                 {emoji}
               </button>
             ))}
+            {onPin && (
+              <button
+                aria-label={pinned ? "Unpin message" : "Pin message"}
+                onClick={() => {
+                  onPin();
+                  setShowReactions(false);
+                }}
+                className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground transition-transform active:scale-110"
+              >
+                {pinned ? <PinOff className="h-5 w-5" /> : <Pin className="h-5 w-5" />}
+              </button>
+            )}
           </div>
         </>
       )}

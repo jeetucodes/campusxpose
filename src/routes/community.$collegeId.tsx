@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Send, X, FileWarning, CheckCheck } from "lucide-react";
+import { ArrowLeft, Send, X, FileWarning, CheckCheck, Pin } from "lucide-react";
 import { UserSymbol } from "@/components/UserSymbol";
 import { useVerifiedUsernames } from "@/hooks/useVerified";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useIdentity } from "@/stores/identity";
-import { submitMessage } from "@/lib/content.functions";
+import { submitMessage, togglePinMessage } from "@/lib/content.functions";
 
 import { DEFAULT_KEYWORDS } from "@/lib/categories";
 import { useReactions } from "@/hooks/useReactions";
@@ -23,13 +23,14 @@ import { TypingIndicator } from "@/components/ChatPresence";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { AdPin } from "@/components/AdPin";
-import { ChatPolls } from "@/components/ChatPolls";
+import { PollItem, NewPollButton } from "@/components/ChatPolls";
+import { usePolls, type Poll } from "@/hooks/usePolls";
 
 export const Route = createFileRoute("/community/$collegeId")({
   component: Community,
 });
 
-type Msg = { id: string; username: string; content: string; anonymous_user_hash: string; is_incident_signal: boolean; created_at: string; reply_to_id?: string | null; reply_to_username?: string | null; reply_to_content?: string | null };
+type Msg = { id: string; username: string; content: string; anonymous_user_hash: string; is_incident_signal: boolean; created_at: string; pinned?: boolean; reply_to_id?: string | null; reply_to_username?: string | null; reply_to_content?: string | null };
 
 function Community() {
   const { collegeId } = Route.useParams();
@@ -39,6 +40,21 @@ function Community() {
   
   const { byMessage, toggle } = useReactions("community", hashedId);
   const { typing, notifyTyping } = usePresence(`community-${collegeId}`, username, hashedId);
+  const { polls, votes, reload: reloadPolls } = usePolls("college", collegeId);
+
+  const pinMessage = async (m: Msg) => {
+    if (!hashedId) return;
+    const next = !m.pinned;
+    setMessages((prev) => prev.map((x) => (x.id === m.id ? { ...x, pinned: next } : x)));
+    try {
+      await togglePinMessage({
+        data: { messageId: m.id, messageType: "community", hashedId, pinned: next },
+      });
+    } catch {
+      setMessages((prev) => prev.map((x) => (x.id === m.id ? { ...x, pinned: !next } : x)));
+      toast.error("Could not update pin");
+    }
+  };
 
   const collegeQ = useQuery({
     queryKey: ["college-name", collegeId],
@@ -71,6 +87,10 @@ function Community() {
 
       .on("postgres_changes", { event: "DELETE", schema: "public", table: "community_messages" }, (p) => {
         setMessages((prev) => prev.filter((m) => m.id !== (p.old as any).id));
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "community_messages" }, (p) => {
+        const updated = p.new as Msg;
+        setMessages((prev) => prev.map((m) => (m.id === updated.id ? { ...m, pinned: updated.pinned } : m)));
       })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
@@ -124,6 +144,20 @@ function Community() {
 
   const initials = (collegeQ.data?.name ?? "Community").trim().slice(0, 2).toUpperCase();
 
+  const pinned = useMemo(() => messages.filter((m) => m.pinned), [messages]);
+
+  type StreamItem =
+    | { kind: "msg"; at: string; msg: Msg }
+    | { kind: "poll"; at: string; poll: Poll };
+  const items = useMemo<StreamItem[]>(() => {
+    const merged: StreamItem[] = [
+      ...messages.map((m) => ({ kind: "msg" as const, at: m.created_at, msg: m })),
+      ...polls.map((p) => ({ kind: "poll" as const, at: p.created_at, poll: p })),
+    ];
+    merged.sort((a, b) => (a.at < b.at ? 1 : a.at > b.at ? -1 : 0));
+    return merged;
+  }, [messages, polls]);
+
   return (
     <div className="flex h-[100dvh] flex-col bg-background md:h-[calc(100dvh-4rem)]">
       <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col overflow-hidden md:border-x md:border-border">
@@ -152,16 +186,53 @@ function Community() {
 
         <AdPin placement="college" />
 
-        <ChatPolls scope="college" collegeId={collegeId} hashedId={hashedId} username={username} />
-
-
+        {pinned.length > 0 && (
+          <div className="border-b border-border bg-surface-2/60 px-3 py-2 sm:px-4">
+            <div className="space-y-1">
+              {pinned.map((m) => (
+                <div key={m.id} className="flex items-center gap-2 text-xs">
+                  <Pin className="h-3.5 w-3.5 shrink-0 text-primary" />
+                  <span className="shrink-0 font-semibold text-primary">{m.username}:</span>
+                  <span className="truncate text-muted-foreground">{m.content}</span>
+                  {m.anonymous_user_hash === hashedId && (
+                    <button
+                      onClick={() => pinMessage(m)}
+                      className="ml-auto shrink-0 text-muted-foreground hover:text-destructive"
+                      aria-label="Unpin"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* messages */}
         <div className="flex flex-1 flex-col-reverse gap-3 overflow-y-auto px-3 py-4 sm:px-4">
           <AnimatePresence initial={false}>
-            {messages.map((m) => {
+            {items.map((it) => {
+              if (it.kind === "poll") {
+                const p = it.poll;
+                const own = p.anonymous_user_hash === hashedId;
+                return (
+                  <motion.div
+                    key={`poll-${p.id}`}
+                    layout
+                    initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ duration: 0.18 }}
+                    className={cn("flex", own ? "justify-end" : "justify-start")}
+                  >
+                    <div className="w-full max-w-[85%]">
+                      <PollItem poll={p} votes={votes.filter((v) => v.poll_id === p.id)} hashedId={hashedId} own={own} />
+                    </div>
+                  </motion.div>
+                );
+              }
+              const m = it.msg;
               const own = m.anonymous_user_hash === hashedId;
-              const avatar = (m.username ?? "?").trim().slice(0, 2).toUpperCase();
               return (
                 <motion.div
                   key={m.id}
@@ -175,22 +246,27 @@ function Community() {
                     <UserSymbol username={m.username} size="sm" />
                   )}
                   <div className={cn("group/msg flex max-w-[80%] flex-col gap-1", own ? "items-end" : "items-start")}>
-                    <MessageGestures onReply={() => setReplyTo(m)} onReact={(e) => toggle(m.id, e)} align={own ? "end" : "start"}>
+                    <MessageGestures onReply={() => setReplyTo(m)} onReact={(e) => toggle(m.id, e)} onPin={() => pinMessage(m)} pinned={m.pinned} align={own ? "end" : "start"}>
                     <div className={cn("flex items-center gap-1", own ? "flex-row" : "flex-row-reverse")}>
                       <MessageActions
                         className="hidden transition-opacity md:flex md:opacity-0 md:group-hover/msg:opacity-100"
                         onToggle={(e) => toggle(m.id, e)}
                         onReply={() => setReplyTo(m)}
+                        onPin={() => pinMessage(m)}
+                        pinned={m.pinned}
                       />
                       <div
                         className={cn(
-                          "rounded-2xl px-3.5 py-2.5 text-sm shadow-sm",
+                          "relative rounded-2xl px-3.5 py-2.5 text-sm shadow-sm",
                           own
                             ? "rounded-br-md bg-primary text-primary-foreground shadow-primary/15"
                             : "rounded-bl-md border border-border bg-surface",
                           m.is_incident_signal && !own && "border-l-2 border-l-warning",
                         )}
                       >
+                        {m.pinned && (
+                          <Pin className="absolute -right-1.5 -top-1.5 h-3.5 w-3.5 rotate-45 text-primary" />
+                        )}
                         {!own && <div className="mb-0.5 inline-flex items-center gap-1 text-xs font-semibold text-primary/80">{m.username}{m.username && verified.has(m.username) && <VerifiedBadge className="h-3.5 w-3.5" />}</div>}
                         <ReplyQuote username={m.reply_to_username} content={m.reply_to_content} align={own ? "end" : "start"} />
                         <div className="whitespace-pre-wrap break-words leading-relaxed">{m.content}</div>
@@ -242,6 +318,7 @@ function Community() {
             </div>
           )}
           <div className="flex items-center gap-2 rounded-full border border-border bg-surface-2 px-2 py-1.5 transition-colors focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15">
+            <NewPollButton scope="college" collegeId={collegeId} hashedId={hashedId} username={username} onCreated={reloadPolls} />
             <Input
               value={text}
               onChange={(e) => onType(e.target.value)}

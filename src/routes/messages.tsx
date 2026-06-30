@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Send, MessageCircle, Globe, ArrowLeft, Plus, Trash2, X } from "lucide-react";
+import { Send, MessageCircle, Globe, ArrowLeft, Plus, Trash2, X, Pin } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { useIdentity } from "@/stores/identity";
 import { useDmStore } from "@/stores/dm";
 import { UserSymbol } from "@/components/UserSymbol";
-import { submitDirectMessage, fetchDirectMessages, deleteDirectConversation } from "@/lib/content.functions";
+import { submitDirectMessage, fetchDirectMessages, deleteDirectConversation, togglePinMessage } from "@/lib/content.functions";
 import { useReactions } from "@/hooks/useReactions";
 import { ReactionChips, MessageActions, ReplyQuote } from "@/components/MessageReactions";
 import { MessageGestures } from "@/components/MessageGestures";
@@ -49,6 +49,7 @@ type DM = {
   reply_to_id?: string | null;
   reply_to_username?: string | null;
   reply_to_content?: string | null;
+  pinned?: boolean;
 };
 
 function Messages() {
@@ -64,6 +65,22 @@ function Messages() {
   const [newName, setNewName] = useState("");
   const [replyTo, setReplyTo] = useState<DM | null>(null);
   const { byMessage, toggle } = useReactions("direct", hashedId);
+
+  const pinMessage = async (m: DM) => {
+    if (!hashedId) return;
+    const next = !m.pinned;
+    setAll((prev) => prev.map((x) => (x.id === m.id ? { ...x, pinned: next } : x)));
+    try {
+      await togglePinMessage({
+        data: { messageId: m.id, messageType: "direct", hashedId, pinned: next },
+      });
+    } catch {
+      setAll((prev) => prev.map((x) => (x.id === m.id ? { ...x, pinned: !next } : x)));
+      toast.error("Could not update pin");
+    }
+  };
+
+
 
   useEffect(() => {
     init();
@@ -336,22 +353,45 @@ function Messages() {
               </Button>
             </header>
 
+            {thread.some((m) => m.pinned) && (
+              <div className="border-b-2 border-dashed border-border bg-surface-2/60 px-4 py-2">
+                <div className="mx-auto w-full max-w-2xl space-y-1">
+                  {thread.filter((m) => m.pinned).map((m) => (
+                    <div key={m.id} className="flex items-center gap-2 text-xs">
+                      <Pin className="h-3.5 w-3.5 shrink-0 text-accent" />
+                      <span className="shrink-0 font-semibold text-accent">{m.sender_username}:</span>
+                      <span className="truncate text-muted-foreground">{m.content}</span>
+                      <button
+                        onClick={() => pinMessage(m)}
+                        className="ml-auto shrink-0 text-muted-foreground hover:text-destructive"
+                        aria-label="Unpin"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div ref={threadBoxRef} className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-2 overflow-y-auto px-4 py-4">
               {thread.map((m) => {
                 const own = m.sender_username === username;
                 const reactions = byMessage.get(m.id) ?? [];
                 return (
                   <div key={m.id} className={cn("group flex flex-col gap-1", own ? "items-end" : "items-start")}>
-                    <MessageGestures onReply={() => setReplyTo(m)} onReact={(e) => toggle(m.id, e)} align={own ? "end" : "start"}>
+                    <MessageGestures onReply={() => setReplyTo(m)} onReact={(e) => toggle(m.id, e)} onPin={() => pinMessage(m)} pinned={m.pinned} align={own ? "end" : "start"}>
                     <div className={cn("flex items-center gap-1", own ? "flex-row" : "flex-row-reverse")}>
                       <MessageActions
                         className="hidden transition-opacity md:flex md:opacity-0 md:group-hover:opacity-100"
                         onToggle={(e) => toggle(m.id, e)}
                         onReply={() => setReplyTo(m)}
+                        onPin={() => pinMessage(m)}
+                        pinned={m.pinned}
                       />
                       <div
                         className={cn(
-                          "w-fit max-w-[85%] border-2 border-border px-3 py-2 text-sm shadow-ink-soft",
+                          "relative w-fit max-w-[85%] border-2 border-border px-3 py-2 text-sm shadow-ink-soft",
                           own ? "bg-accent text-accent-foreground" : "bg-white",
                         )}
                         style={{
@@ -360,6 +400,9 @@ function Messages() {
                             : "6px 18px 18px 18px",
                         }}
                       >
+                        {m.pinned && (
+                          <Pin className="absolute -right-1.5 -top-1.5 h-3.5 w-3.5 rotate-45 text-accent" />
+                        )}
                         <ReplyQuote username={m.reply_to_username} content={m.reply_to_content} align={own ? "end" : "start"} />
                         <div className="flex flex-wrap items-end justify-end gap-x-2">
                           <span className="whitespace-pre-wrap break-words leading-relaxed">
