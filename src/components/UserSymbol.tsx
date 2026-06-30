@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { userAvatar } from "@/lib/avatar";
+import { useAvatarOverrides } from "@/hooks/useAvatarOverrides";
 import { cn } from "@/lib/utils";
 
 const SIZES: Record<string, string> = {
@@ -18,6 +19,8 @@ export function UserSymbol({
   className?: string;
 }) {
   const { symbol, color, url } = userAvatar(username);
+  const overrides = useAvatarOverrides();
+  const finalUrl = (username && overrides.get(username)) || url;
   const [failed, setFailed] = useState(false);
   return (
     <div
@@ -36,7 +39,7 @@ export function UserSymbol({
         <span>{symbol}</span>
       ) : (
         <img
-          src={url}
+          src={finalUrl}
           alt=""
           loading="lazy"
           className="h-full w-full object-cover"
