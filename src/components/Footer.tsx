@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Shield, MessageCircle, Megaphone, Home, FileText, MessageSquareHeart, Lock } from "lucide-react";
+import { Shield, MessageCircle, Megaphone, Home, FileText, MessageSquareHeart, Lock, Scale } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Navbar } from "@/components/Navbar";
 
