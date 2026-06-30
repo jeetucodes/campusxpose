@@ -21,6 +21,7 @@ const NAV = [
   { to: "/admin/ai", label: "AI Control", icon: Bot },
   { to: "/admin/ads", label: "Ads", icon: Megaphone },
   { to: "/admin/feedback", label: "Feedback", icon: MessageSquareHeart },
+  { to: "/admin/profile", label: "Profile", icon: UserCog },
 ] as const;
 
 export function AdminShell({ children }: { children: ReactNode }) {
