@@ -70,9 +70,24 @@ function UsersAdmin() {
     if (!res.ok) { toast.error("That username is already taken"); return; }
     toast.success(`Renamed to ${next.trim()}`); q.refetch();
   };
+  const doNewAvatar = async (u: any) => {
+    await setAvatar({ data: { token: token!, userHash: u.hash, username: u.username || undefined, url: randomAvatarUrl() } });
+    toast.success("New avatar set");
+    queryClient.invalidateQueries({ queryKey: ["avatar-overrides"] });
+    q.refetch();
+  };
+  const doResetAvatar = async (u: any) => {
+    await setAvatar({ data: { token: token!, userHash: u.hash, username: u.username || undefined, url: null } });
+    toast.success("Avatar reset to default");
+    queryClient.invalidateQueries({ queryKey: ["avatar-overrides"] });
+    q.refetch();
+  };
 
   const total = (q.data ?? []).length;
   const verifiedCount = (q.data ?? []).filter((u: any) => u.verified).length;
+  const forgotCount = (q.data ?? []).filter((u: any) => u.forgotten).length;
+  const realCount = (q.data ?? []).filter((u: any) => u.real).length;
+
 
   return (
     <div>
