@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Shield, ChevronDown, Trash2, UserRound } from "lucide-react";
+import { Shield, ChevronDown, Trash2, UserRound, BellRing } from "lucide-react";
+import { toast } from "sonner";
 import { UserSymbol } from "@/components/UserSymbol";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { NotificationBell } from "@/components/NotificationBell";
+import { PushPermissionPrompt } from "@/components/PushPermissionPrompt";
 import { useIdentity } from "@/stores/identity";
 import { useDmUnread } from "@/stores/dm";
 import { ForgetMeDialog } from "@/components/ForgetMeDialog";
 import { Logo } from "@/components/Logo";
+import { enablePush, isPushSupported, permissionState } from "@/lib/push-client";
 import {
   DropdownMenu,
   DropdownMenuContent,
