@@ -69,6 +69,11 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link to="/terms" className="inline-flex items-center gap-2 hover:text-foreground transition-colors">
+                  <Scale className="h-4 w-4" /> Terms of Service
+                </Link>
+              </li>
+              <li>
                 <Link to="/" hash="feedback" className="inline-flex items-center gap-2 hover:text-foreground transition-colors">
                   <MessageSquareHeart className="h-4 w-4" /> Feedback
                 </Link>
