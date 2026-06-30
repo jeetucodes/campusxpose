@@ -73,10 +73,6 @@ export function Footer() {
         </div>
 
 
-        {/* Feedback */}
-        <div className="mt-8">
-          <FeedbackForm compact />
-        </div>
 
 
 
