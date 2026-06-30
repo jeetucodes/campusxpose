@@ -337,7 +337,7 @@ function Messages() {
 
       {/* Active thread */}
       <section
-        className={cn("flex-1 flex-col", active ? "flex" : "hidden md:flex")}
+        className={cn("min-h-0 flex-1 flex-col", active ? "flex" : "hidden md:flex")}
       >
         {active ? (
           <>
