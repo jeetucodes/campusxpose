@@ -122,6 +122,18 @@ export function MessageGestures({
                 {emoji}
               </button>
             ))}
+            {onPin && (
+              <button
+                aria-label={pinned ? "Unpin message" : "Pin message"}
+                onClick={() => {
+                  onPin();
+                  setShowReactions(false);
+                }}
+                className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground transition-transform active:scale-110"
+              >
+                {pinned ? <PinOff className="h-5 w-5" /> : <Pin className="h-5 w-5" />}
+              </button>
+            )}
           </div>
         </>
       )}
