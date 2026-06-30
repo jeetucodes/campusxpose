@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Send, X, FileWarning, CheckCheck } from "lucide-react";
+import { ArrowLeft, Send, X, FileWarning, CheckCheck, Pin } from "lucide-react";
 import { UserSymbol } from "@/components/UserSymbol";
 import { useVerifiedUsernames } from "@/hooks/useVerified";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useIdentity } from "@/stores/identity";
-import { submitMessage } from "@/lib/content.functions";
+import { submitMessage, togglePinMessage } from "@/lib/content.functions";
 
 import { DEFAULT_KEYWORDS } from "@/lib/categories";
 import { useReactions } from "@/hooks/useReactions";
@@ -23,7 +23,8 @@ import { TypingIndicator } from "@/components/ChatPresence";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { AdPin } from "@/components/AdPin";
-import { ChatPolls } from "@/components/ChatPolls";
+import { PollItem, NewPollButton } from "@/components/ChatPolls";
+import { usePolls, type Poll } from "@/hooks/usePolls";
 
 export const Route = createFileRoute("/community/$collegeId")({
   component: Community,
