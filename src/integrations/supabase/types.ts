@@ -68,6 +68,33 @@ export type Database = {
         }
         Relationships: []
       }
+      anon_users: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          forgotten: boolean
+          updated_at: string
+          user_hash: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          forgotten?: boolean
+          updated_at?: string
+          user_hash: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          forgotten?: boolean
+          updated_at?: string
+          user_hash?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           key: string
