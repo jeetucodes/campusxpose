@@ -73,7 +73,7 @@ export function MessageGestures({
   };
 
   return (
-    <div className="relative">
+    <div ref={wrapRef} className="relative">
       {dx > 0 && (
         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-1">
           <Reply
