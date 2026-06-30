@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { forgetMe, forgetMeWithUsername, loadOrCreateIdentity, USERNAME_KEY } from "@/lib/identity";
-import { purgeMyActivity, syncIdentity } from "@/lib/content.functions";
+import { markForgotten, purgeMyActivity, registerIdentity, syncIdentity } from "@/lib/content.functions";
 
 interface IdentityState {
   hashedId: string | null;
