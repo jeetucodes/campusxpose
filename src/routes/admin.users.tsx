@@ -12,9 +12,13 @@ import {
   adminDeleteUserActivity,
   adminSetVerified,
   adminRenameUser,
+  adminSetAvatar,
 } from "@/lib/admin.functions";
 import { timeAgo } from "@/lib/format";
 import { Button } from "@/components/ui/button";
+import { UserSymbol } from "@/components/UserSymbol";
+import { randomAvatarUrl } from "@/lib/avatar";
+import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/users")({
