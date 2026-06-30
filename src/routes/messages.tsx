@@ -212,7 +212,7 @@ function Messages() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] bg-background">
+    <div className="flex h-[100dvh] bg-background md:h-[calc(100vh-4rem)]">
       {/* Conversation list */}
       <aside
         className={cn(
