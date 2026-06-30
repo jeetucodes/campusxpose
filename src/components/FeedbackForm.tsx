@@ -55,8 +55,8 @@ export function FeedbackForm({ compact = false }: { compact?: boolean }) {
         <CheckCircle2 className="h-10 w-10 text-success" />
         <h3 className="font-display text-xl font-bold">Shukriya! 🙌</h3>
         <p className="text-sm text-muted-foreground">
-          Tumhara feedback admin tak pahunch gaya. Reply seedha tumhare DM me{" "}
-          <span className="font-semibold text-foreground">admin</span> ke naam se aayega.
+          Tumhara honest review mil gaya. App ko aur behtar banane me yahi
+          sabse zyada help karta hai.
         </p>
         <Button variant="outline" size="sm" onClick={() => setDone(false)}>
           Aur feedback do
