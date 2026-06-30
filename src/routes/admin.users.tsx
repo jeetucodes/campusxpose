@@ -93,9 +93,15 @@ function UsersAdmin() {
     <div>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <h1 className="text-2xl font-bold">Users</h1>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <div className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm">
-            <span className="font-semibold">{total}</span> <span className="text-muted-foreground">total users</span>
+            <span className="font-semibold">{total}</span> <span className="text-muted-foreground">total</span>
+          </div>
+          <div className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm">
+            <span className="font-semibold text-success">{realCount}</span> <span className="text-muted-foreground">real users</span>
+          </div>
+          <div className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm">
+            <span className="font-semibold text-warning">{forgotCount}</span> <span className="text-muted-foreground">forgot me</span>
           </div>
           <div className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm">
             <span className="font-semibold">{verifiedCount}</span> <span className="text-muted-foreground">verified</span>
