@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Shield, BookOpen, ServerOff, Database, Cookie, Trash2, Scale,
-  AlertTriangle, RefreshCw, ArrowRight, FileText,
+  AlertTriangle, RefreshCw, ArrowRight, FileText, Ban, Megaphone,
 } from "lucide-react";
 import { SiteShell } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
