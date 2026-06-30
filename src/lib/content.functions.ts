@@ -738,8 +738,17 @@ export const syncIdentity = createServerFn({ method: "POST" })
       username = rows[0]?.name ?? null;
     }
 
-    return { username, verified };
+    // Admin-assigned custom avatar, if any.
+    const { data: au } = await supabaseAdmin
+      .from("anon_users" as any)
+      .select("avatar_url")
+      .eq("user_hash", h)
+      .maybeSingle();
+    const avatarUrl: string | null = (au as any)?.avatar_url ?? null;
+
+    return { username, verified, avatarUrl };
   });
+
 
 /** Create a poll in the global room or a college community. Lives 24h. */
 export const createPoll = createServerFn({ method: "POST" })
