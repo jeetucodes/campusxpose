@@ -353,18 +353,41 @@ function Messages() {
               </Button>
             </header>
 
+            {thread.some((m) => m.pinned) && (
+              <div className="border-b-2 border-dashed border-border bg-surface-2/60 px-4 py-2">
+                <div className="mx-auto w-full max-w-2xl space-y-1">
+                  {thread.filter((m) => m.pinned).map((m) => (
+                    <div key={m.id} className="flex items-center gap-2 text-xs">
+                      <Pin className="h-3.5 w-3.5 shrink-0 text-accent" />
+                      <span className="shrink-0 font-semibold text-accent">{m.sender_username}:</span>
+                      <span className="truncate text-muted-foreground">{m.content}</span>
+                      <button
+                        onClick={() => pinMessage(m)}
+                        className="ml-auto shrink-0 text-muted-foreground hover:text-destructive"
+                        aria-label="Unpin"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div ref={threadBoxRef} className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-2 overflow-y-auto px-4 py-4">
               {thread.map((m) => {
                 const own = m.sender_username === username;
                 const reactions = byMessage.get(m.id) ?? [];
                 return (
                   <div key={m.id} className={cn("group flex flex-col gap-1", own ? "items-end" : "items-start")}>
-                    <MessageGestures onReply={() => setReplyTo(m)} onReact={(e) => toggle(m.id, e)} align={own ? "end" : "start"}>
+                    <MessageGestures onReply={() => setReplyTo(m)} onReact={(e) => toggle(m.id, e)} onPin={() => pinMessage(m)} pinned={m.pinned} align={own ? "end" : "start"}>
                     <div className={cn("flex items-center gap-1", own ? "flex-row" : "flex-row-reverse")}>
                       <MessageActions
                         className="hidden transition-opacity md:flex md:opacity-0 md:group-hover:opacity-100"
                         onToggle={(e) => toggle(m.id, e)}
                         onReply={() => setReplyTo(m)}
+                        onPin={() => pinMessage(m)}
+                        pinned={m.pinned}
                       />
                       <div
                         className={cn(
