@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TrustRouteImport } from './routes/trust'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as ProfileRouteImport } from './routes/profile'
@@ -40,6 +41,11 @@ import { Route as AdminAdsRouteImport } from './routes/admin.ads'
 const TrustRoute = TrustRouteImport.update({
   id: '/trust',
   path: '/trust',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -181,6 +187,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/report': typeof ReportRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
   '/admin/ads': typeof AdminAdsRoute
   '/admin/ai': typeof AdminAiRoute
@@ -210,6 +217,7 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/report': typeof ReportRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
   '/admin/ads': typeof AdminAdsRoute
   '/admin/ai': typeof AdminAiRoute
@@ -240,6 +248,7 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/report': typeof ReportRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
   '/admin/ads': typeof AdminAdsRoute
   '/admin/ai': typeof AdminAiRoute
@@ -271,6 +280,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/report'
     | '/sitemap.xml'
+    | '/terms'
     | '/trust'
     | '/admin/ads'
     | '/admin/ai'
@@ -300,6 +310,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/report'
     | '/sitemap.xml'
+    | '/terms'
     | '/trust'
     | '/admin/ads'
     | '/admin/ai'
@@ -329,6 +340,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/report'
     | '/sitemap.xml'
+    | '/terms'
     | '/trust'
     | '/admin/ads'
     | '/admin/ai'
@@ -359,6 +371,7 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   ReportRoute: typeof ReportRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  TermsRoute: typeof TermsRoute
   TrustRoute: typeof TrustRoute
   AdminAdsRoute: typeof AdminAdsRoute
   AdminAiRoute: typeof AdminAiRoute
@@ -388,6 +401,13 @@ declare module '@tanstack/react-router' {
       path: '/trust'
       fullPath: '/trust'
       preLoaderRoute: typeof TrustRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -583,6 +603,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   ReportRoute: ReportRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  TermsRoute: TermsRoute,
   TrustRoute: TrustRoute,
   AdminAdsRoute: AdminAdsRoute,
   AdminAiRoute: AdminAiRoute,

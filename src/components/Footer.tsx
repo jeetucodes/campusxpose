@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Shield, MessageCircle, Megaphone, Home, FileText, MessageSquareHeart, Lock } from "lucide-react";
+import { Shield, MessageCircle, Megaphone, Home, FileText, MessageSquareHeart, Lock, Scale } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Navbar } from "@/components/Navbar";
 
@@ -66,6 +66,11 @@ export function Footer() {
               <li>
                 <Link to="/privacy" className="inline-flex items-center gap-2 hover:text-foreground transition-colors">
                   <Lock className="h-4 w-4" /> Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/terms" className="inline-flex items-center gap-2 hover:text-foreground transition-colors">
+                  <Scale className="h-4 w-4" /> Terms of Service
                 </Link>
               </li>
               <li>
