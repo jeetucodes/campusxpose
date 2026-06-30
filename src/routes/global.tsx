@@ -43,6 +43,7 @@ type Msg = {
   content: string;
   anonymous_user_hash: string;
   created_at: string;
+  pinned?: boolean;
   reply_to_id?: string | null;
   reply_to_username?: string | null;
   reply_to_content?: string | null;
