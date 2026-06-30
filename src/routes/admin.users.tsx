@@ -117,9 +117,11 @@ function UsersAdmin() {
           return (
             <div key={u.hash} className="rounded-xl border border-border bg-surface p-4">
               <div className="flex items-center justify-between gap-2">
-                <span className="flex items-center gap-1 font-medium">
-                  {u.username}
+                <span className="flex items-center gap-2 font-medium">
+                  <UserSymbol username={u.username} size="sm" />
+                  {u.username || <span className="text-muted-foreground">(no name)</span>}
                   {u.verified && <BadgeCheck className="h-4 w-4 fill-accent text-white" />}
+                  {u.forgotten && <span className="rounded bg-warning/15 px-1.5 py-0.5 text-[10px] font-semibold text-warning">FORGOT</span>}
                 </span>
                 <span className={cn("text-xs font-medium", r.cls)}>{r.label}</span>
               </div>
@@ -136,6 +138,8 @@ function UsersAdmin() {
                   {u.verified ? "Unverify" : "Verify"}
                 </Button>
                 <Button size="sm" variant="outline" onClick={() => doRename(u)}>Rename</Button>
+                <Button size="sm" variant="outline" onClick={() => doNewAvatar(u)}>New avatar</Button>
+                {u.avatarUrl && <Button size="sm" variant="outline" className="text-muted-foreground" onClick={() => doResetAvatar(u)}>Reset avatar</Button>}
               </div>
             </div>
           );
