@@ -23,6 +23,8 @@ export function MessageGestures({
   const [dx, setDx] = useState(0);
   const [armed, setArmed] = useState(false);
   const [showReactions, setShowReactions] = useState(false);
+  const [placeBelow, setPlaceBelow] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
   const startX = useRef(0);
   const startY = useRef(0);
   const longTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
