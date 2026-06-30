@@ -17,7 +17,7 @@ export function ReactionChips({
   return (
     <div
       className={cn(
-        "relative z-10 -mt-3 flex flex-wrap gap-1",
+        "relative z-20 -mt-2 flex flex-wrap gap-1",
         align === "end" ? "mr-2 justify-end" : "ml-2 justify-start",
       )}
     >
