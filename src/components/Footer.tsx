@@ -68,6 +68,13 @@ export function Footer() {
           </div>
         </div>
 
+        {/* Feedback */}
+        <div className="mt-8">
+          <FeedbackForm compact />
+        </div>
+
+
+
         {/* Bottom bar */}
         <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t-2 border-dashed border-ink pt-6 text-sm text-muted-foreground md:flex-row">
           <p className="font-display font-bold text-foreground">No identity stored. Ever.</p>
