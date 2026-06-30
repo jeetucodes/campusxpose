@@ -81,6 +81,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      { name: "theme-color", content: "#111111" },
       { title: "CampusXpose — College ka sach, bina darr ke" },
       { name: "description", content: "Anonymous platform for Indian college students to rate colleges and report fake fines, placement fraud, and harassment." },
       { name: "author", content: "CampusXpose" },
@@ -103,6 +104,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { rel: "icon", type: "image/png", href: favicon },
       { rel: "apple-touch-icon", href: favicon },
+      { rel: "manifest", href: "/manifest.webmanifest" },
     ],
   }),
   shellComponent: RootShell,

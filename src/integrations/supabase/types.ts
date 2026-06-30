@@ -543,6 +543,36 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          link: string | null
+          message: string
+          read: boolean
+          type: string
+          user_hash: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          link?: string | null
+          message: string
+          read?: boolean
+          type: string
+          user_hash: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          link?: string | null
+          message?: string
+          read?: boolean
+          type?: string
+          user_hash?: string
+        }
+        Relationships: []
+      }
       poll_votes: {
         Row: {
           anonymous_user_hash: string
@@ -756,6 +786,51 @@ export type Database = {
           },
         ]
       }
+      push_config: {
+        Row: {
+          dispatch_token: string
+          dispatch_url: string
+          id: number
+        }
+        Insert: {
+          dispatch_token: string
+          dispatch_url: string
+          id?: number
+        }
+        Update: {
+          dispatch_token?: string
+          dispatch_url?: string
+          id?: number
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          user_hash: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          user_hash: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          user_hash?: string
+        }
+        Relationships: []
+      }
       ratings: {
         Row: {
           anonymous_user_hash: string
@@ -827,6 +902,16 @@ export type Database = {
     }
     Functions: {
       delete_expired_polls: { Args: never; Returns: undefined }
+      enqueue_notifications: {
+        Args: {
+          _hashes: string[]
+          _link: string
+          _message: string
+          _title: string
+          _type: string
+        }
+        Returns: undefined
+      }
       refresh_clustered_incidents: { Args: never; Returns: undefined }
     }
     Enums: {

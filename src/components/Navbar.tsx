@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Shield, ChevronDown, Trash2, UserRound } from "lucide-react";
+import { Shield, ChevronDown, Trash2, UserRound, BellRing } from "lucide-react";
+import { toast } from "sonner";
 import { UserSymbol } from "@/components/UserSymbol";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { NotificationBell } from "@/components/NotificationBell";
+import { PushPermissionPrompt } from "@/components/PushPermissionPrompt";
 import { useIdentity } from "@/stores/identity";
 import { useDmUnread } from "@/stores/dm";
 import { ForgetMeDialog } from "@/components/ForgetMeDialog";
 import { Logo } from "@/components/Logo";
+import { enablePush, isPushSupported, permissionState } from "@/lib/push-client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,14 +19,32 @@ import {
 import { Button } from "@/components/ui/button";
 
 export function Navbar() {
-  const { username, verified, isReady, init } = useIdentity();
+  const { username, verified, isReady, init, hashedId } = useIdentity();
   const unread = useDmUnread();
   const [open, setOpen] = useState(false);
   const [forgetOpen, setForgetOpen] = useState(false);
+  const [canEnablePush, setCanEnablePush] = useState(false);
 
   useEffect(() => {
     init();
   }, [init]);
+
+  useEffect(() => {
+    setCanEnablePush(isPushSupported() && permissionState() !== "granted");
+  }, []);
+
+  async function handleEnablePush() {
+    if (!hashedId) return;
+    setOpen(false);
+    const res = await enablePush(hashedId);
+    if (res === "granted") {
+      toast.success("Notifications enabled");
+      setCanEnablePush(false);
+    } else if (res === "denied") {
+      toast("Allow notifications in your browser settings to enable them");
+    }
+  }
+
 
   return (
     <header className="sticky top-0 z-40 border-b-2 border-dashed border-ink bg-paper">
@@ -52,6 +74,8 @@ export function Navbar() {
             </Link>
           ))}
         </div>
+        <div className="flex items-center gap-2">
+        <NotificationBell />
         <DropdownMenu open={open} onOpenChange={setOpen}>
           <DropdownMenuTrigger asChild>
             <button
@@ -90,6 +114,17 @@ export function Navbar() {
                 Edit profile & avatar
               </Link>
             </Button>
+            {canEnablePush && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="mb-2 w-full justify-start gap-2"
+                onClick={handleEnablePush}
+              >
+                <BellRing className="h-4 w-4" />
+                Enable notifications
+              </Button>
+            )}
             <Button
               variant="destructive"
               size="sm"
@@ -104,7 +139,9 @@ export function Navbar() {
             </Button>
           </DropdownMenuContent>
         </DropdownMenu>
+        </div>
         <ForgetMeDialog open={forgetOpen} onOpenChange={setForgetOpen} />
+        <PushPermissionPrompt />
       </nav>
     </header>
   );

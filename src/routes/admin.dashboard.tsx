@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 import {
-  Building2, AlertTriangle, FileText, Image, MessageSquare, Ban,
+  Building2, AlertTriangle, FileText, Image, MessageSquare, Ban, Megaphone,
 } from "lucide-react";
 import {
   BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip,
@@ -10,6 +12,7 @@ import {
 import { AdminShell } from "@/components/admin/AdminShell";
 import { useAdmin } from "@/stores/admin";
 import { adminStats, adminRecentActivity } from "@/lib/admin.functions";
+import { adminBroadcast } from "@/lib/notifications.functions";
 import { INCIDENT_CATEGORIES, categoryLabel } from "@/lib/categories";
 import { timeAgo } from "@/lib/format";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -95,7 +98,9 @@ function Dashboard() {
         </Card>
       </div>
 
+      <BroadcastCard />
       <RecentActivity />
+
     </div>
   );
 }
@@ -124,6 +129,66 @@ function RecentActivity() {
     </Card>
   );
 }
+
+function BroadcastCard() {
+  const { token } = useAdmin();
+  const broadcast = useServerFn(adminBroadcast);
+  const [message, setMessage] = useState("");
+  const [link, setLink] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function send() {
+    if (!token || !message.trim()) return;
+    setBusy(true);
+    try {
+      const res = await broadcast({
+        data: { token, message: message.trim(), link: link.trim() || undefined },
+      });
+      toast.success(`Sent to ${res.inserted} users (${res.pushed} push)`);
+      setMessage("");
+      setLink("");
+    } catch {
+      toast.error("Broadcast failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Card title="Broadcast Announcement">
+      <p className="mb-3 text-sm text-muted-foreground">
+        Sends one notification to every user (in-app + browser push for subscribers).
+      </p>
+      <div className="space-y-3">
+        <textarea
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          maxLength={500}
+          rows={3}
+          placeholder="Announcement message…"
+          className="w-full rounded-lg border border-border bg-surface-2 p-3 text-sm outline-none focus:border-primary"
+        />
+        <input
+          value={link}
+          onChange={(e) => setLink(e.target.value)}
+          maxLength={300}
+          placeholder="Optional link (e.g. /global)"
+          className="w-full rounded-lg border border-border bg-surface-2 p-3 text-sm outline-none focus:border-primary"
+        />
+        <button
+          onClick={send}
+          disabled={busy || !message.trim()}
+          className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+        >
+          <Megaphone className="h-4 w-4" />
+          {busy ? "Sending…" : "Send to All Users"}
+        </button>
+      </div>
+    </Card>
+  );
+}
+
+
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
