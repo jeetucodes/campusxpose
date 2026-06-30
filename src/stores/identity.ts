@@ -67,6 +67,7 @@ export const useIdentity = create<IdentityState>((set, get) => ({
   hashedId: null,
   username: null,
   verified: false,
+  avatarUrl: null,
   isReady: false,
   init: async () => {
     if (get().isReady || typeof window === "undefined") return;
@@ -82,15 +83,16 @@ export const useIdentity = create<IdentityState>((set, get) => ({
     await flagForgotten(get().hashedId);
     await purge(get().hashedId);
     const { hashedId, username } = await forgetMe();
-    set({ hashedId, username, verified: false, isReady: true });
+    set({ hashedId, username, verified: false, avatarUrl: null, isReady: true });
     void register(hashedId, username);
   },
   resetWith: async (chosen: string) => {
     await flagForgotten(get().hashedId);
     await purge(get().hashedId);
     const { hashedId, username } = await forgetMeWithUsername(chosen);
-    set({ hashedId, username, verified: false, isReady: true });
+    set({ hashedId, username, verified: false, avatarUrl: null, isReady: true });
     void register(hashedId, username);
   },
 }));
+
 
