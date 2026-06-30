@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 import {
-  Building2, AlertTriangle, FileText, Image, MessageSquare, Ban,
+  Building2, AlertTriangle, FileText, Image, MessageSquare, Ban, Megaphone,
 } from "lucide-react";
 import {
   BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip,
@@ -10,6 +12,7 @@ import {
 import { AdminShell } from "@/components/admin/AdminShell";
 import { useAdmin } from "@/stores/admin";
 import { adminStats, adminRecentActivity } from "@/lib/admin.functions";
+import { adminBroadcast } from "@/lib/notifications.functions";
 import { INCIDENT_CATEGORIES, categoryLabel } from "@/lib/categories";
 import { timeAgo } from "@/lib/format";
 import { Skeleton } from "@/components/ui/skeleton";
