@@ -98,7 +98,9 @@ function Dashboard() {
         </Card>
       </div>
 
+      <BroadcastCard />
       <RecentActivity />
+
     </div>
   );
 }
