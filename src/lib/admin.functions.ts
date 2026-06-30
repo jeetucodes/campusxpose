@@ -281,12 +281,13 @@ export const adminListUsers = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const [posts, msgs, globals, banned, verified] = await Promise.all([
+    const [posts, msgs, globals, banned, verified, anon] = await Promise.all([
       supabaseAdmin.from("posts").select("anonymous_user_hash, username, created_at, is_incident"),
       supabaseAdmin.from("community_messages").select("anonymous_user_hash, username, created_at"),
       supabaseAdmin.from("global_messages").select("anonymous_user_hash, username, created_at"),
       supabaseAdmin.from("banned_users").select("user_hash"),
       supabaseAdmin.from("verified_users" as any).select("username, user_hash"),
+      supabaseAdmin.from("anon_users" as any).select("user_hash, username, avatar_url, forgotten, created_at"),
     ]);
     // Surface real failures instead of silently returning an empty list
     // (which renders a misleading "No users yet").
@@ -295,6 +296,9 @@ export const adminListUsers = createServerFn({ method: "POST" })
     if (globals.error) throw new Error(globals.error.message);
     const bannedSet = new Set((banned.data ?? []).map((b) => b.user_hash));
     const verifiedSet = new Set(((verified.data as any[]) ?? []).map((v) => v.username));
+    const anonRows = (anon.data as any[]) ?? [];
+    const forgottenSet = new Set(anonRows.filter((a) => a.forgotten).map((a) => a.user_hash));
+    const avatarMap = new Map<string, string>(anonRows.filter((a) => a.avatar_url).map((a) => [a.user_hash, a.avatar_url]));
     const map = new Map<string, { hash: string; username: string; posts: number; messages: number; incidents: number; lastActive: string }>();
     const touch = (hash: string, username: string, createdAt: string) => {
       const e = map.get(hash) ?? { hash, username, posts: 0, messages: 0, incidents: 0, lastActive: createdAt };
@@ -318,10 +322,27 @@ export const adminListUsers = createServerFn({ method: "POST" })
     for (const v of (verified.data as any[]) ?? []) {
       if (v.user_hash) touch(v.user_hash, v.username, new Date(0).toISOString());
     }
+    // Surface every registered identity, including brand-new and "forgotten"
+    // ones that have not posted or messaged yet.
+    for (const a of anonRows) {
+      if (a.user_hash) touch(a.user_hash, a.username ?? "", a.created_at ?? new Date(0).toISOString());
+    }
     return Array.from(map.values())
-      .map((u) => ({ ...u, banned: bannedSet.has(u.hash), verified: verifiedSet.has(u.username) }))
+      .map((u) => {
+        const active = u.posts + u.messages + u.incidents > 0;
+        return {
+          ...u,
+          banned: bannedSet.has(u.hash),
+          verified: verifiedSet.has(u.username),
+          forgotten: forgottenSet.has(u.hash),
+          avatarUrl: avatarMap.get(u.hash) ?? null,
+          active,
+          real: active && !forgottenSet.has(u.hash),
+        };
+      })
       .sort((a, b) => (a.lastActive < b.lastActive ? 1 : -1));
   });
+
 
 const RENAME_RE = /^[a-zA-Z0-9_]+$/;
 
