@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useIdentity } from "@/stores/identity";
+import { supabase } from "@/integrations/supabase/client";
 import { useDmStore } from "@/stores/dm";
 import { UserSymbol } from "@/components/UserSymbol";
 import { submitDirectMessage, fetchDirectMessages, deleteDirectConversation, togglePinMessage } from "@/lib/content.functions";
