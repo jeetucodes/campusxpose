@@ -88,6 +88,10 @@ function Community() {
       .on("postgres_changes", { event: "DELETE", schema: "public", table: "community_messages" }, (p) => {
         setMessages((prev) => prev.filter((m) => m.id !== (p.old as any).id));
       })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "community_messages" }, (p) => {
+        const updated = p.new as Msg;
+        setMessages((prev) => prev.map((m) => (m.id === updated.id ? { ...m, pinned: updated.pinned } : m)));
+      })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [collegeId]);
