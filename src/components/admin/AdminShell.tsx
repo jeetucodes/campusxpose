@@ -2,7 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import {
   LayoutDashboard, Building2, AlertTriangle, FileText, MessageSquare,
-  Users, ShieldAlert, BarChart3, Bot, LogOut, Ghost, Megaphone, MessagesSquare, Vote,
+  Users, ShieldAlert, BarChart3, Bot, LogOut, Ghost, Megaphone, MessagesSquare, Vote, MessageSquareHeart,
 } from "lucide-react";
 import { useAdmin } from "@/stores/admin";
 import { cn } from "@/lib/utils";
