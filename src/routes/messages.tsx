@@ -391,7 +391,7 @@ function Messages() {
                       />
                       <div
                         className={cn(
-                          "w-fit max-w-[85%] border-2 border-border px-3 py-2 text-sm shadow-ink-soft",
+                          "relative w-fit max-w-[85%] border-2 border-border px-3 py-2 text-sm shadow-ink-soft",
                           own ? "bg-accent text-accent-foreground" : "bg-white",
                         )}
                         style={{
@@ -400,6 +400,9 @@ function Messages() {
                             : "6px 18px 18px 18px",
                         }}
                       >
+                        {m.pinned && (
+                          <Pin className="absolute -right-1.5 -top-1.5 h-3.5 w-3.5 rotate-45 text-accent" />
+                        )}
                         <ReplyQuote username={m.reply_to_username} content={m.reply_to_content} align={own ? "end" : "start"} />
                         <div className="flex flex-wrap items-end justify-end gap-x-2">
                           <span className="whitespace-pre-wrap break-words leading-relaxed">
