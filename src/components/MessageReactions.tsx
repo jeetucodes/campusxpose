@@ -17,7 +17,7 @@ export function ReactionChips({
   return (
     <div
       className={cn(
-        "relative z-10 -mt-2.5 flex flex-wrap gap-1",
+        "relative z-10 -mt-3 flex flex-wrap gap-1",
         align === "end" ? "mr-2 justify-end" : "ml-2 justify-start",
       )}
     >
@@ -26,10 +26,10 @@ export function ReactionChips({
           key={r.emoji}
           onClick={() => onToggle(r.emoji as ReactionEmoji)}
           className={cn(
-            "flex items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[11px] leading-none shadow-sm transition-all duration-150 active:scale-90",
+            "flex items-center gap-0.5 rounded-full border bg-white px-1.5 py-0.5 text-[11px] leading-none shadow-sm transition-all duration-150 active:scale-90",
             r.mine
-              ? "border-accent bg-accent/15 text-accent hover:bg-accent/25"
-              : "border-border bg-white text-muted-foreground hover:-translate-y-0.5 hover:bg-surface-2",
+              ? "border-accent text-accent hover:bg-accent/10"
+              : "border-border text-muted-foreground hover:-translate-y-0.5 hover:bg-surface-2",
           )}
         >
           <span className="text-xs leading-none">{r.emoji}</span>
