@@ -32,7 +32,7 @@ async function syncFromServer(
   if (!hashedId) return;
   try {
     const res = await syncIdentity({ data: { hashedId } });
-    const patch: Partial<IdentityState> = { verified: !!res.verified };
+    const patch: Partial<IdentityState> = { verified: !!res.verified, avatarUrl: res.avatarUrl ?? null };
     if (res.username) {
       patch.username = res.username;
       if (typeof window !== "undefined") localStorage.setItem(USERNAME_KEY, res.username);
