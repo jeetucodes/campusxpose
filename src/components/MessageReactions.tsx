@@ -1,4 +1,4 @@
-import { Smile, Reply } from "lucide-react";
+import { Smile, Reply, Pin, PinOff } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { REACTION_EMOJIS, type ReactionEmoji } from "@/lib/reactions";
 import type { ReactionSummary } from "@/hooks/useReactions";
