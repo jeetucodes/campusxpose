@@ -139,7 +139,9 @@ export function Navbar() {
             </Button>
           </DropdownMenuContent>
         </DropdownMenu>
+        </div>
         <ForgetMeDialog open={forgetOpen} onOpenChange={setForgetOpen} />
+        <PushPermissionPrompt />
       </nav>
     </header>
   );
