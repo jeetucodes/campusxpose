@@ -19,14 +19,32 @@ import {
 import { Button } from "@/components/ui/button";
 
 export function Navbar() {
-  const { username, verified, isReady, init } = useIdentity();
+  const { username, verified, isReady, init, hashedId } = useIdentity();
   const unread = useDmUnread();
   const [open, setOpen] = useState(false);
   const [forgetOpen, setForgetOpen] = useState(false);
+  const [canEnablePush, setCanEnablePush] = useState(false);
 
   useEffect(() => {
     init();
   }, [init]);
+
+  useEffect(() => {
+    setCanEnablePush(isPushSupported() && permissionState() !== "granted");
+  }, []);
+
+  async function handleEnablePush() {
+    if (!hashedId) return;
+    setOpen(false);
+    const res = await enablePush(hashedId);
+    if (res === "granted") {
+      toast.success("Notifications enabled");
+      setCanEnablePush(false);
+    } else if (res === "denied") {
+      toast("Allow notifications in your browser settings to enable them");
+    }
+  }
+
 
   return (
     <header className="sticky top-0 z-40 border-b-2 border-dashed border-ink bg-paper">
