@@ -80,6 +80,17 @@ export function Navbar() {
               Identity never stored
             </div>
             <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="mb-2 w-full justify-start gap-2"
+            >
+              <Link to="/profile" onClick={() => setOpen(false)}>
+                <UserRound className="h-4 w-4" />
+                Edit profile & avatar
+              </Link>
+            </Button>
+            <Button
               variant="destructive"
               size="sm"
               className="w-full justify-start gap-2"
