@@ -379,7 +379,7 @@ function Messages() {
                 const own = m.sender_username === username;
                 const reactions = byMessage.get(m.id) ?? [];
                 return (
-                  <div key={m.id} className={cn("group flex flex-col gap-1", own ? "items-end" : "items-start")}>
+                  <div key={m.id} className={cn("group flex flex-col gap-0", own ? "items-end" : "items-start")}>
                     <MessageGestures onReply={() => setReplyTo(m)} onReact={(e) => toggle(m.id, e)} onPin={() => pinMessage(m)} pinned={m.pinned} align={own ? "end" : "start"}>
                     <div className={cn("flex items-center gap-1", own ? "flex-row" : "flex-row-reverse")}>
                       <MessageActions
