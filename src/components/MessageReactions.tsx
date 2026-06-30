@@ -44,10 +44,14 @@ export function ReactionChips({
 export function MessageActions({
   onToggle,
   onReply,
+  onPin,
+  pinned,
   className,
 }: {
   onToggle: (emoji: ReactionEmoji) => void;
   onReply: () => void;
+  onPin?: () => void;
+  pinned?: boolean;
   className?: string;
 }) {
   return (
@@ -85,9 +89,22 @@ export function MessageActions({
       >
         <Reply className="h-4 w-4" />
       </button>
+      {onPin && (
+        <button
+          aria-label={pinned ? "Unpin message" : "Pin message"}
+          onClick={onPin}
+          className={cn(
+            "grid h-7 w-7 place-items-center rounded-full transition-colors hover:bg-surface-2 hover:text-accent",
+            pinned ? "text-accent" : "text-muted-foreground",
+          )}
+        >
+          {pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
+        </button>
+      )}
     </div>
   );
 }
+
 
 export function ReplyQuote({
   username,
