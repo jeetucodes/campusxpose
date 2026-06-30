@@ -704,7 +704,7 @@ export const purgeMyActivity = createServerFn({ method: "POST" })
 export const syncIdentity = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ hashedId: z.string().min(8) }).parse(d))
   .handler(async ({ data }) => {
-    if (!HASH_RE.test(data.hashedId)) return { username: null as string | null, verified: false };
+    if (!HASH_RE.test(data.hashedId)) return { username: null as string | null, verified: false, avatarUrl: null as string | null };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const h = data.hashedId;
 
