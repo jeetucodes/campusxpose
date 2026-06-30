@@ -74,6 +74,8 @@ export function Navbar() {
             </Link>
           ))}
         </div>
+        <div className="flex items-center gap-2">
+        <NotificationBell />
         <DropdownMenu open={open} onOpenChange={setOpen}>
           <DropdownMenuTrigger asChild>
             <button
