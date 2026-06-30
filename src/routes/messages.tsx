@@ -337,7 +337,7 @@ function Messages() {
 
       {/* Active thread */}
       <section
-        className={cn("flex-1 flex-col", active ? "flex" : "hidden md:flex")}
+        className={cn("min-h-0 flex-1 flex-col", active ? "flex" : "hidden md:flex")}
       >
         {active ? (
           <>
@@ -396,7 +396,7 @@ function Messages() {
               </div>
             )}
 
-            <div ref={threadBoxRef} className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-2 overflow-y-auto px-4 py-4">
+            <div ref={threadBoxRef} className="mx-auto flex w-full max-w-2xl min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-4 py-4">
               {thread.map((m) => {
                 const own = m.sender_hash === hashedId;
                 const reactions = byMessage.get(m.id) ?? [];
@@ -454,7 +454,7 @@ function Messages() {
               )}
             </div>
 
-            <div className="border-t-2 border-dashed border-border px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <div className="shrink-0 border-t-2 border-dashed border-border px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
               <div className="mx-auto w-full max-w-2xl">
                 <TypingIndicator users={typing} className="mb-1.5 px-1" />
                 {replyTo && (
