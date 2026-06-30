@@ -624,6 +624,56 @@ export const listVerifiedUsernames = createServerFn({ method: "GET" })
     return { usernames: ((data as any[]) ?? []).map((r) => r.username as string) };
   });
 
+/** Public list of admin-assigned custom avatars, keyed by username. */
+export const listAvatarOverrides = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("anon_users" as any)
+      .select("username, avatar_url")
+      .not("avatar_url", "is", null);
+    const overrides: { username: string; url: string }[] = [];
+    for (const r of (data as any[]) ?? []) {
+      if (r.username && r.avatar_url) overrides.push({ username: r.username, url: r.avatar_url });
+    }
+    return { overrides };
+  });
+
+/** Register (or refresh) the caller's anonymous identity so admins can see
+ * every user — even brand-new ones with no posts or messages yet. */
+export const registerIdentity = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z.object({ hashedId: z.string().min(8), username: z.string().min(3).max(40) }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    if (!HASH_RE.test(data.hashedId)) return { ok: false as const };
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin
+      .from("anon_users" as any)
+      .upsert(
+        { user_hash: data.hashedId, username: data.username, forgotten: false },
+        { onConflict: "user_hash" },
+      );
+    return { ok: true as const };
+  });
+
+/** Mark the caller's current identity as abandoned ("Forget Me"). Lets admins
+ * count how many users wiped themselves vs how many are still real/active. */
+export const markForgotten = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ hashedId: z.string().min(8) }).parse(d))
+  .handler(async ({ data }) => {
+    if (!HASH_RE.test(data.hashedId)) return { ok: false as const };
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin
+      .from("anon_users" as any)
+      .upsert(
+        { user_hash: data.hashedId, forgotten: true },
+        { onConflict: "user_hash" },
+      );
+    return { ok: true as const };
+  });
+
+
 /** Wipe every trace of the caller's activity. Used by "Forget Me". */
 export const purgeMyActivity = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ hashedId: z.string().min(8) }).parse(d))
@@ -654,7 +704,7 @@ export const purgeMyActivity = createServerFn({ method: "POST" })
 export const syncIdentity = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ hashedId: z.string().min(8) }).parse(d))
   .handler(async ({ data }) => {
-    if (!HASH_RE.test(data.hashedId)) return { username: null as string | null, verified: false };
+    if (!HASH_RE.test(data.hashedId)) return { username: null as string | null, verified: false, avatarUrl: null as string | null };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const h = data.hashedId;
 
@@ -688,8 +738,17 @@ export const syncIdentity = createServerFn({ method: "POST" })
       username = rows[0]?.name ?? null;
     }
 
-    return { username, verified };
+    // Admin-assigned custom avatar, if any.
+    const { data: au } = await supabaseAdmin
+      .from("anon_users" as any)
+      .select("avatar_url")
+      .eq("user_hash", h)
+      .maybeSingle();
+    const avatarUrl: string | null = (au as any)?.avatar_url ?? null;
+
+    return { username, verified, avatarUrl };
   });
+
 
 /** Create a poll in the global room or a college community. Lives 24h. */
 export const createPoll = createServerFn({ method: "POST" })

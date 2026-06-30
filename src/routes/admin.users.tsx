@@ -12,9 +12,13 @@ import {
   adminDeleteUserActivity,
   adminSetVerified,
   adminRenameUser,
+  adminSetAvatar,
 } from "@/lib/admin.functions";
 import { timeAgo } from "@/lib/format";
 import { Button } from "@/components/ui/button";
+import { UserSymbol } from "@/components/UserSymbol";
+import { randomAvatarUrl } from "@/lib/avatar";
+import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/users")({
@@ -37,6 +41,8 @@ function UsersAdmin() {
   const wipe = useServerFn(adminDeleteUserActivity);
   const setVerified = useServerFn(adminSetVerified);
   const rename = useServerFn(adminRenameUser);
+  const setAvatar = useServerFn(adminSetAvatar);
+  const queryClient = useQueryClient();
   const q = useQuery({ queryKey: ["admin-users"], enabled: !!token, queryFn: () => list({ data: { token: token! } }) });
 
   const doBan = async (u: any) => {
@@ -64,17 +70,38 @@ function UsersAdmin() {
     if (!res.ok) { toast.error("That username is already taken"); return; }
     toast.success(`Renamed to ${next.trim()}`); q.refetch();
   };
+  const doNewAvatar = async (u: any) => {
+    await setAvatar({ data: { token: token!, userHash: u.hash, username: u.username || undefined, url: randomAvatarUrl() } });
+    toast.success("New avatar set");
+    queryClient.invalidateQueries({ queryKey: ["avatar-overrides"] });
+    q.refetch();
+  };
+  const doResetAvatar = async (u: any) => {
+    await setAvatar({ data: { token: token!, userHash: u.hash, username: u.username || undefined, url: null } });
+    toast.success("Avatar reset to default");
+    queryClient.invalidateQueries({ queryKey: ["avatar-overrides"] });
+    q.refetch();
+  };
 
   const total = (q.data ?? []).length;
   const verifiedCount = (q.data ?? []).filter((u: any) => u.verified).length;
+  const forgotCount = (q.data ?? []).filter((u: any) => u.forgotten).length;
+  const realCount = (q.data ?? []).filter((u: any) => u.real).length;
+
 
   return (
     <div>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <h1 className="text-2xl font-bold">Users</h1>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <div className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm">
-            <span className="font-semibold">{total}</span> <span className="text-muted-foreground">total users</span>
+            <span className="font-semibold">{total}</span> <span className="text-muted-foreground">total</span>
+          </div>
+          <div className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm">
+            <span className="font-semibold text-success">{realCount}</span> <span className="text-muted-foreground">real users</span>
+          </div>
+          <div className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm">
+            <span className="font-semibold text-warning">{forgotCount}</span> <span className="text-muted-foreground">forgot me</span>
           </div>
           <div className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm">
             <span className="font-semibold">{verifiedCount}</span> <span className="text-muted-foreground">verified</span>
@@ -90,9 +117,11 @@ function UsersAdmin() {
           return (
             <div key={u.hash} className="rounded-xl border border-border bg-surface p-4">
               <div className="flex items-center justify-between gap-2">
-                <span className="flex items-center gap-1 font-medium">
-                  {u.username}
+                <span className="flex items-center gap-2 font-medium">
+                  <UserSymbol username={u.username} size="sm" />
+                  {u.username || <span className="text-muted-foreground">(no name)</span>}
                   {u.verified && <BadgeCheck className="h-4 w-4 fill-accent text-white" />}
+                  {u.forgotten && <span className="rounded bg-warning/15 px-1.5 py-0.5 text-[10px] font-semibold text-warning">FORGOT</span>}
                 </span>
                 <span className={cn("text-xs font-medium", r.cls)}>{r.label}</span>
               </div>
@@ -109,6 +138,8 @@ function UsersAdmin() {
                   {u.verified ? "Unverify" : "Verify"}
                 </Button>
                 <Button size="sm" variant="outline" onClick={() => doRename(u)}>Rename</Button>
+                <Button size="sm" variant="outline" onClick={() => doNewAvatar(u)}>New avatar</Button>
+                {u.avatarUrl && <Button size="sm" variant="outline" className="text-muted-foreground" onClick={() => doResetAvatar(u)}>Reset avatar</Button>}
               </div>
             </div>
           );
@@ -129,9 +160,11 @@ function UsersAdmin() {
               return (
                 <tr key={u.hash} className="border-t border-border">
                   <td className="p-3 font-medium">
-                    <span className="flex items-center gap-1">
-                      {u.username}
+                    <span className="flex items-center gap-2">
+                      <UserSymbol username={u.username} size="sm" />
+                      {u.username || <span className="text-muted-foreground">(no name)</span>}
                       {u.verified && <BadgeCheck className="h-4 w-4 fill-accent text-white" />}
+                      {u.forgotten && <span className="rounded bg-warning/15 px-1.5 py-0.5 text-[10px] font-semibold text-warning">FORGOT</span>}
                     </span>
                   </td>
                   <td className="p-3 font-mono text-xs text-muted-foreground">{u.hash.slice(0, 8)}</td>
@@ -149,6 +182,8 @@ function UsersAdmin() {
                         {u.verified ? "Unverify" : "Verify"}
                       </Button>
                       <Button size="sm" variant="ghost" onClick={() => doRename(u)}>Rename</Button>
+                      <Button size="sm" variant="ghost" onClick={() => doNewAvatar(u)}>New avatar</Button>
+                      {u.avatarUrl && <Button size="sm" variant="ghost" className="text-muted-foreground" onClick={() => doResetAvatar(u)}>Reset avatar</Button>}
                       <Button size="sm" variant="ghost" className="text-destructive" onClick={() => doWipe(u)}>Wipe</Button>
                     </div>
                   </td>
