@@ -1,5 +1,5 @@
 import { useRef, useState, type ReactNode } from "react";
-import { Reply } from "lucide-react";
+import { Reply, Pin, PinOff } from "lucide-react";
 import { REACTION_EMOJIS, type ReactionEmoji } from "@/lib/reactions";
 import { cn } from "@/lib/utils";
 
