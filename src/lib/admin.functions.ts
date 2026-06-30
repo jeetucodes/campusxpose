@@ -388,6 +388,42 @@ export const adminSetAvatar = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+/** Admin's own profile avatar. Stored on a fixed "admin" identity row so it
+ * shows wherever the admin appears (e.g. DM replies). The admin is always
+ * verified. Returns the currently saved avatar URL (or null). */
+export const adminGetOwnAvatar = createServerFn({ method: "GET" })
+  .inputValidator((d: unknown) => z.object({ token: z.string() }).parse(d))
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row } = await supabaseAdmin
+      .from("anon_users" as any)
+      .select("avatar_url")
+      .eq("user_hash", "admin")
+      .maybeSingle();
+    return { url: ((row as any)?.avatar_url as string | null) ?? null };
+  });
+
+/** Set the admin's own profile avatar (and ensure the admin stays verified). */
+export const adminSetOwnAvatar = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: z.string(), url: z.string().url() }).parse(d))
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("anon_users" as any)
+      .upsert(
+        { user_hash: "admin", username: "admin", avatar_url: data.url },
+        { onConflict: "user_hash" },
+      );
+    if (error) throw new Error(error.message);
+    await supabaseAdmin
+      .from("verified_users" as any)
+      .upsert({ username: "admin", user_hash: "admin" }, { onConflict: "user_hash" });
+    return { ok: true };
+  });
+
+
 
 
 /** Assign a brand-new unique username to a user across all their content. */
