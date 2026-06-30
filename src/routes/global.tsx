@@ -58,6 +58,21 @@ function GlobalChat() {
   const navigate = useNavigate();
   const { byMessage, toggle } = useReactions("global", hashedId);
   const { typing, notifyTyping } = usePresence("global", username, hashedId);
+  const { polls, votes, reload: reloadPolls } = usePolls("global");
+
+  const pinMessage = async (m: Msg) => {
+    if (!hashedId) return;
+    const next = !m.pinned;
+    setMessages((prev) => prev.map((x) => (x.id === m.id ? { ...x, pinned: next } : x)));
+    try {
+      await togglePinMessage({
+        data: { messageId: m.id, messageType: "global", hashedId, pinned: next },
+      });
+    } catch {
+      setMessages((prev) => prev.map((x) => (x.id === m.id ? { ...x, pinned: !next } : x)));
+      toast.error("Could not update pin");
+    }
+  };
 
   useEffect(() => {
     init();
