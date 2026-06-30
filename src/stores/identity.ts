@@ -6,6 +6,7 @@ interface IdentityState {
   hashedId: string | null;
   username: string | null;
   verified: boolean;
+  avatarUrl: string | null;
   isReady: boolean;
   init: () => Promise<void>;
   refresh: () => Promise<void>;
