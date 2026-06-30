@@ -15,6 +15,31 @@ async function isBanned(hash: string): Promise<boolean> {
   return !!data;
 }
 
+/** Public: submit feedback from the home page / footer form. */
+export const submitFeedback = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        message: z.string().min(2).max(2000),
+        name: z.string().max(60).optional(),
+        username: z.string().max(40).optional(),
+        hashedId: z.string().max(128).optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("feedback" as any).insert({
+      message: clean(data.message),
+      name: data.name ? clean(data.name).slice(0, 60) : null,
+      user_username: data.username ?? null,
+      user_hash: data.hashedId ?? null,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+
 export const submitPost = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z
