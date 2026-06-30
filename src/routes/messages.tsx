@@ -49,6 +49,7 @@ type DM = {
   reply_to_id?: string | null;
   reply_to_username?: string | null;
   reply_to_content?: string | null;
+  pinned?: boolean;
 };
 
 function Messages() {
