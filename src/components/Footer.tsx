@@ -1,8 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { Shield, MessageCircle, Megaphone, Home, FileText } from "lucide-react";
+import { Shield, MessageCircle, Megaphone, Home, FileText, MessageSquareHeart } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Navbar } from "@/components/Navbar";
-import { FeedbackForm } from "@/components/FeedbackForm";
 
 const WOBBLY = "16px 6px 18px 6px / 6px 18px 6px 16px";
 
