@@ -1,13 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Send, Globe, MessageCircle, ArrowLeft, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Send, Globe, MessageCircle, ArrowLeft, X, Pin } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useIdentity } from "@/stores/identity";
 import { UserSymbol } from "@/components/UserSymbol";
-import { submitGlobalMessage } from "@/lib/content.functions";
+import { submitGlobalMessage, togglePinMessage } from "@/lib/content.functions";
 import { useReactions } from "@/hooks/useReactions";
 import { ReactionChips, MessageActions, ReplyQuote } from "@/components/MessageReactions";
 import { MessageGestures } from "@/components/MessageGestures";
@@ -18,7 +18,8 @@ import { TypingIndicator } from "@/components/ChatPresence";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { AdPin } from "@/components/AdPin";
-import { ChatPolls } from "@/components/ChatPolls";
+import { PollItem, NewPollButton } from "@/components/ChatPolls";
+import { usePolls } from "@/hooks/usePolls";
 
 export const Route = createFileRoute("/global")({
   head: () => ({
