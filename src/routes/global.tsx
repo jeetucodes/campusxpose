@@ -106,6 +106,16 @@ function GlobalChat() {
           ]);
         },
       )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "global_messages" },
+        (p) => {
+          const updated = p.new as Msg;
+          setMessages((prev) =>
+            prev.map((m) => (m.id === updated.id ? { ...m, pinned: updated.pinned } : m)),
+          );
+        },
+      )
       .subscribe();
     return () => {
       supabase.removeChannel(ch);
