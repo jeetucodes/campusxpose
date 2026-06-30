@@ -64,9 +64,15 @@ export function Footer() {
                   <Shield className="h-4 w-4" /> Privacy & Trust
                 </Link>
               </li>
+              <li>
+                <Link to="/" hash="feedback" className="inline-flex items-center gap-2 hover:text-foreground transition-colors">
+                  <MessageSquareHeart className="h-4 w-4" /> Feedback
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
+
 
         {/* Feedback */}
         <div className="mt-8">
