@@ -5,7 +5,7 @@
 
 // A mix of cartoon / anime / playful illustrated styles. Each username is
 // pinned to one style + seed, so the picture is stable and unique-feeling.
-const STYLES = [
+export const STYLES = [
   "adventurer",
   "avataaars",
   "big-smile",
@@ -18,7 +18,14 @@ const STYLES = [
   "miniavs",
   "bottts-neutral",
   "thumbs",
-];
+] as const;
+
+export type AvatarStyle = (typeof STYLES)[number];
+
+/** Build a DiceBear avatar URL for a specific style + seed. */
+export function buildAvatarUrl(style: string, seed: string): string {
+  return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&radius=20&backgroundType=gradientLinear`;
+}
 
 const SYMBOLS = [
   "🦊", "🐺", "🦅", "🐯", "🦉", "🐉", "🦁", "🐼", "🦝", "🐗",
