@@ -62,3 +62,11 @@ export function userAvatar(username: string | null | undefined): UserAvatar {
     url: `https://api.dicebear.com/9.x/${style}/svg?seed=${seed}&radius=20&backgroundType=gradientLinear`,
   };
 }
+
+/** A fresh, random cartoon/anime avatar URL — used by admins to re-roll a
+ * user's avatar. Each call returns a different style + seed. */
+export function randomAvatarUrl(): string {
+  const style = STYLES[Math.floor(Math.random() * STYLES.length)];
+  const seed = Math.random().toString(36).slice(2, 10);
+  return `https://api.dicebear.com/9.x/${style}/svg?seed=${seed}&radius=20&backgroundType=gradientLinear`;
+}
