@@ -396,7 +396,7 @@ function Messages() {
               </div>
             )}
 
-            <div ref={threadBoxRef} className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-2 overflow-y-auto px-4 py-4">
+            <div ref={threadBoxRef} className="mx-auto flex w-full max-w-2xl min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-4 py-4">
               {thread.map((m) => {
                 const own = m.sender_hash === hashedId;
                 const reactions = byMessage.get(m.id) ?? [];
