@@ -245,7 +245,7 @@ function Community() {
                   {!own && (
                     <UserSymbol username={m.username} size="sm" />
                   )}
-                  <div className={cn("group/msg flex max-w-[80%] flex-col gap-1", own ? "items-end" : "items-start")}>
+                  <div className={cn("group/msg flex max-w-[80%] flex-col gap-0", own ? "items-end" : "items-start")}>
                     <MessageGestures onReply={() => setReplyTo(m)} onReact={(e) => toggle(m.id, e)} onPin={() => pinMessage(m)} pinned={m.pinned} align={own ? "end" : "start"}>
                     <div className={cn("flex items-center gap-1", own ? "flex-row" : "flex-row-reverse")}>
                       <MessageActions
