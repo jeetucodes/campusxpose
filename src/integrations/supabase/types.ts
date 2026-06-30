@@ -379,6 +379,42 @@ export type Database = {
           },
         ]
       }
+      feedback: {
+        Row: {
+          admin_reply: string | null
+          created_at: string
+          id: string
+          message: string
+          name: string | null
+          replied_at: string | null
+          status: string
+          user_hash: string | null
+          user_username: string | null
+        }
+        Insert: {
+          admin_reply?: string | null
+          created_at?: string
+          id?: string
+          message: string
+          name?: string | null
+          replied_at?: string | null
+          status?: string
+          user_hash?: string | null
+          user_username?: string | null
+        }
+        Update: {
+          admin_reply?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          name?: string | null
+          replied_at?: string | null
+          status?: string
+          user_hash?: string | null
+          user_username?: string | null
+        }
+        Relationships: []
+      }
       global_messages: {
         Row: {
           anonymous_user_hash: string
