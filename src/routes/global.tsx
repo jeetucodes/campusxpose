@@ -19,7 +19,7 @@ import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { AdPin } from "@/components/AdPin";
 import { PollItem, NewPollButton } from "@/components/ChatPolls";
-import { usePolls } from "@/hooks/usePolls";
+import { usePolls, type Poll } from "@/hooks/usePolls";
 
 export const Route = createFileRoute("/global")({
   head: () => ({
