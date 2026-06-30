@@ -20,17 +20,23 @@ export const getNotifications = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // The bell only surfaces comment + broadcast notifications.
+    // DMs have their own unread badge and global chat replies live in /global,
+    // so 'dm' and 'reply' types are intentionally excluded here.
+    const HIDDEN = "(dm,reply)";
     const [list, unread] = await Promise.all([
       supabaseAdmin
         .from("notifications")
         .select("id, type, message, link, read, created_at")
         .eq("user_hash", data.hashedId)
+        .not("type", "in", HIDDEN)
         .order("created_at", { ascending: false })
         .limit(data.limit),
       supabaseAdmin
         .from("notifications")
         .select("*", { count: "exact", head: true })
         .eq("user_hash", data.hashedId)
+        .not("type", "in", HIDDEN)
         .eq("read", false),
     ]);
     return { items: list.data ?? [], unread: unread.count ?? 0 };

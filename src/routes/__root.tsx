@@ -140,7 +140,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <div className={cn("md:pb-0", !hideNav && "pb-16")}>
+      <div className={cn("md:pb-0", !hideNav && "pb-[calc(4rem+env(safe-area-inset-bottom))]")}>
         <Outlet />
       </div>
       {!hideNav && <MobileBottomNav />}
