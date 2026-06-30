@@ -364,6 +364,32 @@ export const adminSetVerified = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+/** Set (or clear) a custom avatar for a user. Pass url=null to reset to the
+ * default generated avatar. The user sees it on their own device via syncIdentity. */
+export const adminSetAvatar = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z.object({
+      token: z.string(),
+      userHash: z.string().min(1),
+      username: z.string().optional(),
+      url: z.string().url().nullable(),
+    }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("anon_users" as any)
+      .upsert(
+        { user_hash: data.userHash, username: data.username ?? null, avatar_url: data.url },
+        { onConflict: "user_hash" },
+      );
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+
+
 /** Assign a brand-new unique username to a user across all their content. */
 export const adminRenameUser = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
