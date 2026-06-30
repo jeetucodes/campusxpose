@@ -40,6 +40,21 @@ function Community() {
   
   const { byMessage, toggle } = useReactions("community", hashedId);
   const { typing, notifyTyping } = usePresence(`community-${collegeId}`, username, hashedId);
+  const { polls, votes, reload: reloadPolls } = usePolls("college", collegeId);
+
+  const pinMessage = async (m: Msg) => {
+    if (!hashedId) return;
+    const next = !m.pinned;
+    setMessages((prev) => prev.map((x) => (x.id === m.id ? { ...x, pinned: next } : x)));
+    try {
+      await togglePinMessage({
+        data: { messageId: m.id, messageType: "community", hashedId, pinned: next },
+      });
+    } catch {
+      setMessages((prev) => prev.map((x) => (x.id === m.id ? { ...x, pinned: !next } : x)));
+      toast.error("Could not update pin");
+    }
+  };
 
   const collegeQ = useQuery({
     queryKey: ["college-name", collegeId],
