@@ -42,6 +42,26 @@ async function syncFromServer(
   }
 }
 
+/** Best-effort: register this identity so admins can see it, even with no activity. */
+async function register(hashedId: string | null, username: string | null) {
+  if (!hashedId || !username) return;
+  try {
+    await registerIdentity({ data: { hashedId, username } });
+  } catch {
+    // Non-fatal.
+  }
+}
+
+/** Best-effort: flag the old identity as abandoned via "Forget Me". */
+async function flagForgotten(hashedId: string | null) {
+  if (!hashedId) return;
+  try {
+    await markForgotten({ data: { hashedId } });
+  } catch {
+    // Non-fatal.
+  }
+}
+
 export const useIdentity = create<IdentityState>((set, get) => ({
   hashedId: null,
   username: null,
@@ -51,19 +71,25 @@ export const useIdentity = create<IdentityState>((set, get) => ({
     if (get().isReady || typeof window === "undefined") return;
     const { hashedId, username } = await loadOrCreateIdentity();
     set({ hashedId, username, isReady: true });
+    void register(hashedId, username);
     void syncFromServer(hashedId, set);
   },
   refresh: async () => {
     await syncFromServer(get().hashedId, set);
   },
   reset: async () => {
+    await flagForgotten(get().hashedId);
     await purge(get().hashedId);
     const { hashedId, username } = await forgetMe();
     set({ hashedId, username, verified: false, isReady: true });
+    void register(hashedId, username);
   },
   resetWith: async (chosen: string) => {
+    await flagForgotten(get().hashedId);
     await purge(get().hashedId);
     const { hashedId, username } = await forgetMeWithUsername(chosen);
     set({ hashedId, username, verified: false, isReady: true });
+    void register(hashedId, username);
   },
 }));
+
