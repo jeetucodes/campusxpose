@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Send, MessageCircle, Globe, ArrowLeft, Plus, Trash2, X, Pin } from "lucide-react";
+import { Send, MessageCircle, Globe, ArrowLeft, Plus, Trash2, X, Pin, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -454,44 +454,53 @@ function Messages() {
               )}
             </div>
 
-            <div className="shrink-0 border-t-2 border-dashed border-border px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-              <div className="mx-auto w-full max-w-2xl">
-                <TypingIndicator users={typing} className="mb-1.5 px-1" />
-                {replyTo && (
-                  <div className="mb-2 flex items-center gap-2 rounded-md border border-border bg-surface-2/60 px-3 py-1.5 text-xs">
-                    <div className="min-w-0 flex-1">
-                      <span className="font-semibold text-accent">Replying to {replyTo.sender_username}</span>
-                      <div className="truncate text-muted-foreground">{replyTo.content}</div>
-                    </div>
-                    <button onClick={() => setReplyTo(null)} aria-label="Cancel reply">
-                      <X className="h-4 w-4 text-muted-foreground" />
-                    </button>
-                  </div>
-                )}
-                <div className="flex items-end gap-2 rounded-2xl border-2 border-border bg-white px-2 py-1.5 shadow-ink-soft transition-colors focus-within:border-accent">
-                  <Input
-                    value={text}
-                    onChange={(e) => {
-                      setText(e.target.value);
-                      notifyTyping();
-                    }}
-                    onKeyDown={(e) => e.key === "Enter" && send()}
-                    placeholder={`Message ${active}...`}
-                    maxLength={1000}
-                    className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                  />
-                  <Button
-                    onClick={send}
-                    disabled={!text.trim()}
-                    size="icon"
-                    className="h-9 w-9 shrink-0 rounded-full transition-transform active:scale-90"
-                    aria-label="Send message"
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
+            {active === "admin" ? (
+              <div className="shrink-0 border-t-2 border-dashed border-border px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+                <div className="mx-auto flex w-full max-w-2xl items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-surface-2/60 px-4 py-3 text-center text-sm text-muted-foreground">
+                  <ShieldCheck className="h-4 w-4 shrink-0 text-accent" />
+                  <span>This is an official admin message. You can read replies here, but can't reply back.</span>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="shrink-0 border-t-2 border-dashed border-border px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+                <div className="mx-auto w-full max-w-2xl">
+                  <TypingIndicator users={typing} className="mb-1.5 px-1" />
+                  {replyTo && (
+                    <div className="mb-2 flex items-center gap-2 rounded-md border border-border bg-surface-2/60 px-3 py-1.5 text-xs">
+                      <div className="min-w-0 flex-1">
+                        <span className="font-semibold text-accent">Replying to {replyTo.sender_username}</span>
+                        <div className="truncate text-muted-foreground">{replyTo.content}</div>
+                      </div>
+                      <button onClick={() => setReplyTo(null)} aria-label="Cancel reply">
+                        <X className="h-4 w-4 text-muted-foreground" />
+                      </button>
+                    </div>
+                  )}
+                  <div className="flex items-end gap-2 rounded-2xl border-2 border-border bg-white px-2 py-1.5 shadow-ink-soft transition-colors focus-within:border-accent">
+                    <Input
+                      value={text}
+                      onChange={(e) => {
+                        setText(e.target.value);
+                        notifyTyping();
+                      }}
+                      onKeyDown={(e) => e.key === "Enter" && send()}
+                      placeholder={`Message ${active}...`}
+                      maxLength={1000}
+                      className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                    />
+                    <Button
+                      onClick={send}
+                      disabled={!text.trim()}
+                      size="icon"
+                      className="h-9 w-9 shrink-0 rounded-full transition-transform active:scale-90"
+                      aria-label="Send message"
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         ) : (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center text-muted-foreground">
