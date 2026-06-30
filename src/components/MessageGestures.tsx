@@ -43,6 +43,8 @@ export function MessageGestures({
     startY.current = t.clientY;
     moved.current = false;
     longTimer.current = setTimeout(() => {
+      const top = wrapRef.current?.getBoundingClientRect().top ?? 200;
+      setPlaceBelow(top < 80);
       setShowReactions(true);
       if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(12);
     }, 420);
