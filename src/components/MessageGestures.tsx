@@ -105,8 +105,8 @@ export function MessageGestures({
           <div className="fixed inset-0 z-40" onClick={() => setShowReactions(false)} />
           <div
             className={cn(
-              "absolute z-50 flex gap-1 rounded-full border-2 border-border bg-white p-1.5 shadow-ink-soft",
-              placeBelow ? "top-full mt-1" : "-top-12",
+              "absolute z-50 flex max-w-[calc(100vw-1.5rem)] gap-0.5 rounded-full border-2 border-border bg-white p-1 shadow-ink-soft",
+              placeBelow ? "top-full mt-1" : "-top-11",
               align === "end" ? "right-0" : "left-0",
             )}
           >
@@ -117,7 +117,7 @@ export function MessageGestures({
                   onReact(emoji);
                   setShowReactions(false);
                 }}
-                className="grid h-9 w-9 place-items-center rounded-full text-xl transition-transform active:scale-110"
+                className="grid h-8 w-8 place-items-center rounded-full text-lg transition-transform active:scale-110"
               >
                 {emoji}
               </button>
@@ -129,9 +129,9 @@ export function MessageGestures({
                   onPin();
                   setShowReactions(false);
                 }}
-                className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground transition-transform active:scale-110"
+                className="grid h-8 w-8 place-items-center rounded-full text-muted-foreground transition-transform active:scale-110"
               >
-                {pinned ? <PinOff className="h-5 w-5" /> : <Pin className="h-5 w-5" />}
+                {pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
               </button>
             )}
           </div>
