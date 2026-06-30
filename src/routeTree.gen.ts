@@ -13,6 +13,7 @@ import { Route as TrustRouteImport } from './routes/trust'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as GlobalRouteImport } from './routes/global'
 import { Route as IndexRouteImport } from './routes/index'
@@ -54,6 +55,11 @@ const ReportRoute = ReportRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MessagesRoute = MessagesRouteImport.update({
@@ -171,6 +177,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/global': typeof GlobalRoute
   '/messages': typeof MessagesRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/report': typeof ReportRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -199,6 +206,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/global': typeof GlobalRoute
   '/messages': typeof MessagesRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/report': typeof ReportRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -228,6 +236,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/global': typeof GlobalRoute
   '/messages': typeof MessagesRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/report': typeof ReportRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -258,6 +267,7 @@ export interface FileRouteTypes {
     | '/'
     | '/global'
     | '/messages'
+    | '/privacy'
     | '/profile'
     | '/report'
     | '/sitemap.xml'
@@ -286,6 +296,7 @@ export interface FileRouteTypes {
     | '/'
     | '/global'
     | '/messages'
+    | '/privacy'
     | '/profile'
     | '/report'
     | '/sitemap.xml'
@@ -314,6 +325,7 @@ export interface FileRouteTypes {
     | '/'
     | '/global'
     | '/messages'
+    | '/privacy'
     | '/profile'
     | '/report'
     | '/sitemap.xml'
@@ -343,6 +355,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   GlobalRoute: typeof GlobalRoute
   MessagesRoute: typeof MessagesRoute
+  PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   ReportRoute: typeof ReportRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -396,6 +409,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/messages': {
@@ -559,6 +579,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   GlobalRoute: GlobalRoute,
   MessagesRoute: MessagesRoute,
+  PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   ReportRoute: ReportRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
