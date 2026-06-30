@@ -41,6 +41,8 @@ function UsersAdmin() {
   const wipe = useServerFn(adminDeleteUserActivity);
   const setVerified = useServerFn(adminSetVerified);
   const rename = useServerFn(adminRenameUser);
+  const setAvatar = useServerFn(adminSetAvatar);
+  const queryClient = useQueryClient();
   const q = useQuery({ queryKey: ["admin-users"], enabled: !!token, queryFn: () => list({ data: { token: token! } }) });
 
   const doBan = async (u: any) => {
