@@ -38,7 +38,7 @@ export function FeedbackForm({ compact = false }: { compact?: boolean }) {
       setDone(true);
       setName("");
       setMessage("");
-      toast.success("Feedback bhej diya! Admin DM me reply karega 💬");
+      toast.success("Shukriya! Tumhara honest review mil gaya 💚");
     } catch {
       toast.error("Feedback nahi gaya, dobara try karo.");
     } finally {
@@ -55,8 +55,8 @@ export function FeedbackForm({ compact = false }: { compact?: boolean }) {
         <CheckCircle2 className="h-10 w-10 text-success" />
         <h3 className="font-display text-xl font-bold">Shukriya! 🙌</h3>
         <p className="text-sm text-muted-foreground">
-          Tumhara feedback admin tak pahunch gaya. Reply seedha tumhare DM me{" "}
-          <span className="font-semibold text-foreground">admin</span> ke naam se aayega.
+          Tumhara honest review mil gaya. App ko aur behtar banane me yahi
+          sabse zyada help karta hai.
         </p>
         <Button variant="outline" size="sm" onClick={() => setDone(false)}>
           Aur feedback do
@@ -79,8 +79,8 @@ export function FeedbackForm({ compact = false }: { compact?: boolean }) {
           <MessageSquareHeart className="h-5 w-5 text-accent" strokeWidth={2.5} />
         </div>
         <div>
-          <h3 className="font-display text-xl font-bold">Feedback do</h3>
-          <p className="text-xs text-muted-foreground">Admin tumhe DM me reply karega.</p>
+          <h3 className="font-display text-xl font-bold">Honest review do</h3>
+          <p className="text-xs text-muted-foreground">Kya pasand aaya, kya sudhar sakta hai?</p>
         </div>
       </div>
 
@@ -94,7 +94,7 @@ export function FeedbackForm({ compact = false }: { compact?: boolean }) {
       <Textarea
         value={message}
         onChange={(e) => setMessage(e.target.value)}
-        placeholder="Apni baat likho — suggestion, bug, ya koi shikayat…"
+        placeholder="Honest review likho — app kaisa laga, kya add karein, kya sudhar sakta hai…"
         maxLength={2000}
         rows={compact ? 3 : 4}
         required
