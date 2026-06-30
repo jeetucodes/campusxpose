@@ -283,9 +283,9 @@ function Home() {
       {/* Feedback */}
       <section className="mx-auto max-w-2xl px-4 py-12">
         <div className="mb-6 text-center">
-          <h2 className="font-display text-3xl font-bold">💬 Tumhari baat suno</h2>
+          <h2 className="font-display text-3xl font-bold">💬 Honest review do</h2>
           <p className="mx-auto mt-2 max-w-md text-muted-foreground">
-            Koi suggestion, bug ya shikayat? Likho — admin seedha tumhare DM me reply karega.
+            App kaisa laga? Kya add karein, kya behtar ho sakta hai — apni honest baat batao.
           </p>
         </div>
         <FeedbackForm />
