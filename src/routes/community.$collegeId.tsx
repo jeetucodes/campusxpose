@@ -144,6 +144,20 @@ function Community() {
 
   const initials = (collegeQ.data?.name ?? "Community").trim().slice(0, 2).toUpperCase();
 
+  const pinned = useMemo(() => messages.filter((m) => m.pinned), [messages]);
+
+  type StreamItem =
+    | { kind: "msg"; at: string; msg: Msg }
+    | { kind: "poll"; at: string; poll: Poll };
+  const items = useMemo<StreamItem[]>(() => {
+    const merged: StreamItem[] = [
+      ...messages.map((m) => ({ kind: "msg" as const, at: m.created_at, msg: m })),
+      ...polls.map((p) => ({ kind: "poll" as const, at: p.created_at, poll: p })),
+    ];
+    merged.sort((a, b) => (a.at < b.at ? 1 : a.at > b.at ? -1 : 0));
+    return merged;
+  }, [messages, polls]);
+
   return (
     <div className="flex h-[100dvh] flex-col bg-background md:h-[calc(100dvh-4rem)]">
       <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col overflow-hidden md:border-x md:border-border">
