@@ -212,7 +212,7 @@ function Messages() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] bg-background">
+    <div className="flex h-[100dvh] bg-background md:h-[calc(100vh-4rem)]">
       {/* Conversation list */}
       <aside
         className={cn(
@@ -384,7 +384,7 @@ function Messages() {
               )}
             </div>
 
-            <div className="border-t-2 border-dashed border-border px-4 py-3">
+            <div className="border-t-2 border-dashed border-border px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
               <div className="mx-auto w-full max-w-2xl">
                 <TypingIndicator users={typing} className="mb-1.5 px-1" />
                 {replyTo && (

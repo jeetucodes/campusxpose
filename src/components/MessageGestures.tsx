@@ -23,6 +23,8 @@ export function MessageGestures({
   const [dx, setDx] = useState(0);
   const [armed, setArmed] = useState(false);
   const [showReactions, setShowReactions] = useState(false);
+  const [placeBelow, setPlaceBelow] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
   const startX = useRef(0);
   const startY = useRef(0);
   const longTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -41,6 +43,8 @@ export function MessageGestures({
     startY.current = t.clientY;
     moved.current = false;
     longTimer.current = setTimeout(() => {
+      const top = wrapRef.current?.getBoundingClientRect().top ?? 200;
+      setPlaceBelow(top < 80);
       setShowReactions(true);
       if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(12);
     }, 420);
@@ -69,7 +73,7 @@ export function MessageGestures({
   };
 
   return (
-    <div className="relative">
+    <div ref={wrapRef} className="relative">
       {dx > 0 && (
         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-1">
           <Reply
@@ -97,7 +101,8 @@ export function MessageGestures({
           <div className="fixed inset-0 z-40" onClick={() => setShowReactions(false)} />
           <div
             className={cn(
-              "absolute -top-12 z-50 flex gap-1 rounded-full border-2 border-border bg-white p-1.5 shadow-ink-soft",
+              "absolute z-50 flex gap-1 rounded-full border-2 border-border bg-white p-1.5 shadow-ink-soft",
+              placeBelow ? "top-full mt-1" : "-top-12",
               align === "end" ? "right-0" : "left-0",
             )}
           >
