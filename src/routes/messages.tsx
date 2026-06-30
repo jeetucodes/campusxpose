@@ -106,6 +106,27 @@ function Messages() {
     return () => clearInterval(interval);
   }, [username, load]);
 
+  // Realtime: instantly reflect new/updated DMs that involve me.
+  useEffect(() => {
+    if (!hashedId) return;
+    const ch = supabase
+      .channel(`dm-rt-${hashedId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "direct_messages" },
+        (p) => {
+          const row = (p.new ?? p.old) as { sender_hash?: string; recipient_hash?: string };
+          if (row?.sender_hash === hashedId || row?.recipient_hash === hashedId) {
+            load();
+          }
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(ch);
+    };
+  }, [hashedId, load]);
+
   // Build conversation list: the "other party" for every message I'm part of.
   const conversations = useMemo(() => {
     const map = new Map<string, DM>();
