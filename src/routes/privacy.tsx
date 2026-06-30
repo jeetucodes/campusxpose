@@ -48,6 +48,16 @@ const SECTIONS = [
     body: `All User-Generated Content is subject to Community Guidelines and applicable law. Reports of prohibited content (harassment, threats, illegal material) are reviewed under a strict moderation protocol. Enforcement actions — content removal, account-level restrictions, or legal referral — are directed at the specific content or pseudonymous identifier only. CampusXpose assumes no liability for the accuracy or lawfulness of UGC, provided such content was not solicited, edited, or endorsed by the Platform.`,
   },
   {
+    icon: Ban,
+    title: "Impossibility of Data Sharing",
+    body: `CampusXpose does not collect, retain, or archive any Personally Identifiable Information. Because no identity-linked data exists within our systems, the Platform is technically and legally incapable of sharing, selling, transferring, or disclosing user data to advertisers, data brokers, analytics firms, government agencies, or any other third party. Without possession, there can be no transfer. This structural absence of data collection is the strongest privacy guarantee available — not a policy choice, but an architectural impossibility of disclosure.`,
+  },
+  {
+    icon: Megaphone,
+    title: "Democratic Right to Anonymous Expression",
+    body: `Freedom of speech is a foundational pillar of democratic society. CampusXpose exists to protect that right by eliminating fear of retaliation, social backlash, or institutional consequence. Anonymous expression empowers whistleblowers, survivors, dissenters, and everyday citizens to speak truth without exposing their identity. The Platform treats anonymity not as a loophole, but as a democratic safeguard — ensuring that every voice, especially the vulnerable and the marginalized, can be heard without reservation. We uphold the principle that the right to speak freely includes the right to speak safely.`,
+  },
+  {
     icon: RefreshCw,
     title: "Policy Amendments & Governing Law",
     body: `CampusXpose reserves the right to amend this Privacy Policy at any time. Material changes will be communicated through in-app notification and update of the effective date above. Continued use of the Platform after such amendments constitutes acceptance of the revised terms. This Policy is governed by the laws of India, and any disputes arising hereunder shall be subject to the exclusive jurisdiction of the courts at [Jurisdiction]. For grievances, contact the designated Grievance Officer.`,
