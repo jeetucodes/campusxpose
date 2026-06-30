@@ -186,16 +186,53 @@ function Community() {
 
         <AdPin placement="college" />
 
-        <ChatPolls scope="college" collegeId={collegeId} hashedId={hashedId} username={username} />
-
-
+        {pinned.length > 0 && (
+          <div className="border-b border-border bg-surface-2/60 px-3 py-2 sm:px-4">
+            <div className="space-y-1">
+              {pinned.map((m) => (
+                <div key={m.id} className="flex items-center gap-2 text-xs">
+                  <Pin className="h-3.5 w-3.5 shrink-0 text-primary" />
+                  <span className="shrink-0 font-semibold text-primary">{m.username}:</span>
+                  <span className="truncate text-muted-foreground">{m.content}</span>
+                  {m.anonymous_user_hash === hashedId && (
+                    <button
+                      onClick={() => pinMessage(m)}
+                      className="ml-auto shrink-0 text-muted-foreground hover:text-destructive"
+                      aria-label="Unpin"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* messages */}
         <div className="flex flex-1 flex-col-reverse gap-3 overflow-y-auto px-3 py-4 sm:px-4">
           <AnimatePresence initial={false}>
-            {messages.map((m) => {
+            {items.map((it) => {
+              if (it.kind === "poll") {
+                const p = it.poll;
+                const own = p.anonymous_user_hash === hashedId;
+                return (
+                  <motion.div
+                    key={`poll-${p.id}`}
+                    layout
+                    initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ duration: 0.18 }}
+                    className={cn("flex", own ? "justify-end" : "justify-start")}
+                  >
+                    <div className="w-full max-w-[85%]">
+                      <PollItem poll={p} votes={votes.filter((v) => v.poll_id === p.id)} hashedId={hashedId} own={own} />
+                    </div>
+                  </motion.div>
+                );
+              }
+              const m = it.msg;
               const own = m.anonymous_user_hash === hashedId;
-              const avatar = (m.username ?? "?").trim().slice(0, 2).toUpperCase();
               return (
                 <motion.div
                   key={m.id}
@@ -209,22 +246,27 @@ function Community() {
                     <UserSymbol username={m.username} size="sm" />
                   )}
                   <div className={cn("group/msg flex max-w-[80%] flex-col gap-1", own ? "items-end" : "items-start")}>
-                    <MessageGestures onReply={() => setReplyTo(m)} onReact={(e) => toggle(m.id, e)} align={own ? "end" : "start"}>
+                    <MessageGestures onReply={() => setReplyTo(m)} onReact={(e) => toggle(m.id, e)} onPin={() => pinMessage(m)} pinned={m.pinned} align={own ? "end" : "start"}>
                     <div className={cn("flex items-center gap-1", own ? "flex-row" : "flex-row-reverse")}>
                       <MessageActions
                         className="hidden transition-opacity md:flex md:opacity-0 md:group-hover/msg:opacity-100"
                         onToggle={(e) => toggle(m.id, e)}
                         onReply={() => setReplyTo(m)}
+                        onPin={() => pinMessage(m)}
+                        pinned={m.pinned}
                       />
                       <div
                         className={cn(
-                          "rounded-2xl px-3.5 py-2.5 text-sm shadow-sm",
+                          "relative rounded-2xl px-3.5 py-2.5 text-sm shadow-sm",
                           own
                             ? "rounded-br-md bg-primary text-primary-foreground shadow-primary/15"
                             : "rounded-bl-md border border-border bg-surface",
                           m.is_incident_signal && !own && "border-l-2 border-l-warning",
                         )}
                       >
+                        {m.pinned && (
+                          <Pin className="absolute -right-1.5 -top-1.5 h-3.5 w-3.5 rotate-45 text-primary" />
+                        )}
                         {!own && <div className="mb-0.5 inline-flex items-center gap-1 text-xs font-semibold text-primary/80">{m.username}{m.username && verified.has(m.username) && <VerifiedBadge className="h-3.5 w-3.5" />}</div>}
                         <ReplyQuote username={m.reply_to_username} content={m.reply_to_content} align={own ? "end" : "start"} />
                         <div className="whitespace-pre-wrap break-words leading-relaxed">{m.content}</div>
