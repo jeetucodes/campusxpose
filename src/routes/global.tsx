@@ -248,7 +248,7 @@ function GlobalChat() {
               className={cn("group flex items-end gap-2", own ? "justify-end" : "justify-start")}
             >
               {!own && <UserSymbol username={m.username} size="sm" />}
-              <div className={cn("flex max-w-[80%] flex-col gap-1", own ? "items-end" : "items-start")}>
+              <div className={cn("flex max-w-[80%] flex-col gap-0", own ? "items-end" : "items-start")}>
                 <MessageGestures onReply={() => setReplyTo(m)} onReact={(e) => toggle(m.id, e)} onPin={() => pinMessage(m)} pinned={m.pinned} align={own ? "end" : "start"}>
                   <div className="flex items-center gap-1">
                     {own && (
