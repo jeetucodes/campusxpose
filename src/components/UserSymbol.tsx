@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { userAvatar } from "@/lib/avatar";
 import { cn } from "@/lib/utils";
 
@@ -16,11 +17,12 @@ export function UserSymbol({
   size?: "sm" | "md" | "lg";
   className?: string;
 }) {
-  const { symbol, color } = userAvatar(username);
+  const { symbol, color, url } = userAvatar(username);
+  const [failed, setFailed] = useState(false);
   return (
     <div
       className={cn(
-        "grid shrink-0 -rotate-2 place-items-center border-2 border-border shadow-ink-soft",
+        "grid shrink-0 -rotate-2 place-items-center overflow-hidden border-2 border-border shadow-ink-soft",
         SIZES[size],
         className,
       )}
@@ -30,7 +32,17 @@ export function UserSymbol({
       }}
       aria-hidden
     >
-      <span>{symbol}</span>
+      {failed ? (
+        <span>{symbol}</span>
+      ) : (
+        <img
+          src={url}
+          alt=""
+          loading="lazy"
+          className="h-full w-full object-cover"
+          onError={() => setFailed(true)}
+        />
+      )}
     </div>
   );
 }

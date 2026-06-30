@@ -1,6 +1,24 @@
-// Deterministic anonymous avatar: each username maps to a stable emoji + color.
-// Same username always renders the same symbol, so DMs feel personal while
+// Deterministic anonymous avatar: each username maps to a stable, colorful
+// cartoon/anime-style avatar image (via DiceBear) plus a fallback emoji + color.
+// Same username always renders the same avatar, so DMs feel personal while
 // staying fully anonymous.
+
+// A mix of cartoon / anime / playful illustrated styles. Each username is
+// pinned to one style + seed, so the picture is stable and unique-feeling.
+const STYLES = [
+  "adventurer",
+  "avataaars",
+  "big-smile",
+  "lorelei",
+  "micah",
+  "open-peeps",
+  "fun-emoji",
+  "notionists",
+  "personas",
+  "miniavs",
+  "bottts-neutral",
+  "thumbs",
+];
 
 const SYMBOLS = [
   "🦊", "🐺", "🦅", "🐯", "🦉", "🐉", "🦁", "🐼", "🦝", "🐗",
@@ -25,15 +43,22 @@ function hashString(input: string): number {
 }
 
 export interface UserAvatar {
+  /** Fallback emoji shown while the image loads or if it fails. */
   symbol: string;
+  /** Accent color tied to the username. */
   color: string;
+  /** Stable cartoon/anime avatar image URL. */
+  url: string;
 }
 
 export function userAvatar(username: string | null | undefined): UserAvatar {
   const key = (username ?? "anonymous").toLowerCase();
   const h = hashString(key);
+  const style = STYLES[h % STYLES.length];
+  const seed = encodeURIComponent(key);
   return {
     symbol: SYMBOLS[h % SYMBOLS.length],
-    color: COLORS[(Math.floor(h / SYMBOLS.length)) % COLORS.length],
+    color: COLORS[Math.floor(h / SYMBOLS.length) % COLORS.length],
+    url: `https://api.dicebear.com/9.x/${style}/svg?seed=${seed}&radius=20&backgroundType=gradientLinear`,
   };
 }
