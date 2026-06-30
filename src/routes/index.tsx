@@ -14,6 +14,7 @@ import { HomeAds } from "@/components/HomeAds";
 import { TrustSection } from "@/components/TrustSection";
 import { useVerifiedUsernames } from "@/hooks/useVerified";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { FeedbackForm } from "@/components/FeedbackForm";
 
 const homeQueryOptions = queryOptions({
   queryKey: ["home"],
