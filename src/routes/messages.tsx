@@ -66,6 +66,22 @@ function Messages() {
   const [replyTo, setReplyTo] = useState<DM | null>(null);
   const { byMessage, toggle } = useReactions("direct", hashedId);
 
+  const pinMessage = async (m: DM) => {
+    if (!hashedId) return;
+    const next = !m.pinned;
+    setAll((prev) => prev.map((x) => (x.id === m.id ? { ...x, pinned: next } : x)));
+    try {
+      await togglePinMessage({
+        data: { messageId: m.id, messageType: "direct", hashedId, pinned: next },
+      });
+    } catch {
+      setAll((prev) => prev.map((x) => (x.id === m.id ? { ...x, pinned: !next } : x)));
+      toast.error("Could not update pin");
+    }
+  };
+
+
+
   useEffect(() => {
     init();
   }, [init]);
