@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Shield, ChevronDown, Trash2 } from "lucide-react";
+import { Shield, ChevronDown, Trash2, UserRound } from "lucide-react";
 import { UserSymbol } from "@/components/UserSymbol";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { useIdentity } from "@/stores/identity";
@@ -79,6 +79,17 @@ export function Navbar() {
               <Shield className="h-4 w-4" />
               Identity never stored
             </div>
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="mb-2 w-full justify-start gap-2"
+            >
+              <Link to="/profile" onClick={() => setOpen(false)}>
+                <UserRound className="h-4 w-4" />
+                Edit profile & avatar
+              </Link>
+            </Button>
             <Button
               variant="destructive"
               size="sm"

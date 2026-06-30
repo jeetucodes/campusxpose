@@ -673,6 +673,35 @@ export const markForgotten = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
+/** Save the caller's chosen avatar (a DiceBear URL) to their own identity.
+ * Pass url=null to clear it and fall back to the default generated avatar. */
+export const setMyAvatar = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z.object({
+      hashedId: z.string().min(8),
+      username: z.string().min(3).max(40),
+      url: z.string().url().max(500).nullable(),
+    }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    if (!HASH_RE.test(data.hashedId)) return { ok: false as const };
+    // Only allow DiceBear-hosted avatar URLs to avoid storing arbitrary links.
+    if (data.url && !/^https:\/\/api\.dicebear\.com\//.test(data.url)) {
+      return { ok: false as const };
+    }
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("anon_users" as any)
+      .upsert(
+        { user_hash: data.hashedId, username: data.username, avatar_url: data.url },
+        { onConflict: "user_hash" },
+      );
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+
+
 
 /** Wipe every trace of the caller's activity. Used by "Forget Me". */
 export const purgeMyActivity = createServerFn({ method: "POST" })
