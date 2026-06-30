@@ -38,7 +38,7 @@ export function FeedbackForm({ compact = false }: { compact?: boolean }) {
       setDone(true);
       setName("");
       setMessage("");
-      toast.success("Feedback bhej diya! Admin DM me reply karega 💬");
+      toast.success("Shukriya! Tumhara honest review mil gaya 💚");
     } catch {
       toast.error("Feedback nahi gaya, dobara try karo.");
     } finally {
