@@ -230,7 +230,7 @@ function GlobalChat() {
         )}
       </div>
 
-      <div className="border-t-2 border-dashed border-border bg-background px-4 py-3">
+      <div className="border-t-2 border-dashed border-border bg-background px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
         <div className="mx-auto w-full max-w-3xl">
           <TypingIndicator users={typing} className="mb-1.5 px-1" />
           {replyTo && (
