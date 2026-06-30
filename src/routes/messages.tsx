@@ -454,7 +454,7 @@ function Messages() {
               )}
             </div>
 
-            <div className="border-t-2 border-dashed border-border px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <div className="shrink-0 border-t-2 border-dashed border-border px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
               <div className="mx-auto w-full max-w-2xl">
                 <TypingIndicator users={typing} className="mb-1.5 px-1" />
                 {replyTo && (
