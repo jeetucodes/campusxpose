@@ -327,6 +327,7 @@ function GlobalChat() {
             </div>
           )}
           <div className="flex items-center gap-2">
+            <NewPollButton scope="global" hashedId={hashedId} username={username} onCreated={reloadPolls} />
             <Input
               value={text}
               onChange={(e) => {
@@ -342,6 +343,7 @@ function GlobalChat() {
             </Button>
           </div>
         </div>
+
       </div>
     </div>
   );
