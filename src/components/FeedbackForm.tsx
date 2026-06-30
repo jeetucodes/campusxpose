@@ -79,7 +79,7 @@ export function FeedbackForm({ compact = false }: { compact?: boolean }) {
           <MessageSquareHeart className="h-5 w-5 text-accent" strokeWidth={2.5} />
         </div>
         <div>
-          <h3 className="font-display text-xl font-bold">Honest review do</h3>
+          <h3 className="font-display text-xl font-bold">Feedback</h3>
           <p className="text-xs text-muted-foreground">Kya pasand aaya, kya sudhar sakta hai?</p>
         </div>
       </div>

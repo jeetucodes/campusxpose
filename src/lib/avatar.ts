@@ -34,6 +34,19 @@ const SYMBOLS = [
   "🛸", "🗿", "🎲", "🧿", "🪲", "🦂", "🐊", "🦖", "🦕", "🐲",
 ];
 
+/** Distinct, official-looking avatar options reserved for the admin account.
+ * These use bold "bottts" robot styles so the admin clearly stands apart from
+ * regular users' cartoon/anime avatars. */
+export const ADMIN_AVATARS: string[] = [
+  "https://api.dicebear.com/9.x/bottts/svg?seed=command&radius=20&backgroundColor=1e293b",
+  "https://api.dicebear.com/9.x/bottts/svg?seed=sentinel&radius=20&backgroundColor=0f172a",
+  "https://api.dicebear.com/9.x/bottts/svg?seed=warden&radius=20&backgroundColor=312e81",
+  "https://api.dicebear.com/9.x/bottts/svg?seed=guardian&radius=20&backgroundColor=7c2d12",
+  "https://api.dicebear.com/9.x/bottts/svg?seed=overseer&radius=20&backgroundColor=14532d",
+  "https://api.dicebear.com/9.x/bottts/svg?seed=oracle&radius=20&backgroundColor=581c87",
+];
+
+
 const COLORS = [
   "#ef4444", "#f97316", "#f59e0b", "#eab308", "#84cc16",
   "#22c55e", "#10b981", "#14b8a6", "#06b6d4", "#0ea5e9",

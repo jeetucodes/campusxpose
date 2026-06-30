@@ -1,8 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { Shield, MessageCircle, Megaphone, Home, FileText } from "lucide-react";
+import { Shield, MessageCircle, Megaphone, Home, FileText, MessageSquareHeart } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Navbar } from "@/components/Navbar";
-import { FeedbackForm } from "@/components/FeedbackForm";
 
 const WOBBLY = "16px 6px 18px 6px / 6px 18px 6px 16px";
 
@@ -64,14 +63,16 @@ export function Footer() {
                   <Shield className="h-4 w-4" /> Privacy & Trust
                 </Link>
               </li>
+              <li>
+                <Link to="/" hash="feedback" className="inline-flex items-center gap-2 hover:text-foreground transition-colors">
+                  <MessageSquareHeart className="h-4 w-4" /> Feedback
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
 
-        {/* Feedback */}
-        <div className="mt-8">
-          <FeedbackForm compact />
-        </div>
+
 
 
 

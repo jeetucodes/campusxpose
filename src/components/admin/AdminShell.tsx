@@ -2,7 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import {
   LayoutDashboard, Building2, AlertTriangle, FileText, MessageSquare,
-  Users, ShieldAlert, BarChart3, Bot, LogOut, Ghost, Megaphone, MessagesSquare, Vote, MessageSquareHeart,
+  Users, ShieldAlert, BarChart3, Bot, LogOut, Ghost, Megaphone, MessagesSquare, Vote, MessageSquareHeart, UserCog,
 } from "lucide-react";
 import { useAdmin } from "@/stores/admin";
 import { cn } from "@/lib/utils";
@@ -21,6 +21,7 @@ const NAV = [
   { to: "/admin/ai", label: "AI Control", icon: Bot },
   { to: "/admin/ads", label: "Ads", icon: Megaphone },
   { to: "/admin/feedback", label: "Feedback", icon: MessageSquareHeart },
+  { to: "/admin/profile", label: "Profile", icon: UserCog },
 ] as const;
 
 export function AdminShell({ children }: { children: ReactNode }) {
