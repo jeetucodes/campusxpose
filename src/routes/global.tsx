@@ -135,7 +135,7 @@ function GlobalChat() {
 
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] flex-col bg-background">
+    <div className="flex h-[100dvh] flex-col bg-background md:h-[calc(100dvh-4rem)]">
       <header className="flex items-center gap-3 border-b-2 border-dashed border-border bg-background px-4 py-3">
         <Button variant="ghost" size="icon" onClick={() => navigate({ to: "/" })}>
           <ArrowLeft className="h-5 w-5" />
