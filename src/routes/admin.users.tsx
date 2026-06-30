@@ -160,9 +160,11 @@ function UsersAdmin() {
               return (
                 <tr key={u.hash} className="border-t border-border">
                   <td className="p-3 font-medium">
-                    <span className="flex items-center gap-1">
-                      {u.username}
+                    <span className="flex items-center gap-2">
+                      <UserSymbol username={u.username} size="sm" />
+                      {u.username || <span className="text-muted-foreground">(no name)</span>}
                       {u.verified && <BadgeCheck className="h-4 w-4 fill-accent text-white" />}
+                      {u.forgotten && <span className="rounded bg-warning/15 px-1.5 py-0.5 text-[10px] font-semibold text-warning">FORGOT</span>}
                     </span>
                   </td>
                   <td className="p-3 font-mono text-xs text-muted-foreground">{u.hash.slice(0, 8)}</td>
@@ -180,6 +182,8 @@ function UsersAdmin() {
                         {u.verified ? "Unverify" : "Verify"}
                       </Button>
                       <Button size="sm" variant="ghost" onClick={() => doRename(u)}>Rename</Button>
+                      <Button size="sm" variant="ghost" onClick={() => doNewAvatar(u)}>New avatar</Button>
+                      {u.avatarUrl && <Button size="sm" variant="ghost" className="text-muted-foreground" onClick={() => doResetAvatar(u)}>Reset avatar</Button>}
                       <Button size="sm" variant="ghost" className="text-destructive" onClick={() => doWipe(u)}>Wipe</Button>
                     </div>
                   </td>
