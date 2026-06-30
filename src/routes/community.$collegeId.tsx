@@ -318,6 +318,7 @@ function Community() {
             </div>
           )}
           <div className="flex items-center gap-2 rounded-full border border-border bg-surface-2 px-2 py-1.5 transition-colors focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15">
+            <NewPollButton scope="college" collegeId={collegeId} hashedId={hashedId} username={username} onCreated={reloadPolls} />
             <Input
               value={text}
               onChange={(e) => onType(e.target.value)}
