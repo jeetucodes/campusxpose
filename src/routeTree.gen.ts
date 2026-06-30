@@ -26,6 +26,7 @@ import { Route as AdminPollsRouteImport } from './routes/admin.polls'
 import { Route as AdminModerationRouteImport } from './routes/admin.moderation'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminIncidentsRouteImport } from './routes/admin.incidents'
+import { Route as AdminFeedbackRouteImport } from './routes/admin.feedback'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminCommunityRouteImport } from './routes/admin.community'
 import { Route as AdminCommentsRouteImport } from './routes/admin.comments'
@@ -119,6 +120,11 @@ const AdminIncidentsRoute = AdminIncidentsRouteImport.update({
   path: '/admin/incidents',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminFeedbackRoute = AdminFeedbackRouteImport.update({
+  id: '/admin/feedback',
+  path: '/admin/feedback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminDashboardRoute = AdminDashboardRouteImport.update({
   id: '/admin/dashboard',
   path: '/admin/dashboard',
@@ -170,6 +176,7 @@ export interface FileRoutesByFullPath {
   '/admin/comments': typeof AdminCommentsRoute
   '/admin/community': typeof AdminCommunityRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/feedback': typeof AdminFeedbackRoute
   '/admin/incidents': typeof AdminIncidentsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/moderation': typeof AdminModerationRoute
@@ -196,6 +203,7 @@ export interface FileRoutesByTo {
   '/admin/comments': typeof AdminCommentsRoute
   '/admin/community': typeof AdminCommunityRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/feedback': typeof AdminFeedbackRoute
   '/admin/incidents': typeof AdminIncidentsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/moderation': typeof AdminModerationRoute
@@ -223,6 +231,7 @@ export interface FileRoutesById {
   '/admin/comments': typeof AdminCommentsRoute
   '/admin/community': typeof AdminCommunityRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/feedback': typeof AdminFeedbackRoute
   '/admin/incidents': typeof AdminIncidentsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/moderation': typeof AdminModerationRoute
@@ -251,6 +260,7 @@ export interface FileRouteTypes {
     | '/admin/comments'
     | '/admin/community'
     | '/admin/dashboard'
+    | '/admin/feedback'
     | '/admin/incidents'
     | '/admin/login'
     | '/admin/moderation'
@@ -277,6 +287,7 @@ export interface FileRouteTypes {
     | '/admin/comments'
     | '/admin/community'
     | '/admin/dashboard'
+    | '/admin/feedback'
     | '/admin/incidents'
     | '/admin/login'
     | '/admin/moderation'
@@ -303,6 +314,7 @@ export interface FileRouteTypes {
     | '/admin/comments'
     | '/admin/community'
     | '/admin/dashboard'
+    | '/admin/feedback'
     | '/admin/incidents'
     | '/admin/login'
     | '/admin/moderation'
@@ -330,6 +342,7 @@ export interface RootRouteChildren {
   AdminCommentsRoute: typeof AdminCommentsRoute
   AdminCommunityRoute: typeof AdminCommunityRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminFeedbackRoute: typeof AdminFeedbackRoute
   AdminIncidentsRoute: typeof AdminIncidentsRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminModerationRoute: typeof AdminModerationRoute
@@ -463,6 +476,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIncidentsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/feedback': {
+      id: '/admin/feedback'
+      path: '/admin/feedback'
+      fullPath: '/admin/feedback'
+      preLoaderRoute: typeof AdminFeedbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/dashboard': {
       id: '/admin/dashboard'
       path: '/admin/dashboard'
@@ -530,6 +550,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminCommentsRoute: AdminCommentsRoute,
   AdminCommunityRoute: AdminCommunityRoute,
   AdminDashboardRoute: AdminDashboardRoute,
+  AdminFeedbackRoute: AdminFeedbackRoute,
   AdminIncidentsRoute: AdminIncidentsRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminModerationRoute: AdminModerationRoute,

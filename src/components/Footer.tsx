@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Shield, MessageCircle, Megaphone, Home, FileText } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Navbar } from "@/components/Navbar";
+import { FeedbackForm } from "@/components/FeedbackForm";
 
 const WOBBLY = "16px 6px 18px 6px / 6px 18px 6px 16px";
 
@@ -66,6 +67,13 @@ export function Footer() {
             </ul>
           </div>
         </div>
+
+        {/* Feedback */}
+        <div className="mt-8">
+          <FeedbackForm compact />
+        </div>
+
+
 
         {/* Bottom bar */}
         <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t-2 border-dashed border-ink pt-6 text-sm text-muted-foreground md:flex-row">
