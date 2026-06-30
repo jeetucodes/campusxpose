@@ -398,10 +398,14 @@ function Messages() {
 
             <div ref={threadBoxRef} className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-2 overflow-y-auto px-4 py-4">
               {thread.map((m) => {
-                const own = m.sender_username === username;
+                const own = m.sender_hash === hashedId;
                 const reactions = byMessage.get(m.id) ?? [];
                 return (
-                  <div key={m.id} className={cn("group flex flex-col gap-0", own ? "items-end" : "items-start")}>
+                  <div
+                    key={m.id}
+                    className={cn("group flex w-full", own ? "justify-end" : "justify-start")}
+                  >
+                    <div className={cn("flex max-w-[85%] flex-col gap-0", own ? "items-end" : "items-start")}>
                     <MessageGestures onReply={() => setReplyTo(m)} onReact={(e) => toggle(m.id, e)} onPin={() => pinMessage(m)} pinned={m.pinned} align={own ? "end" : "start"}>
                     <div className={cn("flex items-center gap-1", own ? "flex-row" : "flex-row-reverse")}>
                       <MessageActions
@@ -413,7 +417,7 @@ function Messages() {
                       />
                       <div
                         className={cn(
-                          "relative w-fit max-w-[85%] border-2 border-border px-3 py-2 text-sm shadow-ink-soft",
+                          "relative w-fit max-w-full border-2 border-border px-3 py-2 text-sm shadow-ink-soft",
                           own ? "bg-accent text-accent-foreground" : "bg-white",
                         )}
                         style={{
@@ -439,6 +443,7 @@ function Messages() {
                     </div>
                     </MessageGestures>
                     <ReactionChips reactions={reactions} onToggle={(e) => toggle(m.id, e)} align={own ? "end" : "start"} />
+                    </div>
                   </div>
                 );
               })}
