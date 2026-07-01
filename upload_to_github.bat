@@ -19,7 +19,7 @@ git add .
 
 echo.
 echo [4/5] Committing changes...
-git commit -m "Upload pure code to repo"
+git commit -m "Update chat textareas, fix text wrapping, and ImgBB error handling"
 
 echo.
 echo [4.5/5] Pulling remote changes to sync with Lovable...
