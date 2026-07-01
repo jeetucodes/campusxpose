@@ -62,13 +62,15 @@ export async function uploadToImgbb(file: File): Promise<string> {
     body: formData,
   });
   
-  if (!res.ok) {
-    throw new Error("Failed to upload image");
+  let data;
+  try {
+    data = await res.json();
+  } catch (e) {
+    throw new Error(`Failed to upload image (Status: ${res.status})`);
   }
   
-  const data = await res.json();
-  if (!data.success) {
-    throw new Error(data.error?.message || "Failed to upload image");
+  if (!res.ok || !data.success) {
+    throw new Error(data.error?.message || `ImgBB API error: ${res.status} ${res.statusText}`);
   }
   
   return data.data.url;

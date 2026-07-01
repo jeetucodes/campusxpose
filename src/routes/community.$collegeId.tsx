@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Send, X, FileWarning, CheckCheck, Pin, Image as ImageIcon, Loader2 } from "lucide-react";
+import { ArrowLeft, Send, MessageCircle, Info, Hash, MoreVertical, Flag, Link as LinkIcon, Reply, X, ShieldAlert, Pin, Image as ImageIcon, Loader2, FileWarning, CheckCheck } from "lucide-react";
+import { AutoResizeTextarea } from "@/components/AutoResizeTextarea";
 import { UserSymbol } from "@/components/UserSymbol";
 import { useVerifiedUsernames } from "@/hooks/useVerified";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
@@ -296,7 +297,7 @@ function Community() {
                             <img src={m.image_url} alt="Attachment" className="w-full h-auto object-cover" loading="lazy" />
                           </div>
                         )}
-                        {m.content && <div className="whitespace-pre-wrap break-words leading-relaxed"><Linkify text={m.content} /></div>}
+                        {m.content && <div className="whitespace-pre-wrap break-all leading-relaxed"><Linkify text={m.content} /></div>}
                       </div>
                     </div>
                     </MessageGestures>
@@ -379,13 +380,19 @@ function Community() {
                 <ImageIcon className="h-4 w-4" />
               </Button>
               
-              <Input
+              <AutoResizeTextarea
                 value={text}
                 onChange={(e) => onType(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && send()}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    send();
+                  }
+                }}
                 placeholder="Write anonymously..."
                 disabled={!hashedId || !username || uploadingImage}
-                className="h-8 flex-1 border-0 bg-transparent px-2 shadow-none focus-visible:ring-0"
+                maxHeight={150}
+                className="h-8 flex-1 border-0 bg-transparent px-2 shadow-none focus-visible:ring-0 max-h-32 pt-1.5"
               />
               <Button onClick={send} disabled={(!text.trim() && !imageFile) || uploadingImage} size="icon" className="h-9 w-9 shrink-0 rounded-full">
                 {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}

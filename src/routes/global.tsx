@@ -1,10 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef, KeyboardEvent } from "react";
 import { Send, Globe, MessageCircle, ArrowLeft, X, Pin, Image as ImageIcon, Loader2 } from "lucide-react";
+import { AutoResizeTextarea } from "@/components/AutoResizeTextarea";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useIdentity } from "@/stores/identity";
 import { UserSymbol } from "@/components/UserSymbol";
 import { submitGlobalMessage, togglePinMessage } from "@/lib/content.functions";
@@ -56,6 +56,7 @@ function GlobalChat() {
   const { hashedId, username, init } = useIdentity();
   const verified = useVerifiedUsernames();
   const [messages, setMessages] = useState<Msg[]>([]);
+  const [loading, setLoading] = useState(true);
   const [text, setText] = useState("");
   const [replyTo, setReplyTo] = useState<Msg | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -90,7 +91,10 @@ function GlobalChat() {
       .select("*")
       .order("created_at", { ascending: false })
       .limit(150)
-      .then(({ data }) => setMessages((data ?? []) as Msg[]));
+      .then(({ data }) => {
+        setMessages((data ?? []) as Msg[]);
+        setLoading(false);
+      });
     const ch = supabase
       .channel("global-room")
       .on(
@@ -130,7 +134,7 @@ function GlobalChat() {
 
   const send = async () => {
     if ((!text.trim() && !imageFile) || !hashedId || !username) return;
-    
+
     setUploadingImage(true);
     let uploadedUrl = null;
     try {
@@ -149,7 +153,7 @@ function GlobalChat() {
     setText("");
     setReplyTo(null);
     setImageFile(null);
-    
+
     // Optimistic insert for an instant, real-time feel.
     const tempId = `temp-${Date.now()}`;
     setMessages((prev) => [
@@ -251,7 +255,20 @@ function GlobalChat() {
       )}
 
       <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col-reverse gap-2 overflow-y-auto px-4 py-4">
-        {items.map((it) => {
+        {loading ? (
+          Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className={cn("flex items-end gap-2", i % 2 === 0 ? "justify-end" : "justify-start")}>
+              {i % 2 !== 0 && <div className="h-8 w-8 shrink-0 rounded-full bg-muted/40 animate-pulse" />}
+              <div
+                className={cn(
+                  "h-12 w-[60%] border-2 border-border/20 bg-muted/20 animate-pulse",
+                  i % 2 === 0 ? "bg-accent/10" : ""
+                )}
+                style={{ borderRadius: "16px 6px 18px 6px / 6px 18px 6px 16px" }}
+              />
+            </div>
+          ))
+        ) : items.map((it) => {
           if (it.kind === "poll") {
             const p = it.poll;
             const own = p.anonymous_user_hash === hashedId;
@@ -303,14 +320,14 @@ function GlobalChat() {
                           {m.username}{m.username && verified.has(m.username) && <VerifiedBadge className="h-3.5 w-3.5" />}
                         </Link>
                       )}
-                        <ReplyQuote username={m.reply_to_username} content={m.reply_to_content} align={own ? "end" : "start"} />
+                      <ReplyQuote username={m.reply_to_username} content={m.reply_to_content} align={own ? "end" : "start"} />
                       {m.image_url && (
                         <div className="mb-2 max-w-[240px] overflow-hidden rounded-md border border-ink/10">
                           <img src={m.image_url} alt="Attachment" className="w-full h-auto object-cover" loading="lazy" />
                         </div>
                       )}
                       <div className="flex flex-wrap items-end justify-end gap-x-2">
-                        {m.content && <span className="whitespace-pre-wrap break-words"><Linkify text={m.content} /></span>}
+                        {m.content && <span className="whitespace-pre-wrap break-all"><Linkify text={m.content} /></span>}
                         <span className={cn("shrink-0 text-[10px]", own ? "text-accent-foreground/70" : "text-muted-foreground")}>
                           {timeAgo(m.created_at)}
                         </span>
@@ -335,7 +352,7 @@ function GlobalChat() {
         })}
         {items.length === 0 && (
           <p className="my-auto text-center text-sm text-muted-foreground">
-            No messages yet. Say something to the whole campus universe.
+
           </p>
         )}
       </div>
@@ -369,37 +386,43 @@ function GlobalChat() {
             )}
             <div className="flex items-center gap-2 rounded-2xl border-2 border-border bg-white px-2 py-1.5 shadow-ink-soft transition-colors focus-within:border-accent">
               <NewPollButton scope="global" hashedId={hashedId} username={username} onCreated={reloadPolls} />
-              
-              <input 
-                type="file" 
-                accept="image/*" 
-                ref={fileInputRef} 
-                className="hidden" 
+
+              <input
+                type="file"
+                accept="image/*"
+                ref={fileInputRef}
+                className="hidden"
                 onChange={(e) => {
                   if (e.target.files && e.target.files[0]) setImageFile(e.target.files[0]);
                   e.target.value = "";
-                }} 
+                }}
               />
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="shrink-0 text-muted-foreground hover:bg-transparent hover:text-accent" 
+              <Button
+                variant="ghost"
+                size="icon"
+                className="shrink-0 text-muted-foreground hover:bg-transparent hover:text-accent"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploadingImage}
               >
                 <ImageIcon className="h-4 w-4" />
               </Button>
-              
-              <Input
+
+              <AutoResizeTextarea
                 value={text}
                 onChange={(e) => {
                   setText(e.target.value);
                   notifyTyping();
                 }}
-                onKeyDown={(e) => e.key === "Enter" && send()}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    send();
+                  }
+                }}
                 placeholder="Message everyone..."
                 maxLength={1000}
-                className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                maxHeight={150}
+                className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 max-h-32 pt-2.5"
                 disabled={uploadingImage}
               />
               <Button

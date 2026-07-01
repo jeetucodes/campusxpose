@@ -147,8 +147,6 @@ function ProjectsPage() {
   const [activeTag, setActiveTag] = useState<string | undefined>(undefined);
   const [sort, setSort] = useState<"newest" | "rating">("newest");
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const { projectsEnabled, featuresLoading } = useFeatures();
-
   const fetchProjects = useServerFn(listProjects);
 
   const load = async () => {
@@ -167,9 +165,6 @@ function ProjectsPage() {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTag, sort]);
-
-  if (featuresLoading) return null;
-  if (!projectsEnabled) return <Navigate to="/" />;
 
   return (
     <SiteShell hideFooter>
@@ -350,9 +345,9 @@ function ProjectsPage() {
             {projects.map((p, i) => (
               <motion.div
                 key={p.id}
-                initial={{ opacity: 0, y: 16 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: Math.min(i * 0.04, 0.4) }}
+                transition={{ duration: 0.2 }}
               >
                 <ProjectCard project={p} index={i} />
               </motion.div>

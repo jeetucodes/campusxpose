@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Send, MessageCircle, Globe, ArrowLeft, Plus, Trash2, X, Pin, ShieldCheck, Image as ImageIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { AutoResizeTextarea } from "@/components/AutoResizeTextarea";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,6 +66,7 @@ function Messages() {
   const refreshUnread = useDmStore((s) => s.refresh);
   const unreadBy = useDmStore((s) => s.unreadBy);
   const [all, setAll] = useState<DM[]>([]);
+  const [loading, setLoading] = useState(true);
   const [text, setText] = useState("");
   const [newName, setNewName] = useState("");
   const [replyTo, setReplyTo] = useState<DM | null>(null);
@@ -87,24 +89,33 @@ function Messages() {
     }
   };
 
-
-
   useEffect(() => {
     init();
   }, [init]);
 
   const load = useMemo(
     () => async () => {
-      if (!hashedId || !username) return;
+      if (!hashedId || !username) {
+        // If identity is missing, wait a bit or just assume no messages for now if it stays missing.
+        return;
+      }
       try {
         const r = await fetchDirectMessages({ data: { hashedId, username } });
         setAll((r.messages ?? []) as DM[]);
       } catch {
         /* ignore transient errors */
+      } finally {
+        setLoading(false);
       }
     },
     [hashedId, username],
   );
+
+  // Fallback to stop loading if it takes too long
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (!username) return;
@@ -313,7 +324,17 @@ function Messages() {
         </div>
 
         <div className="flex-1 overflow-y-auto">
-          {conversations.map((c) => {
+          {loading ? (
+            Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3 px-4 py-3">
+                <div className="h-10 w-10 shrink-0 rounded-full bg-muted/40 animate-pulse" />
+                <div className="min-w-0 flex-1 space-y-2">
+                  <div className="h-4 w-1/2 rounded bg-muted/40 animate-pulse" />
+                  <div className="h-3 w-3/4 rounded bg-muted/40 animate-pulse" />
+                </div>
+              </div>
+            ))
+          ) : conversations.map((c) => {
             const unread = unreadBy[c.name] ?? 0;
             return (
               <div
@@ -350,11 +371,16 @@ function Messages() {
               </div>
             );
           })}
-          {conversations.length === 0 && (
-            <p className="px-4 py-8 text-center text-sm text-muted-foreground">
-              No conversations yet. Start one above, or tap a username in Global
-              Chat.
-            </p>
+          {!loading && conversations.length === 0 && (
+            <div className="flex flex-col items-center justify-center gap-3 px-4 py-16 text-center text-muted-foreground">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted/30">
+                <MessageCircle className="h-6 w-6 opacity-50" />
+              </div>
+              <p className="text-sm">
+                No messages have arrived yet.<br/>
+                Start a conversation above or tap a username in Global Chat.
+              </p>
+            </div>
           )}
         </div>
       </aside>
@@ -421,7 +447,19 @@ function Messages() {
             )}
 
             <div ref={threadBoxRef} className="mx-auto flex w-full max-w-2xl min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-4 py-4">
-              {thread.map((m) => {
+              {loading ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className={cn("flex w-full", i % 2 === 0 ? "justify-end" : "justify-start")}>
+                    <div
+                      className={cn(
+                        "h-12 w-[60%] border-2 border-border/20 bg-muted/20 animate-pulse",
+                        i % 2 === 0 ? "bg-accent/10" : ""
+                      )}
+                      style={{ borderRadius: "16px 6px 18px 6px / 6px 18px 6px 16px" }}
+                    />
+                  </div>
+                ))
+              ) : thread.map((m) => {
                 const own = m.sender_hash === hashedId;
                 const reactions = byMessage.get(m.id) ?? [];
                 return (
@@ -461,7 +499,7 @@ function Messages() {
                         )}
                         <div className="flex flex-wrap items-end justify-end gap-x-2">
                           {m.content && (
-                            <span className="whitespace-pre-wrap break-words leading-relaxed">
+                            <span className="whitespace-pre-wrap break-all leading-relaxed">
                               <Linkify text={m.content} />
                             </span>
                           )}
@@ -540,16 +578,22 @@ function Messages() {
                         <ImageIcon className="h-4 w-4" />
                       </Button>
                       
-                      <Input
+                      <AutoResizeTextarea
                         value={text}
                         onChange={(e) => {
                           setText(e.target.value);
                           notifyTyping();
                         }}
-                        onKeyDown={(e) => e.key === "Enter" && send()}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            send();
+                          }
+                        }}
                         placeholder={`Message ${active}...`}
                         maxLength={1000}
-                        className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                        maxHeight={150}
+                        className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 max-h-32 pt-2.5"
                         disabled={uploadingImage}
                       />
                       <Button

@@ -41,7 +41,6 @@ import { uploadToImgbb } from "@/lib/upload";
 function NewProjectPage() {
   const navigate = useNavigate();
   const { hashedId, username, isReady, init } = useIdentity();
-  const { projectsEnabled, featuresLoading } = useFeatures();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -60,9 +59,6 @@ function NewProjectPage() {
   useEffect(() => {
     init();
   }, [init]);
-
-  if (featuresLoading) return null;
-  if (!projectsEnabled) return <Navigate to="/" />;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

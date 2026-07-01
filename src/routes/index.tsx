@@ -15,6 +15,12 @@ import { TrustSection } from "@/components/TrustSection";
 import { useVerifiedUsernames } from "@/hooks/useVerified";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { FeedbackForm } from "@/components/FeedbackForm";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const homeQueryOptions = queryOptions({
   queryKey: ["home"],
@@ -79,105 +85,80 @@ function Home() {
 
   return (
     <SiteShell>
-      {/* Hero */}
-      <section className="relative overflow-hidden px-4 pb-16 pt-20 text-center">
-        {/* hand-drawn arrow to CTA (desktop) */}
-        <svg className="pointer-events-none absolute right-[14%] top-[46%] hidden h-24 w-24 -rotate-12 text-accent md:block" viewBox="0 0 100 100" fill="none">
-          <path d="M10 20 C 40 30, 60 50, 80 80" stroke="currentColor" strokeWidth="3" strokeDasharray="6 6" strokeLinecap="round" />
-          <path d="M80 80 L 64 76 M80 80 L 76 62" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-        </svg>
-        {/* bouncing decorative circle */}
-        <div className="absolute left-[12%] top-28 hidden h-12 w-12 animate-gentle-bounce border-2 border-border bg-postit md:block" style={{ borderRadius: "50% 40% 55% 45% / 45% 55% 40% 50%" }} />
+      {/* Hero Section */}
+      <div className="px-4 pt-6 pb-2 space-y-4 mx-auto max-w-4xl">
 
-        <motion.div {...fadeUp} className="mx-auto max-w-3xl">
-          <span
-            className="inline-flex -rotate-2 items-center gap-2 border-2 border-border bg-white px-4 py-1.5 text-sm font-semibold text-success shadow-ink-soft"
-            style={{ borderRadius: WOBBLY_MD }}
-          >
-            <Shield className="h-3.5 w-3.5" /> 100% Anonymous Platform
-          </span>
-          <h1 className="mt-6 font-display text-5xl font-bold tracking-tight sm:text-7xl">
-            Campus<span className="text-accent">Xpose</span>
-            <span className="ml-1 inline-block rotate-12 text-accent">!</span>
-          </h1>
-          <p className="mt-4 text-2xl font-semibold">College ka sach, bina darr ke</p>
-          <p className="mx-auto mt-3 max-w-xl text-lg text-muted-foreground">
-            Apne college ki asli kahani share karo. Fake fines, placement fraud, faculty issues — sab kuch anonymously report karo.
-          </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Button asChild size="lg">
-              <Link to="/colleges">Apna College Dhundo <ArrowRight className="ml-1 h-4 w-4" /></Link>
-            </Button>
-            <Button asChild size="lg" variant="outline">
-              <Link to="/report">Issue Report Karo</Link>
-            </Button>
+        {/* Hero Card */}
+        <section
+          className="relative w-full overflow-hidden border-2 border-border bg-white sm:min-h-[380px] min-h-[300px]"
+          style={{ borderRadius: WOBBLY_MD }}
+        >
+          {/* Background image — college sketch on bottom right */}
+          <img
+            src="/heroimg.png"
+            alt="CampusXpose campus illustration"
+            className="absolute inset-0 h-full w-full object-cover object-[80%_bottom] sm:object-[right_bottom]"
+          />
+
+          {/* Strong gradient so text is easily readable on top-left */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white via-white/80 to-transparent sm:via-white/50" />
+
+          {/* Text overlay — top-left */}
+          <div className="relative z-10 flex flex-col justify-start px-6 pt-20 pb-6 sm:px-12 sm:py-12">
+            <motion.div {...fadeUp} className="w-[85%] max-w-[280px] sm:max-w-[50%] space-y-3">
+              <h1 className="font-display text-3xl font-bold leading-tight tracking-tight sm:text-5xl md:text-6xl text-foreground">
+                College ka sach,
+                <br />
+                bina darr ke.
+              </h1>
+              <p className="hidden sm:block text-xs leading-relaxed text-muted-foreground sm:text-sm font-medium">
+                Apne college ki asli kahani share karo.<br className="hidden sm:block" />
+                Fake fines, placement fraud, faculty issues — sab kuch anonymously report karo.
+              </p>
+            </motion.div>
           </div>
-          <div className="mx-auto mt-12 grid max-w-xl grid-cols-2 gap-4 sm:grid-cols-4">
-            {[
-              { n: data?.collegeCount ?? 0, l: "Colleges", rot: "-rotate-2", bg: "bg-white" },
-              { n: data?.postCount ?? 0, l: "Reports", rot: "rotate-2", bg: "bg-postit" },
-              { n: data?.incidentCount ?? 0, l: "Incidents", rot: "rotate-1", bg: "bg-white" },
-              { n: "∞", l: "Anon Users", rot: "-rotate-1", bg: "bg-postit" },
-            ].map((s, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.1 * i }}
-                className={`border-2 border-border p-4 shadow-ink ${s.rot} ${s.bg}`}
-                style={{ borderRadius: WOBBLY_MD }}
-              >
-                <div className="font-display text-3xl font-bold text-accent">{s.n}</div>
-                <div className="text-sm text-muted-foreground">{s.l}</div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-      </section>
+        </section>
+
+        {/* Buttons Row */}
+        <div className="flex gap-2 sm:gap-3">
+          <Button asChild className="flex-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] border-2 border-border bg-accent text-white hover:bg-accent/90 h-10 text-[11px] sm:h-12 sm:text-base px-2 sm:px-4" style={{ borderRadius: WOBBLY_MD }}>
+            <Link to="/colleges">
+              Apna College Dhundo <ArrowRight className="ml-1 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="flex-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] border-2 border-border bg-white text-foreground hover:bg-muted h-10 text-[11px] sm:h-12 sm:text-base px-2 sm:px-4" style={{ borderRadius: WOBBLY_MD }}>
+            <Link to="/report">Issue Report Karo</Link>
+          </Button>
+        </div>
+
+        {/* Stats Row */}
+        <div className="grid grid-cols-4 gap-2 pt-2 pb-4">
+          {[
+            { n: data?.collegeCount ?? 0, l: "Colleges", color: "text-accent" },
+            { n: data?.postCount ?? 0, l: "Reports", color: "text-yellow-500" },
+            { n: data?.incidentCount ?? 0, l: "Incidents", color: "text-accent" },
+            { n: "∞", l: "Anon Users", color: "text-yellow-500" },
+          ].map((s, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 * i }}
+              className="flex flex-col items-center justify-center border border-border bg-white p-2 rounded-xl shadow-sm"
+            >
+              <div className={`font-display text-xl sm:text-2xl font-bold ${s.color}`}>{s.n}</div>
+              <div className="text-[9px] sm:text-[10px] font-semibold text-foreground mt-0.5">{s.l}</div>
+            </motion.div>
+          ))}
+        </div>
+
+      </div>
+
+
 
       <HomeAds />
 
 
-      {/* Trust proof badges */}
-      <section className="mx-auto max-w-5xl px-4 py-12">
-        <div className="mb-8 text-center">
-          <span
-            className="inline-flex -rotate-2 items-center gap-2 border-2 border-border bg-success/15 px-4 py-1.5 text-sm font-semibold text-success shadow-ink-soft"
-            style={{ borderRadius: WOBBLY_MD }}
-          >
-            <Shield className="h-3.5 w-3.5" /> Trust ke saath share karo
-          </span>
-          <h2 className="mt-4 font-display text-4xl font-bold">Tumhara data kabhi store nahi hota</h2>
-          <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-            Na location, na IP, na device permission. Koi tumhe trace nahi kar sakta — guaranteed.
-          </p>
-        </div>
-        <div className="grid gap-8 md:grid-cols-3">
-          {features.map((f, i) => (
-            <motion.div
-              key={i}
-              {...fadeUp}
-              transition={{ delay: i * 0.1 }}
-              className={`relative border-2 border-border p-6 shadow-ink transition-transform duration-100 hover:-rotate-1 ${f.bg}`}
-              style={{ borderRadius: WOBBLY_MD }}
-            >
-              {/* tape strip */}
-              <span className="absolute -top-3 left-1/2 h-5 w-16 -translate-x-1/2 rotate-3 bg-foreground/10 backdrop-blur-sm" />
-              <div
-                className="mb-4 grid h-11 w-11 place-items-center border-2 border-border bg-white"
-                style={{ borderRadius: "50% 42% 55% 45% / 45% 55% 42% 50%" }}
-              >
-                <f.icon className="h-6 w-6 text-accent" strokeWidth={2.5} />
-              </div>
-              <h3 className="mb-2 font-display text-xl font-bold">{f.title}</h3>
-              <p className="text-muted-foreground">{f.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* Trust & safety */}
-      <TrustSection />
 
       {/* Top reported */}
       <section className="mx-auto max-w-3xl px-4 py-16">
@@ -279,6 +260,50 @@ function Home() {
         )}
       </section>
 
+      {/* FAQ / Common Sawaal */}
+      <section className="mx-auto max-w-3xl px-4 py-12">
+        <div className="mb-6 text-center">
+          <h2 className="font-display text-3xl font-bold">🤔 Common Sawaal</h2>
+          <p className="mt-2 text-muted-foreground">Tumhare dimaag mein chal rahe kuch sawaalon ke jawaab</p>
+        </div>
+
+        <div className="sketch-card p-2 sm:p-4 bg-white" style={{ borderRadius: WOBBLY_MD }}>
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="item-1" className="border-b-2 border-border">
+              <AccordionTrigger className="font-bold text-left hover:no-underline hover:text-accent">
+                Kya mera sach mein koi naam nahi aayega?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground font-medium">
+                Haan, bilkul! Hum na email maangte hain, na phone number, aur na hi koi location/IP data store karte hain. Tum ekdum safe aur anonymous ho.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-2" className="border-b-2 border-border">
+              <AccordionTrigger className="font-bold text-left hover:no-underline hover:text-accent">
+                College administration ko kaise pata chalega?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground font-medium">
+                Jab tumhari post pe kaafi upvotes aur engagement aati hai, toh usey automatically attention milti hai. Yeh platform ek collective voice banata hai jise ignore karna mushkil ho jata hai.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-3" className="border-b-2 border-border">
+              <AccordionTrigger className="font-bold text-left hover:no-underline hover:text-accent">
+                Kya main proof/documents upload kar sakta hoon?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground font-medium">
+                Haan! Hum strongly encourage karte hain ki tum reports ke saath photos ya documents upload karo taaki tumhari baat sach sabit ho sake.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-4" className="border-b-0">
+              <AccordionTrigger className="font-bold text-left hover:no-underline hover:text-accent">
+                Fake reports ko kaise rokoge?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground font-medium">
+                Hamari community hi moderation karti hai. Agar koi fake ya galat cheez post hoti hai, toh users use downvote ya report kar sakte hain. Spam accounts jaldi block kar diye jaate hain.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+      </section>
 
       {/* Feedback */}
       <section id="feedback" className="mx-auto max-w-2xl px-4 py-12">
@@ -290,21 +315,6 @@ function Home() {
         </div>
         <FeedbackForm />
       </section>
-
-      {/* Final CTA */}
-
-      <section className="mx-auto max-w-3xl px-4 pb-20 pt-4 text-center">
-        <div className="sketch-card -rotate-1 p-8" style={{ borderRadius: WOBBLY_MD }}>
-          <h2 className="font-display text-3xl font-bold">Tumhare college ka sach kya hai?</h2>
-          <p className="mx-auto mt-3 max-w-md text-muted-foreground">
-            Bina darr ke, bina naam ke. Apni baat rakho — kisi ko pata nahi chalega.
-          </p>
-          <Button asChild size="lg" className="mt-6">
-            <Link to="/report">Abhi Report Karo <ArrowRight className="ml-1 h-4 w-4" /></Link>
-          </Button>
-        </div>
-      </section>
     </SiteShell>
-
   );
 }

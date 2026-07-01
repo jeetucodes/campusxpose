@@ -564,9 +564,6 @@ function ProjectDetailPage() {
     }
   };
 
-  if (featuresLoading) return null;
-  if (!projectsEnabled) return <Navigate to="/" />;
-
   if (loading) {
     return (
       <SiteShell hideFooter>
@@ -810,54 +807,56 @@ function ProjectDetailPage() {
           <div className="space-y-8 pb-12">
             
             {/* Rate Form */}
-            <div className="border-2 border-ink bg-white shadow-ink sketch-card p-6 sm:p-8" style={{ borderRadius: "20px 8px 18px 8px / 8px 18px 8px 20px" }}>
-              <div className="mb-6 pb-4 border-b-2 border-dashed border-ink/20">
-                <h2 className="font-display text-2xl font-black text-foreground">
-                  {ratingDone ? "✏️ Edit Review" : "⭐ Review Project"}
-                </h2>
-              </div>
-              
-              {!isOwner ? (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  <div className="space-y-6 rounded-xl bg-surface-1 p-5 sm:p-6 border-2 border-ink shadow-ink-soft wobbly-sm" style={{ borderRadius: "16px 6px 18px 6px / 6px 18px 6px 16px" }}>
-                    <StarRatingPicker value={myRating} onChange={setMyRating} label="Overall Rating" layout="auto" />
-                    <div className="h-px w-full bg-ink/10" />
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
-                      <StarRatingPicker value={myRatingUi} onChange={setMyRatingUi} label="UI / Design" icon={Layout} layout="vertical" />
-                      <StarRatingPicker value={myRatingFunc} onChange={setMyRatingFunc} label="Functionality" icon={Zap} layout="vertical" />
-                      <StarRatingPicker value={myRatingConcept} onChange={setMyRatingConcept} label="Concept" icon={Lightbulb} layout="vertical" />
-                      <StarRatingPicker value={myRatingBugs} onChange={setMyRatingBugs} label="Stability" icon={Bug} layout="vertical" />
+            {!ratingDone && (
+              <div className="border-2 border-ink bg-white shadow-ink sketch-card p-6 sm:p-8" style={{ borderRadius: "20px 8px 18px 8px / 8px 18px 8px 20px" }}>
+                <div className="mb-6 pb-4 border-b-2 border-dashed border-ink/20">
+                  <h2 className="font-display text-2xl font-black text-foreground">
+                    ⭐ Review Project
+                  </h2>
+                </div>
+                
+                {!isOwner ? (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-6 rounded-xl bg-surface-1 p-5 sm:p-6 border-2 border-ink shadow-ink-soft wobbly-sm" style={{ borderRadius: "16px 6px 18px 6px / 6px 18px 6px 16px" }}>
+                      <StarRatingPicker value={myRating} onChange={setMyRating} label="Overall Rating" layout="auto" />
+                      <div className="h-px w-full bg-ink/10" />
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
+                        <StarRatingPicker value={myRatingUi} onChange={setMyRatingUi} label="UI / Design" icon={Layout} layout="vertical" />
+                        <StarRatingPicker value={myRatingFunc} onChange={setMyRatingFunc} label="Functionality" icon={Zap} layout="vertical" />
+                        <StarRatingPicker value={myRatingConcept} onChange={setMyRatingConcept} label="Concept" icon={Lightbulb} layout="vertical" />
+                        <StarRatingPicker value={myRatingBugs} onChange={setMyRatingBugs} label="Stability" icon={Bug} layout="vertical" />
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-col h-full">
+                      <label className="mb-2 block text-sm font-bold font-display">Your Thoughts</label>
+                      <textarea
+                        value={myComment}
+                        onChange={(e) => setMyComment(e.target.value)}
+                        placeholder="What did you like? What could be improved?"
+                        maxLength={1000}
+                        className="flex-1 w-full resize-none border-2 border-ink bg-white px-3.5 py-2.5 text-sm font-sans placeholder:text-muted-foreground focus:border-accent focus:outline-none wobbly-sm shadow-ink-soft min-h-[120px]"
+                        style={{ borderRadius: "8px 12px 6px 14px / 12px 8px 14px 6px" }}
+                      />
+                      
+                      <Button 
+                        onClick={handleRatingSubmit} 
+                        disabled={ratingSubmitting || myRating === 0} 
+                        className="mt-5 w-full border-2 border-ink bg-foreground text-background font-black font-display text-lg py-6 shadow-ink hover:shadow-ink-lg hover:-translate-y-1 wobbly-md"
+                        style={{ borderRadius: "14px 5px 16px 5px / 5px 16px 5px 14px" }}
+                      >
+                        {ratingSubmitting ? <Loader2 className="h-6 w-6 animate-spin" /> : "Submit Review"}
+                      </Button>
                     </div>
                   </div>
-                  
-                  <div className="flex flex-col h-full">
-                    <label className="mb-2 block text-sm font-bold font-display">Your Thoughts</label>
-                    <textarea
-                      value={myComment}
-                      onChange={(e) => setMyComment(e.target.value)}
-                      placeholder="What did you like? What could be improved?"
-                      maxLength={1000}
-                      className="flex-1 w-full resize-none border-2 border-ink bg-white px-3.5 py-2.5 text-sm font-sans placeholder:text-muted-foreground focus:border-accent focus:outline-none wobbly-sm shadow-ink-soft min-h-[120px]"
-                      style={{ borderRadius: "8px 12px 6px 14px / 12px 8px 14px 6px" }}
-                    />
-                    
-                    <Button 
-                      onClick={handleRatingSubmit} 
-                      disabled={ratingSubmitting || myRating === 0} 
-                      className="mt-5 w-full border-2 border-ink bg-foreground text-background font-black font-display text-lg py-6 shadow-ink hover:shadow-ink-lg hover:-translate-y-1 wobbly-md"
-                      style={{ borderRadius: "14px 5px 16px 5px / 5px 16px 5px 14px" }}
-                    >
-                      {ratingSubmitting ? <Loader2 className="h-6 w-6 animate-spin" /> : ratingDone ? "Update Review" : "Submit Review"}
-                    </Button>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground text-sm font-bold font-sans border-2 border-dashed border-ink/20 rounded-xl bg-surface-1">
+                    <Star className="mx-auto h-8 w-8 text-ink/30 mb-3" />
+                    You cannot review your own project.
                   </div>
-                </div>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground text-sm font-bold font-sans border-2 border-dashed border-ink/20 rounded-xl bg-surface-1">
-                  <Star className="mx-auto h-8 w-8 text-ink/30 mb-3" />
-                  You cannot review your own project.
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
 
             {/* Reviews List */}
             <div>

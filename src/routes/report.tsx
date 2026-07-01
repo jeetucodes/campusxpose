@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SiteShell } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { AutoResizeTextarea } from "@/components/AutoResizeTextarea";
 import { ProofUploader } from "@/components/ProofUploader";
 import { REPORT_CATEGORIES } from "@/lib/categories";
 import { useIdentity } from "@/stores/identity";
@@ -139,7 +139,7 @@ function ReportPage() {
                   )}
                   <div>
                     <label className="text-xs text-muted-foreground">What happened? (min 50 chars)</label>
-                    <Textarea value={content} onChange={(e) => setContent(e.target.value)} rows={5} placeholder="Detail me likho kya hua..." className="bg-surface-2" />
+                    <AutoResizeTextarea value={content} onChange={(e) => setContent(e.target.value)} placeholder="Detail me likho kya hua..." className="bg-surface-2 min-h-[100px]" />
                     <p className="mt-1 text-right text-xs text-muted-foreground">{content.length} chars</p>
                   </div>
                   <div className="grid grid-cols-2 gap-3">

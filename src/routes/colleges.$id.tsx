@@ -128,7 +128,6 @@ function CollegeDetail() {
       const { data } = await supabase
         .from("evidence")
         .select("*")
-        .eq("is_verified", true)
         .or(ors.join(","))
         .order("created_at", { ascending: false });
       return data ?? [];
@@ -298,26 +297,7 @@ function CollegeDetail() {
           </div>
         </section>
 
-        {/* Verified evidence */}
-        <section className="mt-8">
-          <h2 className="mb-4 flex items-center gap-2 text-xl font-bold">
-            Verified Evidence
-            <span className="rounded-full bg-success/15 px-2 py-0.5 text-sm text-success">{evidence.length}</span>
-          </h2>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {evidence.map((e) => (
-              <a key={e.id} href={e.file_url} target="_blank" rel="noreferrer" className="group rounded-xl border border-border bg-surface p-2">
-                {e.type === "image" ? (
-                  <img src={e.file_url} alt="Verified evidence" loading="lazy" className="h-32 w-full rounded-lg object-cover" />
-                ) : (
-                  <div className="flex h-32 w-full items-center justify-center rounded-lg bg-surface-2 text-sm text-muted-foreground">{e.type} file</div>
-                )}
-                <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-[11px] text-success">✓ Verified</div>
-              </a>
-            ))}
-            {evidence.length === 0 && <p className="text-sm text-muted-foreground">No verified evidence yet.</p>}
-          </div>
-        </section>
+
 
 
         {/* Dark secrets feed */}
@@ -325,7 +305,7 @@ function CollegeDetail() {
           <h2 className="mb-4 text-xl font-bold">Dark Secrets Feed</h2>
           <div className="space-y-3">
             {posts.map((p) => (
-              <PostCard key={p.id} post={p} userVote={myVotes[p.id] ?? null} onVoted={() => { postsQ.refetch(); myVotesQ.refetch(); }} />
+              <PostCard key={p.id} post={p} userVote={myVotes[p.id] ?? null} onVoted={() => { postsQ.refetch(); myVotesQ.refetch(); }} evidence={evidence.filter(e => e.post_id === p.id)} />
             ))}
             {posts.length === 0 && <p className="text-sm text-muted-foreground">No posts yet. Be the first to share the truth.</p>}
           </div>
@@ -365,7 +345,7 @@ function Trend({ t }: { t?: string | null }) {
   return <Minus className="h-3.5 w-3.5 text-warning" />;
 }
 
-function PostCard({ post, userVote, onVoted }: { post: any; userVote: "up" | "down" | null; onVoted: () => void }) {
+function PostCard({ post, userVote, onVoted, evidence = [] }: { post: any; userVote: "up" | "down" | null; onVoted: () => void; evidence?: any[] }) {
   const { hashedId } = useIdentity();
   const verified = useVerifiedUsernames();
   const vote = useServerFn(votePost);
@@ -402,7 +382,22 @@ function PostCard({ post, userVote, onVoted }: { post: any; userVote: "up" | "do
         <span>· {timeAgo(post.created_at)}</span>
         <span className="ml-auto rounded-full bg-surface-2 px-2 py-0.5 capitalize">{categoryLabel(post.category ?? "general")}</span>
       </div>
-      <p className="mt-2 text-sm">{post.content}</p>
+      <p className="mt-2 text-sm whitespace-pre-wrap break-words">
+        <Linkify text={post.content} />
+      </p>
+      {evidence.length > 0 && (
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          {evidence.map((e) => (
+            <a key={e.id} href={e.file_url} target="_blank" rel="noreferrer" className="block">
+              {e.type === "image" ? (
+                <img src={e.file_url} loading="lazy" className="h-40 w-full rounded-lg object-cover border border-border" />
+              ) : (
+                <div className="flex h-16 w-full items-center justify-center rounded-lg bg-surface-2 border border-border text-xs text-muted-foreground">{e.type} file</div>
+              )}
+            </a>
+          ))}
+        </div>
+      )}
       <div className="mt-3 flex items-center gap-2">
         <button disabled={voting} onClick={() => doVote("up")} className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs", upActive ? "bg-success/15 text-success" : "bg-surface-2 hover:text-success")}>
           <ArrowUp className="h-3.5 w-3.5" /> {post.upvotes}

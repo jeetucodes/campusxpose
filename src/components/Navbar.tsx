@@ -60,7 +60,6 @@ export function Navbar() {
             { to: "/messages", label: "DMs" },
             { to: "/report", label: "Report" },
           ]
-            .filter((item) => item.label === "Projects" ? projectsEnabled : true)
             .map((item) => (
             <Link
               key={item.to}
