@@ -685,6 +685,31 @@ export const adminDeleteAd = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const adminGetFeatures = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: z.string() }).parse(d))
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: setting } = await supabaseAdmin
+      .from("app_settings" as any)
+      .select("value")
+      .eq("key", "projects_enabled")
+      .maybeSingle();
+    return { projectsEnabled: (setting as any)?.value === true };
+  });
+
+export const adminSetFeature = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: z.string(), feature: z.string(), enabled: z.boolean() }).parse(d))
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("app_settings" as any)
+      .upsert({ key: `${data.feature}_enabled`, value: data.enabled, updated_at: new Date().toISOString() }, { onConflict: "key" });
+    if (error) throw new Error(error.message);
+    return { ok: true, enabled: data.enabled };
+  });
+
 export const adminSetAdsEnabled = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ token: z.string(), enabled: z.boolean() }).parse(d))
   .handler(async ({ data }) => {

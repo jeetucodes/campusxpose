@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Send, MessageCircle, Globe, ArrowLeft, Plus, Trash2, X, Pin, ShieldCheck } from "lucide-react";
+import { Send, MessageCircle, Globe, ArrowLeft, Plus, Trash2, X, Pin, ShieldCheck, Image as ImageIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useDmStore } from "@/stores/dm";
 import { UserSymbol } from "@/components/UserSymbol";
 import { submitDirectMessage, fetchDirectMessages, deleteDirectConversation, togglePinMessage } from "@/lib/content.functions";
+import { uploadToImgbb } from "@/lib/upload";
 import { useReactions } from "@/hooks/useReactions";
 import { ReactionChips, MessageActions, ReplyQuote } from "@/components/MessageReactions";
 import { MessageGestures } from "@/components/MessageGestures";
@@ -19,6 +20,7 @@ import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useVerifiedUsernames } from "@/hooks/useVerified";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { Linkify } from "@/components/Linkify";
 
 type Search = { to?: string };
 
@@ -51,6 +53,7 @@ type DM = {
   reply_to_username?: string | null;
   reply_to_content?: string | null;
   pinned?: boolean;
+  image_url?: string | null;
 };
 
 function Messages() {
@@ -65,6 +68,9 @@ function Messages() {
   const [text, setText] = useState("");
   const [newName, setNewName] = useState("");
   const [replyTo, setReplyTo] = useState<DM | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { byMessage, toggle } = useReactions("direct", hashedId);
 
   const pinMessage = async (m: DM) => {
@@ -179,11 +185,27 @@ function Messages() {
   }, [active, thread.length]);
 
   const send = async () => {
-    if (!text.trim() || !hashedId || !username || !active) return;
+    if ((!text.trim() && !imageFile) || !hashedId || !username || !active) return;
+    
+    setUploadingImage(true);
+    let uploadedUrl = null;
+    try {
+      if (imageFile) {
+        uploadedUrl = await uploadToImgbb(imageFile);
+      }
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to upload image");
+      setUploadingImage(false);
+      return;
+    }
+    setUploadingImage(false);
+
     const content = text.trim();
     const reply = replyTo;
     setText("");
     setReplyTo(null);
+    setImageFile(null);
+    
     // Optimistic insert so the message appears instantly (real-time feel).
     const tempId = `temp-${Date.now()}`;
     const optimistic: DM = {
@@ -195,7 +217,8 @@ function Messages() {
       created_at: new Date().toISOString(),
       reply_to_id: reply?.id ?? null,
       reply_to_username: reply?.sender_username ?? null,
-      reply_to_content: reply?.content ?? null,
+      reply_to_content: reply?.content || (reply?.image_url ? "📷 Image" : null),
+      image_url: uploadedUrl,
     };
     setAll((prev) => [...prev, optimistic]);
     try {
@@ -207,14 +230,15 @@ function Messages() {
           content,
           replyToId: reply?.id,
           replyToUsername: reply?.sender_username,
-          replyToContent: reply?.content,
+          replyToContent: reply?.content || (reply?.image_url ? "📷 Image" : undefined),
+          imageUrl: uploadedUrl ?? undefined,
         },
       });
       await load();
     } catch (e) {
       // Roll back the optimistic message on failure.
       setAll((prev) => prev.filter((m) => m.id !== tempId));
-      toast.error(e instanceof Error ? e.message : "Message failed");
+      toast.error(e instanceof Error ? e.message : (e as any)?.message || "Message failed");
     }
   };
 
@@ -382,7 +406,7 @@ function Messages() {
                     <div key={m.id} className="flex items-center gap-2 text-xs">
                       <Pin className="h-3.5 w-3.5 shrink-0 text-accent" />
                       <span className="shrink-0 font-semibold text-accent">{m.sender_username}:</span>
-                      <span className="truncate text-muted-foreground">{m.content}</span>
+                      <span className="truncate text-muted-foreground"><Linkify text={m.content} /></span>
                       <button
                         onClick={() => pinMessage(m)}
                         className="ml-auto shrink-0 text-muted-foreground hover:text-destructive"
@@ -430,10 +454,17 @@ function Messages() {
                           <Pin className="absolute -right-1.5 -top-1.5 h-3.5 w-3.5 rotate-45 text-accent" />
                         )}
                         <ReplyQuote username={m.reply_to_username} content={m.reply_to_content} align={own ? "end" : "start"} />
+                        {m.image_url && (
+                          <div className="mb-2 max-w-[240px] overflow-hidden rounded-md border border-ink/10 mt-1">
+                            <img src={m.image_url} alt="Attachment" className="w-full h-auto object-cover" loading="lazy" />
+                          </div>
+                        )}
                         <div className="flex flex-wrap items-end justify-end gap-x-2">
-                          <span className="whitespace-pre-wrap break-words leading-relaxed">
-                            {m.content}
-                          </span>
+                          {m.content && (
+                            <span className="whitespace-pre-wrap break-words leading-relaxed">
+                              <Linkify text={m.content} />
+                            </span>
+                          )}
                           <span className={cn("shrink-0 text-[10px]", own ? "text-accent-foreground/70" : "text-muted-foreground")}>
                             {timeAgo(m.created_at)}
                           </span>
@@ -468,35 +499,69 @@ function Messages() {
                   {replyTo && (
                     <div className="mb-2 flex items-center gap-2 rounded-md border border-border bg-surface-2/60 px-3 py-1.5 text-xs">
                       <div className="min-w-0 flex-1">
-                        <span className="font-semibold text-accent">Replying to {replyTo.sender_username}</span>
-                        <div className="truncate text-muted-foreground">{replyTo.content}</div>
+                        <span className="font-semibold text-accent">Replying to {replyTo.content ? replyTo.sender_username : "an image"}</span>
+                        <div className="truncate text-muted-foreground">{replyTo.content || (replyTo.image_url ? "📷 Image" : "")}</div>
                       </div>
                       <button onClick={() => setReplyTo(null)} aria-label="Cancel reply">
                         <X className="h-4 w-4 text-muted-foreground" />
                       </button>
                     </div>
                   )}
-                  <div className="flex items-end gap-2 rounded-2xl border-2 border-border bg-white px-2 py-1.5 shadow-ink-soft transition-colors focus-within:border-accent">
-                    <Input
-                      value={text}
-                      onChange={(e) => {
-                        setText(e.target.value);
-                        notifyTyping();
-                      }}
-                      onKeyDown={(e) => e.key === "Enter" && send()}
-                      placeholder={`Message ${active}...`}
-                      maxLength={1000}
-                      className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                    />
-                    <Button
-                      onClick={send}
-                      disabled={!text.trim()}
-                      size="icon"
-                      className="h-9 w-9 shrink-0 rounded-full transition-transform active:scale-90"
-                      aria-label="Send message"
-                    >
-                      <Send className="h-4 w-4" />
-                    </Button>
+                  <div className="flex flex-col gap-2">
+                    {imageFile && (
+                      <div className="relative w-20 h-20 rounded-md border-2 border-border overflow-hidden bg-surface-2/60">
+                        <img src={URL.createObjectURL(imageFile)} alt="Preview" className="w-full h-full object-cover" />
+                        <button
+                          onClick={() => setImageFile(null)}
+                          className="absolute top-1 right-1 rounded-full bg-black/50 p-1 text-white hover:bg-black/70"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2 rounded-2xl border-2 border-border bg-white px-2 py-1.5 shadow-ink-soft transition-colors focus-within:border-accent">
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        ref={fileInputRef} 
+                        className="hidden" 
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files[0]) setImageFile(e.target.files[0]);
+                          e.target.value = "";
+                        }} 
+                      />
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="shrink-0 text-muted-foreground hover:bg-transparent hover:text-accent" 
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploadingImage}
+                      >
+                        <ImageIcon className="h-4 w-4" />
+                      </Button>
+                      
+                      <Input
+                        value={text}
+                        onChange={(e) => {
+                          setText(e.target.value);
+                          notifyTyping();
+                        }}
+                        onKeyDown={(e) => e.key === "Enter" && send()}
+                        placeholder={`Message ${active}...`}
+                        maxLength={1000}
+                        className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                        disabled={uploadingImage}
+                      />
+                      <Button
+                        onClick={send}
+                        disabled={(!text.trim() && !imageFile) || uploadingImage}
+                        size="icon"
+                        className="h-9 w-9 shrink-0 rounded-full transition-transform active:scale-90"
+                        aria-label="Send message"
+                      >
+                        {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>

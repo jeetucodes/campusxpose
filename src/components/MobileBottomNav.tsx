@@ -1,21 +1,26 @@
 import { Link } from "@tanstack/react-router";
-import { Home, GraduationCap, Globe, MessageCircle } from "lucide-react";
+import { Home, GraduationCap, Globe, MessageCircle, FolderOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useDmUnread } from "@/stores/dm";
+import { useFeatures } from "@/hooks/useFeatures";
 
 const items = [
   { to: "/", label: "Home", icon: Home, exact: true },
   { to: "/colleges", label: "Colleges", icon: GraduationCap, exact: false },
   { to: "/global", label: "Global", icon: Globe, exact: false },
+  { to: "/projects/", label: "Projects", icon: FolderOpen, exact: false },
   { to: "/messages", label: "DMs", icon: MessageCircle, exact: false },
 ] as const;
 
 export function MobileBottomNav() {
   const unread = useDmUnread();
+  const { projectsEnabled } = useFeatures();
+  const activeItems = items.filter(item => item.to.startsWith("/projects") ? projectsEnabled : true);
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t-2 border-dashed border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
       <ul className="mx-auto flex max-w-5xl items-stretch justify-around">
-        {items.map(({ to, label, icon: Icon, exact }) => (
+        {activeItems.map(({ to, label, icon: Icon, exact }) => (
           <li key={to} className="flex-1">
             <Link
               to={to}

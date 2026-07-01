@@ -8,6 +8,7 @@ import { NotificationBell } from "@/components/NotificationBell";
 import { PushPermissionPrompt } from "@/components/PushPermissionPrompt";
 import { useIdentity } from "@/stores/identity";
 import { useDmUnread } from "@/stores/dm";
+import { useFeatures } from "@/hooks/useFeatures";
 import { ForgetMeDialog } from "@/components/ForgetMeDialog";
 import { Logo } from "@/components/Logo";
 import { enablePush, isPushSupported, permissionState } from "@/lib/push-client";
@@ -21,6 +22,7 @@ import { Button } from "@/components/ui/button";
 export function Navbar() {
   const { username, verified, isReady, init, hashedId } = useIdentity();
   const unread = useDmUnread();
+  const { projectsEnabled } = useFeatures();
   const [open, setOpen] = useState(false);
   const [forgetOpen, setForgetOpen] = useState(false);
   const [canEnablePush, setCanEnablePush] = useState(false);
@@ -54,9 +56,12 @@ export function Navbar() {
           {[
             { to: "/colleges", label: "Colleges" },
             { to: "/global", label: "Global" },
+            { to: "/projects/", label: "Projects" },
             { to: "/messages", label: "DMs" },
             { to: "/report", label: "Report" },
-          ].map((item) => (
+          ]
+            .filter((item) => item.label === "Projects" ? projectsEnabled : true)
+            .map((item) => (
             <Link
               key={item.to}
               to={item.to}
@@ -83,7 +88,7 @@ export function Navbar() {
               style={{ borderRadius: "20px 7px 22px 7px / 7px 22px 7px 20px" }}
             >
               <UserSymbol username={username} size="sm" />
-              <span className="inline-flex max-w-[140px] items-center gap-1 truncate font-medium">
+              <span className="hidden sm:inline-flex max-w-[140px] items-center gap-1 truncate font-medium">
                 {isReady ? username : "..."}
                 {verified && <VerifiedBadge className="h-3.5 w-3.5" />}
               </span>

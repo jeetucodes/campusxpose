@@ -128,7 +128,7 @@ export function ReplyQuote({
       )}
       style={{ borderRadius: "8px" }}
     >
-      {username && (
+      {username && content !== "📷 Image" && (
         <div
           className={cn(
             "truncate font-semibold",

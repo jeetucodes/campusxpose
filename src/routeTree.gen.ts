@@ -12,14 +12,18 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TrustRouteImport } from './routes/trust'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SetupProjectsRouteImport } from './routes/setup-projects'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as GlobalRouteImport } from './routes/global'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProjectsIndexRouteImport } from './routes/projects.index'
 import { Route as CollegesIndexRouteImport } from './routes/colleges.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as ProjectsNewRouteImport } from './routes/projects.new'
+import { Route as ProjectsIdRouteImport } from './routes/projects.$id'
 import { Route as CommunityCollegeIdRouteImport } from './routes/community.$collegeId'
 import { Route as CollegesIdRouteImport } from './routes/colleges.$id'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
@@ -30,10 +34,12 @@ import { Route as AdminModerationRouteImport } from './routes/admin.moderation'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminIncidentsRouteImport } from './routes/admin.incidents'
 import { Route as AdminFeedbackRouteImport } from './routes/admin.feedback'
+import { Route as AdminFeaturesRouteImport } from './routes/admin.features'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminCommunityRouteImport } from './routes/admin.community'
 import { Route as AdminCommentsRouteImport } from './routes/admin.comments'
 import { Route as AdminCollegesRouteImport } from './routes/admin.colleges'
+import { Route as AdminCollaborateRouteImport } from './routes/admin.collaborate'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAiRouteImport } from './routes/admin.ai'
 import { Route as AdminAdsRouteImport } from './routes/admin.ads'
@@ -51,6 +57,11 @@ const TermsRoute = TermsRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SetupProjectsRoute = SetupProjectsRouteImport.update({
+  id: '/setup-projects',
+  path: '/setup-projects',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportRoute = ReportRouteImport.update({
@@ -83,6 +94,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProjectsIndexRoute = ProjectsIndexRouteImport.update({
+  id: '/projects/',
+  path: '/projects/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CollegesIndexRoute = CollegesIndexRouteImport.update({
   id: '/colleges/',
   path: '/colleges/',
@@ -91,6 +107,16 @@ const CollegesIndexRoute = CollegesIndexRouteImport.update({
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectsNewRoute = ProjectsNewRouteImport.update({
+  id: '/projects/new',
+  path: '/projects/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectsIdRoute = ProjectsIdRouteImport.update({
+  id: '/projects/$id',
+  path: '/projects/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommunityCollegeIdRoute = CommunityCollegeIdRouteImport.update({
@@ -143,6 +169,11 @@ const AdminFeedbackRoute = AdminFeedbackRouteImport.update({
   path: '/admin/feedback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminFeaturesRoute = AdminFeaturesRouteImport.update({
+  id: '/admin/features',
+  path: '/admin/features',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminDashboardRoute = AdminDashboardRouteImport.update({
   id: '/admin/dashboard',
   path: '/admin/dashboard',
@@ -161,6 +192,11 @@ const AdminCommentsRoute = AdminCommentsRouteImport.update({
 const AdminCollegesRoute = AdminCollegesRouteImport.update({
   id: '/admin/colleges',
   path: '/admin/colleges',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCollaborateRoute = AdminCollaborateRouteImport.update({
+  id: '/admin/collaborate',
+  path: '/admin/collaborate',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
@@ -186,16 +222,19 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/report': typeof ReportRoute
+  '/setup-projects': typeof SetupProjectsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
   '/admin/ads': typeof AdminAdsRoute
   '/admin/ai': typeof AdminAiRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/collaborate': typeof AdminCollaborateRoute
   '/admin/colleges': typeof AdminCollegesRoute
   '/admin/comments': typeof AdminCommentsRoute
   '/admin/community': typeof AdminCommunityRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/features': typeof AdminFeaturesRoute
   '/admin/feedback': typeof AdminFeedbackRoute
   '/admin/incidents': typeof AdminIncidentsRoute
   '/admin/login': typeof AdminLoginRoute
@@ -206,8 +245,11 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AdminUsersRoute
   '/colleges/$id': typeof CollegesIdRoute
   '/community/$collegeId': typeof CommunityCollegeIdRoute
+  '/projects/$id': typeof ProjectsIdRoute
+  '/projects/new': typeof ProjectsNewRoute
   '/admin/': typeof AdminIndexRoute
   '/colleges/': typeof CollegesIndexRoute
+  '/projects/': typeof ProjectsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -216,16 +258,19 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/report': typeof ReportRoute
+  '/setup-projects': typeof SetupProjectsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
   '/admin/ads': typeof AdminAdsRoute
   '/admin/ai': typeof AdminAiRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/collaborate': typeof AdminCollaborateRoute
   '/admin/colleges': typeof AdminCollegesRoute
   '/admin/comments': typeof AdminCommentsRoute
   '/admin/community': typeof AdminCommunityRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/features': typeof AdminFeaturesRoute
   '/admin/feedback': typeof AdminFeedbackRoute
   '/admin/incidents': typeof AdminIncidentsRoute
   '/admin/login': typeof AdminLoginRoute
@@ -236,8 +281,11 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AdminUsersRoute
   '/colleges/$id': typeof CollegesIdRoute
   '/community/$collegeId': typeof CommunityCollegeIdRoute
+  '/projects/$id': typeof ProjectsIdRoute
+  '/projects/new': typeof ProjectsNewRoute
   '/admin': typeof AdminIndexRoute
   '/colleges': typeof CollegesIndexRoute
+  '/projects': typeof ProjectsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -247,16 +295,19 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/report': typeof ReportRoute
+  '/setup-projects': typeof SetupProjectsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
   '/admin/ads': typeof AdminAdsRoute
   '/admin/ai': typeof AdminAiRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/collaborate': typeof AdminCollaborateRoute
   '/admin/colleges': typeof AdminCollegesRoute
   '/admin/comments': typeof AdminCommentsRoute
   '/admin/community': typeof AdminCommunityRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/features': typeof AdminFeaturesRoute
   '/admin/feedback': typeof AdminFeedbackRoute
   '/admin/incidents': typeof AdminIncidentsRoute
   '/admin/login': typeof AdminLoginRoute
@@ -267,8 +318,11 @@ export interface FileRoutesById {
   '/admin/users': typeof AdminUsersRoute
   '/colleges/$id': typeof CollegesIdRoute
   '/community/$collegeId': typeof CommunityCollegeIdRoute
+  '/projects/$id': typeof ProjectsIdRoute
+  '/projects/new': typeof ProjectsNewRoute
   '/admin/': typeof AdminIndexRoute
   '/colleges/': typeof CollegesIndexRoute
+  '/projects/': typeof ProjectsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -279,16 +333,19 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/report'
+    | '/setup-projects'
     | '/sitemap.xml'
     | '/terms'
     | '/trust'
     | '/admin/ads'
     | '/admin/ai'
     | '/admin/analytics'
+    | '/admin/collaborate'
     | '/admin/colleges'
     | '/admin/comments'
     | '/admin/community'
     | '/admin/dashboard'
+    | '/admin/features'
     | '/admin/feedback'
     | '/admin/incidents'
     | '/admin/login'
@@ -299,8 +356,11 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/colleges/$id'
     | '/community/$collegeId'
+    | '/projects/$id'
+    | '/projects/new'
     | '/admin/'
     | '/colleges/'
+    | '/projects/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -309,16 +369,19 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/report'
+    | '/setup-projects'
     | '/sitemap.xml'
     | '/terms'
     | '/trust'
     | '/admin/ads'
     | '/admin/ai'
     | '/admin/analytics'
+    | '/admin/collaborate'
     | '/admin/colleges'
     | '/admin/comments'
     | '/admin/community'
     | '/admin/dashboard'
+    | '/admin/features'
     | '/admin/feedback'
     | '/admin/incidents'
     | '/admin/login'
@@ -329,8 +392,11 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/colleges/$id'
     | '/community/$collegeId'
+    | '/projects/$id'
+    | '/projects/new'
     | '/admin'
     | '/colleges'
+    | '/projects'
   id:
     | '__root__'
     | '/'
@@ -339,16 +405,19 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/report'
+    | '/setup-projects'
     | '/sitemap.xml'
     | '/terms'
     | '/trust'
     | '/admin/ads'
     | '/admin/ai'
     | '/admin/analytics'
+    | '/admin/collaborate'
     | '/admin/colleges'
     | '/admin/comments'
     | '/admin/community'
     | '/admin/dashboard'
+    | '/admin/features'
     | '/admin/feedback'
     | '/admin/incidents'
     | '/admin/login'
@@ -359,8 +428,11 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/colleges/$id'
     | '/community/$collegeId'
+    | '/projects/$id'
+    | '/projects/new'
     | '/admin/'
     | '/colleges/'
+    | '/projects/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -370,16 +442,19 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   ReportRoute: typeof ReportRoute
+  SetupProjectsRoute: typeof SetupProjectsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   TrustRoute: typeof TrustRoute
   AdminAdsRoute: typeof AdminAdsRoute
   AdminAiRoute: typeof AdminAiRoute
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  AdminCollaborateRoute: typeof AdminCollaborateRoute
   AdminCollegesRoute: typeof AdminCollegesRoute
   AdminCommentsRoute: typeof AdminCommentsRoute
   AdminCommunityRoute: typeof AdminCommunityRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminFeaturesRoute: typeof AdminFeaturesRoute
   AdminFeedbackRoute: typeof AdminFeedbackRoute
   AdminIncidentsRoute: typeof AdminIncidentsRoute
   AdminLoginRoute: typeof AdminLoginRoute
@@ -390,8 +465,11 @@ export interface RootRouteChildren {
   AdminUsersRoute: typeof AdminUsersRoute
   CollegesIdRoute: typeof CollegesIdRoute
   CommunityCollegeIdRoute: typeof CommunityCollegeIdRoute
+  ProjectsIdRoute: typeof ProjectsIdRoute
+  ProjectsNewRoute: typeof ProjectsNewRoute
   AdminIndexRoute: typeof AdminIndexRoute
   CollegesIndexRoute: typeof CollegesIndexRoute
+  ProjectsIndexRoute: typeof ProjectsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -415,6 +493,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/setup-projects': {
+      id: '/setup-projects'
+      path: '/setup-projects'
+      fullPath: '/setup-projects'
+      preLoaderRoute: typeof SetupProjectsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/report': {
@@ -459,6 +544,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/projects/': {
+      id: '/projects/'
+      path: '/projects'
+      fullPath: '/projects/'
+      preLoaderRoute: typeof ProjectsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/colleges/': {
       id: '/colleges/'
       path: '/colleges'
@@ -471,6 +563,20 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projects/new': {
+      id: '/projects/new'
+      path: '/projects/new'
+      fullPath: '/projects/new'
+      preLoaderRoute: typeof ProjectsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projects/$id': {
+      id: '/projects/$id'
+      path: '/projects/$id'
+      fullPath: '/projects/$id'
+      preLoaderRoute: typeof ProjectsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/community/$collegeId': {
@@ -543,6 +649,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminFeedbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/features': {
+      id: '/admin/features'
+      path: '/admin/features'
+      fullPath: '/admin/features'
+      preLoaderRoute: typeof AdminFeaturesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/dashboard': {
       id: '/admin/dashboard'
       path: '/admin/dashboard'
@@ -569,6 +682,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/colleges'
       fullPath: '/admin/colleges'
       preLoaderRoute: typeof AdminCollegesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/collaborate': {
+      id: '/admin/collaborate'
+      path: '/admin/collaborate'
+      fullPath: '/admin/collaborate'
+      preLoaderRoute: typeof AdminCollaborateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/analytics': {
@@ -602,16 +722,19 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   ReportRoute: ReportRoute,
+  SetupProjectsRoute: SetupProjectsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   TrustRoute: TrustRoute,
   AdminAdsRoute: AdminAdsRoute,
   AdminAiRoute: AdminAiRoute,
   AdminAnalyticsRoute: AdminAnalyticsRoute,
+  AdminCollaborateRoute: AdminCollaborateRoute,
   AdminCollegesRoute: AdminCollegesRoute,
   AdminCommentsRoute: AdminCommentsRoute,
   AdminCommunityRoute: AdminCommunityRoute,
   AdminDashboardRoute: AdminDashboardRoute,
+  AdminFeaturesRoute: AdminFeaturesRoute,
   AdminFeedbackRoute: AdminFeedbackRoute,
   AdminIncidentsRoute: AdminIncidentsRoute,
   AdminLoginRoute: AdminLoginRoute,
@@ -622,9 +745,22 @@ const rootRouteChildren: RootRouteChildren = {
   AdminUsersRoute: AdminUsersRoute,
   CollegesIdRoute: CollegesIdRoute,
   CommunityCollegeIdRoute: CommunityCollegeIdRoute,
+  ProjectsIdRoute: ProjectsIdRoute,
+  ProjectsNewRoute: ProjectsNewRoute,
   AdminIndexRoute: AdminIndexRoute,
   CollegesIndexRoute: CollegesIndexRoute,
+  ProjectsIndexRoute: ProjectsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

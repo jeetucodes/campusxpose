@@ -16,7 +16,7 @@ function assertAdmin(token: string) {
 /** List a ghost user's in-app notifications + unread count. */
 export const getNotifications = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
-    z.object({ hashedId: z.string().min(1), limit: z.number().min(1).max(50).default(30) }).parse(d),
+    z.object({ hashedId: z.string().min(1), limit: z.number().min(1).max(50).default(5) }).parse(d),
   )
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -39,6 +39,20 @@ export const getNotifications = createServerFn({ method: "POST" })
         .not("type", "in", HIDDEN)
         .eq("read", false),
     ]);
+
+    // Automatically remove older notifications to keep only the latest ones
+    if (list.data && list.data.length === data.limit) {
+      const oldestKept = list.data[list.data.length - 1];
+      supabaseAdmin
+        .from("notifications")
+        .delete()
+        .eq("user_hash", data.hashedId)
+        .not("type", "in", HIDDEN)
+        .lt("created_at", oldestKept.created_at)
+        .then(() => {})
+        .catch(() => {});
+    }
+
     return { items: list.data ?? [], unread: unread.count ?? 0 };
   });
 

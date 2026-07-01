@@ -25,6 +25,16 @@ export const savePushSubscription = createServerFn({ method: "POST" })
         { onConflict: "endpoint" },
       );
     if (error) throw new Error(error.message);
+
+    // Send a welcome notification
+    await supabaseAdmin.rpc("enqueue_notifications", {
+      _hashes: [data.hashedId],
+      _type: "system",
+      _title: "Notifications enabled",
+      _message: "You will now receive alerts for replies and messages.",
+      _link: "/",
+    });
+
     return { ok: true as const };
   });
 

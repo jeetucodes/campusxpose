@@ -160,6 +160,29 @@
   scrollbar-width: none;
 }
 
+@utility notebook-page {
+  background-color: var(--paper);
+  background-image: repeating-linear-gradient(transparent, transparent 27px, var(--muted) 27px, var(--muted) 28px);
+  background-attachment: local;
+  position: relative;
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 40px;
+    width: 2px;
+    background-color: var(--marker);
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 0;
+  }
+  & > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
 @keyframes gentle-bounce {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-8px); }

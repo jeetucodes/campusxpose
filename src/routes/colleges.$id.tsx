@@ -21,6 +21,7 @@ import { UserSymbol } from "@/components/UserSymbol";
 import { PostComments } from "@/components/PostComments";
 import { useVerifiedUsernames } from "@/hooks/useVerified";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { Linkify } from "@/components/Linkify";
 
 export const Route = createFileRoute("/colleges/$id")({
   loader: async ({ params }) => {
@@ -158,36 +159,36 @@ function CollegeDetail() {
     <SiteShell hideFooter>
       <div className="mx-auto max-w-4xl px-4 py-8">
         {/* Header */}
-        <div className="rounded-xl border border-border bg-surface p-6">
+        <div className="border-2 border-ink bg-white p-6 shadow-ink-soft" style={{ borderRadius: "18px 6px 20px 6px / 6px 20px 6px 18px" }}>
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold">{c.name}</h1>
-              <p className="mt-1 text-sm text-muted-foreground">{c.city}, {c.state} · {((c as any).types?.length ? (c as any).types : [c.type]).join(", ")} · Est. {c.established ?? "—"}</p>
+              <h1 className="font-display text-3xl font-bold">{c.name}</h1>
+              <p className="mt-1 text-sm font-medium text-muted-foreground">{c.city}, {c.state} · {((c as any).types?.length ? (c as any).types : [c.type]).join(", ")} · Est. {c.established ?? "—"}</p>
             </div>
             <div className="text-right">
-              <div className={cn("text-5xl font-extrabold", ratingColor(c.total_rating ?? 0))}>{(c.total_rating ?? 0).toFixed(1)}</div>
-              <div className="text-xs text-muted-foreground">overall</div>
+              <div className={cn("font-display text-5xl font-extrabold", ratingColor(c.total_rating ?? 0))}>{(c.total_rating ?? 0).toFixed(1)}</div>
+              <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">overall</div>
             </div>
           </div>
-          <div className="mt-5 grid grid-cols-3 gap-3 text-center">
+          <div className="mt-6 grid grid-cols-3 gap-3 text-center">
             <Stat n={posts.length} l="Total Reports" />
             <Stat n={incidents.filter((i) => i.status === "active").length} l="Active Incidents" />
             <Stat n={c.total_reviews ?? 0} l="Reviews" />
           </div>
-          <Button asChild variant="destructive" className="mt-5 w-full rounded-full">
-            <Link to="/report" search={{ college: id }}><Zap className="mr-1 h-4 w-4" /> Report Incident</Link>
+          <Button asChild className="mt-6 w-full bg-accent text-accent-foreground hover:bg-accent/90 shadow-ink-soft" style={{ borderRadius: "12px 4px 10px 4px" }}>
+            <Link to="/report" search={{ college: id }}><Zap className="mr-1 h-5 w-5 fill-current" /> Report Incident</Link>
           </Button>
-          <Button asChild variant="outline" className="mt-3 w-full rounded-full">
-            <Link to="/community/$collegeId" params={{ collegeId: id }}><MessageCircle className="mr-1 h-4 w-4" /> Campus Students Chats</Link>
+          <Button asChild variant="outline" className="mt-3 w-full border-2 border-ink hover:-rotate-1 transition-transform" style={{ borderRadius: "4px 12px 4px 10px" }}>
+            <Link to="/community/$collegeId" params={{ collegeId: id }}><MessageCircle className="mr-1 h-5 w-5" /> Campus Students Chats</Link>
           </Button>
         </div>
 
         {/* Ratings breakdown */}
-        <section className="mt-8 rounded-xl border border-border bg-surface p-6">
+        <section className="mt-8 border-2 border-ink bg-white p-6 shadow-ink-soft" style={{ borderRadius: "6px 18px 6px 20px / 20px 6px 18px 6px" }}>
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold">Ratings Breakdown</h2>
-            <Button size="sm" variant="outline" className="rounded-full" onClick={() => setRatingOpen(true)}>
-              <Star className="mr-1 h-4 w-4" /> Rate This College
+            <h2 className="font-display text-xl font-bold">Ratings Breakdown</h2>
+            <Button size="sm" variant="outline" className="border-2 border-ink bg-postit text-ink shadow-ink-soft hover:-rotate-2 transition-transform" style={{ borderRadius: "12px 4px 10px 4px" }} onClick={() => setRatingOpen(true)}>
+              <Star className="mr-1 h-4 w-4 fill-ink" /> Rate This College
             </Button>
           </div>
           <div className="mt-5 space-y-4">
@@ -209,11 +210,10 @@ function CollegeDetail() {
           <p className="mt-4 text-xs text-muted-foreground">{ratings.length} anonymous reviewers</p>
         </section>
 
-        {/* Incident dashboard */}
         <section className="mt-8">
-          <h2 className="mb-4 flex items-center gap-2 text-xl font-bold">
+          <h2 className="mb-4 flex items-center gap-2 font-display text-xl font-bold">
             Incident Reports
-            <span className="rounded-full bg-destructive/15 px-2 py-0.5 text-sm text-destructive">{incidents.length + posts.length}</span>
+            <span className="rounded-full bg-destructive/15 px-2 py-0.5 text-sm font-bold text-destructive shadow-sm">{incidents.length + posts.length}</span>
           </h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {INCIDENT_CATEGORIES.map((cat) => {
@@ -223,60 +223,74 @@ function CollegeDetail() {
               const sev = list.length ? Math.max(...list.map((i) => i.severity ?? 1)) : 0;
               const open = openCat === cat.key;
               return (
-                <div key={cat.key}>
-                  <div
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => setOpenCat(open ? null : cat.key)}
-                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpenCat(open ? null : cat.key); } }}
-                    style={{ borderRadius: "22px 7px 24px 7px / 7px 24px 7px 22px" }}
-                    className={cn("sketch-card cursor-pointer p-4 text-left", open ? "border-[#2d5da1]" : "border-border")}
-                  >
-                    <div className="text-2xl">{cat.emoji}</div>
-                    <div className="mt-1 text-sm font-medium">{cat.label}</div>
-                    <div className="mt-2 flex items-center gap-2">
-                      <span className="text-lg font-bold">{count}</span>
-                      {sev > 0 && <span className={cn("rounded-full border px-1.5 py-0.5 text-[10px]", severityColor(sev))}>S{sev}</span>}
-                      <Trend t={list[0]?.trend} />
-                    </div>
+                <div
+                  key={cat.key}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setOpenCat(open ? null : cat.key)}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpenCat(open ? null : cat.key); } }}
+                  style={{ borderRadius: "22px 7px 24px 7px / 7px 24px 7px 22px" }}
+                  className={cn("sketch-card cursor-pointer p-4 text-left border-2 shadow-ink-soft transition-transform hover:-translate-y-1", open ? "border-accent bg-accent/10" : "border-ink bg-white")}
+                >
+                  <div className="text-2xl">{cat.emoji}</div>
+                  <div className="mt-1 text-sm font-medium">{cat.label}</div>
+                  <div className="mt-2 flex items-center gap-2">
+                    <span className="text-lg font-bold">{count}</span>
+                    {sev > 0 && <span className={cn("rounded-full border px-1.5 py-0.5 text-[10px]", severityColor(sev))}>S{sev}</span>}
+                    <Trend t={list[0]?.trend} />
                   </div>
-                  {open && (
-                    <div className="mt-2 space-y-2">
-                      {list.map((i) => (
-                        <div key={i.id} className="rounded-lg border border-border bg-surface-2 p-3 text-sm">
-                          <div className="font-medium">{i.title}</div>
-                          <div className="text-xs text-muted-foreground">{i.affected_count} affected · severity {i.severity}</div>
-                        </div>
-                      ))}
-                      {catPosts.map((p) => (
-                        <div key={p.id} className="rounded-lg border border-border bg-surface-2 p-3 text-sm">
-                          <div className="line-clamp-2">{p.content}</div>
-                          <div className="inline-flex items-center gap-1 text-xs text-muted-foreground">{p.username}{p.username && verified.has(p.username) && <VerifiedBadge className="h-3.5 w-3.5" />} · {timeAgo(p.created_at)}</div>
-                        </div>
-                      ))}
-                      {count === 0 && <p className="text-sm text-muted-foreground">No reports in this category.</p>}
-                    </div>
-                  )}
                 </div>
               );
             })}
           </div>
+
+          <Dialog open={!!openCat} onOpenChange={(v) => !v && setOpenCat(null)}>
+            <DialogContent className="max-h-[85vh] overflow-y-auto border-2 border-ink bg-white p-6 shadow-ink sm:max-w-[600px]" style={{ borderRadius: "16px 6px 18px 4px / 6px 16px 4px 18px" }}>
+              <DialogHeader>
+                <DialogTitle className="font-display text-2xl font-bold">
+                  {openCat && INCIDENT_CATEGORIES.find((c) => c.key === openCat)?.emoji}{" "}
+                  {openCat && INCIDENT_CATEGORIES.find((c) => c.key === openCat)?.label} Reports
+                </DialogTitle>
+              </DialogHeader>
+              <div className="mt-2 space-y-3">
+                {openCat && incidents.filter((i) => i.category === openCat).map((i) => (
+                  <div key={i.id} className="border-2 border-ink bg-white p-4 shadow-ink-soft" style={{ borderRadius: "12px 4px 10px 4px" }}>
+                    <div className="font-semibold">{i.title}</div>
+                    <div className="mt-1 text-xs font-medium text-muted-foreground">{i.affected_count} affected · severity {i.severity}</div>
+                  </div>
+                ))}
+                {openCat && posts.filter((p) => (p.category ?? "general") === openCat).map((p) => (
+                  <div key={p.id} className="border-2 border-ink bg-white p-4 shadow-ink-soft" style={{ borderRadius: "4px 12px 4px 10px" }}>
+                    <div className="whitespace-pre-wrap text-sm leading-relaxed"><Linkify text={p.content} /></div>
+                    <div className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground">
+                      {p.username}{p.username && verified.has(p.username) && <VerifiedBadge className="h-3.5 w-3.5" />} · {timeAgo(p.created_at)}
+                    </div>
+                  </div>
+                ))}
+                {openCat && incidents.filter((i) => i.category === openCat).length + posts.filter((p) => (p.category ?? "general") === openCat).length === 0 && (
+                  <p className="rounded-lg border-2 border-dashed border-ink bg-surface-2 p-4 text-center text-sm font-medium text-muted-foreground">
+                    No reports in this category.
+                  </p>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
         </section>
 
 
         {/* Clustered incidents */}
         <section className="mt-8">
-          <h2 className="mb-4 text-xl font-bold">Top Clustered Incidents</h2>
+          <h2 className="mb-4 font-display text-xl font-bold">Top Clustered Incidents</h2>
           <div className="space-y-4">
             {incidents.slice(0, 5).map((i) => (
-              <div key={i.id} className="rounded-xl border border-border bg-surface p-5">
+              <div key={i.id} className="border-2 border-ink bg-white p-5 shadow-ink-soft" style={{ borderRadius: "10px 16px 14px 10px / 16px 10px 16px 14px" }}>
                 <div className="flex items-start justify-between gap-3">
                   <h3 className="font-semibold">{i.title}</h3>
-                  <span className={cn("shrink-0 rounded-full border px-2 py-0.5 text-xs capitalize", statusColor(i.status ?? "active"))}>{i.status}</span>
+                  <span className={cn("shrink-0 rounded-full border-2 border-ink px-2 py-0.5 text-xs capitalize shadow-ink-soft", statusColor(i.status ?? "active"))}>{i.status}</span>
                 </div>
-                <p className="mt-1 text-sm text-accent">{i.affected_count} students reported the same issue</p>
-                {i.ai_summary && <p className="mt-2 text-sm text-muted-foreground">{i.ai_summary}</p>}
-                {i.ai_verdict && <p className="mt-2 rounded-lg bg-surface-2 p-2 text-xs text-warning">⚖️ {i.ai_verdict}</p>}
+                <p className="mt-1 text-sm font-bold text-accent">{i.affected_count} students reported the same issue</p>
+                {i.ai_summary && <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{i.ai_summary}</p>}
+                {i.ai_verdict && <p className="mt-3 rounded-lg border border-dashed border-warning bg-warning/10 p-2 text-xs font-medium text-warning">⚖️ {i.ai_verdict}</p>}
                 {(i.total_amount ?? 0) > 0 && <p className="mt-2 text-sm font-medium">Total reported: {inr(i.total_amount ?? 0)}</p>}
               </div>
             ))}
@@ -319,14 +333,17 @@ function CollegeDetail() {
       </div>
 
       {/* Side chat icon */}
-      <Link
-        to="/community/$collegeId"
-        params={{ collegeId: id }}
-        className="fixed right-0 top-1/2 z-[60] -translate-y-1/2 rounded-l-xl bg-primary p-3 text-primary-foreground shadow-lg shadow-primary/30 transition-transform duration-200 hover:-translate-x-1 active:scale-95"
-        title="Campus Students Chats"
-      >
-        <MessageCircle className="h-5 w-5" />
-      </Link>
+      {!ratingOpen && !openCat && (
+        <Link
+          to="/community/$collegeId"
+          params={{ collegeId: id }}
+          className="fixed right-0 top-[60%] sm:top-1/2 z-[60] -translate-y-1/2 border-y-2 border-l-2 border-ink bg-accent p-3 text-accent-foreground shadow-ink transition-transform duration-200 hover:-translate-x-1 active:scale-95"
+          style={{ borderRadius: "16px 0 0 16px" }}
+          title="Campus Students Chats"
+        >
+          <MessageCircle className="h-6 w-6" strokeWidth={2.5} />
+        </Link>
+      )}
 
 
       <RatingModal open={ratingOpen} onOpenChange={setRatingOpen} collegeId={id} onDone={() => { ratingsQ.refetch(); collegeQ.refetch(); router.invalidate(); }} />
@@ -336,9 +353,9 @@ function CollegeDetail() {
 
 function Stat({ n, l }: { n: number; l: string }) {
   return (
-    <div className="rounded-lg bg-surface-2 p-3">
-      <div className="text-xl font-bold">{n}</div>
-      <div className="text-xs text-muted-foreground">{l}</div>
+    <div className="flex flex-col items-center justify-center border-2 border-dashed border-ink bg-accent/5 p-3" style={{ borderRadius: "12px 6px 12px 6px / 6px 12px 6px 12px" }}>
+      <div className="font-display text-2xl font-bold text-accent">{n}</div>
+      <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{l}</div>
     </div>
   );
 }

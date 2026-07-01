@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Send, X, FileWarning, CheckCheck, Pin } from "lucide-react";
+import { ArrowLeft, Send, X, FileWarning, CheckCheck, Pin, Image as ImageIcon, Loader2 } from "lucide-react";
 import { UserSymbol } from "@/components/UserSymbol";
 import { useVerifiedUsernames } from "@/hooks/useVerified";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useIdentity } from "@/stores/identity";
 import { submitMessage, togglePinMessage } from "@/lib/content.functions";
+import { uploadToImgbb } from "@/lib/upload";
 
 import { DEFAULT_KEYWORDS } from "@/lib/categories";
 import { useReactions } from "@/hooks/useReactions";
@@ -24,13 +25,14 @@ import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { AdPin } from "@/components/AdPin";
 import { PollItem, NewPollButton } from "@/components/ChatPolls";
+import { Linkify } from "@/components/Linkify";
 import { usePolls, type Poll } from "@/hooks/usePolls";
 
 export const Route = createFileRoute("/community/$collegeId")({
   component: Community,
 });
 
-type Msg = { id: string; username: string; content: string; anonymous_user_hash: string; is_incident_signal: boolean; created_at: string; pinned?: boolean; reply_to_id?: string | null; reply_to_username?: string | null; reply_to_content?: string | null };
+type Msg = { id: string; username: string; content: string; anonymous_user_hash: string; is_incident_signal: boolean; created_at: string; pinned?: boolean; reply_to_id?: string | null; reply_to_username?: string | null; reply_to_content?: string | null; image_url?: string | null; };
 
 function Community() {
   const { collegeId } = Route.useParams();
@@ -64,6 +66,9 @@ function Community() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [text, setText] = useState("");
   const [replyTo, setReplyTo] = useState<Msg | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [incidentPrompt, setIncidentPrompt] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -108,13 +113,29 @@ function Community() {
   };
 
   const send = async () => {
-    if (!text.trim() || !hashedId || !username) return;
+    if ((!text.trim() && !imageFile) || !hashedId || !username) return;
+    
+    setUploadingImage(true);
+    let uploadedUrl = null;
+    try {
+      if (imageFile) {
+        uploadedUrl = await uploadToImgbb(imageFile);
+      }
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to upload image");
+      setUploadingImage(false);
+      return;
+    }
+    setUploadingImage(false);
+
     const isSignal = DEFAULT_KEYWORDS.some((k) => text.toLowerCase().includes(k));
     const content = text.trim();
     const reply = replyTo;
     setText("");
     setReplyTo(null);
     setIncidentPrompt(false);
+    setImageFile(null);
+    
     // Optimistic insert for an instant, real-time feel.
     const tempId = `temp-${Date.now()}`;
     setMessages((prev) => [
@@ -127,15 +148,16 @@ function Community() {
         created_at: new Date().toISOString(),
         reply_to_id: reply?.id ?? null,
         reply_to_username: reply?.username ?? null,
-        reply_to_content: reply?.content ?? null,
+        reply_to_content: reply?.content || (reply?.image_url ? "📷 Image" : null),
+        image_url: uploadedUrl,
       } as Msg,
       ...prev,
     ]);
     try {
-      await sendFn({ data: { collegeId, hashedId, username, content, isIncidentSignal: isSignal, replyToId: reply?.id, replyToUsername: reply?.username, replyToContent: reply?.content } });
-    } catch {
+      await sendFn({ data: { collegeId, hashedId, username, content, isIncidentSignal: isSignal, replyToId: reply?.id, replyToUsername: reply?.username, replyToContent: reply?.content || (reply?.image_url ? "📷 Image" : undefined), imageUrl: uploadedUrl ?? undefined } });
+    } catch (e) {
       setMessages((prev) => prev.filter((m) => m.id !== tempId));
-      toast.error("Message failed");
+      toast.error(e instanceof Error ? e.message : (e as any)?.message || "Message failed");
     }
   };
 
@@ -193,7 +215,7 @@ function Community() {
                 <div key={m.id} className="flex items-center gap-2 text-xs">
                   <Pin className="h-3.5 w-3.5 shrink-0 text-primary" />
                   <span className="shrink-0 font-semibold text-primary">{m.username}:</span>
-                  <span className="truncate text-muted-foreground">{m.content}</span>
+                  <span className="truncate text-muted-foreground"><Linkify text={m.content} /></span>
                   {m.anonymous_user_hash === hashedId && (
                     <button
                       onClick={() => pinMessage(m)}
@@ -269,7 +291,12 @@ function Community() {
                         )}
                         {!own && <div className="mb-0.5 inline-flex items-center gap-1 text-xs font-semibold text-primary/80">{m.username}{m.username && verified.has(m.username) && <VerifiedBadge className="h-3.5 w-3.5" />}</div>}
                         <ReplyQuote username={m.reply_to_username} content={m.reply_to_content} align={own ? "end" : "start"} />
-                        <div className="whitespace-pre-wrap break-words leading-relaxed">{m.content}</div>
+                        {m.image_url && (
+                          <div className="mb-2 max-w-[240px] overflow-hidden rounded-md border border-ink/10 mt-1">
+                            <img src={m.image_url} alt="Attachment" className="w-full h-auto object-cover" loading="lazy" />
+                          </div>
+                        )}
+                        {m.content && <div className="whitespace-pre-wrap break-words leading-relaxed"><Linkify text={m.content} /></div>}
                       </div>
                     </div>
                     </MessageGestures>
@@ -311,25 +338,59 @@ function Community() {
           {replyTo && (
             <div className="mb-2 flex items-center gap-2 rounded-lg border border-border bg-surface-2/60 px-3 py-1.5 text-xs">
               <div className="min-w-0 flex-1">
-                <span className="font-semibold text-primary">Replying to {replyTo.username}</span>
-                <div className="truncate text-muted-foreground">{replyTo.content}</div>
+                <span className="font-semibold text-primary">Replying to {replyTo.content ? replyTo.username : "an image"}</span>
+                <div className="truncate text-muted-foreground">{replyTo.content || (replyTo.image_url ? "📷 Image" : "")}</div>
               </div>
               <button onClick={() => setReplyTo(null)} aria-label="Cancel reply"><X className="h-4 w-4 text-muted-foreground" /></button>
             </div>
           )}
-          <div className="flex items-center gap-2 rounded-full border border-border bg-surface-2 px-2 py-1.5 transition-colors focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15">
-            <NewPollButton scope="college" collegeId={collegeId} hashedId={hashedId} username={username} onCreated={reloadPolls} />
-            <Input
-              value={text}
-              onChange={(e) => onType(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && send()}
-              placeholder="Write anonymously..."
-              disabled={!hashedId || !username}
-              className="h-8 flex-1 border-0 bg-transparent px-2 shadow-none focus-visible:ring-0"
-            />
-            <Button onClick={send} disabled={!text.trim()} size="icon" className="h-9 w-9 shrink-0 rounded-full">
-              <Send className="h-4 w-4" />
-            </Button>
+          <div className="flex flex-col gap-2">
+            {imageFile && (
+              <div className="relative w-20 h-20 rounded-md border border-border overflow-hidden bg-surface-2/60 ml-2">
+                <img src={URL.createObjectURL(imageFile)} alt="Preview" className="w-full h-full object-cover" />
+                <button
+                  onClick={() => setImageFile(null)}
+                  className="absolute top-1 right-1 rounded-full bg-black/50 p-1 text-white hover:bg-black/70"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            )}
+            <div className="flex items-center gap-2 rounded-full border border-border bg-surface-2 px-2 py-1.5 transition-colors focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15">
+              <NewPollButton scope="college" collegeId={collegeId} hashedId={hashedId} username={username} onCreated={reloadPolls} />
+              
+              <input 
+                type="file" 
+                accept="image/*" 
+                ref={fileInputRef} 
+                className="hidden" 
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) setImageFile(e.target.files[0]);
+                  e.target.value = "";
+                }} 
+              />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="shrink-0 text-muted-foreground hover:bg-transparent hover:text-primary rounded-full h-8 w-8" 
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingImage}
+              >
+                <ImageIcon className="h-4 w-4" />
+              </Button>
+              
+              <Input
+                value={text}
+                onChange={(e) => onType(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && send()}
+                placeholder="Write anonymously..."
+                disabled={!hashedId || !username || uploadingImage}
+                className="h-8 flex-1 border-0 bg-transparent px-2 shadow-none focus-visible:ring-0"
+              />
+              <Button onClick={send} disabled={(!text.trim() && !imageFile) || uploadingImage} size="icon" className="h-9 w-9 shrink-0 rounded-full">
+                {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              </Button>
+            </div>
           </div>
         </div>
 

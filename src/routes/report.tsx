@@ -186,16 +186,32 @@ function ReportPage() {
             </motion.div>
           </AnimatePresence>
 
-          {step < 5 && (
-            <div className="mt-6 flex justify-between">
-              <Button variant="ghost" disabled={step === 1} onClick={() => setStep((s) => s - 1)}><ArrowLeft className="mr-1 h-4 w-4" /> Back</Button>
-              {step === 4 ? (
+          {/* footer buttons */}
+          <div className="mt-6 flex justify-between">
+            <Button 
+              variant="ghost" 
+              onClick={() => {
+                if (step === 1) {
+                  if (collegeId) {
+                    navigate({ to: "/colleges/$id", params: { id: collegeId } });
+                  } else {
+                    navigate({ to: "/colleges" });
+                  }
+                } else {
+                  setStep((s) => s - 1);
+                }
+              }}
+            >
+              <ArrowLeft className="mr-1 h-4 w-4" /> {step === 1 ? "Exit" : "Back"}
+            </Button>
+            {step < 5 && (
+              step === 4 ? (
                 <Button onClick={() => setStep(5)} variant="outline">Skip / Continue <ArrowRight className="ml-1 h-4 w-4" /></Button>
               ) : (
                 <Button onClick={next}>Next <ArrowRight className="ml-1 h-4 w-4" /></Button>
-              )}
-            </div>
-          )}
+              )
+            )}
+          </div>
         </div>
       </div>
     </SiteShell>
