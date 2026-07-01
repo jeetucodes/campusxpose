@@ -36,22 +36,12 @@ const IMGBB_KEY = import.meta.env.VITE_IMGBB_API_KEY as string;
 
 const ALL_TAGS = ["Web Dev", "Android", "iOS", "AI/ML", "Design", "Hardware", "Other"];
 
-async function uploadToImgBB(file: File): Promise<string> {
-  const formData = new FormData();
-  formData.append("image", file);
-  const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
-    method: "POST",
-    body: formData,
-  });
-  const data = await response.json();
-  if (!data?.data?.url) throw new Error("ImgBB upload failed");
-  return data.data.url as string;
-}
+import { uploadToImgbb } from "@/lib/upload";
 
 function NewProjectPage() {
   const navigate = useNavigate();
   const { hashedId, username, isReady, init } = useIdentity();
-  const { projectsEnabled } = useFeatures();
+  const { projectsEnabled, featuresLoading } = useFeatures();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -71,6 +61,7 @@ function NewProjectPage() {
     init();
   }, [init]);
 
+  if (featuresLoading) return null;
   if (!projectsEnabled) return <Navigate to="/" />;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,7 +93,7 @@ function NewProjectPage() {
       if (imageFile) {
         setUploading(true);
         try {
-          imageUrl = await uploadToImgBB(imageFile);
+          imageUrl = await uploadToImgbb(imageFile);
         } catch {
           toast.error("Image upload failed. Please try again or submit without an image.");
           setUploading(false);
@@ -139,7 +130,7 @@ function NewProjectPage() {
     <SiteShell hideFooter>
       <div className="mx-auto max-w-3xl px-4 py-8 relative">
         <Link
-          to="/projects/"
+          to="/projects"
           className="mb-6 inline-flex items-center gap-1.5 text-sm font-bold text-muted-foreground transition-colors hover:text-accent"
         >
           <ArrowLeft className="h-4 w-4" />

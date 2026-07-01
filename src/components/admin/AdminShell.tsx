@@ -13,6 +13,7 @@ const NAV = [
   { to: "/admin/incidents", label: "Incidents", icon: AlertTriangle },
   { to: "/admin/posts", label: "Posts", icon: FileText },
   { to: "/admin/comments", label: "Comments", icon: MessagesSquare },
+  { to: "/admin/projects", label: "Projects", icon: FileText },
   { to: "/admin/polls", label: "Polls", icon: Vote },
   { to: "/admin/community", label: "Community", icon: MessageSquare },
   { to: "/admin/users", label: "Users", icon: Users },

@@ -147,7 +147,7 @@ function ProjectsPage() {
   const [activeTag, setActiveTag] = useState<string | undefined>(undefined);
   const [sort, setSort] = useState<"newest" | "rating">("newest");
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const { projectsEnabled } = useFeatures();
+  const { projectsEnabled, featuresLoading } = useFeatures();
 
   const fetchProjects = useServerFn(listProjects);
 
@@ -167,6 +167,9 @@ function ProjectsPage() {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTag, sort]);
+
+  if (featuresLoading) return null;
+  if (!projectsEnabled) return <Navigate to="/" />;
 
   return (
     <SiteShell hideFooter>

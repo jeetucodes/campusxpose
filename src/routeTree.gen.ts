@@ -27,6 +27,7 @@ import { Route as ProjectsIdRouteImport } from './routes/projects.$id'
 import { Route as CommunityCollegeIdRouteImport } from './routes/community.$collegeId'
 import { Route as CollegesIdRouteImport } from './routes/colleges.$id'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminProjectsRouteImport } from './routes/admin.projects'
 import { Route as AdminProfileRouteImport } from './routes/admin.profile'
 import { Route as AdminPostsRouteImport } from './routes/admin.posts'
 import { Route as AdminPollsRouteImport } from './routes/admin.polls'
@@ -132,6 +133,11 @@ const CollegesIdRoute = CollegesIdRouteImport.update({
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/admin/users',
   path: '/admin/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminProjectsRoute = AdminProjectsRouteImport.update({
+  id: '/admin/projects',
+  path: '/admin/projects',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminProfileRoute = AdminProfileRouteImport.update({
@@ -242,6 +248,7 @@ export interface FileRoutesByFullPath {
   '/admin/polls': typeof AdminPollsRoute
   '/admin/posts': typeof AdminPostsRoute
   '/admin/profile': typeof AdminProfileRoute
+  '/admin/projects': typeof AdminProjectsRoute
   '/admin/users': typeof AdminUsersRoute
   '/colleges/$id': typeof CollegesIdRoute
   '/community/$collegeId': typeof CommunityCollegeIdRoute
@@ -278,6 +285,7 @@ export interface FileRoutesByTo {
   '/admin/polls': typeof AdminPollsRoute
   '/admin/posts': typeof AdminPostsRoute
   '/admin/profile': typeof AdminProfileRoute
+  '/admin/projects': typeof AdminProjectsRoute
   '/admin/users': typeof AdminUsersRoute
   '/colleges/$id': typeof CollegesIdRoute
   '/community/$collegeId': typeof CommunityCollegeIdRoute
@@ -315,6 +323,7 @@ export interface FileRoutesById {
   '/admin/polls': typeof AdminPollsRoute
   '/admin/posts': typeof AdminPostsRoute
   '/admin/profile': typeof AdminProfileRoute
+  '/admin/projects': typeof AdminProjectsRoute
   '/admin/users': typeof AdminUsersRoute
   '/colleges/$id': typeof CollegesIdRoute
   '/community/$collegeId': typeof CommunityCollegeIdRoute
@@ -353,6 +362,7 @@ export interface FileRouteTypes {
     | '/admin/polls'
     | '/admin/posts'
     | '/admin/profile'
+    | '/admin/projects'
     | '/admin/users'
     | '/colleges/$id'
     | '/community/$collegeId'
@@ -389,6 +399,7 @@ export interface FileRouteTypes {
     | '/admin/polls'
     | '/admin/posts'
     | '/admin/profile'
+    | '/admin/projects'
     | '/admin/users'
     | '/colleges/$id'
     | '/community/$collegeId'
@@ -425,6 +436,7 @@ export interface FileRouteTypes {
     | '/admin/polls'
     | '/admin/posts'
     | '/admin/profile'
+    | '/admin/projects'
     | '/admin/users'
     | '/colleges/$id'
     | '/community/$collegeId'
@@ -462,6 +474,7 @@ export interface RootRouteChildren {
   AdminPollsRoute: typeof AdminPollsRoute
   AdminPostsRoute: typeof AdminPostsRoute
   AdminProfileRoute: typeof AdminProfileRoute
+  AdminProjectsRoute: typeof AdminProjectsRoute
   AdminUsersRoute: typeof AdminUsersRoute
   CollegesIdRoute: typeof CollegesIdRoute
   CommunityCollegeIdRoute: typeof CommunityCollegeIdRoute
@@ -598,6 +611,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/users'
       fullPath: '/admin/users'
       preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/projects': {
+      id: '/admin/projects'
+      path: '/admin/projects'
+      fullPath: '/admin/projects'
+      preLoaderRoute: typeof AdminProjectsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/profile': {
@@ -742,6 +762,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminPollsRoute: AdminPollsRoute,
   AdminPostsRoute: AdminPostsRoute,
   AdminProfileRoute: AdminProfileRoute,
+  AdminProjectsRoute: AdminProjectsRoute,
   AdminUsersRoute: AdminUsersRoute,
   CollegesIdRoute: CollegesIdRoute,
   CommunityCollegeIdRoute: CommunityCollegeIdRoute,

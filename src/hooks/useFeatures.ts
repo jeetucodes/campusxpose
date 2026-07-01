@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export function useFeatures() {
   const [projectsEnabled, setProjectsEnabled] = useState(false);
+  const [featuresLoading, setFeaturesLoading] = useState(true);
 
   useEffect(() => {
     let alive = true;
@@ -15,6 +16,7 @@ export function useFeatures() {
         .maybeSingle();
       if (alive) {
         setProjectsEnabled((setting as any)?.value === true);
+        setFeaturesLoading(false);
       }
     };
 
@@ -35,5 +37,5 @@ export function useFeatures() {
     };
   }, []);
 
-  return { projectsEnabled };
+  return { projectsEnabled, featuresLoading };
 }

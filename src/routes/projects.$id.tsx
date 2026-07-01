@@ -53,17 +53,7 @@ export const Route = createFileRoute("/projects/$id")({
 const IMGBB_KEY = import.meta.env.VITE_IMGBB_API_KEY as string;
 const ALL_TAGS = ["Web Dev", "Android", "iOS", "AI/ML", "Design", "Hardware", "Other"];
 
-async function uploadToImgBB(file: File): Promise<string> {
-  const formData = new FormData();
-  formData.append("image", file);
-  const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
-    method: "POST",
-    body: formData,
-  });
-  const data = await response.json();
-  if (!data?.data?.url) throw new Error("ImgBB upload failed");
-  return data.data.url as string;
-}
+import { uploadToImgbb } from "@/lib/upload";
 
 type Project = {
   id: string;
@@ -268,7 +258,7 @@ function EditModal({
       let imageUrl: string | undefined = imagePreview ?? undefined;
       if (imageFile) {
         setUploading(true);
-        try { imageUrl = await uploadToImgBB(imageFile); }
+        try { imageUrl = await uploadToImgbb(imageFile); }
         catch { toast.error("Image upload failed"); setUploading(false); setSaving(false); return; }
         setUploading(false);
       }
@@ -439,7 +429,7 @@ function ProjectDetailPage() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const { hashedId, username, isReady, init } = useIdentity();
-  const { projectsEnabled } = useFeatures();
+  const { projectsEnabled, featuresLoading } = useFeatures();
 
   const [data, setData] = useState<ProjectData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -471,8 +461,6 @@ function ProjectDetailPage() {
   const updateCollabRequest = useServerFn(updateProjectCollabRequest);
 
   useEffect(() => { init(); }, [init]);
-
-  if (!projectsEnabled) return <Navigate to="/" />;
 
   const load = async () => {
     setLoading(true);
@@ -569,12 +557,15 @@ function ProjectDetailPage() {
     try {
       await del({ data: { id, hashedId } });
       toast.success("Project deleted.");
-      navigate({ to: "/projects/" });
+      navigate({ to: "/projects" });
     } catch (e: any) {
       toast.error(e?.message ?? "Failed to delete");
       setDeleting(false);
     }
   };
+
+  if (featuresLoading) return null;
+  if (!projectsEnabled) return <Navigate to="/" />;
 
   if (loading) {
     return (
@@ -591,7 +582,7 @@ function ProjectDetailPage() {
       <SiteShell hideFooter>
         <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center px-4">
           <p className="font-display text-2xl font-bold text-foreground">Project Not Found</p>
-          <Button asChild className="border-2 border-ink bg-white font-bold text-foreground shadow-ink-soft wobbly-sm"><Link to="/projects/"><ArrowLeft className="h-4 w-4 mr-2"/> Back to Projects</Link></Button>
+          <Button asChild className="border-2 border-ink bg-white font-bold text-foreground shadow-ink-soft wobbly-sm"><Link to="/projects"><ArrowLeft className="h-4 w-4 mr-2"/> Back to Projects</Link></Button>
         </div>
       </SiteShell>
     );
@@ -610,7 +601,7 @@ function ProjectDetailPage() {
         <div className="mx-auto max-w-4xl px-4">
           {/* Top Nav */}
           <div className="mb-6 flex items-center justify-between">
-            <Link to="/projects/" className="inline-flex items-center gap-1.5 text-sm font-bold text-muted-foreground transition-colors hover:text-ink">
+            <Link to="/projects" className="inline-flex items-center gap-1.5 text-sm font-bold text-muted-foreground transition-colors hover:text-ink">
               <ArrowLeft className="h-4 w-4" /> Back to Projects
             </Link>
 

@@ -821,6 +821,7 @@ export const adminReplyFeedback = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
+
 /** Admin: delete a feedback item. */
 export const adminDeleteFeedback = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ token: z.string(), id: z.string().uuid() }).parse(d))
@@ -830,4 +831,30 @@ export const adminDeleteFeedback = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin.from("feedback" as any).delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true as const };
+  });
+
+/** Admin: delete projects. */
+export const adminDeleteProjects = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: z.string(), ids: z.array(z.string().uuid()).min(1) }).parse(d))
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("projects" as any).delete().in("id", data.ids);
+    if (error) throw new Error(error.message);
+    return { ok: true as const, deleted: data.ids.length };
+  });
+
+/** Admin: list projects. */
+export const adminListProjects = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: z.string() }).parse(d))
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows, error } = await supabaseAdmin
+      .from("projects" as any)
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(300);
+    if (error) throw new Error(error.message);
+    return (rows as any[]) ?? [];
   });
