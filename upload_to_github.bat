@@ -22,6 +22,10 @@ echo [4/5] Committing changes...
 git commit -m "Upload pure code to repo"
 
 echo.
+echo [4.5/5] Pulling remote changes to sync with Lovable...
+git pull github main --no-edit
+
+echo.
 echo [5/5] Pushing to GitHub...
 git push -u github main
 
