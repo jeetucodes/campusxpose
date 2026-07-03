@@ -19,7 +19,7 @@ git add .
 
 echo.
 echo [4/5] Committing changes...
-git commit -m "Implement local push notifications using web-push, fix dynamic import crashes, and add admin config button"
+git commit -m "Add user search functionality to admin dashboard, fix push dynamic import crashes"
 
 echo.
 echo [4.5/5] Pulling remote changes to sync with Lovable...

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -44,6 +45,7 @@ function UsersAdmin() {
   const setAvatar = useServerFn(adminSetAvatar);
   const queryClient = useQueryClient();
   const q = useQuery({ queryKey: ["admin-users"], enabled: !!token, queryFn: () => list({ data: { token: token! } }) });
+  const [search, setSearch] = useState("");
 
   const doBan = async (u: any) => {
     await ban({ data: { token: token!, userHash: u.hash, username: u.username, reason: "Admin action" } });
@@ -109,10 +111,24 @@ function UsersAdmin() {
         </div>
       </div>
 
+      <div className="mt-6 mb-4">
+        <input 
+          type="text" 
+          placeholder="Search by username or hash..." 
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full max-w-sm rounded-lg border border-border bg-surface px-4 py-2 text-sm outline-none focus:border-primary"
+        />
+      </div>
 
       {/* Mobile card list */}
       <div className="mt-4 space-y-3 md:hidden">
-        {(q.data ?? []).map((u) => {
+        {(q.data ?? [])
+          .filter((u: any) => 
+            u.username?.toLowerCase().includes(search.toLowerCase()) || 
+            u.hash?.toLowerCase().includes(search.toLowerCase())
+          )
+          .map((u) => {
           const r = risk(u);
           return (
             <div key={u.hash} className="rounded-xl border border-border bg-surface p-4">
@@ -155,7 +171,12 @@ function UsersAdmin() {
         <table className="w-full text-sm">
           <thead className="bg-surface-2 text-left text-muted-foreground"><tr><th className="p-3">Username</th><th className="p-3">Hash</th><th className="p-3">Posts</th><th className="p-3">Messages</th><th className="p-3">Incidents</th><th className="p-3">Last Active</th><th className="p-3">Risk</th><th className="p-3">Actions</th></tr></thead>
           <tbody>
-            {(q.data ?? []).map((u) => {
+            {(q.data ?? [])
+              .filter((u: any) => 
+                u.username?.toLowerCase().includes(search.toLowerCase()) || 
+                u.hash?.toLowerCase().includes(search.toLowerCase())
+              )
+              .map((u) => {
               const r = risk(u);
               return (
                 <tr key={u.hash} className="border-t border-border">
