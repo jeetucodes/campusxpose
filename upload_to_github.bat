@@ -19,7 +19,7 @@ git add .
 
 echo.
 echo [4/5] Committing changes...
-git commit -m "Add user search functionality to admin dashboard, fix push dynamic import crashes"
+git commit -m "Add recovery key login, delete account functionality to user profile"
 
 echo.
 echo [4.5/5] Pulling remote changes to sync with Lovable...

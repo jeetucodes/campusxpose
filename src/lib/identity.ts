@@ -52,6 +52,7 @@ export async function sha256(input: string): Promise<string> {
 export interface Identity {
   hashedId: string;
   username: string;
+  uid: string;
 }
 
 /** Reads (or creates) the anonymous identity from localStorage. Browser only. */
@@ -67,7 +68,14 @@ export async function loadOrCreateIdentity(): Promise<Identity> {
     localStorage.setItem(USERNAME_KEY, username);
   }
   const hashedId = await sha256(uid);
-  return { hashedId, username };
+  return { hashedId, username, uid };
+}
+
+/** Logs in using an existing secret key (UID). */
+export async function loginWithKey(key: string): Promise<Identity> {
+  localStorage.setItem(UID_KEY, key);
+  localStorage.removeItem(USERNAME_KEY); // Will be regenerated or synced
+  return loadOrCreateIdentity();
 }
 
 /** Wipes the current identity and creates a brand new one. */
@@ -83,5 +91,5 @@ export async function forgetMeWithUsername(username: string): Promise<Identity> 
   localStorage.setItem(UID_KEY, uid);
   localStorage.setItem(USERNAME_KEY, username);
   const hashedId = await sha256(uid);
-  return { hashedId, username };
+  return { hashedId, username, uid };
 }

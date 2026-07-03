@@ -1,9 +1,10 @@
 import { create } from "zustand";
-import { forgetMe, forgetMeWithUsername, loadOrCreateIdentity, USERNAME_KEY } from "@/lib/identity";
+import { forgetMe, forgetMeWithUsername, loadOrCreateIdentity, loginWithKey, USERNAME_KEY } from "@/lib/identity";
 import { markForgotten, purgeMyActivity, registerIdentity, syncIdentity } from "@/lib/content.functions";
 
 interface IdentityState {
   hashedId: string | null;
+  secretKey: string | null;
   username: string | null;
   verified: boolean;
   avatarUrl: string | null;
@@ -12,6 +13,7 @@ interface IdentityState {
   refresh: () => Promise<void>;
   reset: () => Promise<void>;
   resetWith: (username: string) => Promise<void>;
+  login: (key: string) => Promise<void>;
 }
 
 /** Best-effort server wipe of the current identity's activity. */
@@ -65,14 +67,15 @@ async function flagForgotten(hashedId: string | null) {
 
 export const useIdentity = create<IdentityState>((set, get) => ({
   hashedId: null,
+  secretKey: null,
   username: null,
   verified: false,
   avatarUrl: null,
   isReady: false,
   init: async () => {
     if (get().isReady || typeof window === "undefined") return;
-    const { hashedId, username } = await loadOrCreateIdentity();
-    set({ hashedId, username, isReady: true });
+    const { hashedId, username, uid } = await loadOrCreateIdentity();
+    set({ hashedId, secretKey: uid, username, isReady: true });
     void register(hashedId, username);
     void syncFromServer(hashedId, set);
   },
@@ -82,16 +85,23 @@ export const useIdentity = create<IdentityState>((set, get) => ({
   reset: async () => {
     await flagForgotten(get().hashedId);
     await purge(get().hashedId);
-    const { hashedId, username } = await forgetMe();
-    set({ hashedId, username, verified: false, avatarUrl: null, isReady: true });
+    const { hashedId, username, uid } = await forgetMe();
+    set({ hashedId, secretKey: uid, username, verified: false, avatarUrl: null, isReady: true });
     void register(hashedId, username);
   },
   resetWith: async (chosen: string) => {
     await flagForgotten(get().hashedId);
     await purge(get().hashedId);
-    const { hashedId, username } = await forgetMeWithUsername(chosen);
-    set({ hashedId, username, verified: false, avatarUrl: null, isReady: true });
+    const { hashedId, username, uid } = await forgetMeWithUsername(chosen);
+    set({ hashedId, secretKey: uid, username, verified: false, avatarUrl: null, isReady: true });
     void register(hashedId, username);
+  },
+  login: async (key: string) => {
+    set({ isReady: false });
+    const { hashedId, username, uid } = await loginWithKey(key);
+    set({ hashedId, secretKey: uid, username, verified: false, avatarUrl: null, isReady: true });
+    void register(hashedId, username);
+    void syncFromServer(hashedId, set);
   },
 }));
 

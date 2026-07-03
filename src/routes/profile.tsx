@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Check, RefreshCw, Save, Shuffle } from "lucide-react";
+import { Check, RefreshCw, Save, Shuffle, Copy, Key, LogIn, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -40,12 +40,39 @@ const STYLE_LABELS: Record<string, string> = {
 };
 
 function ProfilePage() {
-  const { username, verified, avatarUrl, isReady, hashedId, init, refresh } = useIdentity();
+  const { username, verified, avatarUrl, isReady, hashedId, secretKey, init, refresh, reset, login } = useIdentity();
   const queryClient = useQueryClient();
 
   const [style, setStyle] = useState<string>(STYLES[0]);
   const [seed, setSeed] = useState<string>("");
   const [saving, setSaving] = useState(false);
+  const [loginKey, setLoginKey] = useState("");
+  const [showKey, setShowKey] = useState(false);
+
+  const doDeleteAccount = async () => {
+    if (!window.confirm("Are you sure? This will wipe your account, posts, and messages. You will be assigned a brand new identity.")) return;
+    await reset();
+    toast.success("Account deleted and reset!");
+  };
+
+  const doLogin = async () => {
+    if (!loginKey.trim()) return;
+    if (loginKey.trim() === secretKey) {
+       toast.error("You are already logged in with this key");
+       return;
+    }
+    await login(loginKey.trim());
+    toast.success("Logged in successfully!");
+    setLoginKey("");
+    setShowKey(false);
+  };
+  
+  const copyKey = () => {
+    if (secretKey) {
+       navigator.clipboard.writeText(secretKey);
+       toast.success("Recovery key copied to clipboard!");
+    }
+  };
 
   useEffect(() => {
     init();
@@ -192,6 +219,63 @@ function ProfilePage() {
             </button>
           );
         })}
+      </div>
+
+      {/* Account Management */}
+      <h2 className="mt-12 font-display text-lg font-bold text-destructive">Account Management</h2>
+      <div className="mt-3 rounded-xl border border-destructive/20 bg-destructive/5 p-5 mb-8">
+        <div className="space-y-6">
+          <div>
+            <h3 className="font-semibold flex items-center gap-2"><Key className="h-4 w-4" /> Recovery Key (Login Hash)</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Save this secret key. You can use it to login to this exact account from another device. 
+              <strong> Do not share this with anyone!</strong>
+            </p>
+            <div className="mt-3 flex items-center gap-2">
+              <input 
+                type={showKey ? "text" : "password"} 
+                readOnly 
+                value={secretKey || ""} 
+                className="flex-1 rounded-md border border-border bg-surface px-3 py-2 text-sm font-mono text-muted-foreground outline-none"
+              />
+              <Button variant="outline" size="sm" onClick={() => setShowKey(!showKey)}>
+                {showKey ? "Hide" : "Show"}
+              </Button>
+              <Button variant="outline" size="sm" onClick={copyKey}>
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="border-t border-destructive/10 pt-6">
+            <h3 className="font-semibold flex items-center gap-2"><LogIn className="h-4 w-4" /> Login with Hash</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Paste a previously saved recovery key here to restore that account.
+            </p>
+            <div className="mt-3 flex items-center gap-2">
+              <input 
+                type="text" 
+                placeholder="Paste recovery key..." 
+                value={loginKey}
+                onChange={(e) => setLoginKey(e.target.value)}
+                className="flex-1 rounded-md border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
+              />
+              <Button onClick={doLogin} disabled={!loginKey.trim()}>
+                Login
+              </Button>
+            </div>
+          </div>
+
+          <div className="border-t border-destructive/10 pt-6">
+            <h3 className="font-semibold flex items-center gap-2"><Trash2 className="h-4 w-4" /> Delete Account</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Permanently wipe your account activity from the server and generate a new anonymous identity.
+            </p>
+            <Button variant="destructive" className="mt-3" onClick={doDeleteAccount}>
+              Delete My Account
+            </Button>
+          </div>
+        </div>
       </div>
     </main>
   );
