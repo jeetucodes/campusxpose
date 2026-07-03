@@ -103,7 +103,7 @@ export const submitMessage = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     if (await isBanned(data.hashedId)) return { ok: true, shadow: true };
-    const { error } = await supabaseAdmin.from("community_messages").insert({
+    const { error } = await supabaseAdmin.from("community_messages" as any).insert({
       college_id: data.collegeId,
       anonymous_user_hash: data.hashedId,
       username: data.username,
@@ -313,7 +313,7 @@ export const submitGlobalMessage = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     if (await isBanned(data.hashedId)) return { ok: true, shadow: true };
-    const { error } = await supabaseAdmin.from("global_messages").insert({
+    const { error } = await supabaseAdmin.from("global_messages" as any).insert({
       anonymous_user_hash: data.hashedId,
       username: data.username,
       content: clean(data.content),
@@ -367,7 +367,7 @@ export const submitDirectMessage = createServerFn({ method: "POST" })
       throw new Error("You cannot message yourself");
     }
     const recipientHash = await lookupHashForUsername(data.recipientUsername);
-    const { error } = await supabaseAdmin.from("direct_messages").insert({
+    const { error } = await supabaseAdmin.from("direct_messages" as any).insert({
       sender_hash: data.hashedId,
       sender_username: data.username,
       recipient_username: data.recipientUsername,

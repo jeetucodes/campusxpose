@@ -858,3 +858,13 @@ export const adminListProjects = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return (rows as any[]) ?? [];
   });
+
+export const adminUpdatePushConfig = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: z.string(), origin: z.string().url() }).parse(d))
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const dispatchUrl = `${data.origin}/api/send-push`;
+    await supabaseAdmin.from("push_config").update({ dispatch_url: dispatchUrl }).eq("id", 1);
+    return { ok: true };
+  });

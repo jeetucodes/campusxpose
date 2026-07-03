@@ -632,7 +632,7 @@ function ProjectDetailPage() {
             style={{ borderRadius: "25px 8px 22px 8px / 8px 22px 8px 25px" }}
           >
             {project.image_url && (
-              <div className="relative h-64 w-full sm:h-96 border-b-2 border-ink bg-accent/5">
+              <div className="relative aspect-video w-full overflow-hidden border-b-2 border-ink bg-accent/5">
                 <img src={project.image_url} alt={project.title} className="h-full w-full object-cover" />
               </div>
             )}

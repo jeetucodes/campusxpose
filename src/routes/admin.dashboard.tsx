@@ -11,7 +11,7 @@ import {
 } from "recharts";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { useAdmin } from "@/stores/admin";
-import { adminStats, adminRecentActivity } from "@/lib/admin.functions";
+import { adminStats, adminRecentActivity, adminUpdatePushConfig } from "@/lib/admin.functions";
 import { adminBroadcast } from "@/lib/notifications.functions";
 import { INCIDENT_CATEGORIES, categoryLabel } from "@/lib/categories";
 import { timeAgo } from "@/lib/format";
@@ -133,9 +133,24 @@ function RecentActivity() {
 function BroadcastCard() {
   const { token } = useAdmin();
   const broadcast = useServerFn(adminBroadcast);
+  const updateConfig = useServerFn(adminUpdatePushConfig);
   const [message, setMessage] = useState("");
   const [link, setLink] = useState("");
   const [busy, setBusy] = useState(false);
+  const [configBusy, setConfigBusy] = useState(false);
+
+  async function updatePushConfig() {
+    if (!token) return;
+    setConfigBusy(true);
+    try {
+      await updateConfig({ data: { token, origin: window.location.origin } });
+      toast.success("Database push config updated to this domain");
+    } catch {
+      toast.error("Failed to update config");
+    } finally {
+      setConfigBusy(false);
+    }
+  }
 
   async function send() {
     if (!token || !message.trim()) return;
@@ -175,14 +190,24 @@ function BroadcastCard() {
           placeholder="Optional link (e.g. /global)"
           className="w-full rounded-lg border border-border bg-surface-2 p-3 text-sm outline-none focus:border-primary"
         />
-        <button
-          onClick={send}
-          disabled={busy || !message.trim()}
-          className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
-        >
-          <Megaphone className="h-4 w-4" />
-          {busy ? "Sending…" : "Send to All Users"}
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={send}
+            disabled={busy || !message.trim()}
+            className="flex flex-1 justify-center items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+          >
+            <Megaphone className="h-4 w-4" />
+            {busy ? "Sending…" : "Send to All Users"}
+          </button>
+          <button
+            onClick={updatePushConfig}
+            disabled={configBusy}
+            title="Fix DB Push Config URL"
+            className="flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium hover:bg-surface-2 disabled:opacity-50"
+          >
+            {configBusy ? "Updating..." : "Fix Push Config"}
+          </button>
+        </div>
       </div>
     </Card>
   );

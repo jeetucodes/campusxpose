@@ -26,6 +26,7 @@ import { Route as ProjectsNewRouteImport } from './routes/projects.new'
 import { Route as ProjectsIdRouteImport } from './routes/projects.$id'
 import { Route as CommunityCollegeIdRouteImport } from './routes/community.$collegeId'
 import { Route as CollegesIdRouteImport } from './routes/colleges.$id'
+import { Route as ApiSendPushRouteImport } from './routes/api.send-push'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminProjectsRouteImport } from './routes/admin.projects'
 import { Route as AdminProfileRouteImport } from './routes/admin.profile'
@@ -128,6 +129,11 @@ const CommunityCollegeIdRoute = CommunityCollegeIdRouteImport.update({
 const CollegesIdRoute = CollegesIdRouteImport.update({
   id: '/colleges/$id',
   path: '/colleges/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSendPushRoute = ApiSendPushRouteImport.update({
+  id: '/api/send-push',
+  path: '/api/send-push',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
@@ -250,6 +256,7 @@ export interface FileRoutesByFullPath {
   '/admin/profile': typeof AdminProfileRoute
   '/admin/projects': typeof AdminProjectsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/api/send-push': typeof ApiSendPushRoute
   '/colleges/$id': typeof CollegesIdRoute
   '/community/$collegeId': typeof CommunityCollegeIdRoute
   '/projects/$id': typeof ProjectsIdRoute
@@ -287,6 +294,7 @@ export interface FileRoutesByTo {
   '/admin/profile': typeof AdminProfileRoute
   '/admin/projects': typeof AdminProjectsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/api/send-push': typeof ApiSendPushRoute
   '/colleges/$id': typeof CollegesIdRoute
   '/community/$collegeId': typeof CommunityCollegeIdRoute
   '/projects/$id': typeof ProjectsIdRoute
@@ -325,6 +333,7 @@ export interface FileRoutesById {
   '/admin/profile': typeof AdminProfileRoute
   '/admin/projects': typeof AdminProjectsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/api/send-push': typeof ApiSendPushRoute
   '/colleges/$id': typeof CollegesIdRoute
   '/community/$collegeId': typeof CommunityCollegeIdRoute
   '/projects/$id': typeof ProjectsIdRoute
@@ -364,6 +373,7 @@ export interface FileRouteTypes {
     | '/admin/profile'
     | '/admin/projects'
     | '/admin/users'
+    | '/api/send-push'
     | '/colleges/$id'
     | '/community/$collegeId'
     | '/projects/$id'
@@ -401,6 +411,7 @@ export interface FileRouteTypes {
     | '/admin/profile'
     | '/admin/projects'
     | '/admin/users'
+    | '/api/send-push'
     | '/colleges/$id'
     | '/community/$collegeId'
     | '/projects/$id'
@@ -438,6 +449,7 @@ export interface FileRouteTypes {
     | '/admin/profile'
     | '/admin/projects'
     | '/admin/users'
+    | '/api/send-push'
     | '/colleges/$id'
     | '/community/$collegeId'
     | '/projects/$id'
@@ -476,6 +488,7 @@ export interface RootRouteChildren {
   AdminProfileRoute: typeof AdminProfileRoute
   AdminProjectsRoute: typeof AdminProjectsRoute
   AdminUsersRoute: typeof AdminUsersRoute
+  ApiSendPushRoute: typeof ApiSendPushRoute
   CollegesIdRoute: typeof CollegesIdRoute
   CommunityCollegeIdRoute: typeof CommunityCollegeIdRoute
   ProjectsIdRoute: typeof ProjectsIdRoute
@@ -604,6 +617,13 @@ declare module '@tanstack/react-router' {
       path: '/colleges/$id'
       fullPath: '/colleges/$id'
       preLoaderRoute: typeof CollegesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/send-push': {
+      id: '/api/send-push'
+      path: '/api/send-push'
+      fullPath: '/api/send-push'
+      preLoaderRoute: typeof ApiSendPushRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/users': {
@@ -764,6 +784,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminProfileRoute: AdminProfileRoute,
   AdminProjectsRoute: AdminProjectsRoute,
   AdminUsersRoute: AdminUsersRoute,
+  ApiSendPushRoute: ApiSendPushRoute,
   CollegesIdRoute: CollegesIdRoute,
   CommunityCollegeIdRoute: CommunityCollegeIdRoute,
   ProjectsIdRoute: ProjectsIdRoute,

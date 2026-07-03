@@ -137,7 +137,7 @@ function Home() {
             { n: data?.collegeCount ?? 0, l: "Colleges", color: "text-accent" },
             { n: data?.postCount ?? 0, l: "Reports", color: "text-yellow-500" },
             { n: data?.incidentCount ?? 0, l: "Incidents", color: "text-accent" },
-            { n: "∞", l: "Anon Users", color: "text-yellow-500" },
+            { n: data?.userCount ?? 0, l: "Anon Users", color: "text-yellow-500" },
           ].map((s, i) => (
             <motion.div
               key={i}

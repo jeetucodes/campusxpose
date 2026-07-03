@@ -111,7 +111,7 @@ function CollaborateAdmin() {
         </div>
       ) : (
         <div className="space-y-3">
-          {(requests as CollabRequest[] ?? []).map((req) => (
+          {(requests as unknown as CollabRequest[] ?? []).map((req) => (
             <div
               key={req.id}
               className={cn(

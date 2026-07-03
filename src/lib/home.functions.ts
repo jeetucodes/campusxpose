@@ -5,6 +5,7 @@ export type HomeData = {
   collegeCount: number;
   postCount: number;
   incidentCount: number;
+  userCount: number;
   top: Array<{
     id: string;
     name: string;
@@ -31,8 +32,9 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(
       process.env.SUPABASE_PUBLISHABLE_KEY!,
       { auth: { persistSession: false } },
     );
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const [colleges, posts, incidents, allColleges, postRows, incidentRows, recent] =
+    const [colleges, posts, incidents, allColleges, postRows, incidentRows, recent, users] =
       await Promise.all([
         supabase.from("colleges").select("*", { count: "exact", head: true }),
         supabase.from("posts").select("*", { count: "exact", head: true }),
@@ -46,6 +48,7 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(
           .order("upvotes", { ascending: false })
           .order("created_at", { ascending: false })
           .limit(12),
+        supabaseAdmin.from("anon_users" as any).select("*", { count: "exact", head: true }),
       ]);
 
     // Live report counts per college (posts + incidents).
@@ -75,6 +78,7 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(
       collegeCount: colleges.count ?? 0,
       postCount: posts.count ?? 0,
       incidentCount: incidents.count ?? 0,
+      userCount: users.count ?? 0,
       top,
       recentPosts: (recent.data ?? []).map((p) => ({
         id: p.id as string,

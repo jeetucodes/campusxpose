@@ -141,7 +141,7 @@ function SetupPage() {
                 </p>
                 <Button
                   className="mt-3"
-                  onClick={() => navigate({ to: "/projects/" })}
+                  onClick={() => navigate({ to: "/projects" })}
                 >
                   Go to /projects →
                 </Button>

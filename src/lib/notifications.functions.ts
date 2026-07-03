@@ -43,12 +43,12 @@ export const getNotifications = createServerFn({ method: "POST" })
     // Automatically remove older notifications to keep only the latest ones
     if (list.data && list.data.length === data.limit) {
       const oldestKept = list.data[list.data.length - 1];
-      supabaseAdmin
+      Promise.resolve(supabaseAdmin
         .from("notifications")
         .delete()
         .eq("user_hash", data.hashedId)
         .not("type", "in", HIDDEN)
-        .lt("created_at", oldestKept.created_at)
+        .lt("created_at", oldestKept.created_at))
         .then(() => {})
         .catch(() => {});
     }
@@ -104,24 +104,34 @@ export const adminBroadcast = createServerFn({ method: "POST" })
       }
     }
 
-    // Browser push to all subscribers (best-effort).
+    // Browser push to all subscribers using the NodeJS backend instead of an edge function
     let pushed = 0;
+    const stale: string[] = [];
+    
     try {
-      const res = await fetch(`${process.env.SUPABASE_URL}/functions/v1/send-push`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-dispatch-secret": process.env.PUSH_DISPATCH_TOKEN ?? "",
-        },
-        body: JSON.stringify({
-          broadcast: true,
-          payload: { title: "CampusXpose", body: data.message, url: data.link || "/" },
-        }),
-      });
-      const j = (await res.json().catch(() => ({}))) as { sent?: number };
-      pushed = j.sent ?? 0;
-    } catch {
-      // best-effort
+      const { sendPushMessage } = await import("./push.server");
+      const { data: subs } = await supabaseAdmin.from("push_subscriptions").select("id, endpoint, p256dh, auth");
+      if (subs && subs.length > 0) {
+        await Promise.all(
+          subs.map(async (s) => {
+            const success = await sendPushMessage(
+              { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
+              { title: "CampusXpose", body: data.message, url: data.link || "/" }
+            );
+            if (success) {
+              pushed++;
+            } else {
+              stale.push(s.id);
+            }
+          })
+        );
+        
+        if (stale.length > 0) {
+          await supabaseAdmin.from("push_subscriptions").delete().in("id", stale);
+        }
+      }
+    } catch (e) {
+      console.error("Broadcast push error:", e);
     }
 
     return { ok: true as const, inserted, pushed };

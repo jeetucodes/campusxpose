@@ -32,15 +32,15 @@ export const listProjects = createServerFn({ method: "POST" })
       .from("projects" as any)
       .select("*")
       .order("created_at", { ascending: false })
-      .limit(data.limit);
+      .limit(data.limit) as any;
 
     const { data: projects, error } = await q;
     if (error) throw new Error(error.message);
 
     // Fetch avg ratings for all projects
-    const { data: ratings } = await supabaseAdmin
+    const { data: ratings } = await (supabaseAdmin
       .from("project_ratings" as any)
-      .select("project_id, rating, rating_ui, rating_functionality, rating_concept, rating_bugs");
+      .select("project_id, rating, rating_ui, rating_functionality, rating_concept, rating_bugs") as any);
 
     const ratingMap = new Map<
       string,
@@ -98,12 +98,12 @@ export const getProject = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const [projectRes, ratingsRes] = await Promise.all([
-      supabaseAdmin.from("projects" as any).select("*").eq("id", data.id).single(),
+      supabaseAdmin.from("projects" as any).select("*").eq("id", data.id).single() as any,
       supabaseAdmin
         .from("project_ratings" as any)
         .select("*")
         .eq("project_id", data.id)
-        .order("created_at", { ascending: false }),
+        .order("created_at", { ascending: false }) as any,
     ]);
 
     if (projectRes.error) throw new Error(projectRes.error.message);
@@ -153,7 +153,7 @@ export const createProject = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const { data: project, error } = await supabaseAdmin
+    const { data: project, error } = await (supabaseAdmin
       .from("projects" as any)
       .insert({
         owner_ghost_id: data.hashedId,
@@ -167,7 +167,7 @@ export const createProject = createServerFn({ method: "POST" })
         looking_for_collaborators: data.lookingForCollaborators,
       })
       .select("id")
-      .single();
+      .single() as any);
 
     if (error) throw new Error(error.message);
     return { ok: true as const, id: project.id };
@@ -194,11 +194,11 @@ export const updateProject = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     // Verify ownership
-    const { data: existing } = await supabaseAdmin
+    const { data: existing } = await (supabaseAdmin
       .from("projects" as any)
       .select("owner_ghost_id")
       .eq("id", data.id)
-      .single();
+      .single() as any);
     if (!existing || existing.owner_ghost_id !== data.hashedId) {
       throw new Error("Not authorized to edit this project.");
     }
@@ -229,11 +229,11 @@ export const deleteProject = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     // Verify ownership
-    const { data: existing } = await supabaseAdmin
+    const { data: existing } = await (supabaseAdmin
       .from("projects" as any)
       .select("owner_ghost_id")
       .eq("id", data.id)
-      .single();
+      .single() as any);
     if (!existing || existing.owner_ghost_id !== data.hashedId) {
       throw new Error("Not authorized to delete this project.");
     }
@@ -308,13 +308,13 @@ export const requestCollaborate = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     // Check for existing pending request from this user
-    const { data: existing } = await supabaseAdmin
+    const { data: existing } = await (supabaseAdmin
       .from("collaborate_requests" as any)
       .select("id")
       .eq("project_id", data.projectId)
       .eq("sender_ghost_id", data.senderGhostId)
       .eq("status", "pending")
-      .maybeSingle();
+      .maybeSingle() as any);
 
     if (existing) throw new Error("You already have a pending request for this project.");
 
@@ -362,21 +362,21 @@ export const listProjectCollabRequests = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     // Verify ownership
-    const { data: project } = await supabaseAdmin
+    const { data: project } = await (supabaseAdmin
       .from("projects" as any)
       .select("owner_ghost_id")
       .eq("id", data.projectId)
-      .single();
+      .single() as any);
 
     if (!project || project.owner_ghost_id !== data.ownerGhostId) {
       throw new Error("Unauthorized");
     }
 
-    const { data: requests, error } = await supabaseAdmin
+    const { data: requests, error } = await (supabaseAdmin
       .from("collaborate_requests" as any)
       .select("*")
       .eq("project_id", data.projectId)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false }) as any);
 
     if (error) throw new Error(error.message);
     return requests ?? [];
@@ -397,11 +397,11 @@ export const updateProjectCollabRequest = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     // Fetch request and verify owner ownership
-    const { data: req, error: fetchErr } = await supabaseAdmin
+    const { data: req, error: fetchErr } = await (supabaseAdmin
       .from("collaborate_requests" as any)
       .select("*")
       .eq("id", data.requestId)
-      .single();
+      .single() as any);
 
     if (fetchErr || !req) throw new Error("Request not found");
     if (req.owner_ghost_id !== data.ownerGhostId) throw new Error("Unauthorized");
@@ -462,7 +462,7 @@ export const adminListCollabRequests = createServerFn({ method: "POST" })
     let q = supabaseAdmin
       .from("collaborate_requests" as any)
       .select("*")
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false }) as any;
 
     if (data.status !== "all") {
       q = q.eq("status", data.status);
@@ -489,11 +489,11 @@ export const adminUpdateCollabRequest = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     // Fetch the request first
-    const { data: req, error: fetchErr } = await supabaseAdmin
+    const { data: req, error: fetchErr } = await (supabaseAdmin
       .from("collaborate_requests" as any)
       .select("*")
       .eq("id", data.requestId)
-      .single();
+      .single() as any);
 
     if (fetchErr || !req) throw new Error("Request not found");
 
