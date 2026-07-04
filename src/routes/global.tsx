@@ -171,7 +171,7 @@ function GlobalChat() {
       ...prev,
     ]);
     try {
-      await submitGlobalMessage({
+      const res = await submitGlobalMessage({
         data: {
           hashedId,
           username,
@@ -182,6 +182,9 @@ function GlobalChat() {
           imageUrl: uploadedUrl ?? undefined,
         },
       });
+
+
+
     } catch (e) {
       setMessages((prev) => prev.filter((m) => m.id !== tempId));
       toast.error(e instanceof Error ? e.message : (e as any)?.message || "Message failed");

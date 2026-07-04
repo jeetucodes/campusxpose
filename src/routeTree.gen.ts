@@ -16,6 +16,7 @@ import { Route as SetupProjectsRouteImport } from './routes/setup-projects'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as NewsRouteImport } from './routes/news'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as GlobalRouteImport } from './routes/global'
 import { Route as IndexRouteImport } from './routes/index'
@@ -32,6 +33,7 @@ import { Route as AdminProjectsRouteImport } from './routes/admin.projects'
 import { Route as AdminProfileRouteImport } from './routes/admin.profile'
 import { Route as AdminPostsRouteImport } from './routes/admin.posts'
 import { Route as AdminPollsRouteImport } from './routes/admin.polls'
+import { Route as AdminNewsRouteImport } from './routes/admin.news'
 import { Route as AdminModerationRouteImport } from './routes/admin.moderation'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminIncidentsRouteImport } from './routes/admin.incidents'
@@ -79,6 +81,11 @@ const ProfileRoute = ProfileRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewsRoute = NewsRouteImport.update({
+  id: '/news',
+  path: '/news',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MessagesRoute = MessagesRouteImport.update({
@@ -161,6 +168,11 @@ const AdminPollsRoute = AdminPollsRouteImport.update({
   path: '/admin/polls',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminNewsRoute = AdminNewsRouteImport.update({
+  id: '/admin/news',
+  path: '/admin/news',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminModerationRoute = AdminModerationRouteImport.update({
   id: '/admin/moderation',
   path: '/admin/moderation',
@@ -231,6 +243,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/global': typeof GlobalRoute
   '/messages': typeof MessagesRoute
+  '/news': typeof NewsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/report': typeof ReportRoute
@@ -251,6 +264,7 @@ export interface FileRoutesByFullPath {
   '/admin/incidents': typeof AdminIncidentsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/moderation': typeof AdminModerationRoute
+  '/admin/news': typeof AdminNewsRoute
   '/admin/polls': typeof AdminPollsRoute
   '/admin/posts': typeof AdminPostsRoute
   '/admin/profile': typeof AdminProfileRoute
@@ -269,6 +283,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/global': typeof GlobalRoute
   '/messages': typeof MessagesRoute
+  '/news': typeof NewsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/report': typeof ReportRoute
@@ -289,6 +304,7 @@ export interface FileRoutesByTo {
   '/admin/incidents': typeof AdminIncidentsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/moderation': typeof AdminModerationRoute
+  '/admin/news': typeof AdminNewsRoute
   '/admin/polls': typeof AdminPollsRoute
   '/admin/posts': typeof AdminPostsRoute
   '/admin/profile': typeof AdminProfileRoute
@@ -308,6 +324,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/global': typeof GlobalRoute
   '/messages': typeof MessagesRoute
+  '/news': typeof NewsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/report': typeof ReportRoute
@@ -328,6 +345,7 @@ export interface FileRoutesById {
   '/admin/incidents': typeof AdminIncidentsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/moderation': typeof AdminModerationRoute
+  '/admin/news': typeof AdminNewsRoute
   '/admin/polls': typeof AdminPollsRoute
   '/admin/posts': typeof AdminPostsRoute
   '/admin/profile': typeof AdminProfileRoute
@@ -348,6 +366,7 @@ export interface FileRouteTypes {
     | '/'
     | '/global'
     | '/messages'
+    | '/news'
     | '/privacy'
     | '/profile'
     | '/report'
@@ -368,6 +387,7 @@ export interface FileRouteTypes {
     | '/admin/incidents'
     | '/admin/login'
     | '/admin/moderation'
+    | '/admin/news'
     | '/admin/polls'
     | '/admin/posts'
     | '/admin/profile'
@@ -386,6 +406,7 @@ export interface FileRouteTypes {
     | '/'
     | '/global'
     | '/messages'
+    | '/news'
     | '/privacy'
     | '/profile'
     | '/report'
@@ -406,6 +427,7 @@ export interface FileRouteTypes {
     | '/admin/incidents'
     | '/admin/login'
     | '/admin/moderation'
+    | '/admin/news'
     | '/admin/polls'
     | '/admin/posts'
     | '/admin/profile'
@@ -424,6 +446,7 @@ export interface FileRouteTypes {
     | '/'
     | '/global'
     | '/messages'
+    | '/news'
     | '/privacy'
     | '/profile'
     | '/report'
@@ -444,6 +467,7 @@ export interface FileRouteTypes {
     | '/admin/incidents'
     | '/admin/login'
     | '/admin/moderation'
+    | '/admin/news'
     | '/admin/polls'
     | '/admin/posts'
     | '/admin/profile'
@@ -463,6 +487,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   GlobalRoute: typeof GlobalRoute
   MessagesRoute: typeof MessagesRoute
+  NewsRoute: typeof NewsRoute
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   ReportRoute: typeof ReportRoute
@@ -483,6 +508,7 @@ export interface RootRouteChildren {
   AdminIncidentsRoute: typeof AdminIncidentsRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminModerationRoute: typeof AdminModerationRoute
+  AdminNewsRoute: typeof AdminNewsRoute
   AdminPollsRoute: typeof AdminPollsRoute
   AdminPostsRoute: typeof AdminPostsRoute
   AdminProfileRoute: typeof AdminProfileRoute
@@ -547,6 +573,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/news': {
+      id: '/news'
+      path: '/news'
+      fullPath: '/news'
+      preLoaderRoute: typeof NewsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/messages': {
@@ -661,6 +694,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPollsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/news': {
+      id: '/admin/news'
+      path: '/admin/news'
+      fullPath: '/admin/news'
+      preLoaderRoute: typeof AdminNewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/moderation': {
       id: '/admin/moderation'
       path: '/admin/moderation'
@@ -759,6 +799,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   GlobalRoute: GlobalRoute,
   MessagesRoute: MessagesRoute,
+  NewsRoute: NewsRoute,
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   ReportRoute: ReportRoute,
@@ -779,6 +820,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminIncidentsRoute: AdminIncidentsRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminModerationRoute: AdminModerationRoute,
+  AdminNewsRoute: AdminNewsRoute,
   AdminPollsRoute: AdminPollsRoute,
   AdminPostsRoute: AdminPostsRoute,
   AdminProfileRoute: AdminProfileRoute,

@@ -155,7 +155,10 @@ function Community() {
       ...prev,
     ]);
     try {
-      await sendFn({ data: { collegeId, hashedId, username, content, isIncidentSignal: isSignal, replyToId: reply?.id, replyToUsername: reply?.username, replyToContent: reply?.content || (reply?.image_url ? "📷 Image" : undefined), imageUrl: uploadedUrl ?? undefined } });
+      const res = await sendFn({ data: { collegeId, hashedId, username, content, isIncidentSignal: isSignal, replyToId: reply?.id, replyToUsername: reply?.username, replyToContent: reply?.content || (reply?.image_url ? "📷 Image" : undefined), imageUrl: uploadedUrl ?? undefined } });
+      
+
+
     } catch (e) {
       setMessages((prev) => prev.filter((m) => m.id !== tempId));
       toast.error(e instanceof Error ? e.message : (e as any)?.message || "Message failed");

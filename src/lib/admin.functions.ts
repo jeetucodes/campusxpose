@@ -20,6 +20,33 @@ function assertToken(token: string) {
   }
 }
 
+
+export const getSiteSettings = createServerFn({ method: "GET" })
+  .validator((d: unknown) => {
+    return (d as { token: string }).token ? { token: (d as { token: string }).token } : { token: "" };
+  })
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    assertToken(data.token);
+    
+    const { data: settings } = await supabaseAdmin.from("site_settings" as any).select("*").eq("id", 1).single();
+    return settings || { news_enabled: true };
+  });
+
+export const toggleNewsEnabled = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => {
+    return (d as { token: string; enabled: boolean }).token 
+      ? { token: (d as { token: string; enabled: boolean }).token, enabled: (d as { enabled: boolean }).enabled } 
+      : { token: "", enabled: true };
+  })
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    assertToken(data.token);
+    
+    await supabaseAdmin.from("site_settings" as any).update({ news_enabled: data.enabled }).eq("id", 1);
+    return { ok: true };
+  });
+
 export const adminLogin = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ password: z.string().min(1) }).parse(d))
   .handler(async ({ data }) => {
@@ -535,23 +562,108 @@ export const adminGenerateReport = createServerFn({ method: "POST" })
       supabaseAdmin.from("posts").select("content, category").gte("created_at", since),
       supabaseAdmin.from("incidents").select("title, category, severity").gte("first_seen", since),
     ]);
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("AI not configured");
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    
+    const key = process.env.OPENROUTER_API_KEY;
+    if (!key) throw new Error("AI not configured in environment");
+    
+    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+      headers: { 
+        "Content-Type": "application/json", 
+        "Authorization": `Bearer ${key}`,
+        "HTTP-Referer": "https://campusxpose.com",
+        "X-Title": "CampusXpose"
+      },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "openrouter/free",
+        max_tokens: 2000,
+        temperature: 0.6,
         messages: [
-          { role: "system", content: "Generate a concise markdown daily moderation report for an anonymous college accountability platform. Include sections: Total new incidents, Top issues, Spike alerts, Recommended actions." },
-          { role: "user", content: `New posts: ${JSON.stringify(posts.data ?? [])}\nNew incidents: ${JSON.stringify(incidents.data ?? [])}` },
+          { role: "system", content: "You are an expert AI Analyst. Generate a concise, highly visual daily moderation report for an anonymous college accountability platform.\nSTRICT RULE 1: YOU MUST RESPOND IN 100% ENGLISH ONLY.\nSTRICT RULE 2: OUTPUT ONLY PURE HTML. DO NOT WRITE ANY CONVERSATIONAL TEXT LIKE 'Here is the report'. START IMMEDIATELY WITH <div> or <table>.\n\nMUST INCLUDE:\n1. HTML Tables to present data.\n2. HTML Bar Graphs inside tables! Use: <div style='background-color:#0f172a; height:16px; border-radius:4px; width:[PERCENTAGE]%;'></div>\n\nSections: Quick Summary, Top Issues, Spike Alerts, Recommended Actions." },
+          { role: "user", content: `Today's Date is: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}\nNew posts: ${JSON.stringify(posts.data ?? [])}\nNew incidents: ${JSON.stringify(incidents.data ?? [])}` },
         ],
       }),
     });
-    if (res.status === 402) throw new Error("AI credits exhausted.");
-    if (!res.ok) throw new Error(`AI error ${res.status}`);
+    
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`Grok API error ${res.status}: ${errText}`);
+    }
     const j = await res.json();
     return { report: j.choices?.[0]?.message?.content ?? "No report generated." };
+  });
+
+export const adminGenerateGrokReport = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: z.string() }).parse(d))
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const since = new Date(Date.now() - 30 * 864e5).toISOString(); // Last 30 days
+    
+    // Fetch comprehensive data (excluding DMs)
+    const [posts, incidents, users, colleges, feedback] = await Promise.all([
+      supabaseAdmin.from("posts").select("content, category, is_incident, upvotes").gte("created_at", since).order("created_at", { ascending: false }).limit(50),
+      supabaseAdmin.from("incidents").select("title, category, severity, status").gte("first_seen", since).order("first_seen", { ascending: false }).limit(30),
+      supabaseAdmin.from("anon_users" as any).select("id", { count: 'exact', head: true }).gte("created_at", since),
+      supabaseAdmin.from("colleges").select("name, incident_count").order("incident_count", { ascending: false }).limit(10),
+      supabaseAdmin.from("feedback" as any).select("message").gte("created_at", since).order("created_at", { ascending: false }).limit(20),
+    ]);
+
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    if (!apiKey) throw new Error("AI not configured in environment");
+    
+    const prompt = `You are an expert AI Data Analyst for CampusXpose, an anonymous college accountability platform.
+Your task is to generate a concise, highly visual, and easy-to-understand report based on the following data from the last 30 days.
+
+Data:
+- New Users (last 30 days): ${users.count}
+- Posts/Reports: ${JSON.stringify(posts.data?.map(p => ({ category: p.category, incident: p.is_incident, upvotes: p.upvotes })))}
+- Incidents: ${JSON.stringify(incidents.data)}
+- Top Problematic Colleges: ${JSON.stringify(colleges.data)}
+
+Please write the report entirely in semantic HTML. 
+STRICT RULE 1: YOU MUST RESPOND IN 100% ENGLISH ONLY.
+STRICT RULE 2: OUTPUT ONLY PURE HTML. DO NOT WRITE ANY CONVERSATIONAL TEXT LIKE "Here is the report". START IMMEDIATELY WITH HTML TAGS.
+Keep it SHORT, punchy, and highly visual.
+
+MUST INCLUDE:
+1. HTML Tables to present the data clearly.
+2. HTML Bar Graphs inside the tables! To draw a graph, use this format inside a table cell: 
+   <div style="background-color:#0f172a; height:16px; border-radius:4px; width:[PERCENTAGE]%;"></div>
+
+Sections to include:
+1. Quick Summary (Bullet points)
+2. Top Issues (Table with visual bar graphs)
+3. College Leaderboard (Table with visual bar graphs)
+4. Action Items
+
+DO NOT wrap the response in markdown blocks. Output pure HTML.`;
+
+    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json", 
+        "Authorization": `Bearer ${apiKey}`,
+        "HTTP-Referer": "https://campusxpose.com",
+        "X-Title": "CampusXpose"
+      },
+      body: JSON.stringify({
+        model: "openrouter/free",
+        max_tokens: 3000,
+        temperature: 0.7,
+        messages: [
+          { role: "system", content: "You are an expert data analyst. Output only valid HTML." },
+          { role: "user", content: prompt },
+        ],
+      }),
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`OpenRouter API error ${res.status}: ${errText}`);
+    }
+    const j = await res.json();
+    return { reportHtml: j.choices?.[0]?.message?.content ?? "<p>No report generated.</p>" };
   });
 
 export const adminListCollegeRequests = createServerFn({ method: "POST" })
@@ -867,4 +979,49 @@ export const adminUpdatePushConfig = createServerFn({ method: "POST" })
     const dispatchUrl = `${data.origin}/api/send-push`;
     await supabaseAdmin.from("push_config").update({ dispatch_url: dispatchUrl }).eq("id", 1);
     return { ok: true };
+  });
+
+export const adminGetNews = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: z.string() }).parse(d))
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: news, error } = await supabaseAdmin.from("news" as any).select("*").order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return news || [];
+  });
+
+export const adminCreateNews = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: z.string(), text: z.string(), link_url: z.string().optional(), image_url: z.string().optional() }).parse(d))
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("news" as any).insert({
+      text: data.text,
+      link_url: data.link_url || null,
+      image_url: data.image_url || null,
+      is_active: true
+    });
+    if (error) throw new Error(error.message);
+    return { success: true };
+  });
+
+export const adminToggleNewsStatus = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: z.string(), id: z.string(), is_active: z.boolean() }).parse(d))
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("news" as any).update({ is_active: data.is_active }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { success: true };
+  });
+
+export const adminDeleteNews = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: z.string(), id: z.string() }).parse(d))
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("news" as any).delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { success: true };
   });

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Ghost, Shield, FileWarning, ArrowRight, Flame, TrendingUp, ArrowBigUp, EyeOff, MapPinOff } from "lucide-react";
+import { Ghost, Shield, FileWarning, ArrowRight, Flame, TrendingUp, ArrowBigUp, EyeOff, MapPinOff, Megaphone } from "lucide-react";
 import { UserSymbol } from "@/components/UserSymbol";
 import { SiteShell } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -131,6 +131,22 @@ function Home() {
           </Button>
         </div>
 
+        {/* News Page Link Button */}
+        {data?.site_settings?.news_enabled !== false && data?.news && data.news.length > 0 && (
+          <Button 
+            asChild
+            variant="outline" 
+            className="w-full mt-4 h-12 border-2 border-border bg-white hover:bg-muted shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-primary font-bold flex items-center justify-center gap-2"
+            style={{ borderRadius: WOBBLY_MD }}
+          >
+            <Link to="/news">
+              <Megaphone className="w-5 h-5 animate-pulse" /> 
+              CampusXpose Updates / News
+              <div className="bg-destructive text-white text-[10px] px-2 py-0.5 rounded-full ml-2">New</div>
+            </Link>
+          </Button>
+        )}
+
         {/* Stats Row */}
         <div className="grid grid-cols-4 gap-2 pt-2 pb-4">
           {[
@@ -154,11 +170,7 @@ function Home() {
 
       </div>
 
-
-
       <HomeAds />
-
-
 
       {/* Top reported */}
       <section className="mx-auto max-w-3xl px-4 py-16">
@@ -306,6 +318,7 @@ function Home() {
       </section>
 
       {/* Feedback */}
+      <HomeAds />
       <section id="feedback" className="mx-auto max-w-2xl px-4 py-12">
         <div className="mb-6 text-center">
           <h2 className="font-display text-3xl font-bold">💬 Feedback</h2>

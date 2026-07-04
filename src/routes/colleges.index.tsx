@@ -8,6 +8,7 @@ import { Search, Flame, MapPin, ArrowRight, SlidersHorizontal, Plus, Share2 } fr
 import { supabase } from "@/integrations/supabase/client";
 import { SiteShell } from "@/components/Footer";
 import { StarRating } from "@/components/StarRating";
+import { useAds, type Ad } from "@/hooks/useAds";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -55,6 +56,7 @@ const TYPE_COLORS: Record<string, string> = {
 
 
 function CollegesPage() {
+  const ads = useAds("college");
   const { data, isLoading } = useQuery({
     queryKey: ["colleges"],
     queryFn: async () => {
@@ -149,48 +151,65 @@ function CollegesPage() {
         <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {isLoading
             ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-56 wobbly-md bg-surface-2" />)
-            : filtered.map((c, i) => (
-                <motion.div key={c.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(i * 0.04, 0.4) }}>
-                  <div className={cn("sketch-card flex h-full flex-col p-5", i % 2 ? "rotate-1" : "-rotate-1")} style={{ borderRadius: "25px 8px 22px 8px / 8px 22px 8px 25px" }}>
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-display text-lg font-bold leading-tight">{c.name}</h3>
-                      <button
-                        onClick={() => shareCollege(c)}
-                        className="inline-flex shrink-0 items-center justify-center rounded-md border-2 border-border bg-surface-2 p-1.5 text-muted-foreground transition-transform hover:-translate-y-0.5 hover:text-foreground"
-                        title="Share"
-                      >
-                        <Share2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                    <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-                      <span className="inline-flex items-center gap-1 border border-border bg-surface-2 px-2 py-0.5 text-muted-foreground">
-                        <MapPin className="h-3 w-3" />{c.city}, {c.state}
-                      </span>
-                      {colTypes(c).map((t) => (
-                        <span key={t} className={cn("border border-border px-2 py-0.5 font-semibold", TYPE_COLORS[t] ?? "bg-surface-2 text-muted-foreground")}>{t}</span>
-                      ))}
-                    </div>
-                    <div className="mt-4 flex items-center justify-between">
-                      <StarRating value={c.total_rating} />
-                      <span className="text-xs text-muted-foreground">{c.total_reviews} reviews</span>
-                    </div>
-                    <div className="mt-3">
-                      <span className={cn("inline-flex items-center gap-1 border-2 border-border px-2.5 py-1 text-xs font-bold", c.incident_count > 50 ? "bg-accent/15 text-accent" : "bg-surface-2 text-muted-foreground")}>
-                        {c.incident_count > 50 && <Flame className="h-3.5 w-3.5" />}
-                        {c.incident_count} incidents
-                      </span>
-                    </div>
-                    <Link
-                      to="/colleges/$id"
-                      params={{ id: c.id }}
-                      className="mt-5 flex w-full items-center justify-center gap-1 border-2 border-border bg-accent px-4 py-2.5 text-sm font-bold text-accent-foreground shadow-ink transition-transform duration-100 hover:-translate-y-0.5 hover:shadow-ink-lg"
-                      style={{ borderRadius: "18px 6px 20px 6px / 6px 20px 6px 18px" }}
-                    >
-                      View Truth <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </div>
-                </motion.div>
-              ))}
+            : (() => {
+                const items = [];
+                let adIndex = 0;
+                for (let i = 0; i < filtered.length; i++) {
+                  if (i % 5 === 1 && adIndex < ads.length) {
+                    items.push(<CollegeAdCard key={`ad-${ads[adIndex].id}`} ad={ads[adIndex]} index={items.length} />);
+                    adIndex++;
+                  }
+                  const c = filtered[i];
+                  items.push(
+                    <motion.div key={c.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(items.length * 0.04, 0.4) }}>
+                      <div className={cn("sketch-card flex h-full flex-col p-5", items.length % 2 ? "rotate-1" : "-rotate-1")} style={{ borderRadius: "25px 8px 22px 8px / 8px 22px 8px 25px" }}>
+                        <div className="flex items-start justify-between gap-2">
+                          <h3 className="font-display text-lg font-bold leading-tight">{c.name}</h3>
+                          <button
+                            onClick={() => shareCollege(c)}
+                            className="inline-flex shrink-0 items-center justify-center rounded-md border-2 border-border bg-surface-2 p-1.5 text-muted-foreground transition-transform hover:-translate-y-0.5 hover:text-foreground"
+                            title="Share"
+                          >
+                            <Share2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                          <span className="inline-flex items-center gap-1 border border-border bg-surface-2 px-2 py-0.5 text-muted-foreground">
+                            <MapPin className="h-3 w-3" />{c.city}, {c.state}
+                          </span>
+                          {colTypes(c).map((t) => (
+                            <span key={t} className={cn("border border-border px-2 py-0.5 font-semibold", TYPE_COLORS[t] ?? "bg-surface-2 text-muted-foreground")}>{t}</span>
+                          ))}
+                        </div>
+                        <div className="mt-4 flex items-center justify-between">
+                          <StarRating value={c.total_rating} />
+                          <span className="text-xs text-muted-foreground">{c.total_reviews} reviews</span>
+                        </div>
+                        <div className="mt-3">
+                          <span className={cn("inline-flex items-center gap-1 border-2 border-border px-2.5 py-1 text-xs font-bold", c.incident_count > 50 ? "bg-accent/15 text-accent" : "bg-surface-2 text-muted-foreground")}>
+                            {c.incident_count > 50 && <Flame className="h-3.5 w-3.5" />}
+                            {c.incident_count} incidents
+                          </span>
+                        </div>
+                        <Link
+                          to="/colleges/$id"
+                          params={{ id: c.id }}
+                          className="mt-5 flex w-full items-center justify-center gap-1 border-2 border-border bg-accent px-4 py-2.5 text-sm font-bold text-accent-foreground shadow-ink transition-transform duration-100 hover:-translate-y-0.5 hover:shadow-ink-lg"
+                          style={{ borderRadius: "18px 6px 20px 6px / 6px 20px 6px 18px" }}
+                        >
+                          View Truth <ArrowRight className="h-4 w-4" />
+                        </Link>
+                      </div>
+                    </motion.div>
+                  );
+                }
+                while (adIndex < ads.length) {
+                  items.push(<CollegeAdCard key={`ad-${ads[adIndex].id}`} ad={ads[adIndex]} index={items.length} />);
+                  adIndex++;
+                }
+                return items;
+              })()
+          }
 
         </div>
 
@@ -329,4 +348,34 @@ function RequestCollegeDialog() {
   );
 }
 
-
+function CollegeAdCard({ ad, index }: { ad: Ad, index: number }) {
+  return (
+    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(index * 0.04, 0.4) }}>
+      <div className={cn("sketch-card flex h-full flex-col p-5 border-dashed border-accent/50", index % 2 ? "-rotate-1" : "rotate-1")} style={{ borderRadius: "25px 8px 22px 8px / 8px 22px 8px 25px", background: 'linear-gradient(135deg, rgba(255,255,255,1) 0%, rgba(245,245,255,1) 100%)' }}>
+        <div className="flex items-start justify-between gap-2 mb-1">
+          <span className="inline-flex items-center gap-1 border border-accent/20 bg-accent/10 px-2 py-0.5 text-[10px] font-bold text-accent uppercase tracking-wider">
+            Sponsored
+          </span>
+        </div>
+        <h3 className="font-display text-lg font-bold leading-tight mt-1">{ad.title}</h3>
+        {ad.media_url && (
+          <div className="mt-3 aspect-video w-full overflow-hidden rounded-md border-2 border-border">
+            <img src={ad.media_url} alt={ad.title} className="w-full h-full object-cover" loading="lazy" />
+          </div>
+        )}
+        {ad.body && <p className="mt-3 text-sm text-muted-foreground line-clamp-3">{ad.body}</p>}
+        <div className="mt-auto pt-5">
+          <a
+            href={ad.link_url || "#"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex w-full items-center justify-center gap-1 border-2 border-border bg-accent px-4 py-2.5 text-sm font-bold text-accent-foreground shadow-ink transition-transform duration-100 hover:-translate-y-0.5 hover:shadow-ink-lg"
+            style={{ borderRadius: "18px 6px 20px 6px / 6px 20px 6px 18px" }}
+          >
+            {ad.cta_label || "Learn More"} <ArrowRight className="h-4 w-4" />
+          </a>
+        </div>
+      </div>
+    </motion.div>
+  );
+}

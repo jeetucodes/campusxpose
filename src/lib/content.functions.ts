@@ -103,7 +103,7 @@ export const submitMessage = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     if (await isBanned(data.hashedId)) return { ok: true, shadow: true };
-    const { error } = await supabaseAdmin.from("community_messages" as any).insert({
+    const { data: inserted, error } = await supabaseAdmin.from("community_messages" as any).insert({
       college_id: data.collegeId,
       anonymous_user_hash: data.hashedId,
       username: data.username,
@@ -113,9 +113,9 @@ export const submitMessage = createServerFn({ method: "POST" })
       reply_to_username: data.replyToUsername ?? null,
       reply_to_content: data.replyToContent ? clean(data.replyToContent).slice(0, 280) : null,
       image_url: data.imageUrl ?? null,
-    });
+    }).select("id").single();
     if (error) throw new Error(error.message);
-    return { ok: true, shadow: false };
+    return { ok: true, shadow: false, messageId: (inserted as any)?.id };
   });
 
 export const submitRating = createServerFn({ method: "POST" })
@@ -313,7 +313,7 @@ export const submitGlobalMessage = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     if (await isBanned(data.hashedId)) return { ok: true, shadow: true };
-    const { error } = await supabaseAdmin.from("global_messages" as any).insert({
+    const { data: inserted, error } = await supabaseAdmin.from("global_messages" as any).insert({
       anonymous_user_hash: data.hashedId,
       username: data.username,
       content: clean(data.content),
@@ -321,9 +321,9 @@ export const submitGlobalMessage = createServerFn({ method: "POST" })
       reply_to_username: data.replyToUsername ?? null,
       reply_to_content: data.replyToContent ? clean(data.replyToContent).slice(0, 280) : null,
       image_url: data.imageUrl ?? null,
-    });
+    }).select("id").single();
     if (error) throw new Error(error.message);
-    return { ok: true, shadow: false };
+    return { ok: true, shadow: false, messageId: (inserted as any)?.id };
   });
 
 const USERNAME_RE = /^[a-zA-Z0-9_]+$/;

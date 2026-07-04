@@ -58,7 +58,7 @@ export function useAds(placement: Placement): Ad[] {
     load();
 
     const ch = supabase
-      .channel(`ads-${placement}`)
+      .channel(`ads-${placement}-${Math.random().toString(36).substring(2)}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "ads" }, load)
       .on("postgres_changes", { event: "*", schema: "public", table: "app_settings" }, load)
       .subscribe();

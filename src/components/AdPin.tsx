@@ -43,7 +43,7 @@ function AdMedia({ ad }: { ad: Ad }) {
  * the ad in a dialog. Cycles through multiple ads. Renders nothing when the
  * admin master switch is off or there are no ads for the placement.
  */
-export function AdPin({ placement }: { placement: "global" | "college" }) {
+export function AdPin({ placement }: { placement: "global" | "college" | "home" }) {
   const ads = useAds(placement);
   const [idx, setIdx] = useState(0);
   const [open, setOpen] = useState(false);
@@ -62,29 +62,31 @@ export function AdPin({ placement }: { placement: "global" | "college" }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex w-full items-center gap-2 border-b border-accent/20 bg-gradient-to-r from-accent/15 via-accent/10 to-transparent px-3 py-2 text-left transition-colors hover:from-accent/25"
+        className="w-full border-b border-accent/20 bg-gradient-to-r from-accent/15 via-accent/10 to-transparent transition-colors hover:from-accent/25 flex justify-center"
         aria-label={`Promotion: ${ad.title}`}
       >
-        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent/20 text-accent">
-          <Pin className="h-3 w-3" />
-        </span>
-        <span className="truncate text-sm font-medium text-foreground">{ad.title}</span>
-        <span className="ml-auto shrink-0 rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
-          Ad
-        </span>
-        {ads.length > 1 && (
-          <span className="flex shrink-0 gap-1">
-            {ads.map((_, i) => (
-              <span
-                key={i}
-                className={cn(
-                  "h-1.5 w-1.5 rounded-full transition-colors",
-                  i === idx ? "bg-accent" : "bg-accent/30",
-                )}
-              />
-            ))}
+        <div className="flex w-full max-w-5xl items-center gap-2 px-3 py-2 text-left">
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent/20 text-accent">
+            <Pin className="h-3 w-3" />
           </span>
-        )}
+          <span className="truncate text-sm font-medium text-foreground">{ad.title}</span>
+          <span className="ml-auto shrink-0 rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
+            Ad
+          </span>
+          {ads.length > 1 && (
+            <span className="flex shrink-0 gap-1">
+              {ads.map((_, i) => (
+                <span
+                  key={i}
+                  className={cn(
+                    "h-1.5 w-1.5 rounded-full transition-colors",
+                    i === idx ? "bg-accent" : "bg-accent/30",
+                  )}
+                />
+              ))}
+            </span>
+          )}
+        </div>
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>

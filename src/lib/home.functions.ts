@@ -23,6 +23,18 @@ export type HomeData = {
     college_name: string | null;
     upvotes: number | null;
   }>;
+  news: Array<{
+    id: string;
+    text: string;
+    link_url: string | null;
+    image_url: string | null;
+    created_at: string;
+    upvotes: number;
+    comment_count: number;
+  }>;
+  site_settings?: {
+    news_enabled: boolean;
+  };
 };
 
 export const getHomeData = createServerFn({ method: "GET" }).handler(
@@ -34,7 +46,7 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(
     );
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const [colleges, posts, incidents, allColleges, postRows, incidentRows, recent, users] =
+    const [colleges, posts, incidents, allColleges, postRows, incidentRows, recent, users, newsRows, siteSettingsRows] =
       await Promise.all([
         supabase.from("colleges").select("*", { count: "exact", head: true }),
         supabase.from("posts").select("*", { count: "exact", head: true }),
@@ -49,6 +61,8 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(
           .order("created_at", { ascending: false })
           .limit(12),
         supabaseAdmin.from("anon_users" as any).select("*", { count: "exact", head: true }),
+        supabase.from("news" as any).select("id, text, link_url, image_url, created_at, upvotes, comment_count").eq("is_active", true).order("created_at", { ascending: false }),
+        supabase.from("site_settings" as any).select("*").eq("id", 1).single(),
       ]);
 
     // Live report counts per college (posts + incidents).
@@ -90,6 +104,77 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(
         college_name: collegeNames.get(p.college_id as string) ?? null,
         upvotes: (p.upvotes ?? 0) as number | null,
       })),
+      news: (newsRows.data ?? []).map((n) => ({
+        id: n.id,
+        text: n.text,
+        link_url: n.link_url,
+        image_url: n.image_url,
+        created_at: n.created_at,
+        upvotes: n.upvotes || 0,
+        comment_count: n.comment_count || 0,
+      })),
+      site_settings: siteSettingsRows?.data ? { news_enabled: siteSettingsRows.data.news_enabled } : { news_enabled: true },
     };
   },
 );
+
+export const toggleLikeNewsItem = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => {
+    return (d as { id: string, action: string }).id ? { id: (d as { id: string, action: string }).id, action: (d as { action: string }).action } : { id: "", action: "like" };
+  })
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Get current
+    const { data: news } = await supabaseAdmin.from("news" as any).select("upvotes").eq("id", data.id).single();
+    if (!news) throw new Error("Not found");
+    
+    // Update
+    const change = data.action === "unlike" ? -1 : 1;
+    await supabaseAdmin.from("news" as any).update({ upvotes: Math.max(0, ((news as any).upvotes || 0) + change) }).eq("id", data.id);
+    return { ok: true };
+  });
+
+export const getNewsComments = createServerFn({ method: "GET" })
+  .validator((d: unknown) => {
+    return (d as { newsId: string }).newsId ? { newsId: (d as { newsId: string }).newsId } : { newsId: "" };
+  })
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: comments, error } = await supabaseAdmin
+      .from("news_comments" as any)
+      .select("*")
+      .eq("news_id", data.newsId)
+      .order("created_at", { ascending: true });
+      
+    if (error) throw error;
+    return comments || [];
+  });
+
+export const addNewsComment = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => {
+    const z = require("zod").z;
+    return z.object({ newsId: z.string(), username: z.string(), content: z.string().min(1).max(500) }).parse(d);
+  })
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    
+    const { data: comment, error } = await supabaseAdmin
+      .from("news_comments" as any)
+      .insert({
+        news_id: data.newsId,
+        username: data.username,
+        content: data.content,
+      })
+      .select()
+      .single();
+      
+    if (error) throw error;
+    
+    // Increment counter
+    const { data: news } = await supabaseAdmin.from("news" as any).select("comment_count").eq("id", data.newsId).single();
+    if (news) {
+      await supabaseAdmin.from("news" as any).update({ comment_count: ((news as any).comment_count || 0) + 1 }).eq("id", data.newsId);
+    }
+    
+    return comment;
+  });

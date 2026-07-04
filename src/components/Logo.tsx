@@ -1,22 +1,13 @@
-import { Ghost } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
 export function Logo({ className = "" }: { className?: string }) {
   return (
     <Link to="/" className={`flex items-center gap-2.5 font-display font-bold tracking-tight ${className}`}>
-      {/* Mobile Logo Image */}
       <img 
-        src="/icon-512.png" 
+        src="/logo.jpeg" 
         alt="CampusXpose" 
-        className="block sm:hidden h-10 w-10 shrink-0 rounded-xl object-cover border-2 border-ink shadow-sm"
+        className="h-10 w-10 shrink-0 rounded-xl object-cover border-2 border-ink shadow-sm"
       />
-      {/* Desktop Logo Icon */}
-      <span
-        className="hidden sm:grid h-10 w-10 shrink-0 -rotate-6 place-items-center border-2 border-ink bg-postit text-ink shadow-ink"
-        style={{ borderRadius: "16px 6px 18px 6px / 6px 18px 6px 16px" }}
-      >
-        <Ghost className="h-5 w-5" strokeWidth={2.5} />
-      </span>
       
       <span className="hidden sm:inline whitespace-nowrap text-xl sm:text-2xl">
         Campus
