@@ -156,7 +156,8 @@ export const addNewsComment = createServerFn({ method: "POST" })
     return z.object({ 
       newsId: z.string(), 
       username: z.string().nullable().optional(), 
-      content: z.string().min(1).max(500) 
+      content: z.string().min(1).max(500),
+      hashedId: z.string().optional()
     }).parse(d);
   })
   .handler(async ({ data }) => {
@@ -168,6 +169,7 @@ export const addNewsComment = createServerFn({ method: "POST" })
         news_id: data.newsId,
         username: data.username || "Anonymous",
         content: data.content,
+        anonymous_user_hash: data.hashedId || null
       })
       .select()
       .single();
@@ -182,3 +184,40 @@ export const addNewsComment = createServerFn({ method: "POST" })
     
     return comment;
   });
+
+export const deleteNewsComment = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => {
+    return z.object({ 
+      commentId: z.string(),
+      newsId: z.string(),
+      hashedId: z.string()
+    }).parse(d);
+  })
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    
+    const { data: comment } = await supabaseAdmin
+      .from("news_comments" as any)
+      .select("anonymous_user_hash")
+      .eq("id", data.commentId)
+      .single();
+      
+    if (!comment || comment.anonymous_user_hash !== data.hashedId) {
+      throw new Error("Not authorized");
+    }
+
+    const { error } = await supabaseAdmin
+      .from("news_comments" as any)
+      .delete()
+      .eq("id", data.commentId);
+      
+    if (error) throw error;
+    
+    const { data: news } = await supabaseAdmin.from("news" as any).select("comment_count").eq("id", data.newsId).single();
+    if (news) {
+      await supabaseAdmin.from("news" as any).update({ comment_count: Math.max(0, ((news as any).comment_count || 0) - 1) }).eq("id", data.newsId);
+    }
+    
+    return { ok: true };
+  });
+

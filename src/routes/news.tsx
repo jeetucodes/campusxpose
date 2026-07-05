@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Megaphone, Heart, Share2, ArrowRight, ArrowLeft, MessageSquare, Send } from "lucide-react";
+import { Megaphone, Heart, Share2, ArrowRight, ArrowLeft, MessageSquare, Send, Trash2 } from "lucide-react";
 import { SiteShell } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { getHomeData, toggleLikeNewsItem, getNewsComments, addNewsComment } from "@/lib/home.functions";
+import { getHomeData, toggleLikeNewsItem, getNewsComments, addNewsComment, deleteNewsComment } from "@/lib/home.functions";
 import { toast } from "sonner";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -204,7 +204,7 @@ function NewsComments({ newsId }: { newsId: string }) {
   });
 
   const postComment = useMutation({
-    mutationFn: () => addNewsComment({ data: { newsId, username: identity.username, content } }),
+    mutationFn: () => addNewsComment({ data: { newsId, username: identity.username, content, hashedId: identity.hashedId || undefined } }),
     onSuccess: (newComment) => {
       setContent("");
       queryClient.setQueryData(["news-comments", newsId], (old: any) => [...(old || []), newComment]);
@@ -220,6 +220,24 @@ function NewsComments({ newsId }: { newsId: string }) {
     },
     onError: () => {
       toast.error("Failed to post comment.");
+    }
+  });
+
+  const deleteComment = useMutation({
+    mutationFn: (commentId: string) => deleteNewsComment({ data: { commentId, newsId, hashedId: identity.hashedId! } }),
+    onSuccess: (_, commentId) => {
+      queryClient.setQueryData(["news-comments", newsId], (old: any) => (old || []).filter((c: any) => c.id !== commentId));
+      queryClient.setQueryData(["home"], (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          news: old.news.map((n: any) => n.id === newsId ? { ...n, comment_count: Math.max(0, (n.comment_count || 0) - 1) } : n)
+        };
+      });
+      toast.success("Comment deleted");
+    },
+    onError: () => {
+      toast.error("Failed to delete comment");
     }
   });
 
@@ -244,7 +262,7 @@ function NewsComments({ newsId }: { newsId: string }) {
         ) : (
           <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
             {comments.map((c: any) => (
-              <div key={c.id} className="bg-white border-2 border-border p-3" style={{ borderRadius: WOBBLY_MD }}>
+              <div key={c.id} className="bg-white border-2 border-border p-3 group relative" style={{ borderRadius: WOBBLY_MD }}>
                 <div className="flex items-center gap-2 mb-1">
                   <UserSymbol username={c.username} size="sm" />
                   <span className="font-bold text-xs text-foreground">{c.username}</span>
@@ -253,6 +271,16 @@ function NewsComments({ newsId }: { newsId: string }) {
                   </span>
                 </div>
                 <p className="text-sm font-medium">{c.content}</p>
+                {identity.hashedId && c.anonymous_user_hash === identity.hashedId && (
+                  <button 
+                    onClick={() => deleteComment.mutate(c.id)}
+                    disabled={deleteComment.isPending}
+                    className="absolute right-3 top-3 text-muted-foreground/60 hover:text-destructive transition-colors bg-white/80 rounded p-1"
+                    title="Delete comment"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             ))}
           </div>
