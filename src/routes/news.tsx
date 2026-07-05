@@ -60,29 +60,6 @@ function NewsPage() {
     }
   });
 
-  const handleShare = async (item: any) => {
-    const text = `📢 ${item.text || "CampusXpose Update"}\n${item.link_url || ""}\nRead more on CampusXpose!`;
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: 'CampusXpose News',
-          text: text,
-          url: window.location.href,
-        });
-      } else {
-        throw new Error("Share not supported");
-      }
-    } catch (err: any) {
-      if (err.name === 'AbortError') return;
-      try {
-        await navigator.clipboard.writeText(text);
-        toast.success("Copied to clipboard!");
-      } catch (e) {
-        toast.error("Failed to copy link");
-      }
-    }
-  };
-
   return (
     <SiteShell hideFooter>
       <div className="mx-auto max-w-7xl px-4 py-8 md:py-12">
@@ -105,7 +82,7 @@ function NewsPage() {
           ) : (
             news.map((item, i) => (
               <div key={item.id} className="break-inside-avoid mb-6">
-                <NewsCard item={item} i={i} toggleLike={toggleLike} likedItems={likedItems} handleShare={handleShare} />
+                <NewsCard item={item} i={i} toggleLike={toggleLike} likedItems={likedItems} />
               </div>
             ))
           )}
@@ -115,7 +92,7 @@ function NewsPage() {
   );
 }
 
-function NewsCard({ item, i, toggleLike, likedItems, handleShare }: any) {
+function NewsCard({ item, i, toggleLike, likedItems }: any) {
   const [showComments, setShowComments] = useState(false);
 
   return (
@@ -172,16 +149,6 @@ function NewsCard({ item, i, toggleLike, likedItems, handleShare }: any) {
           >
             <MessageSquare className="w-5 h-5" />
             <span className="font-bold">{item.comment_count || 0}</span>
-          </Button>
-          
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => handleShare(item)}
-            className="flex items-center gap-1.5 px-2 text-muted-foreground hover:text-foreground"
-          >
-            <Share2 className="w-5 h-5" />
-            <span className="font-bold text-xs uppercase">Share</span>
           </Button>
         </div>
       </div>

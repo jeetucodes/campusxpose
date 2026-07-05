@@ -59,7 +59,7 @@ function StarDisplay({ rating, count }: { rating: number; count?: number }) {
 
 function ProjectCard({ project, index }: { project: Project; index: number }) {
   const tilt = index % 2 === 0 ? "rotate-[0.5deg]" : "-rotate-[0.5deg]";
-  
+
   return (
     <Link
       to="/projects/$id"
@@ -83,7 +83,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
             <FolderOpen className="h-12 w-12 text-ink/30" strokeWidth={1} />
           </div>
         )}
-        
+
         {/* Collab Badge */}
         {project.looking_for_collaborators && (
           <div className="absolute right-3 top-3">
@@ -171,7 +171,7 @@ function ProjectsPage() {
       {/* Hand-drawn Hero Header */}
       <div className="relative border-b-2 border-ink bg-white overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-        
+
         <div className="mx-auto max-w-5xl px-4 py-12 relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="text-center md:text-left">
             <h1 className="font-display text-4xl font-black text-foreground sm:text-5xl relative inline-block">
@@ -207,7 +207,7 @@ function ProjectsPage() {
               <Filter className="h-4 w-4" />
               {filtersOpen ? "Hide Filters" : "Filter & Sort"}
             </button>
-            
+
             <div className="flex items-center gap-2">
               <span className="text-sm font-bold text-muted-foreground font-display">
                 {projects.length} project{projects.length !== 1 ? 's' : ''}
