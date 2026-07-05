@@ -12,6 +12,7 @@ import {
   Trash2,
   Users,
   X,
+  Share2,
   MessageSquare,
   CheckCircle2,
   XCircle,
@@ -564,6 +565,30 @@ function ProjectDetailPage() {
     }
   };
 
+  const handleShare = async () => {
+    if (!data?.project) return;
+    const text = `🛠️ Check out this project on CampusXpose: ${data.project.title}\nBy @${data.project.owner_username}\n\nRead more & collaborate!`;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: data.project.title,
+          text: text,
+          url: window.location.href,
+        });
+      } else {
+        throw new Error("Share not supported");
+      }
+    } catch (err: any) {
+      if (err.name === 'AbortError') return;
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success("Link copied to clipboard!");
+      } catch (e) {
+        toast.error("Failed to copy link");
+      }
+    }
+  };
+
   if (loading) {
     return (
       <SiteShell hideFooter>
@@ -597,34 +622,43 @@ function ProjectDetailPage() {
 
         <div className="mx-auto max-w-4xl px-4">
           {/* Top Nav */}
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
             <Link to="/projects" className="inline-flex items-center gap-1.5 text-sm font-bold text-muted-foreground transition-colors hover:text-ink">
               <ArrowLeft className="h-4 w-4" /> Back to Projects
             </Link>
 
-            {/* Owner actions */}
-            {isOwner && (
-              <div className="flex items-center gap-3">
-                <Button
-                  size="sm" variant="outline"
-                  className="gap-2 border-2 border-ink bg-white font-bold text-foreground shadow-ink-soft hover:-translate-y-0.5 wobbly-sm"
-                  onClick={() => setEditOpen(true)}
-                  style={{ borderRadius: "12px 4px 14px 4px / 4px 14px 4px 12px" }}
-                >
-                  <Pencil className="h-4 w-4" /> Edit
-                </Button>
-                <Button
-                  size="sm" variant="outline"
-                  className="gap-2 border-2 border-destructive bg-white font-bold text-destructive shadow-ink-soft hover:-translate-y-0.5 hover:bg-destructive/10 wobbly-sm"
-                  onClick={handleDelete}
-                  disabled={deleting}
-                  style={{ borderRadius: "12px 4px 14px 4px / 4px 14px 4px 12px" }}
-                >
-                  {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                  Delete
-                </Button>
-              </div>
-            )}
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                size="sm" variant="outline"
+                className="gap-2 border-2 border-ink bg-white font-bold text-foreground shadow-ink-soft hover:-translate-y-0.5 wobbly-sm"
+                onClick={handleShare}
+                style={{ borderRadius: "12px 4px 14px 4px / 4px 14px 4px 12px" }}
+              >
+                <Share2 className="h-4 w-4" /> Share
+              </Button>
+              {isOwner && (
+                <>
+                  <Button
+                    size="sm" variant="outline"
+                    className="gap-2 border-2 border-ink bg-white font-bold text-foreground shadow-ink-soft hover:-translate-y-0.5 wobbly-sm"
+                    onClick={() => setEditOpen(true)}
+                    style={{ borderRadius: "12px 4px 14px 4px / 4px 14px 4px 12px" }}
+                  >
+                    <Pencil className="h-4 w-4" /> Edit
+                  </Button>
+                  <Button
+                    size="sm" variant="outline"
+                    className="gap-2 border-2 border-destructive bg-white font-bold text-destructive shadow-ink-soft hover:-translate-y-0.5 hover:bg-destructive/10 wobbly-sm"
+                    onClick={handleDelete}
+                    disabled={deleting}
+                    style={{ borderRadius: "12px 4px 14px 4px / 4px 14px 4px 12px" }}
+                  >
+                    {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                    Delete
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
 
           {/* Main Project Card */}
