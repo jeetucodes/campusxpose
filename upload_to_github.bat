@@ -19,7 +19,9 @@ git add .
 
 echo.
 echo [4/5] Committing changes...
-git commit -m "Add recovery key login, delete account functionality to user profile"
+set /p commit_msg="Enter commit message (or press enter for default): "
+if "%commit_msg%"=="" set commit_msg=Update project
+git commit -m "%commit_msg%"
 
 echo.
 echo [4.5/5] Pulling remote changes to sync with Lovable...

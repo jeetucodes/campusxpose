@@ -85,25 +85,29 @@ function NewsPage() {
 
   return (
     <SiteShell hideFooter>
-      <div className="mx-auto max-w-2xl px-4 py-8">
-        <div className="mb-6 flex items-center gap-4">
-          <Button asChild variant="outline" size="icon" className="h-10 w-10 border-2 border-border bg-white" style={{ borderRadius: WOBBLY_MD }}>
+      <div className="mx-auto max-w-7xl px-4 py-8 md:py-12">
+        <div className="mb-8 flex items-center gap-4">
+          <Button asChild variant="outline" size="icon" className="h-10 w-10 border-2 border-border bg-white hover:bg-accent/10 transition-colors" style={{ borderRadius: WOBBLY_MD }}>
             <Link to="/">
               <ArrowLeft className="h-5 w-5" />
             </Link>
           </Button>
-          <h1 className="font-display text-3xl font-bold flex items-center gap-2">
-            <Megaphone className="h-8 w-8 text-primary" /> Updates / News
+          <h1 className="font-display text-3xl md:text-4xl font-bold flex items-center gap-3">
+            <Megaphone className="h-8 w-8 md:h-10 md:w-10 text-primary" /> Updates
           </h1>
         </div>
 
-        <div className="space-y-6">
+        <div className="columns-1 md:columns-2 lg:columns-3 gap-6">
           {news.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground border-2 border-border bg-white" style={{ borderRadius: WOBBLY_MD }}>
+            <div className="break-inside-avoid mb-6 text-center py-12 text-muted-foreground border-2 border-border bg-white" style={{ borderRadius: WOBBLY_MD }}>
               Abhi koi latest updates nahi hain!
             </div>
           ) : (
-            news.map((item, i) => <NewsCard key={item.id} item={item} i={i} toggleLike={toggleLike} likedItems={likedItems} handleShare={handleShare} />)
+            news.map((item, i) => (
+              <div key={item.id} className="break-inside-avoid mb-6">
+                <NewsCard item={item} i={i} toggleLike={toggleLike} likedItems={likedItems} handleShare={handleShare} />
+              </div>
+            ))
           )}
         </div>
       </div>
@@ -116,32 +120,34 @@ function NewsCard({ item, i, toggleLike, likedItems, handleShare }: any) {
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: i * 0.1 }}
-      className={`flex flex-col border-2 border-border bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] ${i % 2 ? "rotate-1" : "-rotate-1"}`}
+      transition={{ delay: (i % 5) * 0.1 }}
+      className="flex flex-col border-2 border-border bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all duration-200"
       style={{ borderRadius: WOBBLY_MD }}
     >
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-bold text-muted-foreground bg-accent/10 px-2 py-1 border-border border">
+      <div className="p-5 flex flex-col h-full">
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-xs font-bold text-muted-foreground bg-accent/10 px-2.5 py-1 border-border border rounded-full">
             {new Date(item.created_at).toLocaleDateString()}
           </span>
         </div>
 
         {item.image_url && (
-          <img src={item.image_url} alt="News thumbnail" className="w-full h-auto max-h-[500px] object-contain bg-muted/20 rounded-md border-2 border-border mb-3" />
+          <div className="w-full mb-4 rounded-xl overflow-hidden border-2 border-border bg-muted/10">
+            <img src={item.image_url} alt="News thumbnail" className="w-full h-auto max-h-[400px] object-cover hover:scale-105 transition-transform duration-500" />
+          </div>
         )}
         {item.text && item.text.trim() !== "" && (
-          <p className="font-bold text-foreground text-sm flex-1">{item.text}</p>
+          <p className="font-medium text-foreground text-base leading-relaxed flex-1 mb-2">{item.text}</p>
         )}
         {item.link_url && (
-          <a href={item.link_url} target="_blank" rel="noreferrer" className="text-primary text-xs font-bold mt-3 underline flex items-center gap-1 hover:text-accent">
+          <a href={item.link_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-primary text-sm font-bold mt-2 underline-offset-4 hover:underline hover:text-accent w-fit">
             Read more <ArrowRight className="w-4 h-4" />
           </a>
         )}
         
-        <div className="flex items-center gap-4 mt-4 pt-3 border-t-2 border-border/50">
+        <div className="flex items-center gap-3 mt-5 pt-4 border-t-2 border-border/20">
           <Button 
             variant="ghost" 
             size="sm" 

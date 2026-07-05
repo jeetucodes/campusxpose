@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
+import { z } from "zod";
 
 export type HomeData = {
   collegeCount: number;
@@ -135,7 +136,7 @@ export const toggleLikeNewsItem = createServerFn({ method: "POST" })
   });
 
 export const getNewsComments = createServerFn({ method: "GET" })
-  .validator((d: unknown) => {
+  .inputValidator((d: unknown) => {
     return (d as { newsId: string }).newsId ? { newsId: (d as { newsId: string }).newsId } : { newsId: "" };
   })
   .handler(async ({ data }) => {
@@ -152,8 +153,11 @@ export const getNewsComments = createServerFn({ method: "GET" })
 
 export const addNewsComment = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => {
-    const z = require("zod").z;
-    return z.object({ newsId: z.string(), username: z.string(), content: z.string().min(1).max(500) }).parse(d);
+    return z.object({ 
+      newsId: z.string(), 
+      username: z.string().nullable().optional(), 
+      content: z.string().min(1).max(500) 
+    }).parse(d);
   })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -162,7 +166,7 @@ export const addNewsComment = createServerFn({ method: "POST" })
       .from("news_comments" as any)
       .insert({
         news_id: data.newsId,
-        username: data.username,
+        username: data.username || "Anonymous",
         content: data.content,
       })
       .select()
