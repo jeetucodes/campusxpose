@@ -19,6 +19,8 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as NewsRouteImport } from './routes/news'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as GlobalRouteImport } from './routes/global'
+import { Route as ConfessionsRouteImport } from './routes/confessions'
+import { Route as ConfessRouteImport } from './routes/confess'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProjectsIndexRouteImport } from './routes/projects.index'
 import { Route as CollegesIndexRouteImport } from './routes/colleges.index'
@@ -96,6 +98,16 @@ const MessagesRoute = MessagesRouteImport.update({
 const GlobalRoute = GlobalRouteImport.update({
   id: '/global',
   path: '/global',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfessionsRoute = ConfessionsRouteImport.update({
+  id: '/confessions',
+  path: '/confessions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfessRoute = ConfessRouteImport.update({
+  id: '/confess',
+  path: '/confess',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -241,6 +253,8 @@ const AdminAdsRoute = AdminAdsRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/confess': typeof ConfessRoute
+  '/confessions': typeof ConfessionsRoute
   '/global': typeof GlobalRoute
   '/messages': typeof MessagesRoute
   '/news': typeof NewsRoute
@@ -281,6 +295,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/confess': typeof ConfessRoute
+  '/confessions': typeof ConfessionsRoute
   '/global': typeof GlobalRoute
   '/messages': typeof MessagesRoute
   '/news': typeof NewsRoute
@@ -322,6 +338,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/confess': typeof ConfessRoute
+  '/confessions': typeof ConfessionsRoute
   '/global': typeof GlobalRoute
   '/messages': typeof MessagesRoute
   '/news': typeof NewsRoute
@@ -364,6 +382,8 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/confess'
+    | '/confessions'
     | '/global'
     | '/messages'
     | '/news'
@@ -404,6 +424,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/confess'
+    | '/confessions'
     | '/global'
     | '/messages'
     | '/news'
@@ -444,6 +466,8 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/confess'
+    | '/confessions'
     | '/global'
     | '/messages'
     | '/news'
@@ -485,6 +509,8 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ConfessRoute: typeof ConfessRoute
+  ConfessionsRoute: typeof ConfessionsRoute
   GlobalRoute: typeof GlobalRoute
   MessagesRoute: typeof MessagesRoute
   NewsRoute: typeof NewsRoute
@@ -594,6 +620,20 @@ declare module '@tanstack/react-router' {
       path: '/global'
       fullPath: '/global'
       preLoaderRoute: typeof GlobalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/confessions': {
+      id: '/confessions'
+      path: '/confessions'
+      fullPath: '/confessions'
+      preLoaderRoute: typeof ConfessionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/confess': {
+      id: '/confess'
+      path: '/confess'
+      fullPath: '/confess'
+      preLoaderRoute: typeof ConfessRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -797,6 +837,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ConfessRoute: ConfessRoute,
+  ConfessionsRoute: ConfessionsRoute,
   GlobalRoute: GlobalRoute,
   MessagesRoute: MessagesRoute,
   NewsRoute: NewsRoute,

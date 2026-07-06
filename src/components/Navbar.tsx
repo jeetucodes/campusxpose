@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Shield, ChevronDown, Trash2, UserRound, BellRing } from "lucide-react";
+import { Shield, ChevronDown, Trash2, UserRound, BellRing, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { UserSymbol } from "@/components/UserSymbol";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
@@ -57,7 +57,7 @@ export function Navbar() {
             { to: "/colleges", label: "Colleges" },
             { to: "/global", label: "Global" },
             { to: "/projects/", label: "Projects" },
-            { to: "/messages", label: "DMs" },
+            { to: "/confessions", label: "Confessions" },
             { to: "/report", label: "Report" },
           ]
             .map((item) => (
@@ -70,11 +70,6 @@ export function Navbar() {
               style={{ borderRadius: "16px 6px 18px 6px / 6px 18px 6px 16px" }}
             >
               {item.label}
-              {item.to === "/messages" && unread > 0 && (
-                <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[10px] font-bold leading-none text-accent-foreground">
-                  {unread > 9 ? "9+" : unread}
-                </span>
-              )}
             </Link>
           ))}
         </div>
@@ -143,6 +138,19 @@ export function Navbar() {
             </Button>
           </DropdownMenuContent>
         </DropdownMenu>
+        {/* DMs icon button — right of profile */}
+        <Link
+          to="/messages"
+          className="relative flex items-center justify-center w-9 h-9 border-2 border-ink bg-white shadow-ink transition-transform duration-100 hover:-rotate-2"
+          style={{ borderRadius: "14px 5px 16px 5px / 5px 16px 5px 14px" }}
+        >
+          <MessageCircle className="h-4 w-4" />
+          {unread > 0 && (
+            <span className="absolute -right-1.5 -top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[10px] font-bold leading-none text-accent-foreground">
+              {unread > 9 ? "9+" : unread}
+            </span>
+          )}
+        </Link>
         </div>
         <ForgetMeDialog open={forgetOpen} onOpenChange={setForgetOpen} />
         <PushPermissionPrompt />
