@@ -4,7 +4,6 @@ import { Megaphone, Heart, Share2, ArrowRight } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { upvoteNewsItem } from "@/lib/home.functions";
-import { toast } from "sonner";
 import { type HomeData } from "@/lib/home.functions";
 
 const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
@@ -44,13 +43,12 @@ export function NewsModal({ news }: { news: HomeData["news"] }) {
     } catch (err: any) {
       // If user cancelled the share, don't fallback to clipboard
       if (err.name === 'AbortError') return;
-      
-      // Fallback to clipboard for browsers that don't support Web Share API
+
+      // Silent fallback: copy to clipboard without showing any notification
       try {
         await navigator.clipboard.writeText(text);
-        toast.success("Copied to clipboard!");
-      } catch (e) {
-        toast.error("Failed to copy link");
+      } catch (_) {
+        // ignore — clipboard not available either
       }
     }
   };

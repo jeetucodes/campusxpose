@@ -580,11 +580,11 @@ function ProjectDetailPage() {
       }
     } catch (err: any) {
       if (err.name === 'AbortError') return;
+      // Silent fallback: copy to clipboard without showing any notification
       try {
         await navigator.clipboard.writeText(window.location.href);
-        toast.success("Link copied to clipboard!");
-      } catch (e) {
-        toast.error("Failed to copy link");
+      } catch (_) {
+        // ignore — clipboard not available either
       }
     }
   };

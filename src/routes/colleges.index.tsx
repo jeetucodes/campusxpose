@@ -152,63 +152,63 @@ function CollegesPage() {
           {isLoading
             ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-56 wobbly-md bg-surface-2" />)
             : (() => {
-                const items = [];
-                let adIndex = 0;
-                for (let i = 0; i < filtered.length; i++) {
-                  if (i % 5 === 1 && adIndex < ads.length) {
-                    items.push(<CollegeAdCard key={`ad-${ads[adIndex].id}`} ad={ads[adIndex]} index={items.length} />);
-                    adIndex++;
-                  }
-                  const c = filtered[i];
-                  items.push(
-                    <motion.div key={c.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(items.length * 0.04, 0.4) }}>
-                      <div className={cn("sketch-card flex h-full flex-col p-5", items.length % 2 ? "rotate-1" : "-rotate-1")} style={{ borderRadius: "25px 8px 22px 8px / 8px 22px 8px 25px" }}>
-                        <div className="flex items-start justify-between gap-2">
-                          <h3 className="font-display text-lg font-bold leading-tight">{c.name}</h3>
-                          <button
-                            onClick={() => shareCollege(c)}
-                            className="inline-flex shrink-0 items-center justify-center rounded-md border-2 border-border bg-surface-2 p-1.5 text-muted-foreground transition-transform hover:-translate-y-0.5 hover:text-foreground"
-                            title="Share"
-                          >
-                            <Share2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-                          <span className="inline-flex items-center gap-1 border border-border bg-surface-2 px-2 py-0.5 text-muted-foreground">
-                            <MapPin className="h-3 w-3" />{c.city}, {c.state}
-                          </span>
-                          {colTypes(c).map((t) => (
-                            <span key={t} className={cn("border border-border px-2 py-0.5 font-semibold", TYPE_COLORS[t] ?? "bg-surface-2 text-muted-foreground")}>{t}</span>
-                          ))}
-                        </div>
-                        <div className="mt-4 flex items-center justify-between">
-                          <StarRating value={c.total_rating} />
-                          <span className="text-xs text-muted-foreground">{c.total_reviews} reviews</span>
-                        </div>
-                        <div className="mt-3">
-                          <span className={cn("inline-flex items-center gap-1 border-2 border-border px-2.5 py-1 text-xs font-bold", c.incident_count > 50 ? "bg-accent/15 text-accent" : "bg-surface-2 text-muted-foreground")}>
-                            {c.incident_count > 50 && <Flame className="h-3.5 w-3.5" />}
-                            {c.incident_count} incidents
-                          </span>
-                        </div>
-                        <Link
-                          to="/colleges/$id"
-                          params={{ id: c.id }}
-                          className="mt-5 flex w-full items-center justify-center gap-1 border-2 border-border bg-accent px-4 py-2.5 text-sm font-bold text-accent-foreground shadow-ink transition-transform duration-100 hover:-translate-y-0.5 hover:shadow-ink-lg"
-                          style={{ borderRadius: "18px 6px 20px 6px / 6px 20px 6px 18px" }}
-                        >
-                          View Truth <ArrowRight className="h-4 w-4" />
-                        </Link>
-                      </div>
-                    </motion.div>
-                  );
-                }
-                while (adIndex < ads.length) {
+              const items = [];
+              let adIndex = 0;
+              for (let i = 0; i < filtered.length; i++) {
+                if (i % 5 === 1 && adIndex < ads.length) {
                   items.push(<CollegeAdCard key={`ad-${ads[adIndex].id}`} ad={ads[adIndex]} index={items.length} />);
                   adIndex++;
                 }
-                return items;
-              })()
+                const c = filtered[i];
+                items.push(
+                  <motion.div key={c.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(items.length * 0.04, 0.4) }}>
+                    <div className={cn("sketch-card flex h-full flex-col p-5", items.length % 2 ? "rotate-1" : "-rotate-1")} style={{ borderRadius: "25px 8px 22px 8px / 8px 22px 8px 25px" }}>
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="font-display text-lg font-bold leading-tight">{c.name}</h3>
+                        <button
+                          onClick={() => shareCollege(c)}
+                          className="inline-flex shrink-0 items-center justify-center rounded-md border-2 border-border bg-surface-2 p-1.5 text-muted-foreground transition-transform hover:-translate-y-0.5 hover:text-foreground"
+                          title="Share"
+                        >
+                          <Share2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                        <span className="inline-flex items-center gap-1 border border-border bg-surface-2 px-2 py-0.5 text-muted-foreground">
+                          <MapPin className="h-3 w-3" />{c.city}, {c.state}
+                        </span>
+                        {colTypes(c).map((t) => (
+                          <span key={t} className={cn("border border-border px-2 py-0.5 font-semibold", TYPE_COLORS[t] ?? "bg-surface-2 text-muted-foreground")}>{t}</span>
+                        ))}
+                      </div>
+                      <div className="mt-4 flex items-center justify-between">
+                        <StarRating value={c.total_rating} />
+                        <span className="text-xs text-muted-foreground">{c.total_reviews} reviews</span>
+                      </div>
+                      <div className="mt-3">
+                        <span className={cn("inline-flex items-center gap-1 border-2 border-border px-2.5 py-1 text-xs font-bold", c.incident_count > 50 ? "bg-accent/15 text-accent" : "bg-surface-2 text-muted-foreground")}>
+                          {c.incident_count > 50 && <Flame className="h-3.5 w-3.5" />}
+                          {c.incident_count} incidents
+                        </span>
+                      </div>
+                      <Link
+                        to="/colleges/$id"
+                        params={{ id: c.id }}
+                        className="mt-5 flex w-full items-center justify-center gap-1 border-2 border-border bg-accent px-4 py-2.5 text-sm font-bold text-accent-foreground shadow-ink transition-transform duration-100 hover:-translate-y-0.5 hover:shadow-ink-lg"
+                        style={{ borderRadius: "18px 6px 20px 6px / 6px 20px 6px 18px" }}
+                      >
+                        View Truth <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </div>
+                  </motion.div>
+                );
+              }
+              while (adIndex < ads.length) {
+                items.push(<CollegeAdCard key={`ad-${ads[adIndex].id}`} ad={ads[adIndex]} index={items.length} />);
+                adIndex++;
+              }
+              return items;
+            })()
           }
 
         </div>
@@ -229,22 +229,19 @@ function CollegesPage() {
 async function shareCollege(c: Col) {
   const url = `${typeof window !== "undefined" ? window.location.origin : ""}/colleges/${c.id}`;
   const text = `Check out ${c.name} on CampusXpose`;
-  const copyFallback = () => {
-    if (typeof navigator !== "undefined" && navigator.clipboard) {
-      navigator.clipboard.writeText(url).then(() => toast.success("Link copied!")).catch(() => toast.error("Couldn't copy link"));
-    } else {
-      toast.error("Sharing not supported on this device");
-    }
-  };
+
   if (typeof navigator !== "undefined" && navigator.share) {
     try {
       await navigator.share({ title: c.name, text, url });
     } catch (e: any) {
-      // User cancelled or permission denied (e.g. inside an iframe) — fall back to copy.
-      if (e?.name !== "AbortError") copyFallback();
+      // User dismissed the share sheet — do nothing
+      if (e?.name === "AbortError") return;
+      // navigator.share failed (e.g. iframe restriction) — silent clipboard fallback
+      try { await navigator.clipboard.writeText(url); } catch (_) { /* ignore */ }
     }
   } else {
-    copyFallback();
+    // navigator.share not available — silent clipboard fallback
+    try { await navigator.clipboard?.writeText(url); } catch (_) { /* ignore */ }
   }
 }
 
