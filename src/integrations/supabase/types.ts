@@ -198,6 +198,8 @@ export type Database = {
           total_reviews: number | null
           type: Database["public"]["Enums"]["college_type"]
           types: Database["public"]["Enums"]["college_type"][]
+          website: string | null
+          fee_structure: string | null
         }
         Insert: {
           city: string
@@ -214,6 +216,8 @@ export type Database = {
           total_reviews?: number | null
           type: Database["public"]["Enums"]["college_type"]
           types?: Database["public"]["Enums"]["college_type"][]
+          website?: string | null
+          fee_structure?: string | null
         }
         Update: {
           city?: string
@@ -230,6 +234,8 @@ export type Database = {
           total_reviews?: number | null
           type?: Database["public"]["Enums"]["college_type"]
           types?: Database["public"]["Enums"]["college_type"][]
+          website?: string | null
+          fee_structure?: string | null
         }
         Relationships: []
       }

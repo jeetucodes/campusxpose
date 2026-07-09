@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
-  Zap, MessageCircle, ArrowUp, ArrowDown, Star, TrendingUp, TrendingDown, Minus,
+  Zap, MessageCircle, ArrowUp, ArrowDown, Star, TrendingUp, TrendingDown, Minus, Globe, Banknote, MapPin
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteShell } from "@/components/Footer";
@@ -153,33 +153,71 @@ function CollegeDetail() {
     { key: "value_rating", label: "Value" },
   ];
 
+  const [feeModalOpen, setFeeModalOpen] = useState(false);
 
   return (
     <SiteShell hideFooter>
       <div className="mx-auto max-w-4xl px-4 py-8">
         {/* Header */}
         <div className="border-2 border-ink bg-white p-6 shadow-ink-soft" style={{ borderRadius: "18px 6px 20px 6px / 6px 20px 6px 18px" }}>
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <h1 className="font-display text-3xl font-bold">{c.name}</h1>
-              <p className="mt-1 text-sm font-medium text-muted-foreground">{c.city}, {c.state} · {((c as any).types?.length ? (c as any).types : [c.type]).join(", ")} · Est. {c.established ?? "—"}</p>
+          <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+            <div className="flex-1">
+              <h1 className="font-display text-4xl font-black text-ink tracking-tight">{c.name}</h1>
+              
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-sm font-semibold text-muted-foreground">
+                <span className="flex items-center gap-1 bg-surface px-2 py-1 rounded-md border border-ink/10"><MapPin className="h-3 w-3" /> {c.city}, {c.state}</span>
+                <span className="bg-surface px-2 py-1 rounded-md border border-ink/10">{((c as any).types?.length ? (c as any).types : [c.type]).join(", ")}</span>
+                <span className="bg-surface px-2 py-1 rounded-md border border-ink/10">Est. {c.established ?? "—"}</span>
+              </div>
+              
+              <div className="mt-4 flex flex-wrap gap-2">
+                {(c as any).website && (
+                  <Button asChild variant="outline" size="sm" className="border-2 border-ink shadow-ink-soft font-bold rounded-lg hover:-translate-y-0.5 transition-transform">
+                    <a href={(c as any).website.startsWith('http') ? (c as any).website : `https://${(c as any).website}`} target="_blank" rel="noreferrer">
+                      <Globe className="mr-2 h-4 w-4" /> Official Website
+                    </a>
+                  </Button>
+                )}
+                {(c as any).fee_structure && (
+                  <Button variant="default" size="sm" onClick={() => setFeeModalOpen(true)} className="border-2 border-ink shadow-ink-soft font-bold rounded-lg hover:-translate-y-0.5 transition-transform bg-primary text-primary-foreground hover:bg-primary/90">
+                    <Banknote className="mr-2 h-4 w-4" /> View Fee Structure
+                  </Button>
+                )}
+              </div>
+              
+              {(c as any).description && (
+                <div className="mt-5 text-sm md:text-base text-ink/80 leading-relaxed font-medium">
+                  {(c as any).description}
+                </div>
+              )}
             </div>
-            <div className="text-right">
-              <div className={cn("font-display text-5xl font-extrabold", ratingColor(c.total_rating ?? 0))}>{(c.total_rating ?? 0).toFixed(1)}</div>
-              <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">overall</div>
+            
+            <div className="flex flex-col items-end shrink-0 bg-surface-2 p-4 rounded-xl border-2 border-ink shadow-ink-soft text-center min-w-[120px]">
+              <div className="text-xs font-black uppercase tracking-widest text-ink/60 mb-1">Overall</div>
+              <div className={cn("font-display text-5xl font-black", ratingColor(c.total_rating ?? 0))}>
+                {(c.total_rating ?? 0).toFixed(1)}
+              </div>
+              <div className="flex items-center justify-center mt-2">
+                <Star className="h-4 w-4 fill-amber-400 text-amber-500 mr-1" />
+                <span className="text-xs font-bold text-ink/70">{c.total_reviews ?? 0} reviews</span>
+              </div>
             </div>
           </div>
-          <div className="mt-6 grid grid-cols-3 gap-3 text-center">
+          
+          <div className="mt-6 grid grid-cols-2 md:grid-cols-3 gap-3">
             <Stat n={posts.length} l="Total Reports" />
             <Stat n={incidents.filter((i) => i.status === "active").length} l="Active Incidents" />
-            <Stat n={c.total_reviews ?? 0} l="Reviews" />
+            <div className="hidden md:block"><Stat n={c.total_reviews ?? 0} l="Reviews" /></div>
           </div>
-          <Button asChild className="mt-6 w-full bg-accent text-accent-foreground hover:bg-accent/90 shadow-ink-soft" style={{ borderRadius: "12px 4px 10px 4px" }}>
-            <Link to="/report" search={{ college: id }}><Zap className="mr-1 h-5 w-5 fill-current" /> Report Incident</Link>
-          </Button>
-          <Button asChild variant="outline" className="mt-3 w-full border-2 border-ink hover:-rotate-1 transition-transform" style={{ borderRadius: "4px 12px 4px 10px" }}>
-            <Link to="/community/$collegeId" params={{ collegeId: id }}><MessageCircle className="mr-1 h-5 w-5" /> Campus Students Chats</Link>
-          </Button>
+          
+          <div className="mt-6 flex flex-col md:flex-row gap-3">
+            <Button asChild className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 shadow-ink-soft border-2 border-ink" style={{ borderRadius: "12px 4px 10px 4px" }}>
+              <Link to="/report" search={{ college: id }}><Zap className="mr-2 h-5 w-5 fill-current" /> Report Incident</Link>
+            </Button>
+            <Button asChild variant="outline" className="flex-1 border-2 border-ink hover:-rotate-1 transition-transform" style={{ borderRadius: "4px 12px 4px 10px" }}>
+              <Link to="/community/$collegeId" params={{ collegeId: id }}><MessageCircle className="mr-2 h-5 w-5" /> Campus Students Chats</Link>
+            </Button>
+          </div>
         </div>
 
         {/* Ratings breakdown */}
@@ -327,6 +365,21 @@ function CollegeDetail() {
 
 
       <RatingModal open={ratingOpen} onOpenChange={setRatingOpen} collegeId={id} onDone={() => { ratingsQ.refetch(); collegeQ.refetch(); router.invalidate(); }} />
+      
+      <Dialog open={feeModalOpen} onOpenChange={setFeeModalOpen}>
+        <DialogContent className="max-w-md border-2 border-ink p-0 overflow-hidden bg-white sm:rounded-xl">
+          <DialogHeader className="bg-surface-2 p-4 border-b-2 border-ink">
+            <DialogTitle className="font-display text-xl font-bold text-ink flex items-center gap-2">
+              <Banknote className="h-5 w-5" /> Fee Structure
+            </DialogTitle>
+          </DialogHeader>
+          <div className="p-6">
+            <div className="prose prose-sm max-w-none whitespace-pre-wrap font-medium text-ink/80 leading-relaxed bg-surface p-4 rounded-lg border border-ink/10">
+              {(c as any).fee_structure}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </SiteShell>
   );
 }

@@ -150,6 +150,75 @@ export const adminUpdateCollege = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const adminResearchCollegeAI = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z.object({ token: z.string(), id: z.string().uuid() }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: col, error: colError } = await supabaseAdmin.from("colleges").select("name, city, state").eq("id", data.id).single();
+    if (colError || !col) throw new Error("College not found");
+
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    if (!apiKey) throw new Error("AI not configured in environment");
+
+    const prompt = `Research the following Indian college:
+Name: ${col.name}
+Location: ${col.city}, ${col.state}
+
+Return ONLY a JSON object (no markdown, no backticks, no other text) with these exact keys:
+"website": The official verified website URL (string). Ensure it is the correct, official website. If absolutely unsure, return null.
+"fee_structure": A detailed branch-wise or course-wise fee structure summary with amounts per year (e.g., "B.Tech CSE: 74k/year\nB.Tech AIML: 80k/year"). Use newlines for formatting. If the exact fee is not clear or available, provide an estimated average yearly fee (e.g., "Average Fee: 80k/year"). (string, or null if completely unknown)
+"latitude": Geographical latitude (number, or null)
+"longitude": Geographical longitude (number, or null)
+"established": Year of establishment (number, or null)
+"description": A 2-3 sentence engaging description of the college (string, or null)`;
+
+    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+        "HTTP-Referer": "https://campusxpose.online",
+        "X-Title": "CampusXpose",
+      },
+      body: JSON.stringify({
+        model: "openrouter/free",
+        messages: [{ role: "user", content: prompt }],
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to contact AI API");
+    }
+
+    const j = await res.json();
+    let content = j.choices?.[0]?.message?.content ?? "{}";
+    
+    // Strip markdown formatting if the model accidentally included it
+    content = content.replace(/^```json\s*/i, "").replace(/```\s*$/i, "").trim();
+
+    try {
+      const parsed = JSON.parse(content);
+      
+      const patch: any = {};
+      if (parsed.website) patch.website = String(parsed.website);
+      if (parsed.fee_structure) patch.fee_structure = String(parsed.fee_structure);
+      if (typeof parsed.latitude === "number") patch.latitude = parsed.latitude;
+      if (typeof parsed.longitude === "number") patch.longitude = parsed.longitude;
+      if (typeof parsed.established === "number") patch.established = parsed.established;
+      if (parsed.description) patch.description = String(parsed.description);
+
+      if (Object.keys(patch).length > 0) {
+        await supabaseAdmin.from("colleges").update(patch).eq("id", data.id);
+      }
+      return { ok: true, data: patch };
+    } catch (e) {
+      throw new Error("Failed to parse AI response: " + content);
+    }
+  });
+
 export const adminDeleteColleges = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z.object({ token: z.string(), ids: z.array(z.string().uuid()).min(1) }).parse(d),

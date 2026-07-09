@@ -2,12 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
-import { Plus, Pencil, Trash2, Eye, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, Search, Bot, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { useAdmin } from "@/stores/admin";
-import { adminAddCollege, adminUpdateCollege, adminDeleteColleges, adminListCollegeRequests, adminApproveCollegeRequest, adminRejectCollegeRequest } from "@/lib/admin.functions";
+import { adminAddCollege, adminUpdateCollege, adminDeleteColleges, adminListCollegeRequests, adminApproveCollegeRequest, adminRejectCollegeRequest, adminResearchCollegeAI } from "@/lib/admin.functions";
 import { COLLEGE_TYPES, INDIAN_STATES } from "@/lib/categories";
 import { TypeMultiSelect } from "@/components/TypeMultiSelect";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,7 @@ function CollegesAdmin() {
   const addFn = useServerFn(adminAddCollege);
   const updFn = useServerFn(adminUpdateCollege);
   const delFn = useServerFn(adminDeleteColleges);
+  const researchFn = useServerFn(adminResearchCollegeAI);
 
   const q = useQuery({
     queryKey: ["admin-colleges"],
@@ -47,6 +48,7 @@ function CollegesAdmin() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [panelOpen, setPanelOpen] = useState(false);
   const [editing, setEditing] = useState<Col | null>(null);
+  const [researching, setResearching] = useState<string | null>(null);
   const [confirm, setConfirm] = useState<{ ids: string[]; names: string[] } | null>(null);
   const [confirmText, setConfirmText] = useState("");
 
@@ -68,6 +70,19 @@ function CollegesAdmin() {
       toast.success(`Deleted ${confirm.ids.length} college(s)`);
       setConfirm(null); setConfirmText(""); setSelected(new Set()); q.refetch();
     } catch { toast.error("Delete failed"); }
+  };
+
+  const doResearch = async (id: string) => {
+    setResearching(id);
+    try {
+      await researchFn({ data: { token: token!, id } });
+      toast.success("College details updated via AI");
+      q.refetch();
+    } catch (e: any) {
+      toast.error(e?.message ?? "AI Research failed");
+    } finally {
+      setResearching(null);
+    }
   };
 
   return (
@@ -121,6 +136,9 @@ function CollegesAdmin() {
                 <td className="p-3">{c.incident_count}</td>
                 <td className="p-3">
                   <div className="flex gap-1">
+                    <button title="AI Research" className="rounded p-1 hover:bg-surface-2 text-primary" disabled={researching === c.id} onClick={() => doResearch(c.id)}>
+                      {researching === c.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bot className="h-4 w-4" />}
+                    </button>
                     <button className="rounded p-1 hover:bg-surface-2" onClick={() => { setEditing(c); setPanelOpen(true); }}><Pencil className="h-4 w-4" /></button>
                     <button className="rounded p-1 text-destructive hover:bg-destructive/10" onClick={() => setConfirm({ ids: [c.id], names: [c.name] })}><Trash2 className="h-4 w-4" /></button>
                   </div>
@@ -168,7 +186,7 @@ function CollegesAdmin() {
 
 function CollegePanel({ open, onOpenChange, editing, onSave }: { open: boolean; onOpenChange: (v: boolean) => void; editing: Col | null; onSave: (v: any) => void }) {
   const [f, setF] = useState<any>({});
-  const v = { name: "", city: "", state: "MP", type: "Engineering", established: "", description: "", latitude: "", longitude: "", ...(editing ?? {}), ...f };
+  const v = { name: "", city: "", state: "MP", type: "Engineering", established: "", description: "", latitude: "", longitude: "", website: "", fee_structure: "", ...(editing ?? {}), ...f };
   const types: string[] = v.types && v.types.length ? v.types : [v.type];
   const set = (k: string, val: any) => setF((p: any) => ({ ...p, [k]: val }));
   const save = () => {
@@ -178,6 +196,8 @@ function CollegePanel({ open, onOpenChange, editing, onSave }: { open: boolean; 
       name: v.name, city: v.city, state: v.state, type: selected[0], types: selected,
       established: v.established ? Number(v.established) : null,
       description: v.description || null,
+      website: v.website || null,
+      fee_structure: v.fee_structure || null,
       latitude: v.latitude ? Number(v.latitude) : null,
       longitude: v.longitude ? Number(v.longitude) : null,
     });
@@ -194,6 +214,8 @@ function CollegePanel({ open, onOpenChange, editing, onSave }: { open: boolean; 
           <Field label="Types (select one or more)"><TypeMultiSelect value={types} onChange={(next) => set("types", next)} /></Field>
           <Field label="Established"><Input type="number" value={v.established} onChange={(e) => set("established", e.target.value)} className="bg-surface-2" /></Field>
           <Field label="Description"><Textarea value={v.description} onChange={(e) => set("description", e.target.value)} className="bg-surface-2" /></Field>
+          <Field label="Website"><Input value={v.website} onChange={(e) => set("website", e.target.value)} className="bg-surface-2" /></Field>
+          <Field label="Fee Structure"><Input value={v.fee_structure} onChange={(e) => set("fee_structure", e.target.value)} className="bg-surface-2" /></Field>
           <div className="grid grid-cols-2 gap-2">
             <Field label="Latitude"><Input value={v.latitude} onChange={(e) => set("latitude", e.target.value)} className="bg-surface-2" /></Field>
             <Field label="Longitude"><Input value={v.longitude} onChange={(e) => set("longitude", e.target.value)} className="bg-surface-2" /></Field>
