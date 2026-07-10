@@ -96,6 +96,7 @@ function CollegeDetail() {
 
   const [ratingOpen, setRatingOpen] = useState(false);
   const [openCat, setOpenCat] = useState<string | null>(null);
+  const [feeModalOpen, setFeeModalOpen] = useState(false);
 
   const c = collegeQ.data;
 
@@ -153,7 +154,6 @@ function CollegeDetail() {
     { key: "value_rating", label: "Value" },
   ];
 
-  const [feeModalOpen, setFeeModalOpen] = useState(false);
 
   return (
     <SiteShell hideFooter>
@@ -166,7 +166,7 @@ function CollegeDetail() {
               
               <div className="mt-3 flex flex-wrap items-center gap-2 text-sm font-semibold text-muted-foreground">
                 <span className="flex items-center gap-1 bg-surface px-2 py-1 rounded-md border border-ink/10"><MapPin className="h-3 w-3" /> {c.city}, {c.state}</span>
-                <span className="bg-surface px-2 py-1 rounded-md border border-ink/10">{((c as any).types?.length ? (c as any).types : [c.type]).join(", ")}</span>
+                <span className="bg-surface px-2 py-1 rounded-md border border-ink/10">{Array.isArray((c as any).types) && (c as any).types.length ? (c as any).types.join(", ") : [c.type].join(", ")}</span>
                 <span className="bg-surface px-2 py-1 rounded-md border border-ink/10">Est. {c.established ?? "—"}</span>
               </div>
               
@@ -194,8 +194,8 @@ function CollegeDetail() {
             
             <div className="flex flex-col items-end shrink-0 bg-surface-2 p-4 rounded-xl border-2 border-ink shadow-ink-soft text-center min-w-[120px]">
               <div className="text-xs font-black uppercase tracking-widest text-ink/60 mb-1">Overall</div>
-              <div className={cn("font-display text-5xl font-black", ratingColor(c.total_rating ?? 0))}>
-                {(c.total_rating ?? 0).toFixed(1)}
+              <div className={cn("font-display text-5xl font-black", ratingColor(Number(c.total_rating ?? 0)))}>
+                {Number(c.total_rating ?? 0).toFixed(1)}
               </div>
               <div className="flex items-center justify-center mt-2">
                 <Star className="h-4 w-4 fill-amber-400 text-amber-500 mr-1" />
@@ -235,7 +235,7 @@ function CollegeDetail() {
                 <div key={cat.key}>
                   <div className="mb-1 flex justify-between text-sm">
                     <span>{cat.label}</span>
-                    <span className="font-semibold">{v.toFixed(1)}</span>
+                    <span className="font-semibold">{Number(v).toFixed(1)}</span>
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-surface-2">
                     <motion.div initial={{ width: 0 }} whileInView={{ width: `${(v / 5) * 100}%` }} viewport={{ once: true }} className={cn("h-full rounded-full", ratingBarColor(v))} />

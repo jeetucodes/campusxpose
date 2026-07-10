@@ -8,11 +8,11 @@ export function StarRating({ value, className = "" }: { value: number; className
         {[1, 2, 3, 4, 5].map((i) => (
           <Star
             key={i}
-            className={`h-4 w-4 ${i <= Math.round(value) ? `fill-current ${ratingColor(value)}` : "text-border"}`}
+            className={`h-4 w-4 ${i <= Math.round(Number(value)) ? `fill-current ${ratingColor(Number(value))}` : "text-border"}`}
           />
         ))}
       </div>
-      <span className={`text-sm font-semibold ${ratingColor(value)}`}>{value.toFixed(1)}</span>
+      <span className={`text-sm font-semibold ${ratingColor(Number(value))}`}>{Number(value).toFixed(1)}</span>
     </div>
   );
 }

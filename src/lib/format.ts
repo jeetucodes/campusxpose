@@ -1,5 +1,7 @@
-export function timeAgo(date: string | Date): string {
+export function timeAgo(date: string | Date | null | undefined): string {
+  if (!date) return "just now";
   const d = typeof date === "string" ? new Date(date) : date;
+  if (!(d instanceof Date) || isNaN(d.getTime())) return "just now";
   const sec = Math.floor((Date.now() - d.getTime()) / 1000);
   if (sec < 60) return "just now";
   const min = Math.floor(sec / 60);
