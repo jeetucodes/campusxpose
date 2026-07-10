@@ -96,7 +96,6 @@ function CollegeDetail() {
 
   const [ratingOpen, setRatingOpen] = useState(false);
   const [openCat, setOpenCat] = useState<string | null>(null);
-  const [feeModalOpen, setFeeModalOpen] = useState(false);
 
   const c = collegeQ.data;
 
@@ -162,7 +161,7 @@ function CollegeDetail() {
         <div className="border-2 border-ink bg-white p-6 shadow-ink-soft" style={{ borderRadius: "18px 6px 20px 6px / 6px 20px 6px 18px" }}>
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
             <div className="flex-1">
-              <h1 className="font-display text-4xl font-black text-ink tracking-tight">{c.name}</h1>
+              <h1 className="font-display text-3xl md:text-4xl font-black text-ink tracking-tight leading-tight">{c.name}</h1>
               
               <div className="mt-3 flex flex-wrap items-center gap-2 text-sm font-semibold text-muted-foreground">
                 <span className="flex items-center gap-1 bg-surface px-2 py-1 rounded-md border border-ink/10"><MapPin className="h-3 w-3" /> {c.city}, {c.state}</span>
@@ -178,11 +177,7 @@ function CollegeDetail() {
                     </a>
                   </Button>
                 )}
-                {(c as any).fee_structure && (
-                  <Button variant="default" size="sm" onClick={() => setFeeModalOpen(true)} className="border-2 border-ink shadow-ink-soft font-bold rounded-lg hover:-translate-y-0.5 transition-transform bg-primary text-primary-foreground hover:bg-primary/90">
-                    <Banknote className="mr-2 h-4 w-4" /> View Fee Structure
-                  </Button>
-                )}
+
               </div>
               
               {(c as any).description && (
@@ -192,7 +187,7 @@ function CollegeDetail() {
               )}
             </div>
             
-            <div className="flex flex-col items-end shrink-0 bg-surface-2 p-4 rounded-xl border-2 border-ink shadow-ink-soft text-center min-w-[120px]">
+            <div className="flex flex-col items-center md:items-end w-full md:w-auto shrink-0 bg-surface-2 p-4 rounded-xl border-2 border-ink shadow-ink-soft text-center min-w-[120px]">
               <div className="text-xs font-black uppercase tracking-widest text-ink/60 mb-1">Overall</div>
               <div className={cn("font-display text-5xl font-black", ratingColor(Number(c.total_rating ?? 0)))}>
                 {Number(c.total_rating ?? 0).toFixed(1)}
@@ -222,9 +217,9 @@ function CollegeDetail() {
 
         {/* Ratings breakdown */}
         <section className="mt-8 border-2 border-ink bg-white p-6 shadow-ink-soft" style={{ borderRadius: "6px 18px 6px 20px / 20px 6px 18px 6px" }}>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <h2 className="font-display text-xl font-bold">Ratings Breakdown</h2>
-            <Button size="sm" variant="outline" className="border-2 border-ink bg-postit text-ink shadow-ink-soft hover:-rotate-2 transition-transform" style={{ borderRadius: "12px 4px 10px 4px" }} onClick={() => setRatingOpen(true)}>
+            <Button size="sm" variant="outline" className="w-full sm:w-auto border-2 border-ink bg-postit text-ink shadow-ink-soft hover:-rotate-2 transition-transform" style={{ borderRadius: "12px 4px 10px 4px" }} onClick={() => setRatingOpen(true)}>
               <Star className="mr-1 h-4 w-4 fill-ink" /> Rate This College
             </Button>
           </div>
@@ -321,7 +316,7 @@ function CollegeDetail() {
           <div className="space-y-4">
             {incidents.slice(0, 5).map((i) => (
               <div key={i.id} className="border-2 border-ink bg-white p-5 shadow-ink-soft" style={{ borderRadius: "10px 16px 14px 10px / 16px 10px 16px 14px" }}>
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center items-start justify-between gap-2 sm:gap-3">
                   <h3 className="font-semibold">{i.title}</h3>
                   <span className={cn("shrink-0 rounded-full border-2 border-ink px-2 py-0.5 text-xs capitalize shadow-ink-soft", statusColor(i.status ?? "active"))}>{i.status}</span>
                 </div>
@@ -366,20 +361,7 @@ function CollegeDetail() {
 
       <RatingModal open={ratingOpen} onOpenChange={setRatingOpen} collegeId={id} onDone={() => { ratingsQ.refetch(); collegeQ.refetch(); router.invalidate(); }} />
       
-      <Dialog open={feeModalOpen} onOpenChange={setFeeModalOpen}>
-        <DialogContent className="max-w-md border-2 border-ink p-0 overflow-hidden bg-white sm:rounded-xl">
-          <DialogHeader className="bg-surface-2 p-4 border-b-2 border-ink">
-            <DialogTitle className="font-display text-xl font-bold text-ink flex items-center gap-2">
-              <Banknote className="h-5 w-5" /> Fee Structure
-            </DialogTitle>
-          </DialogHeader>
-          <div className="p-6">
-            <div className="prose prose-sm max-w-none whitespace-pre-wrap font-medium text-ink/80 leading-relaxed bg-surface p-4 rounded-lg border border-ink/10">
-              {(c as any).fee_structure}
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+
     </SiteShell>
   );
 }
