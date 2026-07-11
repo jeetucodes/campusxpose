@@ -1,17 +1,19 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const MODEL = "google/gemini-3-flash-preview";
+const GATEWAY_URL = "https://openrouter.ai/api/v1/chat/completions";
+const MODEL = "openrouter/free";
 
 async function callAI(system: string, user: string): Promise<string> {
-  const key = process.env.LOVABLE_API_KEY;
+  const key = process.env.OPENROUTER_API_KEY;
   if (!key) throw new Error("AI is not configured");
   const res = await fetch(GATEWAY_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${key}`,
+      "Authorization": `Bearer ${key}`,
+      "HTTP-Referer": "https://campusxpose.com",
+      "X-Title": "CampusXpose"
     },
     body: JSON.stringify({
       model: MODEL,
@@ -19,12 +21,14 @@ async function callAI(system: string, user: string): Promise<string> {
         { role: "system", content: system },
         { role: "user", content: user },
       ],
-      response_format: { type: "json_object" },
     }),
   });
   if (res.status === 429) throw new Error("AI rate limit reached, try again shortly.");
   if (res.status === 402) throw new Error("AI credits exhausted. Add credits in workspace settings.");
-  if (!res.ok) throw new Error(`AI error ${res.status}`);
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`AI error ${res.status}: ${errText}`);
+  }
   const data = await res.json();
   return data.choices?.[0]?.message?.content ?? "{}";
 }
