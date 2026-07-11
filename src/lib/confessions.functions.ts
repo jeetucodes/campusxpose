@@ -51,7 +51,7 @@ export const addConfession = createServerFn({ method: "POST" })
       
     if (error) throw error;
     
-    return { ...confession, likes: 0 };
+    return { ...(confession as any), likes: 0 };
   });
 
 export const toggleLikeConfession = createServerFn({ method: "POST" })

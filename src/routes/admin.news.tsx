@@ -108,12 +108,12 @@ function AdminNews() {
           <Settings className="w-5 h-5 text-muted-foreground" />
           <span className="font-bold text-sm">Master Switch:</span>
           <Button
-            variant={siteSettings?.news_enabled ? "default" : "secondary"}
+            variant={(siteSettings as any)?.news_enabled ? "default" : "secondary"}
             size="sm"
-            onClick={() => toggleMaster.mutate(!siteSettings?.news_enabled)}
+            onClick={() => toggleMaster.mutate(!(siteSettings as any)?.news_enabled)}
             disabled={toggleMaster.isPending}
           >
-            {siteSettings?.news_enabled ? "ON" : "OFF"}
+            {(siteSettings as any)?.news_enabled ? "ON" : "OFF"}
           </Button>
         </div>
       </div>

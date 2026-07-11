@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Megaphone, Heart, Share2, ArrowRight } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { upvoteNewsItem } from "@/lib/home.functions";
+import { toggleLikeNewsItem } from "@/lib/home.functions";
 import { type HomeData } from "@/lib/home.functions";
 
 const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
@@ -14,7 +14,7 @@ export function NewsModal({ news }: { news: HomeData["news"] }) {
   const [likedItems, setLikedItems] = useState<Set<string>>(new Set());
 
   const upvote = useMutation({
-    mutationFn: (id: string) => upvoteNewsItem({ data: { id } }),
+    mutationFn: (id: string) => toggleLikeNewsItem({ data: { id, action: "like" } }),
     onMutate: async (id) => {
       // Optimistic update
       setLikedItems((prev) => new Set(prev).add(id));

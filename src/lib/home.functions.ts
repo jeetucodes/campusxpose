@@ -202,7 +202,7 @@ export const deleteNewsComment = createServerFn({ method: "POST" })
       .eq("id", data.commentId)
       .single();
       
-    if (!comment || comment.anonymous_user_hash !== data.hashedId) {
+    if (!comment || (comment as any).anonymous_user_hash !== data.hashedId) {
       throw new Error("Not authorized");
     }
 
