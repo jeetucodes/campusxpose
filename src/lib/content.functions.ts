@@ -907,3 +907,70 @@ export const deletePoll = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
+
+/**
+ * Submit proof for an existing post that is currently on hold.
+ * Only the original author (matched by hashedId) may do this.
+ * Inserts the evidence URLs and sets the post status to 'published'.
+ */
+export const submitProofForPost = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        postId: z.string().uuid(),
+        hashedId: z.string().min(8),
+        evidenceUrls: z.array(z.string().url()).min(1).max(5),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }) => {
+    if (!HASH_RE.test(data.hashedId)) throw new Error("Invalid identity");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Verify the caller is the original author of the post
+    const { data: post } = await supabaseAdmin
+      .from("posts")
+      .select("id, anonymous_user_hash, status")
+      .eq("id", data.postId)
+      .maybeSingle();
+    if (!post) throw new Error("Post not found");
+    if (post.anonymous_user_hash !== data.hashedId) throw new Error("Not authorized");
+
+    // Insert the new evidence
+    const { error: evErr } = await supabaseAdmin.from("evidence").insert(
+      data.evidenceUrls.map((url) => ({
+        post_id: post.id,
+        type: url.toLowerCase().endsWith(".pdf") ? "document" : "image",
+        file_url: url,
+      })),
+    );
+    if (evErr) throw new Error(evErr.message);
+
+    // Publish the post now that proof has been provided
+    const { error: updateErr } = await supabaseAdmin
+      .from("posts")
+      .update({ status: "published" })
+      .eq("id", post.id);
+    if (updateErr) throw new Error(updateErr.message);
+
+    return { ok: true as const };
+  });
+
+/** Fetch posts authored by a specific user (by their anonymous hash). */
+export const fetchMyPosts = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z.object({ hashedId: z.string().min(8) }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    if (!HASH_RE.test(data.hashedId)) throw new Error("Invalid identity");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: posts, error } = await supabaseAdmin
+      .from("posts")
+      .select("id, content, status, category, created_at, upvotes, downvotes, college_id")
+      .eq("anonymous_user_hash", data.hashedId)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) throw new Error(error.message);
+    return { posts: posts ?? [] };
+  });
+

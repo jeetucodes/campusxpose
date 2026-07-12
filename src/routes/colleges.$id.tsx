@@ -76,7 +76,16 @@ function CollegeDetail() {
   });
   const postsQ = useQuery({
     queryKey: ["posts", id],
-    queryFn: async () => (await supabase.from("posts").select("*").eq("college_id", id).order("created_at", { ascending: false }).limit(50)).data ?? [],
+    queryFn: async () =>
+      (
+        await supabase
+          .from("posts")
+          .select("*")
+          .eq("college_id", id)
+          .eq("status", "published")
+          .order("created_at", { ascending: false })
+          .limit(50)
+      ).data ?? [],
   });
   const ratingsQ = useQuery({
     queryKey: ["ratings", id],

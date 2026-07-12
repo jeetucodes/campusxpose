@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Shield, ChevronDown, Trash2, UserRound, BellRing, MessageCircle } from "lucide-react";
+import { Shield, ChevronDown, Trash2, UserRound, BellRing, MessageCircle, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { UserSymbol } from "@/components/UserSymbol";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
@@ -124,6 +124,17 @@ export function Navbar() {
                 Enable notifications
               </Button>
             )}
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="mb-2 w-full justify-start gap-2"
+            >
+              <Link to="/my-reports" onClick={() => setOpen(false)}>
+                <FileText className="h-4 w-4" />
+                My Reports
+              </Link>
+            </Button>
             <Button
               variant="destructive"
               size="sm"

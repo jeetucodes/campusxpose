@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Check, RefreshCw, Save, Shuffle, Copy, Key, LogIn, Trash2 } from "lucide-react";
+import { Check, RefreshCw, Save, Shuffle, Copy, Key, LogIn, Trash2, ClipboardList } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -219,6 +219,23 @@ function ProfilePage() {
             </button>
           );
         })}
+      </div>
+
+      {/* My Reports — link to dedicated page */}
+      <div className="mt-12">
+        <h2 className="font-display text-lg font-bold mb-3">My Reports</h2>
+        <Link
+          to="/my-reports"
+          className="flex items-center gap-3 rounded-xl border-2 border-border bg-surface p-4 transition-colors hover:bg-surface-2 group"
+          style={{ borderRadius: "16px 6px 18px 6px / 6px 18px 6px 16px" }}
+        >
+          <ClipboardList className="h-6 w-6 text-primary shrink-0" />
+          <div className="flex-1">
+            <p className="font-semibold text-foreground">View My Reports</p>
+            <p className="text-xs text-muted-foreground">See all reports you've submitted</p>
+          </div>
+          <span className="text-sm font-medium text-primary opacity-60 group-hover:opacity-100 transition-opacity">Open →</span>
+        </Link>
       </div>
 
       {/* Account Management */}

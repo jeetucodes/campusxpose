@@ -17,6 +17,7 @@ import { Route as ReportRouteImport } from './routes/report'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as NewsRouteImport } from './routes/news'
+import { Route as MyReportsRouteImport } from './routes/my-reports'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as GlobalRouteImport } from './routes/global'
 import { Route as ConfessionsRouteImport } from './routes/confessions'
@@ -88,6 +89,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const NewsRoute = NewsRouteImport.update({
   id: '/news',
   path: '/news',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyReportsRoute = MyReportsRouteImport.update({
+  id: '/my-reports',
+  path: '/my-reports',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MessagesRoute = MessagesRouteImport.update({
@@ -257,6 +263,7 @@ export interface FileRoutesByFullPath {
   '/confessions': typeof ConfessionsRoute
   '/global': typeof GlobalRoute
   '/messages': typeof MessagesRoute
+  '/my-reports': typeof MyReportsRoute
   '/news': typeof NewsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
@@ -299,6 +306,7 @@ export interface FileRoutesByTo {
   '/confessions': typeof ConfessionsRoute
   '/global': typeof GlobalRoute
   '/messages': typeof MessagesRoute
+  '/my-reports': typeof MyReportsRoute
   '/news': typeof NewsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
@@ -342,6 +350,7 @@ export interface FileRoutesById {
   '/confessions': typeof ConfessionsRoute
   '/global': typeof GlobalRoute
   '/messages': typeof MessagesRoute
+  '/my-reports': typeof MyReportsRoute
   '/news': typeof NewsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
@@ -386,6 +395,7 @@ export interface FileRouteTypes {
     | '/confessions'
     | '/global'
     | '/messages'
+    | '/my-reports'
     | '/news'
     | '/privacy'
     | '/profile'
@@ -428,6 +438,7 @@ export interface FileRouteTypes {
     | '/confessions'
     | '/global'
     | '/messages'
+    | '/my-reports'
     | '/news'
     | '/privacy'
     | '/profile'
@@ -470,6 +481,7 @@ export interface FileRouteTypes {
     | '/confessions'
     | '/global'
     | '/messages'
+    | '/my-reports'
     | '/news'
     | '/privacy'
     | '/profile'
@@ -513,6 +525,7 @@ export interface RootRouteChildren {
   ConfessionsRoute: typeof ConfessionsRoute
   GlobalRoute: typeof GlobalRoute
   MessagesRoute: typeof MessagesRoute
+  MyReportsRoute: typeof MyReportsRoute
   NewsRoute: typeof NewsRoute
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
@@ -606,6 +619,13 @@ declare module '@tanstack/react-router' {
       path: '/news'
       fullPath: '/news'
       preLoaderRoute: typeof NewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-reports': {
+      id: '/my-reports'
+      path: '/my-reports'
+      fullPath: '/my-reports'
+      preLoaderRoute: typeof MyReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/messages': {
@@ -841,6 +861,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConfessionsRoute: ConfessionsRoute,
   GlobalRoute: GlobalRoute,
   MessagesRoute: MessagesRoute,
+  MyReportsRoute: MyReportsRoute,
   NewsRoute: NewsRoute,
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
