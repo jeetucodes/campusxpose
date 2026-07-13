@@ -10,7 +10,7 @@ export const INCIDENT_CATEGORIES: CategoryDef[] = [
   { key: "placement", label: "Placement Fraud", emoji: "🎓" },
   { key: "hostel", label: "Hostel Problems", emoji: "🏠" },
   { key: "harassment", label: "Harassment", emoji: "⚖️" },
-  { key: "sexual_violence", label: "Sexual Violence / Rape", emoji: "🚨" },
+  { key: "sexual_violence", label: "Sexual Violence ", emoji: "🚨" },
   { key: "exam", label: "Exam Issues", emoji: "📚" },
   { key: "general", label: "Other Issues", emoji: "📋" },
 ];
@@ -21,7 +21,7 @@ export const REPORT_CATEGORIES: CategoryDef[] = [
   { key: "placement", label: "Placement Fraud", emoji: "🎓" },
   { key: "hostel", label: "Hostel Issue", emoji: "🏠" },
   { key: "harassment", label: "Ragging / Harassment", emoji: "⚖️" },
-  { key: "sexual_violence", label: "Sexual Violence / Rape", emoji: "🚨" },
+  { key: "sexual_violence", label: "Sexual Violence ", emoji: "🚨" },
   { key: "exam", label: "Exam Malpractice", emoji: "📚" },
   { key: "general", label: "Other Issue", emoji: "📋" },
 ];
@@ -46,7 +46,7 @@ export const COLLEGE_TYPES = ["Engineering", "Medical", "Arts", "Commerce", "Uni
 
 export const INDIAN_STATES = [
   "Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat",
-  "Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","MP","Maharashtra",
+  "Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra",
   "Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab","Rajasthan","Sikkim",
   "Tamil Nadu","Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal","Delhi",
 ];
