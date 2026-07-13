@@ -744,6 +744,7 @@ export type Database = {
           id: string
           incident_id: string | null
           is_incident: boolean | null
+          status: string | null
           upvotes: number | null
           username: string
         }
@@ -758,6 +759,7 @@ export type Database = {
           id?: string
           incident_id?: string | null
           is_incident?: boolean | null
+          status?: string | null
           upvotes?: number | null
           username: string
         }
@@ -772,6 +774,7 @@ export type Database = {
           id?: string
           incident_id?: string | null
           is_incident?: boolean | null
+          status?: string | null
           upvotes?: number | null
           username?: string
         }

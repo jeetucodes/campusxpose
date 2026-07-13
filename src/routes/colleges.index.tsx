@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
@@ -263,6 +263,7 @@ function SortBtn({ active, onClick, children }: { active: boolean; onClick: () =
 function RequestCollegeDialog() {
   const { hashedId } = useIdentity();
   const submit = useServerFn(submitCollegeRequest);
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({
@@ -294,8 +295,10 @@ function RequestCollegeDialog() {
       });
       if ((res as any).ok === false && (res as any).reason === "exists") {
         toast.error("This college already exists — try searching for it.");
+      } else if ((res as any).ok === false && (res as any).reason === "pending") {
+        toast.error("A request for this college is already under review.");
       } else {
-        toast.success("Request sent! Admins will review and add it soon.");
+        toast.success("Request submitted! Our team will review and publish it shortly.");
         setOpen(false);
         setForm({ name: "", city: "", state: "Madhya Pradesh", established: "", description: "" });
         setTypes(["Engineering"]);
@@ -317,7 +320,7 @@ function RequestCollegeDialog() {
       <DialogContent className="max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Request to add a college</DialogTitle>
-          <DialogDescription>Can't find your college? Send it for review and we'll add it.</DialogDescription>
+          <DialogDescription>Can't find your college? Submit a request and our team will review & publish it.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
           <Input placeholder="College name *" value={form.name} onChange={(e) => set("name", e.target.value)} />

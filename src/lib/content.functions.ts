@@ -503,7 +503,7 @@ export const submitCollegeRequest = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     if (await isBanned(data.hashedId)) return { ok: true, shadow: true };
 
-    // Prevent duplicate college names (already exists)
+    // Prevent duplicate college names (college already published)
     const { data: existing } = await supabaseAdmin
       .from("colleges")
       .select("id")
@@ -511,8 +511,19 @@ export const submitCollegeRequest = createServerFn({ method: "POST" })
       .maybeSingle();
     if (existing) return { ok: false as const, reason: "exists" };
 
+    // Prevent duplicate pending requests for the same college name
+    const { data: pendingReq } = await supabaseAdmin
+      .from("college_requests")
+      .select("id")
+      .ilike("name", clean(data.name))
+      .eq("status", "pending")
+      .maybeSingle();
+    if (pendingReq) return { ok: false as const, reason: "pending" };
+
     const types = Array.from(new Set(data.types));
-    const { error } = await supabaseAdmin.from("college_requests").insert({
+
+    // Save as pending — admin will review and publish
+    const { error: reqError } = await supabaseAdmin.from("college_requests").insert({
       requester_hash: data.hashedId,
       name: clean(data.name),
       city: clean(data.city),
@@ -521,9 +532,11 @@ export const submitCollegeRequest = createServerFn({ method: "POST" })
       types,
       established: data.established ?? null,
       description: data.description ? clean(data.description) : null,
+      status: "pending",
     });
-    if (error) throw new Error(error.message);
-    return { ok: true as const, shadow: false };
+    if (reqError) throw new Error(reqError.message);
+
+    return { ok: true as const, shadow: false, pending: true };
   });
 
 const REACTION_EMOJIS = ["👍", "👎", "❤️", "😂", "😮"] as const;

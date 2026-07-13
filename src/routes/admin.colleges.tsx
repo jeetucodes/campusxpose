@@ -249,11 +249,11 @@ function CollegeRequests({ token, onApproved }: { token: string; onApproved: () 
     try {
       if (approve) {
         await approveFn({ data: { token, id } });
-        toast.success("College added");
+        toast.success("✅ College published! AI is auto-filling details in the background.");
         onApproved();
       } else {
         await rejectFn({ data: { token, id } });
-        toast.success("Request rejected");
+        toast.success("Request rejected.");
       }
       rq.refetch();
     } catch (e: any) {
@@ -268,15 +268,31 @@ function CollegeRequests({ token, onApproved }: { token: string; onApproved: () 
       <h2 className="text-lg font-bold">Pending College Requests ({pending.length})</h2>
       <div className="mt-3 space-y-2">
         {pending.map((r) => (
-          <div key={r.id} className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3">
+          <div key={r.id} className="flex flex-wrap items-start gap-3 rounded-lg border border-border bg-surface px-4 py-3">
             <div className="min-w-48 flex-1">
               <div className="font-semibold">{r.name}</div>
-              <div className="text-xs text-muted-foreground">{r.city}, {r.state} · {((r as any).types?.length ? (r as any).types : [r.type]).join(", ")}{r.established ? ` · est. ${r.established}` : ""}</div>
-              {r.description && <div className="mt-1 text-xs text-muted-foreground">{r.description}</div>}
+              <div className="text-xs text-muted-foreground">
+                {r.city}, {r.state} · {((r as any).types?.length ? (r as any).types : [r.type]).join(", ")}
+                {r.established ? ` · est. ${r.established}` : ""}
+              </div>
+              {r.description && <div className="mt-1 text-xs text-muted-foreground line-clamp-2">{r.description}</div>}
+              <div className="mt-1 text-xs text-muted-foreground/60">
+                Submitted: {new Date(r.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+              </div>
             </div>
-            <div className="flex gap-2">
-              <Button size="sm" className="rounded-full bg-success text-background hover:bg-success/90" disabled={busy === r.id} onClick={() => act(r.id, true)}>Approve</Button>
-              <Button size="sm" variant="destructive" className="rounded-full" disabled={busy === r.id} onClick={() => act(r.id, false)}>Reject</Button>
+            <div className="flex gap-2 pt-1">
+              <Button
+                size="sm"
+                className="rounded-full bg-success text-background hover:bg-success/90"
+                disabled={busy === r.id}
+                onClick={() => act(r.id, true)}
+              >
+                {busy === r.id ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
+                {busy === r.id ? "Publishing…" : "Approve & Publish"}
+              </Button>
+              <Button size="sm" variant="destructive" className="rounded-full" disabled={busy === r.id} onClick={() => act(r.id, false)}>
+                Reject
+              </Button>
             </div>
           </div>
         ))}
