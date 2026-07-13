@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useServerFn } from "@tanstack/react-start";
@@ -12,6 +12,7 @@ import { SiteShell } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { INCIDENT_CATEGORIES, categoryLabel } from "@/lib/categories";
 import { ratingBarColor, severityColor, statusColor, timeAgo, ratingColor, inr } from "@/lib/format";
 import { useIdentity } from "@/stores/identity";
@@ -61,6 +62,7 @@ function CollegeDetail() {
   const { id } = Route.useParams();
   const router = useRouter();
   const verified = useVerifiedUsernames();
+  const queryClient = useQueryClient();
 
   const collegeQ = useQuery({
     queryKey: ["college", id],
@@ -82,7 +84,7 @@ function CollegeDetail() {
           .from("posts")
           .select("*")
           .eq("college_id", id)
-          .eq("status", "published")
+          .eq("status" as any, "published")
           .order("created_at", { ascending: false })
           .limit(50)
       ).data ?? [],
@@ -370,7 +372,6 @@ function CollegeDetail() {
 
       <RatingModal open={ratingOpen} onOpenChange={setRatingOpen} collegeId={id} onDone={() => { ratingsQ.refetch(); collegeQ.refetch(); router.invalidate(); }} />
       
-
     </SiteShell>
   );
 }
@@ -406,12 +407,47 @@ function PostCard({ post, userVote, onVoted, evidence = [] }: { post: any; userV
       .then(({ count }) => { if (active) setCommentCount(count ?? 0); });
     return () => { active = false; };
   }, [post.id]);
+  
+  const queryClient = useQueryClient();
   const doVote = async (dir: "up" | "down") => {
     if (!hashedId) return;
+
+    const isRemoving = userVote === dir;
+    const newVote = isRemoving ? null : dir;
+
+    // Snapshot
+    const prevPosts = queryClient.getQueryData(["posts", post.college_id]);
+    const prevMyVotes = queryClient.getQueryData(["my-votes", post.college_id, hashedId]);
+
+    // Optimistic Update
+    queryClient.setQueryData(["my-votes", post.college_id, hashedId], (old: any) => {
+      if (!old) return old;
+      return { ...old, [post.id]: newVote };
+    });
+
+    queryClient.setQueryData(["posts", post.college_id], (old: any) => {
+      if (!old) return old;
+      return old.map((p: any) => {
+        if (p.id !== post.id) return p;
+        let upChange = 0;
+        let downChange = 0;
+        if (userVote === "up") upChange -= 1;
+        if (userVote === "down") downChange -= 1;
+        if (newVote === "up") upChange += 1;
+        if (newVote === "down") downChange += 1;
+        return { ...p, upvotes: p.upvotes + upChange, downvotes: p.downvotes + downChange };
+      });
+    });
+
     setVoting(true);
     try {
       await vote({ data: { postId: post.id, dir, hashedId } });
       onVoted();
+    } catch {
+      // Revert on failure
+      if (prevPosts) queryClient.setQueryData(["posts", post.college_id], prevPosts);
+      if (prevMyVotes) queryClient.setQueryData(["my-votes", post.college_id, hashedId], prevMyVotes);
+      toast.error("Failed to vote");
     } finally {
       setVoting(false);
     }
@@ -471,6 +507,7 @@ function RatingModal({ open, onOpenChange, collegeId, onDone }: { open: boolean;
   ] as const;
   const [vals, setVals] = useState<Record<string, number>>({ faculty: 0, placement: 0, infrastructure: 0, campusLife: 0, value: 0 });
   const [busy, setBusy] = useState(false);
+  const [alreadyRatedOpen, setAlreadyRatedOpen] = useState(false);
 
   const submit = async () => {
     if (!hashedId) return;
@@ -479,7 +516,7 @@ function RatingModal({ open, onOpenChange, collegeId, onDone }: { open: boolean;
     try {
       const res = await rate({ data: { collegeId, hashedId, faculty: vals.faculty, placement: vals.placement, infrastructure: vals.infrastructure, campusLife: vals.campusLife, value: vals.value } });
       if (res && "alreadyRated" in res && res.alreadyRated) {
-        toast.error("You've already rated this college.");
+        setAlreadyRatedOpen(true);
         onOpenChange(false);
         return;
       }
@@ -491,6 +528,7 @@ function RatingModal({ open, onOpenChange, collegeId, onDone }: { open: boolean;
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="border-border bg-surface">
         <DialogHeader><DialogTitle>Rate This College</DialogTitle></DialogHeader>
@@ -511,5 +549,24 @@ function RatingModal({ open, onOpenChange, collegeId, onDone }: { open: boolean;
         </div>
       </DialogContent>
     </Dialog>
+    
+    <AlertDialog open={alreadyRatedOpen} onOpenChange={setAlreadyRatedOpen}>
+      <AlertDialogContent className="border-2 border-border shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-white max-w-sm" style={{ borderRadius: "16px 5px 14px 5px / 5px 14px 5px 16px" }}>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="font-display font-bold text-xl flex items-center gap-2">
+            <span className="text-2xl">🚫</span> Already Rated
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-foreground/80 font-medium">
+            You've already rated this college! We only allow one rating per user to keep things fair and accurate.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogAction className="bg-accent text-white font-bold hover:bg-accent/90 border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-none transition-all w-full" style={{ borderRadius: "10px" }}>
+            Got it
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }

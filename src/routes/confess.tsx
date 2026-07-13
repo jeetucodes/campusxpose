@@ -5,6 +5,7 @@ import { addConfession } from "@/lib/confessions.functions";
 import { toast } from "sonner";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from "@/components/ui/alert-dialog";
 
 const WOBBLY = "25px 8px 22px 8px / 8px 22px 8px 25px";
 const WOBBLY_SM = "16px 5px 14px 5px / 5px 14px 5px 16px";
@@ -63,6 +64,7 @@ function ConfessFormPage() {
   const [customName, setCustomName] = useState("");
   const [mood, setMood]             = useState<string | null>(null);
   const [submitted, setSubmitted]   = useState(false);
+  const [limitErrorOpen, setLimitErrorOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-resize textarea
@@ -88,6 +90,10 @@ function ConfessFormPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!content.trim() || postConfession.isPending) return;
+    if (content.length > MAX) {
+      setLimitErrorOpen(true);
+      return;
+    }
     postConfession.mutate();
   };
 
@@ -202,7 +208,6 @@ function ConfessFormPage() {
                       value={content}
                       onChange={(e) => setContent(e.target.value)}
                       disabled={postConfession.isPending}
-                      maxLength={MAX}
                     />
                     {/* Character counter floated inside textarea */}
                     <div className="absolute bottom-2.5 right-2.5 flex items-center gap-1.5 pointer-events-none">
@@ -338,6 +343,24 @@ function ConfessFormPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AlertDialog open={limitErrorOpen} onOpenChange={setLimitErrorOpen}>
+        <AlertDialogContent className="border-2 border-border shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-white max-w-sm" style={{ borderRadius: WOBBLY_SM }}>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display font-bold text-xl flex items-center gap-2 text-destructive">
+              <span className="text-2xl">⚠️</span> Limit Exceeded
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-foreground/80 font-medium">
+              Your confession is too long! Keep it under 1000 characters. You are currently at {content.length} characters.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction className="bg-accent text-white font-bold hover:bg-accent/90 border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-none transition-all w-full" style={{ borderRadius: "10px" }}>
+              Got it
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

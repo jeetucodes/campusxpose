@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { UserSymbol } from "@/components/UserSymbol";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from "@/components/ui/alert-dialog";
 
 const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
 const WOBBLY_SM = "16px 5px 14px 5px / 5px 14px 5px 16px";
@@ -91,6 +92,7 @@ function ConfessionsPage() {
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"new" | "hot">("new");
   const [deviceId] = useState(() => getDeviceId());
+  const [limitErrorOpen, setLimitErrorOpen] = useState(false);
   const queryClient = useQueryClient();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -189,6 +191,10 @@ function ConfessionsPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!content.trim()) return;
+    if (content.length > 1000) {
+      setLimitErrorOpen(true);
+      return;
+    }
     postConfession.mutate();
   };
 
@@ -390,9 +396,8 @@ function ConfessionsPage() {
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     disabled={postConfession.isPending}
-                    maxLength={1000}
                   />
-                  <p className="text-xs text-muted-foreground mt-1.5 text-right">
+                  <p className={`text-xs mt-1.5 text-right font-bold ${content.length > 1000 ? "text-destructive" : "text-muted-foreground"}`}>
                     {content.length}/1000
                   </p>
                 </div>
@@ -432,6 +437,24 @@ function ConfessionsPage() {
           </>
         )}
       </AnimatePresence>
+
+      <AlertDialog open={limitErrorOpen} onOpenChange={setLimitErrorOpen}>
+        <AlertDialogContent className="border-2 border-border shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-white max-w-sm" style={{ borderRadius: WOBBLY_SM }}>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display font-bold text-xl flex items-center gap-2 text-destructive">
+              <span className="text-2xl">⚠️</span> Limit Exceeded
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-foreground/80 font-medium">
+              Your confession is too long! Keep it under 1000 characters. You are currently at {content.length} characters.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction className="bg-accent text-white font-bold hover:bg-accent/90 border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-none transition-all w-full" style={{ borderRadius: "10px" }}>
+              Got it
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </SiteShell>
   );
 }
