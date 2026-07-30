@@ -412,10 +412,19 @@ function Messages() {
                       <div className="w-full max-w-[300px] overflow-hidden rounded-xl shadow-inner border border-border/50 bg-black/5">
                         <Scanner
                           formats={['qr_code']}
+                          constraints={{ facingMode: 'environment' }}
                           onError={(error: any) => {
                             console.error("Scanner Error:", error);
                             setIsScanning(false);
-                            toast.error(error?.message || "Failed to access camera. Check permissions or use HTTPS.");
+                            
+                            // Specific error handling for permissions
+                            if (error?.name === 'NotAllowedError' || error?.message?.toLowerCase().includes('permission denied')) {
+                              toast.error("Camera Permission Denied! If you are in the app, make sure Camera permission is enabled in your App Settings/Manifest.", { duration: 6000 });
+                            } else if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+                              toast.error("Camera requires HTTPS to work securely.");
+                            } else {
+                              toast.error(error?.message || "Failed to access camera. Device might not support it.");
+                            }
                           }}
                           onScan={(result) => {
                             if (result && result.length > 0) {
