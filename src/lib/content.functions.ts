@@ -333,6 +333,10 @@ async function lookupHashForUsername(username: string): Promise<string | null> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   // Resolve a username to its secret identity hash using existing,
   // identity-bearing records. Never trust a client-supplied recipient hash.
+  
+  const anon = await supabaseAdmin.from("anon_users").select("user_hash").eq("username", username).maybeSingle();
+  if (anon.data?.user_hash) return anon.data.user_hash;
+
   const post = await supabaseAdmin.from("posts").select("anonymous_user_hash").eq("username", username).order("created_at", { ascending: false }).limit(1);
   if (post.data?.[0]?.anonymous_user_hash) return post.data[0].anonymous_user_hash;
   const gm = await supabaseAdmin.from("global_messages").select("anonymous_user_hash").eq("username", username).order("created_at", { ascending: false }).limit(1);

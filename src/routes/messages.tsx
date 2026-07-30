@@ -4,6 +4,8 @@ import { Send, MessageCircle, UserPlus, ArrowLeft, Plus, Trash2, X, Pin, ShieldC
 import { toast } from "sonner";
 import QRCode from "react-qr-code";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Scanner } from '@yudiel/react-qr-scanner';
 import { AutoResizeTextarea } from "@/components/AutoResizeTextarea";
 
 import { Button } from "@/components/ui/button";
@@ -74,6 +76,7 @@ function Messages() {
   const [replyTo, setReplyTo] = useState<DM | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { byMessage, toggle } = useReactions("direct", hashedId);
 
@@ -305,70 +308,111 @@ function Messages() {
           <MessageCircle className="h-5 w-5 text-accent" strokeWidth={2.5} />
           <span className="font-display text-lg font-bold tracking-tight">Messages</span>
           
-          <Dialog>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="ghost" size="icon" className="ml-auto text-accent hover:text-accent hover:bg-accent/10 transition-colors" aria-label="Add Friends">
                 <UserPlus className="h-5 w-5" />
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md border-border/50 bg-background/95 backdrop-blur-xl shadow-2xl">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2 text-xl font-display">
-                  <UserPlus className="h-5 w-5 text-accent" /> Chat with Friends
-                </DialogTitle>
-                <DialogDescription className="text-base">
-                  Share your QR code or direct link to let friends message you anonymously.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="flex flex-col items-center justify-center gap-6 py-4">
-                <div className="rounded-2xl bg-white p-5 shadow-[0_8px_30px_rgba(0,0,0,0.12)] ring-1 ring-black/5 transition-transform hover:scale-105 duration-300">
-                  <QRCode 
-                    value={`https://campusxpose.online/messages?to=${username}`} 
-                    size={200} 
-                    style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-                    viewBox={`0 0 256 256`}
-                    fgColor="#0f172a"
-                  />
-                </div>
-                <div className="text-center space-y-1">
-                  <p className="font-display font-bold text-xl tracking-tight text-foreground">@{username}</p>
-                  <p className="text-sm text-muted-foreground">Scan with phone camera to open chat</p>
-                </div>
-                <div className="flex w-full items-center gap-2">
-                  <Input 
-                    readOnly 
-                    value={`https://campusxpose.online/messages?to=${username}`} 
-                    className="flex-1 bg-surface-2/50 border-border/50 text-xs font-mono truncate" 
-                  />
-                  <Button 
-                    size="icon" 
-                    variant="outline" 
-                    className="shrink-0 hover:bg-accent hover:text-accent-foreground transition-colors"
-                    onClick={() => {
-                      navigator.clipboard.writeText(`https://campusxpose.online/messages?to=${username}`);
-                      toast.success("Link copied to clipboard!");
-                    }}
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                  {typeof navigator !== "undefined" && navigator.share && (
-                    <Button 
-                      size="icon"
-                      variant="default" 
-                      className="shrink-0 bg-accent text-accent-foreground hover:bg-accent/90 shadow-md shadow-accent/20 transition-all"
-                      onClick={() => {
-                        navigator.share({
-                          title: "Message me anonymously",
-                          text: `Chat with me on CampusXpose!`,
-                          url: `https://campusxpose.online/messages?to=${username}`,
-                        }).catch(() => {});
-                      }}
-                    >
-                      <Share2 className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              </div>
+              <Tabs defaultValue="my-code" className="w-full">
+                <DialogHeader className="mb-4">
+                  <div className="flex items-center justify-between">
+                    <DialogTitle className="flex items-center gap-2 text-xl font-display">
+                      <UserPlus className="h-5 w-5 text-accent" /> Chat with Friends
+                    </DialogTitle>
+                    <TabsList>
+                      <TabsTrigger value="my-code">My Code</TabsTrigger>
+                      <TabsTrigger value="scan">Scan</TabsTrigger>
+                    </TabsList>
+                  </div>
+                  <DialogDescription className="text-base">
+                    Share your QR code or scan a friend's code.
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <TabsContent value="my-code">
+                  <div className="flex flex-col items-center justify-center gap-6 py-4">
+                    <div className="rounded-2xl bg-white p-5 shadow-[0_8px_30px_rgba(0,0,0,0.12)] ring-1 ring-black/5 transition-transform hover:scale-105 duration-300">
+                      <QRCode 
+                        value={`https://campusxpose.online/messages?to=${username}`} 
+                        size={200} 
+                        style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                        viewBox={`0 0 256 256`}
+                        fgColor="#0f172a"
+                      />
+                    </div>
+                    <div className="text-center space-y-1">
+                      <p className="font-display font-bold text-xl tracking-tight text-foreground">@{username}</p>
+                      <p className="text-sm text-muted-foreground">Scan with phone camera to open chat</p>
+                    </div>
+                    <div className="flex w-full items-center gap-2">
+                      <Input 
+                        readOnly 
+                        value={`https://campusxpose.online/messages?to=${username}`} 
+                        className="flex-1 bg-surface-2/50 border-border/50 text-xs font-mono truncate" 
+                      />
+                      <Button 
+                        size="icon" 
+                        variant="outline" 
+                        className="shrink-0 hover:bg-accent hover:text-accent-foreground transition-colors"
+                        onClick={() => {
+                          navigator.clipboard.writeText(`https://campusxpose.online/messages?to=${username}`);
+                          toast.success("Link copied to clipboard!");
+                        }}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                      {typeof navigator !== "undefined" && navigator.share && (
+                        <Button 
+                          size="icon"
+                          variant="default" 
+                          className="shrink-0 bg-accent text-accent-foreground hover:bg-accent/90 shadow-md shadow-accent/20 transition-all"
+                          onClick={() => {
+                            navigator.share({
+                              title: "Message me anonymously",
+                              text: `Chat with me on CampusXpose!`,
+                              url: `https://campusxpose.online/messages?to=${username}`,
+                            }).catch(() => {});
+                          }}
+                        >
+                          <Share2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="scan">
+                  <div className="flex flex-col items-center justify-center py-4">
+                    <div className="w-full max-w-[300px] overflow-hidden rounded-xl">
+                      <Scanner
+                        onScan={(result) => {
+                          if (result && result.length > 0) {
+                            const url = result[0].rawValue;
+                            try {
+                              const parsedUrl = new URL(url);
+                              if (parsedUrl.hostname.includes("campusxpose.online") && parsedUrl.pathname.includes("/messages")) {
+                                const scannedUsername = parsedUrl.searchParams.get("to");
+                                if (scannedUsername) {
+                                  setIsDialogOpen(false);
+                                  navigate({ to: "/messages", search: { to: scannedUsername } });
+                                  toast.success(`Chatting with ${scannedUsername}`);
+                                }
+                              } else {
+                                toast.error("Invalid QR Code");
+                              }
+                            } catch (e) {
+                                // Invalid URL
+                            }
+                          }
+                        }}
+                      />
+                    </div>
+                    <p className="mt-4 text-sm text-muted-foreground text-center">Point your camera at a friend's CampusXpose QR code.</p>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </DialogContent>
           </Dialog>
         </header>
