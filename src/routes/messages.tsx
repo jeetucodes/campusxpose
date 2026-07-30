@@ -1,7 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Send, MessageCircle, Globe, ArrowLeft, Plus, Trash2, X, Pin, ShieldCheck, Image as ImageIcon, Loader2 } from "lucide-react";
+import { Send, MessageCircle, UserPlus, ArrowLeft, Plus, Trash2, X, Pin, ShieldCheck, Image as ImageIcon, Loader2, Copy, Share2 } from "lucide-react";
 import { toast } from "sonner";
+import QRCode from "react-qr-code";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { AutoResizeTextarea } from "@/components/AutoResizeTextarea";
 
 import { Button } from "@/components/ui/button";
@@ -290,34 +292,97 @@ function Messages() {
       {/* Conversation list */}
       <aside
         className={cn(
-          "w-full flex-col border-r-2 border-dashed border-border md:flex md:w-72",
+          "w-full flex-col border-r border-border/40 bg-surface-1/20 md:flex md:w-[320px] shadow-[1px_0_10px_rgba(0,0,0,0.02)]",
           active ? "hidden md:flex" : "flex",
         )}
       >
-        <header className="flex items-center gap-2 border-b-2 border-dashed border-border px-4 py-3">
-          <Button asChild variant="ghost" size="icon">
+        <header className="flex items-center gap-2 border-b border-border/40 px-4 py-3 bg-background/80 backdrop-blur-md sticky top-0 z-10">
+          <Button asChild variant="ghost" size="icon" className="hover:bg-accent/10">
             <Link to="/">
               <ArrowLeft className="h-5 w-5" />
             </Link>
           </Button>
           <MessageCircle className="h-5 w-5 text-accent" strokeWidth={2.5} />
-          <span className="font-display text-lg font-bold">Direct Messages</span>
-          <Button asChild variant="ghost" size="icon" className="ml-auto">
-            <Link to="/global">
-              <Globe className="h-4 w-4" />
-            </Link>
-          </Button>
+          <span className="font-display text-lg font-bold tracking-tight">Messages</span>
+          
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="icon" className="ml-auto text-accent hover:text-accent hover:bg-accent/10 transition-colors" aria-label="Add Friends">
+                <UserPlus className="h-5 w-5" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md border-border/50 bg-background/95 backdrop-blur-xl shadow-2xl">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-xl font-display">
+                  <UserPlus className="h-5 w-5 text-accent" /> Chat with Friends
+                </DialogTitle>
+                <DialogDescription className="text-base">
+                  Share your QR code or direct link to let friends message you anonymously.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col items-center justify-center gap-6 py-4">
+                <div className="rounded-2xl bg-white p-5 shadow-[0_8px_30px_rgba(0,0,0,0.12)] ring-1 ring-black/5 transition-transform hover:scale-105 duration-300">
+                  <QRCode 
+                    value={`https://campusxpose.online/messages?to=${username}`} 
+                    size={200} 
+                    style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                    viewBox={`0 0 256 256`}
+                    fgColor="#0f172a"
+                  />
+                </div>
+                <div className="text-center space-y-1">
+                  <p className="font-display font-bold text-xl tracking-tight text-foreground">@{username}</p>
+                  <p className="text-sm text-muted-foreground">Scan with phone camera to open chat</p>
+                </div>
+                <div className="flex w-full items-center gap-2">
+                  <Input 
+                    readOnly 
+                    value={`https://campusxpose.online/messages?to=${username}`} 
+                    className="flex-1 bg-surface-2/50 border-border/50 text-xs font-mono truncate" 
+                  />
+                  <Button 
+                    size="icon" 
+                    variant="outline" 
+                    className="shrink-0 hover:bg-accent hover:text-accent-foreground transition-colors"
+                    onClick={() => {
+                      navigator.clipboard.writeText(`https://campusxpose.online/messages?to=${username}`);
+                      toast.success("Link copied to clipboard!");
+                    }}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                  {typeof navigator !== "undefined" && navigator.share && (
+                    <Button 
+                      size="icon"
+                      variant="default" 
+                      className="shrink-0 bg-accent text-accent-foreground hover:bg-accent/90 shadow-md shadow-accent/20 transition-all"
+                      onClick={() => {
+                        navigator.share({
+                          title: "Message me anonymously",
+                          text: `Chat with me on CampusXpose!`,
+                          url: `https://campusxpose.online/messages?to=${username}`,
+                        }).catch(() => {});
+                      }}
+                    >
+                      <Share2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </header>
 
-        <div className="border-b-2 border-dashed border-border p-3">
+        <div className="border-b border-border/40 bg-surface-1/10 p-3">
           <div className="flex items-center gap-2">
             <Input
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && startNew()}
-              placeholder="username to message..."
+              placeholder="Username to message..."
+              className="bg-background/50 border-border/60 focus-visible:ring-accent/50 focus-visible:border-accent"
             />
-            <Button onClick={startNew} size="icon" className="shrink-0">
+            <Button onClick={startNew} size="icon" variant="secondary" className="shrink-0 hover:bg-accent hover:text-accent-foreground transition-colors">
               <Plus className="h-4 w-4" />
             </Button>
           </div>
@@ -340,8 +405,8 @@ function Messages() {
               <div
                 key={c.name}
                 className={cn(
-                  "group flex items-center gap-3 border-b border-dashed border-border px-4 py-3 transition-colors hover:bg-accent/10",
-                  active === c.name && "bg-accent/15",
+                  "group flex items-center gap-3 border-b border-border/30 px-4 py-3 transition-all hover:bg-accent/5 cursor-pointer relative overflow-hidden",
+                  active === c.name && "bg-accent/5 before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-accent",
                 )}
               >
                 <Link
@@ -391,8 +456,8 @@ function Messages() {
       >
         {active ? (
           <>
-            <header className="flex items-center gap-3 border-b-2 border-dashed border-border px-4 py-3">
-              <Button asChild variant="ghost" size="icon">
+            <header className="flex items-center gap-3 border-b border-border/40 px-4 py-3 bg-background/80 backdrop-blur-md sticky top-0 z-10 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+              <Button asChild variant="ghost" size="icon" className="hover:bg-accent/10">
                 <Link to="/messages" search={{}}>
                   <ArrowLeft className="h-5 w-5" />
                 </Link>
@@ -426,7 +491,7 @@ function Messages() {
             </header>
 
             {thread.some((m) => m.pinned) && (
-              <div className="border-b-2 border-dashed border-border bg-surface-2/60 px-4 py-2">
+              <div className="border-b border-border/40 bg-accent/5 px-4 py-2">
                 <div className="mx-auto w-full max-w-2xl space-y-1">
                   {thread.filter((m) => m.pinned).map((m) => (
                     <div key={m.id} className="flex items-center gap-2 text-xs">
@@ -524,14 +589,14 @@ function Messages() {
             </div>
 
             {active === "admin" ? (
-              <div className="shrink-0 border-t-2 border-dashed border-border px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+              <div className="shrink-0 border-t border-border/40 bg-background/80 backdrop-blur-md px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
                 <div className="mx-auto flex w-full max-w-2xl items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-surface-2/60 px-4 py-3 text-center text-sm text-muted-foreground">
                   <ShieldCheck className="h-4 w-4 shrink-0 text-accent" />
                   <span>This is an official admin message. You can read replies here, but can't reply back.</span>
                 </div>
               </div>
             ) : (
-              <div className="shrink-0 border-t-2 border-dashed border-border px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+              <div className="shrink-0 border-t border-border/40 bg-background/80 backdrop-blur-md px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
                 <div className="mx-auto w-full max-w-2xl">
                   <TypingIndicator users={typing} className="mb-1.5 px-1" />
                   {replyTo && (
