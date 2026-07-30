@@ -163,12 +163,14 @@ function AdsAdmin() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="flex items-center gap-2 text-2xl font-bold">
-          <Megaphone className="h-6 w-6 text-primary" /> Ads
+      {/* Header */}
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="flex items-center gap-2 text-xl font-bold sm:text-2xl">
+          <Megaphone className="h-5 w-5 text-primary sm:h-6 sm:w-6" /> Ads
         </h1>
-        <Button className="rounded-full" onClick={() => setEditing({ ...EMPTY })}>
-          <Plus className="mr-1 h-4 w-4" /> New Ad
+        <Button className="rounded-full" size="sm" onClick={() => setEditing({ ...EMPTY })}>
+          <Plus className="h-4 w-4" />
+          <span className="ml-1 hidden sm:inline">New Ad</span>
         </Button>
       </div>
 
@@ -190,53 +192,59 @@ function AdsAdmin() {
       ) : (
         <div className="grid gap-3">
           {ads.map((ad) => (
-            <div key={ad.id} className="flex items-center gap-3 rounded-xl border border-border bg-surface p-3">
-              {/* Thumbnail */}
-              {ad.media_url ? (
-                <img src={ad.media_url} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
-              ) : ad.kind === "video" ? (
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
-                  <VideoIcon className="h-5 w-5" />
-                </div>
-              ) : (
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-surface-2 text-muted-foreground">
-                  <ImageIcon className="h-5 w-5" />
-                </div>
-              )}
-              {/* Info */}
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="font-semibold truncate">{ad.title}</span>
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium uppercase ${
-                    ad.kind === "video" ? "bg-blue-500/15 text-blue-600" : "bg-green-500/15 text-green-600"
-                  }`}>{ad.kind === "video" ? "Video" : "Banner"}</span>
-                  {ad.active ? (
-                    <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] text-primary">Active</span>
-                  ) : (
-                    <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">Inactive</span>
-                  )}
-                </div>
-                <div className="mt-0.5 flex flex-wrap gap-1 text-[10px] text-muted-foreground">
-                  {ad.show_home && <span className="rounded bg-surface-2 px-1.5 py-0.5">Home</span>}
-                  {ad.show_global && <span className="rounded bg-surface-2 px-1.5 py-0.5">Global</span>}
-                  {ad.show_college && <span className="rounded bg-surface-2 px-1.5 py-0.5">College</span>}
+            <div key={ad.id} className="rounded-xl border border-border bg-surface p-3">
+              {/* Top row: thumbnail + info */}
+              <div className="flex items-start gap-3">
+                {/* Thumbnail */}
+                {ad.media_url ? (
+                  <img src={ad.media_url} alt="" className="h-11 w-11 shrink-0 rounded-lg object-cover" />
+                ) : ad.kind === "video" ? (
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
+                    <VideoIcon className="h-4 w-4" />
+                  </div>
+                ) : (
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-surface-2 text-muted-foreground">
+                    <ImageIcon className="h-4 w-4" />
+                  </div>
+                )}
+                {/* Info */}
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="font-semibold truncate max-w-[140px] sm:max-w-none">{ad.title}</span>
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium uppercase ${
+                      ad.kind === "video" ? "bg-blue-500/15 text-blue-600" : "bg-green-500/15 text-green-600"
+                    }`}>{ad.kind === "video" ? "Video" : "Banner"}</span>
+                  </div>
+                  <div className="mt-0.5 flex flex-wrap gap-1 text-[10px] text-muted-foreground">
+                    {ad.show_home && <span className="rounded bg-surface-2 px-1.5 py-0.5">Home</span>}
+                    {ad.show_global && <span className="rounded bg-surface-2 px-1.5 py-0.5">Global</span>}
+                    {ad.show_college && <span className="rounded bg-surface-2 px-1.5 py-0.5">College</span>}
+                  </div>
                 </div>
               </div>
-              {/* Actions */}
-              <div className="flex shrink-0 items-center gap-1">
-                {/* Quick active toggle */}
-                <div className="flex items-center gap-1.5 mr-1">
+
+              {/* Bottom row: toggle + actions */}
+              <div className="mt-2.5 flex items-center justify-between border-t border-border pt-2.5">
+                {/* Active toggle */}
+                <div className="flex items-center gap-2">
                   <Switch
                     checked={ad.active}
                     onCheckedChange={() => handleToggleActive(ad)}
                     className="scale-90"
                   />
-                  <span className={`text-[11px] font-medium ${ad.active ? "text-primary" : "text-muted-foreground"}`}>
-                    {ad.active ? "On" : "Off"}
+                  <span className={`text-xs font-medium ${ad.active ? "text-primary" : "text-muted-foreground"}`}>
+                    {ad.active ? "Active" : "Inactive"}
                   </span>
                 </div>
-                <Button size="icon" variant="ghost" className="h-9 w-9" onClick={() => setEditing(ad)}><Pencil className="h-4 w-4" /></Button>
-                <Button size="icon" variant="ghost" className="h-9 w-9 text-destructive" onClick={() => handleDelete(ad.id!)}><Trash2 className="h-4 w-4" /></Button>
+                {/* Edit + Delete */}
+                <div className="flex items-center gap-1">
+                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setEditing(ad)}>
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => handleDelete(ad.id!)}>
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
               </div>
             </div>
           ))}
@@ -244,10 +252,13 @@ function AdsAdmin() {
       )}
 
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
-        <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
-          <DialogHeader><DialogTitle>{editing?.id ? "Edit Ad" : "New Ad"}</DialogTitle></DialogHeader>
-          {editing && (
-            <div className="space-y-4 pt-1">
+        <DialogContent className="flex h-[100dvh] w-full flex-col overflow-hidden rounded-none p-0 sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:rounded-2xl">
+          <DialogHeader className="shrink-0 border-b border-border px-4 py-3 sm:px-6 sm:pt-6">
+            <DialogTitle>{editing?.id ? "Edit Ad" : "New Ad"}</DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6">
+            {editing && (
+              <div className="space-y-4">
 
               {/* Title */}
               <div className="space-y-1">
@@ -389,10 +400,13 @@ function AdsAdmin() {
                 <Input type="number" value={editing.sort_order} onChange={(e) => setEditing({ ...editing, sort_order: Number(e.target.value) || 0 })} />
               </div>
             </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
-            <Button onClick={handleSave} disabled={busy}>{busy && <Loader2 className="mr-1 h-4 w-4 animate-spin" />} Save</Button>
+            )}
+          </div>
+          <DialogFooter className="shrink-0 border-t border-border px-4 py-3 sm:px-6">
+            <Button variant="outline" className="flex-1 sm:flex-none" onClick={() => setEditing(null)}>Cancel</Button>
+            <Button className="flex-1 sm:flex-none" onClick={handleSave} disabled={busy}>
+              {busy && <Loader2 className="mr-1 h-4 w-4 animate-spin" />} Save
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
