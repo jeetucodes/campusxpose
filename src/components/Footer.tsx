@@ -88,7 +88,7 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t-2 border-dashed border-ink pt-6 text-sm text-muted-foreground md:flex-row">
           <p className="font-display font-bold text-foreground">No identity stored. Ever.</p>
-          <p>© {year} CampusXpose. Built for students.</p>
+          <p>© {year} Innovatex Labs. Built for students.</p>
         </div>
       </div>
     </footer>
