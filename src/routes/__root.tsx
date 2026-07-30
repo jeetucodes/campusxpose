@@ -131,6 +131,35 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
   const pathname = router.state.location.pathname;
+
+  // Deep linking: redirect to mobile app or Play Store on Android
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    
+    const isAndroid = /android/i.test(navigator.userAgent);
+    
+    // Detect if already inside the Median wrapper
+    const isMedianWebview = /Median|gonative|co\.median\.android\.abxkxke/i.test(navigator.userAgent) || 
+                            (window as any).median || 
+                            (window as any).gonative ||
+                            (navigator.userAgent.includes('wv') && isAndroid);
+                            
+    if (isAndroid && !isMedianWebview) {
+      // Prevent redirect loop if the user intentionally comes back to the browser
+      if (sessionStorage.getItem("app_redirect_attempted")) return;
+      sessionStorage.setItem("app_redirect_attempted", "true");
+      
+      const pathAndQuery = window.location.pathname + window.location.search + window.location.hash;
+      const packageName = "co.median.android.abxkxke";
+      const playStoreFallback = `https://play.google.com/store/apps/details?id=${packageName}&pcampaignid=web_share`;
+      
+      const intentUrl = `intent://campusxpose.online${pathAndQuery}#Intent;scheme=https;package=${packageName};S.browser_fallback_url=${encodeURIComponent(playStoreFallback)};end;`;
+      
+      // Attempt to open the app or redirect to play store
+      window.location.href = intentUrl;
+    }
+  }, []);
+
   const isCommunityChat = useMemo(() => pathname.startsWith("/community/"), [pathname]);
   const isAdmin = useMemo(() => pathname.startsWith("/admin/"), [pathname]);
   const isGlobal = useMemo(() => pathname === "/global", [pathname]);

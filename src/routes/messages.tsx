@@ -77,6 +77,7 @@ function Messages() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { byMessage, toggle } = useReactions("direct", hashedId);
 
@@ -308,7 +309,10 @@ function Messages() {
           <MessageCircle className="h-5 w-5 text-accent" strokeWidth={2.5} />
           <span className="font-display text-lg font-bold tracking-tight">Messages</span>
           
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <Dialog open={isDialogOpen} onOpenChange={(open) => {
+            setIsDialogOpen(open);
+            if (!open) setIsScanning(false);
+          }}>
             <DialogTrigger asChild>
               <Button variant="ghost" size="icon" className="ml-auto text-accent hover:text-accent hover:bg-accent/10 transition-colors" aria-label="Add Friends">
                 <UserPlus className="h-5 w-5" />
@@ -363,58 +367,81 @@ function Messages() {
                       >
                         <Copy className="h-4 w-4" />
                       </Button>
-                      {typeof navigator !== "undefined" && navigator.share && (
-                        <Button 
-                          size="icon"
-                          variant="default" 
-                          className="shrink-0 bg-accent text-accent-foreground hover:bg-accent/90 shadow-md shadow-accent/20 transition-all"
-                          onClick={() => {
+                      <Button 
+                        size="icon"
+                        variant="default" 
+                        className="shrink-0 bg-accent text-accent-foreground hover:bg-accent/90 shadow-md shadow-accent/20 transition-all"
+                        onClick={() => {
+                          const shareUrl = `https://campusxpose.online/messages?to=${username}`;
+                          if (typeof navigator !== "undefined" && navigator.share) {
                             navigator.share({
                               title: "Message me anonymously",
                               text: `Chat with me on CampusXpose!`,
-                              url: `https://campusxpose.online/messages?to=${username}`,
+                              url: shareUrl,
                             }).catch(() => {});
-                          }}
-                        >
-                          <Share2 className="h-4 w-4" />
-                        </Button>
-                      )}
+                          } else if (typeof window !== "undefined" && (window as any).median) {
+                            (window as any).median.share.sharePage({ url: shareUrl, title: "Message me anonymously" });
+                          } else {
+                            navigator.clipboard.writeText(shareUrl);
+                            toast.success("Link copied to clipboard!");
+                          }
+                        }}
+                      >
+                        <Share2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
                 </TabsContent>
                 
                 <TabsContent value="scan">
                   <div className="flex flex-col items-center justify-center py-4">
-                    <div className="w-full max-w-[300px] overflow-hidden rounded-xl">
-                      <Scanner
-                        formats={['qr_code']}
-                        onError={(error: any) => {
-                          console.error("Scanner Error:", error);
-                          toast.error(error?.message || "Failed to access camera. Check permissions or use HTTPS.");
-                        }}
-                        onScan={(result) => {
-                          if (result && result.length > 0) {
-                            const url = result[0].rawValue;
-                            try {
-                              const parsedUrl = new URL(url);
-                              if (parsedUrl.hostname.includes("campusxpose.online") && parsedUrl.pathname.includes("/messages")) {
-                                const scannedUsername = parsedUrl.searchParams.get("to");
-                                if (scannedUsername) {
-                                  setIsDialogOpen(false);
-                                  navigate({ to: "/messages", search: { to: scannedUsername } });
-                                  toast.success(`Chatting with ${scannedUsername}`);
+                    {!isScanning ? (
+                      <div className="flex flex-col items-center justify-center gap-4 py-8 text-center px-4">
+                        <div className="rounded-full bg-accent/10 p-4">
+                          <ImageIcon className="h-8 w-8 text-accent" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-foreground">Camera Permission</h3>
+                          <p className="text-sm text-muted-foreground mt-1">We need your permission to use the camera for scanning QR codes.</p>
+                        </div>
+                        <Button onClick={() => setIsScanning(true)} className="mt-2 shadow-md hover:shadow-lg transition-all">
+                          Enable Camera & Scan
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="w-full max-w-[300px] overflow-hidden rounded-xl shadow-inner border border-border/50 bg-black/5">
+                        <Scanner
+                          formats={['qr_code']}
+                          onError={(error: any) => {
+                            console.error("Scanner Error:", error);
+                            setIsScanning(false);
+                            toast.error(error?.message || "Failed to access camera. Check permissions or use HTTPS.");
+                          }}
+                          onScan={(result) => {
+                            if (result && result.length > 0) {
+                              const url = result[0].rawValue;
+                              try {
+                                const parsedUrl = new URL(url);
+                                if (parsedUrl.hostname.includes("campusxpose.online") && parsedUrl.pathname.includes("/messages")) {
+                                  const scannedUsername = parsedUrl.searchParams.get("to");
+                                  if (scannedUsername) {
+                                    setIsDialogOpen(false);
+                                    setIsScanning(false);
+                                    navigate({ to: "/messages", search: { to: scannedUsername } });
+                                    toast.success(`Chatting with ${scannedUsername}`);
+                                  }
+                                } else {
+                                  toast.error("Invalid CampusXpose QR Code");
                                 }
-                              } else {
-                                toast.error("Invalid CampusXpose QR Code");
+                              } catch (e) {
+                                  toast.error("Invalid QR Code content");
                               }
-                            } catch (e) {
-                                toast.error("Invalid QR Code content");
                             }
-                          }
-                        }}
-                      />
-                    </div>
-                    <p className="mt-4 text-sm text-muted-foreground text-center">Point your camera at a friend's CampusXpose QR code.</p>
+                          }}
+                        />
+                      </div>
+                    )}
+                    <p className="mt-4 text-xs text-muted-foreground text-center px-4">Point your camera at a friend's CampusXpose QR code.</p>
                   </div>
                 </TabsContent>
               </Tabs>
