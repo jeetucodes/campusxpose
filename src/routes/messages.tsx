@@ -387,6 +387,11 @@ function Messages() {
                   <div className="flex flex-col items-center justify-center py-4">
                     <div className="w-full max-w-[300px] overflow-hidden rounded-xl">
                       <Scanner
+                        formats={['qr_code']}
+                        onError={(error: any) => {
+                          console.error("Scanner Error:", error);
+                          toast.error(error?.message || "Failed to access camera. Check permissions or use HTTPS.");
+                        }}
                         onScan={(result) => {
                           if (result && result.length > 0) {
                             const url = result[0].rawValue;
@@ -400,10 +405,10 @@ function Messages() {
                                   toast.success(`Chatting with ${scannedUsername}`);
                                 }
                               } else {
-                                toast.error("Invalid QR Code");
+                                toast.error("Invalid CampusXpose QR Code");
                               }
                             } catch (e) {
-                                // Invalid URL
+                                toast.error("Invalid QR Code content");
                             }
                           }
                         }}
