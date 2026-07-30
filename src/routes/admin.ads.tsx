@@ -1,8 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Megaphone, Plus, Trash2, Pencil, Loader2, ExternalLink } from "lucide-react";
+import {
+  Megaphone, Plus, Trash2, Pencil, Loader2,
+  ImageIcon, VideoIcon, Upload, X,
+} from "lucide-react";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { useAdmin } from "@/stores/admin";
 import {
@@ -19,6 +22,49 @@ import { Label } from "@/components/ui/label";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
+
+const IMGBB_KEY = import.meta.env.VITE_IMGBB_API_KEY as string;
+
+async function uploadToImgBB(file: File): Promise<string> {
+  const form = new FormData();
+  form.append("image", file);
+  const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
+    method: "POST",
+    body: form,
+  });
+  const json = await res.json();
+  if (!json.success) throw new Error(json.error?.message ?? "ImgBB upload failed");
+  return json.data.url as string;
+}
+
+function ImageUploader({ onUrl }: { onUrl: (url: string) => void }) {
+  const ref = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await uploadToImgBB(file);
+      onUrl(url);
+      toast.success("Image uploaded!");
+    } catch (err) {
+      toast.error((err as Error).message ?? "Upload failed");
+    } finally {
+      setUploading(false);
+      if (ref.current) ref.current.value = "";
+    }
+  };
+
+  return (
+    <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-dashed border-border bg-surface-2 px-3 py-1.5 text-xs text-muted-foreground transition hover:border-primary hover:text-primary">
+      {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+      {uploading ? "Uploading…" : "Upload photo"}
+      <input ref={ref} type="file" accept="image/*" className="hidden" onChange={handleFile} disabled={uploading} />
+    </label>
+  );
+}
 
 export const Route = createFileRoute("/admin/ads")({
   head: () => ({ meta: [{ title: "Admin · Ads" }, { name: "robots", content: "noindex" }] }),
@@ -94,8 +140,25 @@ function AdsAdmin() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this ad?")) return;
-    try { await del({ data: { token: token!, id } }); toast.success("Deleted"); reload(); }
-    catch (e) { toast.error((e as Error)?.message ?? "Failed"); }
+    try {
+      await del({ data: { token: token!, id } });
+      toast.success("Deleted");
+      reload();
+    } catch (e) { toast.error((e as Error)?.message ?? "Failed"); }
+  };
+
+  const handleToggleActive = async (ad: Ad) => {
+    const updated = { ...ad, active: !ad.active };
+    // Optimistically update local state
+    setAds((prev) => prev.map((a) => (a.id === ad.id ? updated : a)));
+    try {
+      await save({ data: { token: token!, ...updated } });
+      toast.success(updated.active ? "Ad turned ON" : "Ad turned OFF");
+    } catch (e) {
+      // Revert on failure
+      setAds((prev) => prev.map((a) => (a.id === ad.id ? ad : a)));
+      toast.error((e as Error)?.message ?? "Failed");
+    }
   };
 
   return (
@@ -123,40 +186,57 @@ function AdsAdmin() {
       {loading ? (
         <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
       ) : ads.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-border p-8 text-center text-muted-foreground">No ads yet. Create one.</p>
+        <p className="rounded-xl border border-dashed border-border p-8 text-center text-muted-foreground">No ads yet. Click "New Ad" to create one.</p>
       ) : (
         <div className="grid gap-3">
           {ads.map((ad) => (
-            <div key={ad.id} className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4 sm:flex-row sm:items-start">
-        {ad.media_url ? (
-                <img src={ad.media_url} alt="" className="h-14 w-14 shrink-0 rounded-lg object-cover" />
+            <div key={ad.id} className="flex items-center gap-3 rounded-xl border border-border bg-surface p-3">
+              {/* Thumbnail */}
+              {ad.media_url ? (
+                <img src={ad.media_url} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
+              ) : ad.kind === "video" ? (
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
+                  <VideoIcon className="h-5 w-5" />
+                </div>
               ) : (
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-surface-2 text-muted-foreground"><Megaphone className="h-5 w-5" /></div>
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-surface-2 text-muted-foreground">
+                  <ImageIcon className="h-5 w-5" />
+                </div>
               )}
+              {/* Info */}
               <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-semibold">{ad.title}</span>
-                  <span className="rounded-full bg-surface-2 px-2 py-0.5 text-[10px] uppercase">{ad.kind}</span>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="font-semibold truncate">{ad.title}</span>
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium uppercase ${
+                    ad.kind === "video" ? "bg-blue-500/15 text-blue-600" : "bg-green-500/15 text-green-600"
+                  }`}>{ad.kind === "video" ? "Video" : "Banner"}</span>
                   {ad.active ? (
                     <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] text-primary">Active</span>
                   ) : (
                     <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">Inactive</span>
                   )}
                 </div>
-                <div className="mt-1 flex flex-wrap gap-1 text-[11px] text-muted-foreground">
+                <div className="mt-0.5 flex flex-wrap gap-1 text-[10px] text-muted-foreground">
                   {ad.show_home && <span className="rounded bg-surface-2 px-1.5 py-0.5">Home</span>}
                   {ad.show_global && <span className="rounded bg-surface-2 px-1.5 py-0.5">Global</span>}
                   {ad.show_college && <span className="rounded bg-surface-2 px-1.5 py-0.5">College</span>}
                 </div>
-                {ad.link_url && (
-                  <a href={ad.link_url} target="_blank" rel="noreferrer" className="mt-1 inline-flex max-w-full items-center gap-1 truncate text-xs text-primary">
-                    {ad.link_url} <ExternalLink className="h-3 w-3 shrink-0" />
-                  </a>
-                )}
               </div>
-              <div className="flex shrink-0 gap-1 sm:self-start">
-                <Button size="icon" variant="ghost" className="h-10 w-10" onClick={() => setEditing(ad)}><Pencil className="h-4 w-4" /></Button>
-                <Button size="icon" variant="ghost" className="h-10 w-10 text-destructive" onClick={() => handleDelete(ad.id!)}><Trash2 className="h-4 w-4" /></Button>
+              {/* Actions */}
+              <div className="flex shrink-0 items-center gap-1">
+                {/* Quick active toggle */}
+                <div className="flex items-center gap-1.5 mr-1">
+                  <Switch
+                    checked={ad.active}
+                    onCheckedChange={() => handleToggleActive(ad)}
+                    className="scale-90"
+                  />
+                  <span className={`text-[11px] font-medium ${ad.active ? "text-primary" : "text-muted-foreground"}`}>
+                    {ad.active ? "On" : "Off"}
+                  </span>
+                </div>
+                <Button size="icon" variant="ghost" className="h-9 w-9" onClick={() => setEditing(ad)}><Pencil className="h-4 w-4" /></Button>
+                <Button size="icon" variant="ghost" className="h-9 w-9 text-destructive" onClick={() => handleDelete(ad.id!)}><Trash2 className="h-4 w-4" /></Button>
               </div>
             </div>
           ))}
@@ -167,81 +247,125 @@ function AdsAdmin() {
         <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
           <DialogHeader><DialogTitle>{editing?.id ? "Edit Ad" : "New Ad"}</DialogTitle></DialogHeader>
           {editing && (
-            <div className="space-y-4">
-              <div>
-                <Label>Title</Label>
+            <div className="space-y-4 pt-1">
+
+              {/* Title */}
+              <div className="space-y-1">
+                <Label>Title *</Label>
                 <Input value={editing.title} onChange={(e) => setEditing({ ...editing, title: e.target.value })} placeholder="Promo headline" />
               </div>
-              <div>
-                <Label>Type</Label>
-                <div className="mt-1 flex gap-2">
-                  {(["banner", "video"] as const).map((k) => (
-                    <Button key={k} type="button" size="sm" variant={editing.kind === k ? "default" : "outline"} className="rounded-full capitalize" onClick={() => setEditing({ ...editing, kind: k })}>{k}</Button>
-                  ))}
+
+              {/* Type toggle — pill style */}
+              <div className="space-y-1">
+                <Label>Ad Type</Label>
+                <div className="mt-1 grid grid-cols-2 gap-1.5 rounded-xl border border-border bg-surface-2 p-1">
+                  <button
+                    type="button"
+                    onClick={() => setEditing({ ...editing, kind: "banner" })}
+                    className={`flex items-center justify-center gap-2 rounded-lg py-2 text-sm font-medium transition-all ${
+                      editing.kind === "banner" ? "bg-background shadow text-foreground" : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <ImageIcon className="h-4 w-4" /> Image Banner
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditing({ ...editing, kind: "video" })}
+                    className={`flex items-center justify-center gap-2 rounded-lg py-2 text-sm font-medium transition-all ${
+                      editing.kind === "video" ? "bg-background shadow text-foreground" : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <VideoIcon className="h-4 w-4" /> Video
+                  </button>
                 </div>
               </div>
-              <div>
+
+              {/* Description */}
+              <div className="space-y-1">
                 <Label>Description</Label>
-                <Textarea value={editing.body ?? ""} onChange={(e) => setEditing({ ...editing, body: e.target.value })} placeholder="Shown when the ad is opened" />
+                <Textarea rows={2} value={editing.body ?? ""} onChange={(e) => setEditing({ ...editing, body: e.target.value })} placeholder="Short description shown in the ad" />
               </div>
 
-              {editing.kind === "banner" ? (
-                <>
-                  <div>
-                    <Label>Banner image link (photo)</Label>
-                    <Input value={editing.media_url ?? ""} onChange={(e) => setEditing({ ...editing, media_url: e.target.value })} placeholder="https://...jpg" />
+              {/* BANNER fields */}
+              {editing.kind === "banner" && (
+                <div className="space-y-3 rounded-xl border border-border p-3">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Banner Image</div>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <Input
+                        value={editing.media_url ?? ""}
+                        onChange={(e) => setEditing({ ...editing, media_url: e.target.value })}
+                        placeholder="Paste image URL or upload below"
+                        className="flex-1"
+                      />
+                      {editing.media_url?.trim() && (
+                        <button type="button" onClick={() => setEditing({ ...editing, media_url: "" })} className="shrink-0 text-muted-foreground hover:text-destructive">
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                    <ImageUploader onUrl={(url) => setEditing({ ...editing, media_url: url })} />
                     {editing.media_url?.trim() && (
-                      <div className="mt-2 overflow-hidden rounded-lg border border-border bg-surface-2">
-                        <img
-                          src={editing.media_url}
-                          alt="Banner preview"
-                          className="max-h-48 w-full object-cover"
-                          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
-                          onLoad={(e) => { (e.currentTarget as HTMLImageElement).style.display = "block"; }}
-                        />
+                      <div className="overflow-hidden rounded-lg border border-border">
+                        <img src={editing.media_url} alt="Banner preview" className="max-h-40 w-full object-cover"
+                          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
                       </div>
                     )}
                   </div>
-                  <div>
-                    <Label>Banner link (where it opens)</Label>
-                    <Input value={editing.link_url ?? ""} onChange={(e) => setEditing({ ...editing, link_url: e.target.value })} placeholder="https://..." />
+                  <div className="space-y-1">
+                    <Label className="text-xs">Click-through URL</Label>
+                    <Input value={editing.link_url ?? ""} onChange={(e) => setEditing({ ...editing, link_url: e.target.value })} placeholder="https://…" />
                   </div>
-                </>
-              ) : (
-                <>
-                  <div>
-                    <Label>Video link (embed / iframe URL)</Label>
-                    <Input value={editing.embed_url ?? ""} onChange={(e) => setEditing({ ...editing, embed_url: e.target.value })} placeholder="https://www.youtube.com/embed/..." />
-                    <p className="mt-1 text-xs text-muted-foreground">Use an embeddable link (e.g. YouTube /embed/ URL).</p>
-                  </div>
-                  <div>
-                    <Label>Video cover image link</Label>
-                    <Input value={editing.media_url ?? ""} onChange={(e) => setEditing({ ...editing, media_url: e.target.value })} placeholder="https://...jpg" />
-                    {editing.media_url?.trim() && (
-                      <div className="mt-2 overflow-hidden rounded-lg border border-border bg-surface-2">
-                        <img
-                          src={editing.media_url}
-                          alt="Cover preview"
-                          className="max-h-48 w-full object-cover"
-                          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
-                          onLoad={(e) => { (e.currentTarget as HTMLImageElement).style.display = "block"; }}
-                        />
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <Label>Video button link (optional)</Label>
-                    <Input value={editing.link_url ?? ""} onChange={(e) => setEditing({ ...editing, link_url: e.target.value })} placeholder="https://..." />
-                  </div>
-                </>
+                </div>
               )}
-              <div>
-                <Label>Button label (optional)</Label>
+
+              {/* VIDEO fields */}
+              {editing.kind === "video" && (
+                <div className="space-y-3 rounded-xl border border-border p-3">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Video</div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Embed URL (YouTube /embed/ etc.)</Label>
+                    <Input value={editing.embed_url ?? ""} onChange={(e) => setEditing({ ...editing, embed_url: e.target.value })} placeholder="https://www.youtube.com/embed/…" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Cover / Thumbnail Image</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        value={editing.media_url ?? ""}
+                        onChange={(e) => setEditing({ ...editing, media_url: e.target.value })}
+                        placeholder="Paste image URL or upload below"
+                        className="flex-1"
+                      />
+                      {editing.media_url?.trim() && (
+                        <button type="button" onClick={() => setEditing({ ...editing, media_url: "" })} className="shrink-0 text-muted-foreground hover:text-destructive">
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                    <ImageUploader onUrl={(url) => setEditing({ ...editing, media_url: url })} />
+                    {editing.media_url?.trim() && (
+                      <div className="overflow-hidden rounded-lg border border-border">
+                        <img src={editing.media_url} alt="Cover preview" className="max-h-40 w-full object-cover"
+                          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Button link (optional)</Label>
+                    <Input value={editing.link_url ?? ""} onChange={(e) => setEditing({ ...editing, link_url: e.target.value })} placeholder="https://…" />
+                  </div>
+                </div>
+              )}
+
+              {/* CTA label */}
+              <div className="space-y-1">
+                <Label>Button label</Label>
                 <Input value={editing.cta_label ?? ""} onChange={(e) => setEditing({ ...editing, cta_label: e.target.value })} placeholder="Learn more" />
               </div>
 
-              <div className="space-y-2 rounded-lg border border-border p-3">
-                <div className="text-sm font-medium">Where to show</div>
+              {/* Placements */}
+              <div className="space-y-2 rounded-xl border border-border p-3">
+                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Show on</div>
                 {([["show_home", "Home page"], ["show_global", "Global chat"], ["show_college", "College chats"]] as const).map(([key, label]) => (
                   <div key={key} className="flex items-center justify-between">
                     <span className="text-sm">{label}</span>
@@ -249,6 +373,8 @@ function AdsAdmin() {
                   </div>
                 ))}
               </div>
+
+              {/* Active */}
               <div className="flex items-center justify-between">
                 <div>
                   <Label>Active</Label>
@@ -256,7 +382,9 @@ function AdsAdmin() {
                 </div>
                 <Switch checked={editing.active} onCheckedChange={(v) => setEditing({ ...editing, active: v })} />
               </div>
-              <div>
+
+              {/* Sort order */}
+              <div className="space-y-1">
                 <Label>Sort order</Label>
                 <Input type="number" value={editing.sort_order} onChange={(e) => setEditing({ ...editing, sort_order: Number(e.target.value) || 0 })} />
               </div>

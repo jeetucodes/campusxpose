@@ -1,16 +1,14 @@
-import { ExternalLink, Megaphone } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { useAds, type Ad } from "@/hooks/useAds";
-import { Button } from "@/components/ui/button";
 
-function HomeAdCard({ ad, index = 0 }: { ad: Ad, index?: number }) {
+function HomeAdCard({ ad }: { ad: Ad }) {
   const isVideo = ad.kind === "video" && ad.embed_url;
+
   return (
-    <div 
-      className={`sketch-card flex flex-col sm:flex-row items-center gap-4 p-4 ${index % 2 ? "rotate-1" : "-rotate-1"}`}
-      style={{ borderRadius: "25px 8px 22px 8px / 8px 22px 8px 25px" }}
-    >
+    <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+      {/* Media area */}
       {isVideo ? (
-        <div className="aspect-video w-full sm:w-1/3 shrink-0 rounded-xl overflow-hidden border-2 border-border bg-black">
+        <div className="aspect-video w-full bg-black">
           <iframe
             src={ad.embed_url!}
             title={ad.title}
@@ -20,31 +18,34 @@ function HomeAdCard({ ad, index = 0 }: { ad: Ad, index?: number }) {
           />
         </div>
       ) : ad.media_url ? (
-        <img src={ad.media_url} alt={ad.title} className="h-40 w-full sm:h-32 sm:w-32 shrink-0 object-cover rounded-xl border-2 border-border" loading="lazy" />
+        <img
+          src={ad.media_url}
+          alt={ad.title}
+          className="h-44 w-full object-cover sm:h-56"
+          loading="lazy"
+        />
       ) : null}
-      
-      <div className="flex-1 w-full text-center sm:text-left space-y-2">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div className="flex items-center justify-center sm:justify-start gap-2">
-            <h3 className="font-display text-xl font-bold">{ad.title}</h3>
-            <span className="shrink-0 rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-accent border border-accent/20">
+
+      {/* Content */}
+      <div className="flex items-start justify-between gap-3 p-4">
+        <div className="min-w-0 space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-accent border border-accent/20">
               Ad
             </span>
           </div>
+          <h3 className="font-semibold leading-snug">{ad.title}</h3>
+          {ad.body && <p className="text-sm text-muted-foreground">{ad.body}</p>}
         </div>
-        {ad.body && <p className="text-sm text-muted-foreground">{ad.body}</p>}
         {ad.link_url && (
-          <div className="pt-2">
-            <a 
-              href={ad.link_url} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="inline-flex w-full sm:w-auto items-center justify-center gap-1 border-2 border-border bg-accent px-4 py-2 text-sm font-bold text-accent-foreground shadow-ink transition-transform duration-100 hover:-translate-y-0.5 hover:shadow-ink-lg"
-              style={{ borderRadius: "18px 6px 20px 6px / 6px 20px 6px 18px" }}
-            >
-              {ad.cta_label || "Learn more"} <ExternalLink className="ml-1 h-3.5 w-3.5" />
-            </a>
-          </div>
+          <a
+            href={ad.link_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 inline-flex items-center gap-1 rounded-full bg-accent px-4 py-1.5 text-xs font-semibold text-accent-foreground transition hover:opacity-90"
+          >
+            {ad.cta_label || "Learn more"} <ExternalLink className="h-3 w-3" />
+          </a>
         )}
       </div>
     </div>
@@ -56,10 +57,10 @@ export function HomeAds() {
   const ads = useAds("home");
   if (ads.length === 0) return null;
   return (
-    <section className="mx-auto w-full max-w-3xl px-4 py-6">
-      <div className="flex flex-col gap-6">
-        {ads.map((ad, i) => (
-          <HomeAdCard key={ad.id} ad={ad} index={i} />
+    <section className="mx-auto w-full max-w-3xl px-4 py-4">
+      <div className="flex flex-col gap-4">
+        {ads.map((ad) => (
+          <HomeAdCard key={ad.id} ad={ad} />
         ))}
       </div>
     </section>
