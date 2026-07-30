@@ -71,10 +71,14 @@ export async function loadOrCreateIdentity(): Promise<Identity> {
   return { hashedId, username, uid };
 }
 
-/** Logs in using an existing secret key (UID). */
+/** Logs in using an existing secret key (UID).
+ *  The caller is responsible for setting USERNAME_KEY in localStorage
+ *  before calling this if they want to preserve a specific username.
+ *  If USERNAME_KEY is absent, loadOrCreateIdentity will generate a fresh one. */
 export async function loginWithKey(key: string): Promise<Identity> {
   localStorage.setItem(UID_KEY, key);
-  localStorage.removeItem(USERNAME_KEY); // Will be regenerated or synced
+  // Do NOT remove USERNAME_KEY here — the caller pre-seeds it when recovering
+  // an account so the original username is preserved.
   return loadOrCreateIdentity();
 }
 
