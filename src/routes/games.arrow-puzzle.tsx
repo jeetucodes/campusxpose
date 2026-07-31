@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState, useRef } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, RotateCcw, ChevronRight, ChevronLeft, ChevronUp, ChevronDown, Trophy, Zap, Heart, Flame, Bomb, X } from "lucide-react";
+import { ArrowLeft, RotateCcw, ChevronRight, ChevronLeft, ChevronUp, ChevronDown, Trophy, Zap, Heart, Flame, Bomb, X, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
 export const Route = createFileRoute("/games/arrow-puzzle")({
   head: () => ({
     meta: [
@@ -23,10 +24,10 @@ const DIR_ICON: Record<Dir, typeof ChevronUp> = {
 };
 
 const DIR_COLORS: Record<Dir, string> = {
-  up: "bg-blue-500 text-white",
-  down: "bg-rose-500 text-white",
-  left: "bg-emerald-500 text-white",
-  right: "bg-amber-500 text-white",
+  up: "bg-[#60a5fa] text-white shadow-[6px_6px_12px_rgba(0,0,0,0.15),inset_3px_3px_6px_rgba(255,255,255,0.6),inset_-3px_-3px_6px_rgba(30,58,138,0.3)]",
+  down: "bg-[#fb7185] text-white shadow-[6px_6px_12px_rgba(0,0,0,0.15),inset_3px_3px_6px_rgba(255,255,255,0.6),inset_-3px_-3px_6px_rgba(136,19,55,0.3)]",
+  left: "bg-[#34d399] text-white shadow-[6px_6px_12px_rgba(0,0,0,0.15),inset_3px_3px_6px_rgba(255,255,255,0.6),inset_-3px_-3px_6px_rgba(6,78,59,0.3)]",
+  right: "bg-[#fbbf24] text-white shadow-[6px_6px_12px_rgba(0,0,0,0.15),inset_3px_3px_6px_rgba(255,255,255,0.6),inset_-3px_-3px_6px_rgba(120,53,15,0.3)]",
 };
 
 const DIR_EXIT: Record<Dir, { x: number; y: number }> = {
@@ -37,14 +38,13 @@ const DIR_EXIT: Record<Dir, { x: number; y: number }> = {
 };
 
 // ─── Procedural Level Generator ───────────────────────────────────────────────
-export interface Obstacle { id: number; row: number; col: number; type: "wall" | "bomb"; }
+export interface Obstacle { id: number; row: number; col: number; type: "wall" | "bomb" | "mirror-slash" | "mirror-backslash"; }
 
 export function generateLevel(levelIdx: number): { gridSize: number; arrows: Omit<Arrow, "id">[]; obstacles: Omit<Obstacle, "id">[] } {
   let gridSize = 3;
-  if (levelIdx >= 5) gridSize = 4;
-  if (levelIdx >= 15) gridSize = 5;
+  if (levelIdx >= 2) gridSize = 4;
+  if (levelIdx >= 10) gridSize = 5;
   if (levelIdx >= 30) gridSize = 6;
-  if (levelIdx >= 45) gridSize = 7;
   
   // Density scaling
   const maxArrows = gridSize * gridSize - 2;
@@ -52,23 +52,24 @@ export function generateLevel(levelIdx: number): { gridSize: number; arrows: Omi
   const numArrows = Math.min(maxArrows, targetArrows);
   
   // Obstacle scaling
-  const numWalls = Math.floor(levelIdx / 4);
+  const numWalls = Math.floor(levelIdx / 5);
   const numBombs = Math.floor(levelIdx / 8);
+  const numMirrors = Math.min(6, Math.floor(levelIdx / 3));
   
-  const grid: ({ type: "arrow" | "wall" | "bomb", dir?: Dir } | null)[][] = 
+  const grid: ({ type: "arrow" | "wall" | "bomb" | "mirror-slash" | "mirror-backslash", dir?: Dir } | null)[][] = 
     Array.from({ length: gridSize }, () => Array(gridSize).fill(null));
   
   const obstacles: Omit<Obstacle, "id">[] = [];
   
-  // 1. Place Walls and Bombs
+  // 1. Place Walls, Bombs, Mirrors
   let placedObs = 0;
   let attempts = 0;
-  while(placedObs < numWalls + numBombs && attempts < 200) {
+  while(placedObs < numWalls + numBombs + numMirrors && attempts < 300) {
      attempts++;
      const r = Math.floor(Math.random() * gridSize);
      const c = Math.floor(Math.random() * gridSize);
      if (grid[r][c] === null) {
-       const type = placedObs < numWalls ? "wall" : "bomb";
+       const type = placedObs < numWalls ? "wall" : placedObs < numWalls + numBombs ? "bomb" : (Math.random() > 0.5 ? "mirror-slash" : "mirror-backslash");
        grid[r][c] = { type };
        obstacles.push({row: r, col: c, type});
        placedObs++;
@@ -79,19 +80,35 @@ export function generateLevel(levelIdx: number): { gridSize: number; arrows: Omi
   const arrows: Omit<Arrow, "id">[] = [];
   
   function isPathClearInGrid(r: number, c: number, d: Dir): boolean {
-    if (d === "up") {
-      for (let i = r - 1; i >= 0; i--) if (grid[i][c] !== null) return false;
+    let currR = r, currC = c, currD = d;
+    let steps = 0;
+    while(steps < 100) {
+      if (currD === "up") currR--;
+      else if (currD === "down") currR++;
+      else if (currD === "left") currC--;
+      else if (currD === "right") currC++;
+      
+      if (currR < 0 || currR >= gridSize || currC < 0 || currC >= gridSize) return true;
+      
+      const cell = grid[currR][currC];
+      if (cell) {
+        if (cell.type === "mirror-slash") {
+          if (currD === "up") currD = "right";
+          else if (currD === "down") currD = "left";
+          else if (currD === "right") currD = "up";
+          else if (currD === "left") currD = "down";
+        } else if (cell.type === "mirror-backslash") {
+          if (currD === "up") currD = "left";
+          else if (currD === "down") currD = "right";
+          else if (currD === "right") currD = "down";
+          else if (currD === "left") currD = "up";
+        } else {
+          return false;
+        }
+      }
+      steps++;
     }
-    if (d === "down") {
-      for (let i = r + 1; i < gridSize; i++) if (grid[i][c] !== null) return false;
-    }
-    if (d === "left") {
-      for (let i = c - 1; i >= 0; i--) if (grid[r][i] !== null) return false;
-    }
-    if (d === "right") {
-      for (let i = c + 1; i < gridSize; i++) if (grid[r][i] !== null) return false;
-    }
-    return true;
+    return false;
   }
 
   attempts = 0;
@@ -118,28 +135,56 @@ export function generateLevel(levelIdx: number): { gridSize: number; arrows: Omi
 
 // ─── Game Logic ─────────────────────────────────────────────────────────────
 type Blocker = { type: "wall" | "bomb" | "arrow"; row: number; col: number; id: number | string };
+type PathPoint = { r: number, c: number };
 
-function getFirstBlocker(arrow: Arrow, arrows: Arrow[], obstacles: Obstacle[], gridSize: number): Blocker | null {
-  const { row, col, dir } = arrow;
+function tracePath(
+  arrow: Arrow, arrows: Arrow[], obstacles: Obstacle[], gridSize: number
+): { blocker: Blocker | null, path: PathPoint[] } {
+  let r = arrow.row;
+  let c = arrow.col;
+  let d = arrow.dir;
   
-  const getBlockerAt = (r: number, c: number): Blocker | null => {
+  const path: PathPoint[] = [];
+  let steps = 0;
+  
+  while (steps < 100) {
+    if (d === "up") r--;
+    else if (d === "down") r++;
+    else if (d === "left") c--;
+    else if (d === "right") c++;
+    
+    if (r < 0 || r >= gridSize || c < 0 || c >= gridSize) {
+      if (d === "up") path.push({r: r - 1, c});
+      else if (d === "down") path.push({r: r + 1, c});
+      else if (d === "left") path.push({r, c: c - 1});
+      else if (d === "right") path.push({r, c: c + 1});
+      return { blocker: null, path };
+    }
+    
+    path.push({r, c});
+    
     const a = arrows.find(x => x.row === r && x.col === c);
-    if (a) return { type: "arrow", row: r, col: c, id: a.id };
+    if (a && a.id !== arrow.id) return { blocker: { type: "arrow", row: r, col: c, id: a.id }, path };
+    
     const o = obstacles.find(x => x.row === r && x.col === c);
-    if (o) return { type: o.type, row: r, col: c, id: `obs-${o.id}` };
-    return null;
-  };
-
-  if (dir === "up") {
-    for (let r = row - 1; r >= 0; r--) { const b = getBlockerAt(r, col); if (b) return b; }
-  } else if (dir === "down") {
-    for (let r = row + 1; r < gridSize; r++) { const b = getBlockerAt(r, col); if (b) return b; }
-  } else if (dir === "left") {
-    for (let c = col - 1; c >= 0; c--) { const b = getBlockerAt(row, c); if (b) return b; }
-  } else if (dir === "right") {
-    for (let c = col + 1; c < gridSize; c++) { const b = getBlockerAt(row, c); if (b) return b; }
+    if (o) {
+      if (o.type === "mirror-slash") {
+        if (d === "up") d = "right";
+        else if (d === "down") d = "left";
+        else if (d === "right") d = "up";
+        else if (d === "left") d = "down";
+      } else if (o.type === "mirror-backslash") {
+        if (d === "up") d = "left";
+        else if (d === "down") d = "right";
+        else if (d === "right") d = "down";
+        else if (d === "left") d = "up";
+      } else {
+        return { blocker: { type: o.type, row: r, col: c, id: `obs-${o.id}` }, path };
+      }
+    }
+    steps++;
   }
-  return null;
+  return { blocker: { type: "wall", row: r, col: c, id: "loop" }, path };
 }
 
 // ─── Component ──────────────────────────────────────────────────────────────
@@ -153,10 +198,12 @@ export default function ArrowPuzzleGame() {
   const [arrows, setArrows] = useState<Arrow[]>([]);
   const [moves, setMoves] = useState(0);
   const [lives, setLives] = useState(5);
+  const [hintsLeft, setHintsLeft] = useState(3);
+  const [hintedArrowId, setHintedArrowId] = useState<number | null>(null);
   const [showHelp, setShowHelp] = useState(false);
   const [showLevels, setShowLevels] = useState(false);
   const [shakeId, setShakeId] = useState<number | string | null>(null);
-  const [exitingArrow, setExitingArrow] = useState<{ arrow: Arrow; exitAnim: { x: number; y: number } } | null>(null);
+  const [exitingArrow, setExitingArrow] = useState<{ arrow: Arrow; path: PathPoint[] } | null>(null);
   const [bouncingArrow, setBouncingArrow] = useState<{ id: number; anim: { x?: number[], y?: number[] } } | null>(null);
   const [collisionAnim, setCollisionAnim] = useState<{ id: string, row: number, col: number, type: "wall"|"bomb"|"arrow" } | null>(null);
   const [won, setWon] = useState(false);
@@ -173,6 +220,8 @@ export default function ArrowPuzzleGame() {
     setArrows(arrowsWithIds);
     setMoves(0);
     setLives(5);
+    setHintsLeft(3);
+    setHintedArrowId(null);
     setWon(false);
     setGameOver(false);
     setExitingArrow(null);
@@ -186,13 +235,15 @@ export default function ArrowPuzzleGame() {
   const handleTap = useCallback((arrow: Arrow) => {
     if (won || gameOver || exitingArrow || bouncingArrow || !levelData) return;
 
-    const blocker = getFirstBlocker(arrow, arrows, levelData.obstacles, levelData.gridSize);
+    if (hintedArrowId === arrow.id) setHintedArrowId(null);
+
+    const { blocker, path } = tracePath(arrow, arrows, levelData.obstacles, levelData.gridSize);
 
     if (!blocker) {
-      const exit = DIR_EXIT[arrow.dir];
-      setExitingArrow({ arrow, exitAnim: exit });
+      setExitingArrow({ arrow, path });
       setMoves(m => m + 1);
 
+      const duration = Math.max(0.2, path.length * 0.08) * 1000;
       setTimeout(() => {
         setArrows(prev => {
           const next = prev.filter(a => a.id !== arrow.id);
@@ -207,7 +258,7 @@ export default function ArrowPuzzleGame() {
           return next;
         });
         setExitingArrow(null);
-      }, 300);
+      }, duration);
     } else {
       const offset = 30;
       const bounce = {
@@ -253,13 +304,20 @@ export default function ArrowPuzzleGame() {
   const nextLevel = () => setLevelIdx(i => i + 1);
   const resetLevel = () => initLevel(levelIdx);
 
-  const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
-
   if (!levelData) return null;
 
   const tappableIds = new Set(
-    arrows.filter(a => !exitingArrow && !getFirstBlocker(a, arrows, levelData.obstacles, levelData.gridSize)).map(a => a.id)
+    arrows.filter(a => !exitingArrow && !tracePath(a, arrows, levelData.obstacles, levelData.gridSize).blocker).map(a => a.id)
   );
+
+  const handleHint = () => {
+    if (hintsLeft > 0 && !won && !gameOver && tappableIds.size > 0) {
+      setHintsLeft(h => h - 1);
+      const ids = Array.from(tappableIds);
+      const randomId = ids[Math.floor(Math.random() * ids.length)];
+      setHintedArrowId(randomId);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -277,10 +335,7 @@ export default function ArrowPuzzleGame() {
       <div className="mx-auto max-w-lg px-4 py-6 space-y-5">
 
         {/* Level & Stats Dashboard */}
-        <div 
-          className="border-2 border-border bg-white p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] space-y-3"
-          style={{ borderRadius: WOBBLY_MD }}
-        >
+        <div className="bg-[#f8fafc] p-4 shadow-[8px_8px_16px_rgba(0,0,0,0.06),inset_4px_4px_8px_rgba(255,255,255,0.9),inset_-4px_-4px_8px_rgba(0,0,0,0.03)] border-2 border-white rounded-[32px] space-y-3">
           {/* Top Row: Level & Lives */}
           <div className="flex items-center justify-between px-1">
             <button 
@@ -307,19 +362,31 @@ export default function ArrowPuzzleGame() {
 
           {/* Bottom Row: Moves, Left, Reset */}
           <div className="flex items-center gap-2">
-            <div className="flex-1 rounded-xl bg-muted/40 border border-border/30 p-2 text-center">
+            <div className="flex-1 rounded-[20px] bg-[#f1f5f9] border border-white/60 shadow-[inset_2px_2px_4px_rgba(0,0,0,0.05),inset_-2px_-2px_4px_rgba(255,255,255,0.9)] p-2 text-center">
               <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Moves</div>
               <div className="font-display text-xl font-bold text-foreground leading-none">{moves}</div>
             </div>
-            <div className="flex-1 rounded-xl bg-muted/40 border border-border/30 p-2 text-center">
+            <div className="flex-1 rounded-[20px] bg-[#f1f5f9] border border-white/60 shadow-[inset_2px_2px_4px_rgba(0,0,0,0.05),inset_-2px_-2px_4px_rgba(255,255,255,0.9)] p-2 text-center">
               <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Left</div>
               <div className="font-display text-xl font-bold text-foreground leading-none">{arrows.length}</div>
             </div>
             <Button
+              onClick={handleHint}
+              disabled={hintsLeft === 0 || won || gameOver}
+              variant="outline"
+              size="icon"
+              className={`h-[52px] w-[52px] rounded-[20px] border border-white hover:bg-yellow-100 shrink-0 bg-[#f8fafc] shadow-[4px_4px_8px_rgba(0,0,0,0.05),inset_2px_2px_4px_rgba(255,255,255,0.9),inset_-2px_-2px_4px_rgba(0,0,0,0.02)] transition-colors ${hintsLeft > 0 ? "text-yellow-500" : "text-muted-foreground/30"}`}
+            >
+              <div className="flex flex-col items-center justify-center">
+                <Lightbulb className="h-5 w-5" />
+                <span className="text-[10px] font-bold leading-tight">{hintsLeft}</span>
+              </div>
+            </Button>
+            <Button
               onClick={resetLevel}
               variant="outline"
               size="icon"
-              className="h-[52px] w-[52px] rounded-xl border-border/50 hover:bg-muted/80 shrink-0 bg-transparent text-muted-foreground hover:text-foreground transition-colors"
+              className="h-[52px] w-[52px] rounded-[20px] border border-white hover:bg-muted/80 shrink-0 bg-[#f8fafc] shadow-[4px_4px_8px_rgba(0,0,0,0.05),inset_2px_2px_4px_rgba(255,255,255,0.9),inset_-2px_-2px_4px_rgba(0,0,0,0.02)] text-muted-foreground hover:text-foreground transition-colors"
             >
               <RotateCcw className="h-5 w-5" />
             </Button>
@@ -327,12 +394,9 @@ export default function ArrowPuzzleGame() {
         </div>
 
         {/* Game board */}
-        <div
-          className="relative w-full border-2 border-border bg-[#f8f5f0] p-3 sm:p-4 select-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-          style={{ borderRadius: WOBBLY_MD }}
-        >
+        <div className="relative w-full bg-[#e2e8f0] p-3 sm:p-4 select-none shadow-[inset_6px_6px_12px_rgba(0,0,0,0.1),inset_-6px_-6px_12px_rgba(255,255,255,0.7)] rounded-[32px]">
           <div
-            className="grid gap-2 sm:gap-2.5"
+            className="grid gap-2"
             style={{
               gridTemplateColumns: `repeat(${levelData.gridSize}, 1fr)`,
               gridTemplateRows: `repeat(${levelData.gridSize}, 1fr)`,
@@ -343,7 +407,7 @@ export default function ArrowPuzzleGame() {
             {Array.from({ length: levelData.gridSize * levelData.gridSize }).map((_, i) => (
               <div
                 key={`cell-${i}`}
-                className="rounded-xl bg-[#ebe5dc] border border-[#d8d0c4]"
+                className="rounded-[18px] bg-[#cbd5e1] shadow-[inset_4px_4px_8px_rgba(0,0,0,0.15),inset_-4px_-4px_8px_rgba(255,255,255,0.5)] opacity-50"
                 style={{
                   gridRow: Math.floor(i / levelData.gridSize) + 1,
                   gridColumn: (i % levelData.gridSize) + 1,
@@ -358,7 +422,7 @@ export default function ArrowPuzzleGame() {
                 <motion.button
                   key={`obs-${obs.id}`}
                   onClick={() => handleObstacleTap(obs)}
-                  className={`absolute rounded-xl flex items-center justify-center border-2 shadow-sm ${obs.type === "wall" ? "bg-stone-300 border-b-4 border-stone-500 overflow-hidden" : "bg-zinc-900 border-zinc-800"}`}
+                  className={`absolute rounded-[18px] flex items-center justify-center ${obs.type === "wall" ? "bg-[#d6d3d1] shadow-[4px_4px_10px_rgba(0,0,0,0.15),inset_3px_3px_6px_rgba(255,255,255,0.6),inset_-3px_-3px_6px_rgba(68,64,60,0.4)] overflow-hidden" : obs.type === "bomb" ? "bg-[#3f3f46] shadow-[4px_4px_10px_rgba(0,0,0,0.2),inset_3px_3px_6px_rgba(255,255,255,0.2),inset_-3px_-3px_6px_rgba(0,0,0,0.7)]" : "bg-[#bae6fd] shadow-[4px_4px_10px_rgba(0,0,0,0.15),inset_3px_3px_6px_rgba(255,255,255,0.9),inset_-3px_-3px_6px_rgba(2,132,199,0.3)]"}`}
                   style={{
                     gridRow: obs.row + 1,
                     gridColumn: obs.col + 1,
@@ -380,6 +444,12 @@ export default function ArrowPuzzleGame() {
                   )}
                   {obs.type === "bomb" && (
                      <Bomb className="h-6 w-6 text-rose-500 animate-pulse" strokeWidth={2.5} />
+                  )}
+                  {obs.type === "mirror-slash" && (
+                     <div className="absolute w-[120%] h-[4px] bg-sky-400 rounded-full shadow-[0_0_10px_2px_rgba(56,189,248,0.5)]" style={{ transform: "rotate(-45deg)" }} />
+                  )}
+                  {obs.type === "mirror-backslash" && (
+                     <div className="absolute w-[120%] h-[4px] bg-sky-400 rounded-full shadow-[0_0_10px_2px_rgba(56,189,248,0.5)]" style={{ transform: "rotate(45deg)" }} />
                   )}
                 </motion.button>
               );
@@ -420,6 +490,7 @@ export default function ArrowPuzzleGame() {
                 const Icon = DIR_ICON[arrow.dir];
                 const isTappable = tappableIds.has(arrow.id);
                 const isShaking = shakeId === arrow.id;
+                const isHinted = hintedArrowId === arrow.id;
                 const isExiting = exitingArrow?.arrow.id === arrow.id;
                 const bounceAnim = bouncingArrow?.id === arrow.id ? bouncingArrow.anim : null;
 
@@ -427,9 +498,9 @@ export default function ArrowPuzzleGame() {
                   <motion.button
                     key={arrow.id}
                     onClick={() => handleTap(arrow)}
-                    className={`absolute rounded-xl flex items-center justify-center cursor-pointer ${DIR_COLORS[arrow.dir]} border-2 border-black/10 shadow-md transition-shadow ${
-                      isTappable ? "ring-2 ring-white/50 shadow-lg" : "opacity-80"
-                    }`}
+                    className={`absolute rounded-[18px] flex items-center justify-center cursor-pointer ${DIR_COLORS[arrow.dir]} transition-shadow ${
+                      isTappable ? "ring-2 ring-white/50" : "opacity-80"
+                    } ${isHinted ? "ring-4 ring-yellow-400 !shadow-[0_0_15px_rgba(250,204,21,1)] z-10" : ""}`}
                     style={{
                       gridRow: arrow.row + 1,
                       gridColumn: arrow.col + 1,
@@ -439,11 +510,11 @@ export default function ArrowPuzzleGame() {
                     animate={
                       isExiting
                         ? {
-                            x: exitingArrow!.exitAnim.x,
-                            y: exitingArrow!.exitAnim.y,
-                            opacity: 0,
-                            scale: 0.7,
-                            transition: { duration: 0.3, ease: "easeIn" },
+                            x: exitingArrow!.path.map(p => `calc(${(p.c - exitingArrow!.arrow.col) * 100}% + ${(p.c - exitingArrow!.arrow.col) * 8}px)`),
+                            y: exitingArrow!.path.map(p => `calc(${(p.r - exitingArrow!.arrow.row) * 100}% + ${(p.r - exitingArrow!.arrow.row) * 8}px)`),
+                            opacity: exitingArrow!.path.map((_, i, arr) => i === arr.length - 1 ? 0 : 1),
+                            scale: exitingArrow!.path.map((_, i, arr) => i === arr.length - 1 ? 0.5 : 1),
+                            transition: { duration: Math.max(0.2, exitingArrow!.path.length * 0.08), ease: "linear" },
                           }
                         : bounceAnim
                         ? {
@@ -557,45 +628,72 @@ export default function ArrowPuzzleGame() {
         </div>
 
 
-        {/* How to play */}
-        <div className="border-2 border-border bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all overflow-hidden" style={{ borderRadius: WOBBLY_MD }}>
-          <button 
-            onClick={() => setShowHelp(!showHelp)}
-            className="flex w-full items-center justify-between p-4 font-display font-bold text-sm hover:bg-muted/50 transition-colors"
+        {/* How to play button */}
+        <button 
+          onClick={() => setShowHelp(true)}
+          className="w-full bg-[#f8fafc] border-2 border-white shadow-[4px_4px_10px_rgba(0,0,0,0.05),inset_2px_2px_4px_rgba(255,255,255,0.9),inset_-2px_-2px_4px_rgba(0,0,0,0.02)] p-4 font-display font-bold text-sm text-foreground hover:opacity-90 transition-opacity rounded-[20px] flex items-center justify-center gap-2"
+        >
+          <Lightbulb className="h-5 w-5 text-yellow-500" /> How to Play
+        </button>
+
+      </div>
+
+      {/* How to Play Modal Overlay */}
+      <AnimatePresence>
+        {showHelp && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            onClick={() => setShowHelp(false)}
           >
-            How to Play
-            <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${showHelp ? "rotate-180" : ""}`} />
-          </button>
-          <AnimatePresence>
-            {showHelp && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="px-4 pb-4"
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={e => e.stopPropagation()}
+              className="w-full max-w-sm bg-white border-2 border-border p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col relative"
+              style={{ borderRadius: WOBBLY_MD }}
+            >
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setShowHelp(false)} 
+                className="absolute top-4 right-4 h-8 w-8 rounded-full bg-muted/50 hover:bg-muted text-muted-foreground"
               >
-                <div className="h-px w-full bg-border/50 mb-3" />
-                <p className="text-xs text-muted-foreground font-medium leading-relaxed">
+                <X className="h-4 w-4" />
+              </Button>
+
+              <h2 className="font-display text-2xl font-bold mb-4 flex items-center gap-2">
+                <Lightbulb className="h-6 w-6 text-yellow-500" /> How to Play
+              </h2>
+              
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground font-medium leading-relaxed">
                   Tap an arrow to send it flying off the board! An arrow can only move 
                   if the path in its direction is <strong>completely clear</strong> to the edge.
                   Clear <strong className="text-accent">all arrows</strong> to win! 🏆
                 </p>
-                <p className="text-xs text-muted-foreground font-medium leading-relaxed mt-2">
-                  <strong>🧱 Walls:</strong> Cannot be moved. Arrows must go around them.<br/>
-                  <strong>💣 Bombs:</strong> Explode and cost you 1 life if tapped! Don't touch them!
-                </p>
-                <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                  <span className="inline-flex items-center gap-1"><span className="h-4 w-4 rounded bg-blue-500 inline-block" /> Up</span>
-                  <span className="inline-flex items-center gap-1"><span className="h-4 w-4 rounded bg-rose-500 inline-block" /> Down</span>
-                  <span className="inline-flex items-center gap-1"><span className="h-4 w-4 rounded bg-emerald-500 inline-block" /> Left</span>
-                  <span className="inline-flex items-center gap-1"><span className="h-4 w-4 rounded bg-amber-500 inline-block" /> Right</span>
+                <div className="p-3 bg-muted/40 rounded-xl space-y-2">
+                  <p className="text-sm text-muted-foreground font-medium">
+                    <strong>🧱 Walls:</strong> Cannot be moved. Arrows must go around them.
+                  </p>
+                  <p className="text-sm text-muted-foreground font-medium">
+                    <strong>💣 Bombs:</strong> Explode and cost you 1 life if tapped! Don't touch them!
+                  </p>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-      </div>
+                <div className="pt-2 flex flex-wrap items-center gap-3 text-sm font-medium text-foreground">
+                  <span className="inline-flex items-center gap-1.5"><span className="h-5 w-5 rounded-md bg-[#60a5fa] shadow-sm inline-block" /> Up</span>
+                  <span className="inline-flex items-center gap-1.5"><span className="h-5 w-5 rounded-md bg-[#fb7185] shadow-sm inline-block" /> Down</span>
+                  <span className="inline-flex items-center gap-1.5"><span className="h-5 w-5 rounded-md bg-[#34d399] shadow-sm inline-block" /> Left</span>
+                  <span className="inline-flex items-center gap-1.5"><span className="h-5 w-5 rounded-md bg-[#fbbf24] shadow-sm inline-block" /> Right</span>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Level Selector Modal Overlay */}
       <AnimatePresence>
