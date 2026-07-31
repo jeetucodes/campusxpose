@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
-import { motion } from "framer-motion";
-import { Ghost, Shield, FileWarning, ArrowRight, Flame, TrendingUp, ArrowBigUp, EyeOff, MapPinOff, Megaphone } from "lucide-react";
+import { motion, useMotionValue, useTransform, animate } from "framer-motion";
+import { FileWarning, ArrowRight, Flame, TrendingUp, ArrowBigUp, EyeOff, MapPinOff, Megaphone } from "lucide-react";
 import { UserSymbol } from "@/components/UserSymbol";
 import { SiteShell } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { categoryLabel, categoryEmoji } from "@/lib/categories";
 import { timeAgo } from "@/lib/format";
 import { HomeAds } from "@/components/HomeAds";
-import { TrustSection } from "@/components/TrustSection";
 import { useVerifiedUsernames } from "@/hooks/useVerified";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { FeedbackForm } from "@/components/FeedbackForm";
@@ -42,14 +41,52 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-const fadeUp = {
-  initial: { opacity: 0, y: 20 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true },
-};
-
-const WOBBLY = "255px 15px 225px 15px / 15px 225px 15px 255px";
 const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
+const CYCLING_WORDS = ["truth", "voice", "courage", "justice", "truth"];
+
+// Count-up animation hook
+function useCountUp(target: number, duration = 1.5) {
+  const [val, setVal] = useState(0);
+  useEffect(() => {
+    if (target === 0) return;
+    const controls = animate(0, target, {
+      duration,
+      ease: "easeOut",
+      onUpdate(v) { setVal(Math.floor(v)); },
+    });
+    return () => controls.stop();
+  }, [target, duration]);
+  return val;
+}
+
+function AnimatedStat({ n, l, color }: { n: number; l: string; color: string }) {
+  const count = useCountUp(n);
+  return (
+    <div className="flex flex-col items-center justify-center border border-border bg-white p-2 rounded-xl shadow-sm">
+      <div className={`font-display text-xl sm:text-2xl font-bold ${color}`}>{count}</div>
+      <div className="text-[9px] sm:text-[10px] font-semibold text-foreground mt-0.5">{l}</div>
+    </div>
+  );
+}
+
+// Floating particle dot
+function FloatingDot({ x, y, size, delay, duration, color }: {
+  x: number; y: number; size: number; delay: number; duration: number; color: string;
+}) {
+  return (
+    <motion.div
+      className={`absolute rounded-full pointer-events-none ${color}`}
+      style={{ left: `${x}%`, top: `${y}%`, width: size, height: size }}
+      animate={{
+        y: [0, -20, 0],
+        x: [0, 8, -4, 0],
+        scale: [1, 1.15, 1],
+        opacity: [0.15, 0.35, 0.15],
+      }}
+      transition={{ duration, delay, repeat: Infinity, ease: "easeInOut" }}
+    />
+  );
+}
 
 function Home() {
   const { data } = useQuery(homeQueryOptions);
@@ -59,7 +96,49 @@ function Home() {
   const queryClient = useQueryClient();
   const [showAllReports, setShowAllReports] = useState(false);
 
-  // Auto-update top reported + stats when posts/incidents/colleges change.
+  // Cycling headline word state
+  const [wordIdx, setWordIdx] = useState(0);
+  const [wordVisible, setWordVisible] = useState(true);
+
+  // 3D tilt motion values for hero card
+  const heroRef = useRef<HTMLElement>(null);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const rotateX = useTransform(mouseY, [-150, 150], [4, -4]);
+  const rotateY = useTransform(mouseX, [-150, 150], [-4, 4]);
+
+  // Cycle headline word every 2.2s with a blur-fade transition
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setWordVisible(false);
+      setTimeout(() => {
+        setWordIdx(i => (i + 1) % CYCLING_WORDS.length);
+        setWordVisible(true);
+      }, 300);
+    }, 2200);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Mouse tilt handlers
+  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    const rect = heroRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    mouseX.set(e.clientX - rect.left - rect.width / 2);
+    mouseY.set(e.clientY - rect.top - rect.height / 2);
+  };
+  const handleMouseLeave = () => { mouseX.set(0); mouseY.set(0); };
+
+  // Stable floating dots config
+  const dots = useMemo(() => [
+    { x: 10, y: 20, size: 18, delay: 0,   duration: 5,   color: "bg-accent" },
+    { x: 80, y: 10, size: 12, delay: 0.8, duration: 4,   color: "bg-yellow-400" },
+    { x: 60, y: 75, size: 22, delay: 1.5, duration: 6,   color: "bg-accent" },
+    { x: 25, y: 65, size: 10, delay: 0.3, duration: 4.5, color: "bg-yellow-400" },
+    { x: 90, y: 55, size: 16, delay: 2,   duration: 5.5, color: "bg-accent" },
+    { x: 45, y: 15, size: 8,  delay: 1.2, duration: 3.8, color: "bg-yellow-400" },
+  ], []);
+
+  // Live data subscription
   useEffect(() => {
     const ch = supabase
       .channel("home-live")
@@ -76,94 +155,181 @@ function Home() {
     return () => { supabase.removeChannel(ch); };
   }, [queryClient]);
 
-  const features = [
-    { icon: EyeOff, title: "No Email, No Phone", desc: "Login me kuch nahi maangte. App khulte hi anonymous identity ban jaati hai.", bg: "bg-white" },
-    { icon: MapPinOff, title: "No Location, No IP", desc: "Tumhari location, IP ya device ki koi permission nahi li jaati — na store hoti hai.", bg: "bg-postit" },
-    { icon: FileWarning, title: "Built-in Blur Tool", desc: "Proof upload karne se pehle naam/face blur kar do — bina kisi extra app ke.", bg: "bg-white" },
-  ];
-
-
   return (
     <SiteShell>
-      {/* Hero Section */}
+      {/* ── Hero Section ── */}
       <div className="px-4 pt-6 pb-2 space-y-4 mx-auto max-w-4xl">
 
-        {/* Hero Card */}
-        <section
-          className="relative w-full overflow-hidden border-2 border-border bg-white sm:min-h-[380px] min-h-[300px]"
-          style={{ borderRadius: WOBBLY_MD }}
+        {/* Hero Card — 3D tilt on hover + floating particles */}
+        <motion.section
+          ref={heroRef}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          style={{ rotateX, rotateY, transformPerspective: 900, borderRadius: WOBBLY_MD }}
+          className="relative w-full overflow-hidden border-2 border-border bg-white sm:min-h-[380px] min-h-[300px] cursor-default"
+          initial={{ opacity: 0, y: 32 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: "easeOut" }}
         >
-          {/* Background image — college sketch on bottom right */}
+          {/* Animated glow blobs */}
+          <motion.div
+            className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-accent/20 blur-3xl pointer-events-none"
+            animate={{ scale: [1, 1.22, 1], opacity: [0.25, 0.5, 0.25] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute -bottom-12 -left-12 w-52 h-52 rounded-full bg-yellow-300/20 blur-2xl pointer-events-none"
+            animate={{ scale: [1, 1.3, 1], opacity: [0.18, 0.38, 0.18] }}
+            transition={{ duration: 7, delay: 1, repeat: Infinity, ease: "easeInOut" }}
+          />
+
+          {/* Floating accent dots */}
+          {dots.map((d, i) => <FloatingDot key={i} {...d} />)}
+
+          {/* Background campus illustration */}
           <img
             src="/heroimg.png"
             alt="CampusXpose campus illustration"
             className="absolute inset-0 h-full w-full object-cover object-[80%_bottom] sm:object-[right_bottom]"
           />
 
-          {/* Strong gradient so text is easily readable on top-left */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white via-white/80 to-transparent sm:via-white/50" />
+          {/* Text-readable gradient */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white via-white/85 to-transparent sm:via-white/55" />
 
-          {/* Text overlay — top-left */}
+          {/* Content */}
           <div className="relative z-10 flex flex-col justify-start px-6 pt-20 pb-6 sm:px-12 sm:py-12">
-            <motion.div {...fadeUp} className="w-[85%] max-w-[280px] sm:max-w-[50%] space-y-3">
-              <h1 className="font-display text-3xl font-bold leading-tight tracking-tight sm:text-5xl md:text-6xl text-foreground">
-                College ka sach,
-                <br />
-                bina darr ke.
-              </h1>
-              <p className="hidden sm:block text-xs leading-relaxed text-muted-foreground sm:text-sm font-medium">
-                Apne college ki asli kahani share karo.<br className="hidden sm:block" />
-                Fake fines, placement fraud, faculty issues — sab kuch anonymously report karo.
-              </p>
-            </motion.div>
-          </div>
-        </section>
+            <div className="w-[85%] max-w-[300px] sm:max-w-[55%] space-y-3">
 
-        {/* Buttons Row */}
+              {/* Live anonymous badge */}
+
+
+              {/* Headline with cycling & blurring word */}
+              <motion.h1
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.6 }}
+                className="font-display text-3xl font-bold leading-tight tracking-tight sm:text-5xl md:text-6xl text-foreground"
+              >
+                Speak your{" "}
+                <span className="relative inline-block">
+                  <motion.span
+                    key={wordIdx}
+                    initial={{ opacity: 0, y: 10, filter: "blur(6px)" }}
+                    animate={
+                      wordVisible
+                        ? { opacity: 1, y: 0, filter: "blur(0px)" }
+                        : { opacity: 0, y: -8, filter: "blur(6px)" }
+                    }
+                    transition={{ duration: 0.28, ease: "easeInOut" }}
+                    className="inline-block text-accent"
+                  >
+                    {CYCLING_WORDS[wordIdx]}
+                  </motion.span>
+                  {/* Underline that animates in/out with the word */}
+                  <motion.span
+                    className="absolute -bottom-1 left-0 h-[3px] bg-accent rounded-full"
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: wordVisible ? 1 : 0 }}
+                    transition={{ duration: 0.28, ease: "easeInOut" }}
+                    style={{ width: "100%", transformOrigin: "left" }}
+                  />
+                </span>
+                —<br />
+                without fear.
+              </motion.h1>
+
+              <motion.p
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+                className="hidden sm:block text-xs leading-relaxed text-muted-foreground sm:text-sm font-medium"
+              >
+                Share the real story of your college.<br className="hidden sm:block" />
+                Fake fines, placement fraud, faculty abuse — report it all, 100% anonymously.
+              </motion.p>
+            </div>
+          </div>
+        </motion.section>
+
+        {/* CTA Buttons */}
         <div className="flex gap-2 sm:gap-3">
-          <Button asChild className="flex-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] border-2 border-border bg-accent text-white hover:bg-accent/90 h-10 text-[11px] sm:h-12 sm:text-base px-2 sm:px-4" style={{ borderRadius: WOBBLY_MD }}>
-            <Link to="/colleges">
-              Apna College Dhundo <ArrowRight className="ml-1 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-            </Link>
-          </Button>
-          <Button asChild variant="outline" className="flex-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] border-2 border-border bg-white text-foreground hover:bg-muted h-10 text-[11px] sm:h-12 sm:text-base px-2 sm:px-4" style={{ borderRadius: WOBBLY_MD }}>
-            <Link to="/report">Issue Report Karo</Link>
-          </Button>
+          <motion.div
+            className="flex-1"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.55, duration: 0.4 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+          >
+            <Button
+              asChild
+              className="w-full shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] border-2 border-border bg-accent text-white hover:bg-accent/90 h-10 text-[11px] sm:h-12 sm:text-base px-2 sm:px-4"
+              style={{ borderRadius: WOBBLY_MD }}
+            >
+              <Link to="/colleges">
+                Find Your College <ArrowRight className="ml-1 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              </Link>
+            </Button>
+          </motion.div>
+
+          <motion.div
+            className="flex-1"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.65, duration: 0.4 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+          >
+            <Button
+              asChild
+              variant="outline"
+              className="w-full shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] border-2 border-border bg-white text-foreground hover:bg-muted h-10 text-[11px] sm:h-12 sm:text-base px-2 sm:px-4"
+              style={{ borderRadius: WOBBLY_MD }}
+            >
+              <Link to="/report">Report an Issue</Link>
+            </Button>
+          </motion.div>
         </div>
 
-        {/* News Page Link Button */}
+        {/* News / Updates Button */}
         {data?.site_settings?.news_enabled !== false && data?.news && data.news.length > 0 && (
-          <Button 
-            asChild
-            variant="outline" 
-            className="w-full mt-4 h-12 border-2 border-border bg-white hover:bg-muted shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-primary font-bold flex items-center justify-center gap-2"
-            style={{ borderRadius: WOBBLY_MD }}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.75 }}
+            whileHover={{ scale: 1.01 }}
           >
-            <Link to="/news">
-              <Megaphone className="w-5 h-5 animate-pulse" /> 
-              CampusXpose Updates / News
-              <div className="bg-destructive text-white text-[10px] px-2 py-0.5 rounded-full ml-2">New</div>
-            </Link>
-          </Button>
+            <Button
+              asChild
+              variant="outline"
+              className="w-full mt-4 h-12 border-2 border-border bg-white hover:bg-muted shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-primary font-bold flex items-center justify-center gap-2"
+              style={{ borderRadius: WOBBLY_MD }}
+            >
+              <Link to="/news">
+                <Megaphone className="w-5 h-5 animate-pulse" />
+                Latest News & Updates
+                <div className="bg-destructive text-white text-[10px] px-2 py-0.5 rounded-full ml-2">New</div>
+              </Link>
+            </Button>
+          </motion.div>
         )}
 
-        {/* Stats Row */}
+        {/* Stats Row — count-up on mount + wobble on hover */}
         <div className="grid grid-cols-4 gap-2 pt-2 pb-4">
           {[
-            { n: data?.collegeCount ?? 0, l: "Colleges", color: "text-accent" },
-            { n: data?.postCount ?? 0, l: "Reports", color: "text-yellow-500" },
-            { n: data?.incidentCount ?? 0, l: "Incidents", color: "text-accent" },
-            { n: data?.userCount ?? 0, l: "Anon Users", color: "text-yellow-500" },
+            { n: data?.collegeCount ?? 0, l: "Colleges",   color: "text-accent" },
+            { n: data?.postCount    ?? 0, l: "Reports",    color: "text-yellow-500" },
+            { n: data?.incidentCount?? 0, l: "Incidents",  color: "text-accent" },
+            { n: data?.userCount    ?? 0, l: "Anon Users", color: "text-yellow-500" },
           ].map((s, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 5 }}
+              initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 * i }}
-              className="flex flex-col items-center justify-center border border-border bg-white p-2 rounded-xl shadow-sm"
+              transition={{ delay: 0.1 * i + 0.8 }}
+              whileHover={{ scale: 1.06, rotate: i % 2 === 0 ? 1.5 : -1.5 }}
             >
-              <div className={`font-display text-xl sm:text-2xl font-bold ${s.color}`}>{s.n}</div>
-              <div className="text-[9px] sm:text-[10px] font-semibold text-foreground mt-0.5">{s.l}</div>
+              <AnimatedStat {...s} />
             </motion.div>
           ))}
         </div>
@@ -172,7 +338,7 @@ function Home() {
 
       <HomeAds />
 
-      {/* Top reported */}
+      {/* Top Reported Colleges */}
       <section className="mx-auto max-w-3xl px-4 py-16">
         <div className="mb-6 flex items-center justify-between gap-3">
           <h2 className="font-display text-3xl font-bold">🔥 Top Reported Colleges</h2>
@@ -209,13 +375,12 @@ function Home() {
             </Link>
           ))}
           {top.length === 0 && (
-            <p className="text-center text-muted-foreground">Abhi tak koi report nahi. Pehle aap karo!</p>
+            <p className="text-center text-muted-foreground">No reports yet. Be the first to speak up!</p>
           )}
         </div>
       </section>
 
-
-      {/* Top voted reports */}
+      {/* Latest Reports */}
       <section className="mx-auto max-w-3xl px-4 py-16">
         <div className="mb-6 flex items-center justify-between gap-3">
           <h2 className="font-display text-3xl font-bold">📰 Latest Reports</h2>
@@ -236,7 +401,10 @@ function Home() {
               >
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <UserSymbol username={p.username} size="sm" />
-                  <span className="inline-flex items-center gap-1 font-medium text-foreground">{p.username ?? "Anonymous"}{p.username && verified.has(p.username) && <VerifiedBadge />}</span>
+                  <span className="inline-flex items-center gap-1 font-medium text-foreground">
+                    {p.username ?? "Anonymous"}
+                    {p.username && verified.has(p.username) && <VerifiedBadge />}
+                  </span>
                   {p.created_at && <span suppressHydrationWarning>· {timeAgo(p.created_at)}</span>}
                   <span className="ml-auto inline-flex items-center gap-1 border-2 border-border bg-white px-2 py-0.5 text-[11px] font-bold text-accent">
                     <ArrowBigUp className="h-3.5 w-3.5" /> {p.upvotes ?? 0}
@@ -260,25 +428,24 @@ function Home() {
             );
           })}
           {recentPosts.length === 0 && (
-            <p className="text-center text-muted-foreground">Abhi koi report nahi aayi.</p>
+            <p className="text-center text-muted-foreground">No reports yet. Check back soon!</p>
           )}
         </div>
         {recentPosts.length > 3 && (
           <div className="mt-6 text-center">
-            <Button variant="outline" onClick={() => setShowAllReports((v) => !v)}>
+            <Button variant="outline" onClick={() => setShowAllReports(v => !v)}>
               {showAllReports ? "Show less" : "Read more"}
             </Button>
           </div>
         )}
       </section>
 
-      {/* FAQ / Common Sawaal */}
+      {/* FAQ */}
       <section className="mx-auto max-w-3xl px-4 py-12">
         <div className="mb-6 text-center">
           <h2 className="font-display text-3xl font-bold">🤔 Common Sawaal</h2>
           <p className="mt-2 text-muted-foreground">Tumhare dimaag mein chal rahe kuch sawaalon ke jawaab</p>
         </div>
-
         <div className="sketch-card p-2 sm:p-4 bg-white" style={{ borderRadius: WOBBLY_MD }}>
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="item-1" className="border-b-2 border-border">
