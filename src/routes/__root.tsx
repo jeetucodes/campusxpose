@@ -7,13 +7,14 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, useMemo, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import favicon from "@/assets/favicon.png";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
+import { Button } from "@/components/ui/button";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 
 function NotFoundComponent() {
@@ -149,23 +150,37 @@ function RootComponent() {
       if (sessionStorage.getItem("app_redirect_attempted")) return;
       sessionStorage.setItem("app_redirect_attempted", "true");
       
-      const pathAndQuery = window.location.pathname + window.location.search + window.location.hash;
-      const packageName = "co.median.android.abxkxke";
-      const playStoreFallback = `https://play.google.com/store/apps/details?id=${packageName}&pcampaignid=web_share`;
-      
-      const intentUrl = `intent://campusxpose.online${pathAndQuery}#Intent;scheme=https;package=${packageName};S.browser_fallback_url=${encodeURIComponent(playStoreFallback)};end;`;
-      
-      // Attempt to open the app or redirect to play store via intent
-      window.location.replace(intentUrl);
-
-      // Fallback for non-Chrome browsers / WebViews that don't support the intent scheme properly
-      setTimeout(() => {
-        if (!document.hidden) {
-          window.location.replace(playStoreFallback);
-        }
-      }, 2500);
+      // Instead of forcing an automatic redirect (which Chrome blocks due to no user gesture, causing the fallback timeout to incorrectly fire),
+      // we show a prompt. Chrome requires a physical click to launch an app via intent.
+      (window as any).showAppPrompt = true;
     }
   }, []);
+
+  const [showPrompt, setShowPrompt] = useState(false);
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window as any).showAppPrompt) {
+      setShowPrompt(true);
+    }
+  }, []);
+
+  const handleOpenApp = () => {
+    const pathAndQuery = window.location.pathname + window.location.search + window.location.hash;
+    const packageName = "co.median.android.abxkxke";
+    const playStoreFallback = `https://play.google.com/store/apps/details?id=${packageName}&pcampaignid=web_share`;
+    
+    // Using a custom scheme format to bypass same-domain intent blocks, 
+    // or standard intent with S.browser_fallback_url.
+    const intentUrl = `intent://campusxpose.online${pathAndQuery}#Intent;scheme=https;package=${packageName};S.browser_fallback_url=${encodeURIComponent(playStoreFallback)};end;`;
+    
+    window.location.href = intentUrl;
+    
+    // Fallback if Chrome doesn't process the intent fallback correctly
+    setTimeout(() => {
+      if (!document.hidden) {
+        window.location.href = playStoreFallback;
+      }
+    }, 1500);
+  };
 
   const isCommunityChat = useMemo(() => pathname.startsWith("/community/"), [pathname]);
   const isAdmin = useMemo(() => pathname.startsWith("/admin/"), [pathname]);
@@ -176,6 +191,27 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      {showPrompt && (
+        <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-background/95 backdrop-blur-sm px-6 text-center animate-in fade-in duration-300">
+          <div className="bg-white p-8 rounded-2xl shadow-xl border-2 border-border max-w-sm w-full space-y-6">
+            <div className="bg-primary/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-2">
+              <img src="/logo.jpeg" alt="Logo" className="w-12 h-12 rounded-xl" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-foreground">Open in App</h2>
+              <p className="text-muted-foreground mt-2 font-sans text-sm">For the best experience, open this link in the CampusXpose app.</p>
+            </div>
+            <div className="space-y-3 pt-2">
+              <Button onClick={handleOpenApp} className="w-full text-base py-6 shadow-md" size="lg">
+                Continue in App
+              </Button>
+              <Button onClick={() => setShowPrompt(false)} variant="ghost" className="w-full text-muted-foreground">
+                Continue in Browser
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <div className={cn("md:pb-0", !hideNav && "pb-[calc(4rem+env(safe-area-inset-bottom))]")}>
         <Outlet />

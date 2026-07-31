@@ -569,6 +569,11 @@ function ProjectDetailPage() {
     if (!data?.project) return;
     const text = `🛠️ Check out this project on CampusXpose: ${data.project.title}\nBy @${data.project.owner_username}\n\nRead more & collaborate!`;
     try {
+      if (typeof window !== "undefined" && (window as any).median) {
+        (window as any).median.share.sharePage({ url: window.location.href, title: text });
+        return;
+      }
+      
       if (navigator.share) {
         await navigator.share({
           title: data.project.title,

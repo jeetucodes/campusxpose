@@ -230,6 +230,11 @@ async function shareCollege(c: Col) {
   const url = `${typeof window !== "undefined" ? window.location.origin : ""}/colleges/${c.id}`;
   const text = `Check out ${c.name} on CampusXpose`;
 
+  if (typeof window !== "undefined" && (window as any).median) {
+    (window as any).median.share.sharePage({ url, title: text });
+    return;
+  }
+
   if (typeof navigator !== "undefined" && navigator.share) {
     try {
       await navigator.share({ title: c.name, text, url });
