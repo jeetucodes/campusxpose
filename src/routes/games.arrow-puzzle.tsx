@@ -45,16 +45,31 @@ export function generateLevel(levelIdx: number): { gridSize: number; arrows: Omi
   if (levelIdx >= 2) gridSize = 4;
   if (levelIdx >= 10) gridSize = 5;
   if (levelIdx >= 30) gridSize = 6;
-  
-  // Density scaling
-  const maxArrows = gridSize * gridSize - 2;
-  const targetArrows = 5 + Math.floor(levelIdx * 2);
-  const numArrows = Math.min(maxArrows, targetArrows);
+  if (levelIdx >= 50) gridSize = 7;
+  if (levelIdx >= 75) gridSize = 8;
+  if (levelIdx >= 90) gridSize = 9;
   
   // Obstacle scaling
-  const numWalls = Math.floor(levelIdx / 5);
-  const numBombs = Math.floor(levelIdx / 8);
-  const numMirrors = Math.min(6, Math.floor(levelIdx / 3));
+  let numWalls = Math.floor(levelIdx / 5);
+  let numBombs = Math.floor(levelIdx / 8);
+  let numMirrors = Math.floor(levelIdx / 3);
+  
+  // Cap obstacles at ~45% of the grid to ensure playability
+  const maxObstacles = Math.floor((gridSize * gridSize) * 0.45);
+  const totalDesiredObs = numWalls + numBombs + numMirrors;
+  
+  if (totalDesiredObs > maxObstacles) {
+    const ratio = maxObstacles / totalDesiredObs;
+    numWalls = Math.floor(numWalls * ratio);
+    numBombs = Math.floor(numBombs * ratio);
+    numMirrors = Math.floor(numMirrors * ratio);
+  }
+  
+  // Density scaling
+  const totalObs = numWalls + numBombs + numMirrors;
+  const maxArrows = (gridSize * gridSize) - totalObs - 2;
+  const targetArrows = 5 + Math.floor(levelIdx * 2);
+  const numArrows = Math.min(maxArrows, targetArrows);
   
   const grid: ({ type: "arrow" | "wall" | "bomb" | "mirror-slash" | "mirror-backslash", dir?: Dir } | null)[][] = 
     Array.from({ length: gridSize }, () => Array(gridSize).fill(null));

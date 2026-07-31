@@ -34,7 +34,7 @@ function GamesHub() {
         </div>
 
         <div className="flex flex-col gap-4">
-          
+
           {/* Arrow Puzzle Item */}
           <Link to="/games/arrow-puzzle" className="block outline-none">
             <motion.div
