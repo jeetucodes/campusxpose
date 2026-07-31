@@ -29,6 +29,7 @@ import { Route as CollegesIndexRouteImport } from './routes/colleges.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ProjectsNewRouteImport } from './routes/projects.new'
 import { Route as ProjectsIdRouteImport } from './routes/projects.$id'
+import { Route as GamesMemoryMatchRouteImport } from './routes/games.memory-match'
 import { Route as GamesArrowPuzzleRouteImport } from './routes/games.arrow-puzzle'
 import { Route as Games2048RouteImport } from './routes/games.2048'
 import { Route as CommunityCollegeIdRouteImport } from './routes/community.$collegeId'
@@ -152,6 +153,11 @@ const ProjectsNewRoute = ProjectsNewRouteImport.update({
 const ProjectsIdRoute = ProjectsIdRouteImport.update({
   id: '/projects/$id',
   path: '/projects/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesMemoryMatchRoute = GamesMemoryMatchRouteImport.update({
+  id: '/games/memory-match',
+  path: '/games/memory-match',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GamesArrowPuzzleRoute = GamesArrowPuzzleRouteImport.update({
@@ -314,6 +320,7 @@ export interface FileRoutesByFullPath {
   '/community/$collegeId': typeof CommunityCollegeIdRoute
   '/games/2048': typeof Games2048Route
   '/games/arrow-puzzle': typeof GamesArrowPuzzleRoute
+  '/games/memory-match': typeof GamesMemoryMatchRoute
   '/projects/$id': typeof ProjectsIdRoute
   '/projects/new': typeof ProjectsNewRoute
   '/admin/': typeof AdminIndexRoute
@@ -360,6 +367,7 @@ export interface FileRoutesByTo {
   '/community/$collegeId': typeof CommunityCollegeIdRoute
   '/games/2048': typeof Games2048Route
   '/games/arrow-puzzle': typeof GamesArrowPuzzleRoute
+  '/games/memory-match': typeof GamesMemoryMatchRoute
   '/projects/$id': typeof ProjectsIdRoute
   '/projects/new': typeof ProjectsNewRoute
   '/admin': typeof AdminIndexRoute
@@ -407,6 +415,7 @@ export interface FileRoutesById {
   '/community/$collegeId': typeof CommunityCollegeIdRoute
   '/games/2048': typeof Games2048Route
   '/games/arrow-puzzle': typeof GamesArrowPuzzleRoute
+  '/games/memory-match': typeof GamesMemoryMatchRoute
   '/projects/$id': typeof ProjectsIdRoute
   '/projects/new': typeof ProjectsNewRoute
   '/admin/': typeof AdminIndexRoute
@@ -455,6 +464,7 @@ export interface FileRouteTypes {
     | '/community/$collegeId'
     | '/games/2048'
     | '/games/arrow-puzzle'
+    | '/games/memory-match'
     | '/projects/$id'
     | '/projects/new'
     | '/admin/'
@@ -501,6 +511,7 @@ export interface FileRouteTypes {
     | '/community/$collegeId'
     | '/games/2048'
     | '/games/arrow-puzzle'
+    | '/games/memory-match'
     | '/projects/$id'
     | '/projects/new'
     | '/admin'
@@ -547,6 +558,7 @@ export interface FileRouteTypes {
     | '/community/$collegeId'
     | '/games/2048'
     | '/games/arrow-puzzle'
+    | '/games/memory-match'
     | '/projects/$id'
     | '/projects/new'
     | '/admin/'
@@ -594,6 +606,7 @@ export interface RootRouteChildren {
   CommunityCollegeIdRoute: typeof CommunityCollegeIdRoute
   Games2048Route: typeof Games2048Route
   GamesArrowPuzzleRoute: typeof GamesArrowPuzzleRoute
+  GamesMemoryMatchRoute: typeof GamesMemoryMatchRoute
   ProjectsIdRoute: typeof ProjectsIdRoute
   ProjectsNewRoute: typeof ProjectsNewRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -742,6 +755,13 @@ declare module '@tanstack/react-router' {
       path: '/projects/$id'
       fullPath: '/projects/$id'
       preLoaderRoute: typeof ProjectsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games/memory-match': {
+      id: '/games/memory-match'
+      path: '/games/memory-match'
+      fullPath: '/games/memory-match'
+      preLoaderRoute: typeof GamesMemoryMatchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/games/arrow-puzzle': {
@@ -954,6 +974,7 @@ const rootRouteChildren: RootRouteChildren = {
   CommunityCollegeIdRoute: CommunityCollegeIdRoute,
   Games2048Route: Games2048Route,
   GamesArrowPuzzleRoute: GamesArrowPuzzleRoute,
+  GamesMemoryMatchRoute: GamesMemoryMatchRoute,
   ProjectsIdRoute: ProjectsIdRoute,
   ProjectsNewRoute: ProjectsNewRoute,
   AdminIndexRoute: AdminIndexRoute,

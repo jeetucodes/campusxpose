@@ -413,7 +413,7 @@ export default function ArrowPuzzleGame() {
             {Array.from({ length: levelData.gridSize * levelData.gridSize }).map((_, i) => (
               <div
                 key={`cell-${i}`}
-                className="rounded-[18px] bg-[#cbd5e1] shadow-[inset_4px_4px_8px_rgba(0,0,0,0.15),inset_-4px_-4px_8px_rgba(255,255,255,0.5)] opacity-50"
+                className="rounded-[18px] bg-[#cbd5e1] opacity-40 shadow-inner"
                 style={{
                   gridRow: Math.floor(i / levelData.gridSize) + 1,
                   gridColumn: (i % levelData.gridSize) + 1,
@@ -543,14 +543,6 @@ export default function ArrowPuzzleGame() {
                     whileTap={isTappable ? { scale: 0.92 } : {}}
                   >
                     <Icon className="h-6 w-6 sm:h-8 sm:w-8" strokeWidth={3} />
-                    {/* Glow pulse for tappable arrows */}
-                    {isTappable && (
-                      <motion.div
-                        className="absolute inset-0 rounded-xl border-2 border-white/40"
-                        animate={{ opacity: [0.3, 0.8, 0.3] }}
-                        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                      />
-                    )}
                   </motion.button>
                 );
               })}
