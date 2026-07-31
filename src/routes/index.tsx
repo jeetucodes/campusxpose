@@ -24,9 +24,8 @@ import {
 const homeQueryOptions = queryOptions({
   queryKey: ["home"],
   queryFn: () => getHomeData(),
-  staleTime: 15000,
-  refetchInterval: 15000,
-  refetchOnWindowFocus: true,
+  staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes (live subscription handles real-time updates)
+  refetchOnWindowFocus: false, // Don't refetch when switching tabs
 });
 
 export const Route = createFileRoute("/")({
