@@ -27,6 +27,8 @@ import { useVerifiedUsernames } from "@/hooks/useVerified";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { Linkify } from "@/components/Linkify";
 import { motion } from "framer-motion";
+import { enablePush, permissionState, isPushSupported } from "@/lib/push-client";
+import { BellRing } from "lucide-react";
 
 type Search = { to?: string };
 
@@ -83,6 +85,22 @@ function Messages() {
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { byMessage, toggle } = useReactions("direct", hashedId);
+
+  const [pushStatus, setPushStatus] = useState<string>("unsupported");
+  const [isPushSupportedFlag, setIsPushSupportedFlag] = useState(false);
+
+  useEffect(() => {
+    setIsPushSupportedFlag(isPushSupported());
+    setPushStatus(permissionState());
+  }, []);
+
+  const handleEnablePush = async () => {
+    if (!hashedId) return;
+    const res = await enablePush(hashedId);
+    setPushStatus(res);
+    if (res === "granted") toast.success("Push notifications enabled!");
+    else if (res === "denied") toast.error("Push notifications denied by browser.");
+  };
 
   const pinMessage = async (m: DM) => {
     if (!hashedId) return;
@@ -493,6 +511,15 @@ function Messages() {
             </DialogContent>
           </Dialog>
         </header>
+
+        {isPushSupportedFlag && pushStatus === "default" && (
+          <div className="bg-postit p-3 border-b-2 border-ink shadow-ink-soft">
+            <p className="text-sm font-sans font-medium text-ink mb-2">Enable Push Notifications to get alerted for new messages.</p>
+            <Button onClick={handleEnablePush} size="sm" className="w-full bg-marker text-white hover:bg-marker/90 wobbly-sm shadow-none border-none">
+              <BellRing className="w-4 h-4 mr-2" /> Enable Notifications
+            </Button>
+          </div>
+        )}
 
         <div className="border-b-2 border-ink bg-surface-2 p-3">
           <div className="flex items-center gap-2 bg-white wobbly-sm border-2 border-ink shadow-ink-soft pr-1">

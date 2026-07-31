@@ -383,6 +383,37 @@ export const submitDirectMessage = createServerFn({ method: "POST" })
       image_url: data.imageUrl ?? null,
     });
     if (error) throw new Error(error.message);
+
+    try {
+      const { sendPushMessage } = await import("./push.server");
+      const { data: subs } = await supabaseAdmin
+        .from("push_subscriptions")
+        .select("id, endpoint, p256dh, auth")
+        .eq("user_hash", recipientHash);
+        
+      if (subs && subs.length > 0) {
+        const stale: string[] = [];
+        await Promise.all(
+          subs.map(async (s) => {
+            const success = await sendPushMessage(
+              { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
+              { 
+                title: `@${data.username}`, 
+                body: clean(data.content) || (data.imageUrl ? "Sent an image" : "Sent a message"), 
+                url: `/messages?to=${data.username}` 
+              }
+            );
+            if (!success) stale.push(s.id);
+          })
+        );
+        if (stale.length > 0) {
+          await supabaseAdmin.from("push_subscriptions").delete().in("id", stale);
+        }
+      }
+    } catch (e) {
+      console.error("Push error:", e);
+    }
+
     return { ok: true, shadow: false };
   });
 
