@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, useRef } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, RotateCcw, ChevronRight, ChevronLeft, ChevronUp, ChevronDown, Trophy, Zap, Heart } from "lucide-react";
+import { ArrowLeft, RotateCcw, ChevronRight, ChevronLeft, ChevronUp, ChevronDown, Trophy, Zap, Heart, Flame, Bomb, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/games/arrow-puzzle")({
@@ -48,12 +48,12 @@ export function generateLevel(levelIdx: number): { gridSize: number; arrows: Omi
   
   // Density scaling
   const maxArrows = gridSize * gridSize - 2;
-  const targetArrows = 4 + Math.floor(levelIdx * 1.5);
+  const targetArrows = 5 + Math.floor(levelIdx * 2);
   const numArrows = Math.min(maxArrows, targetArrows);
   
   // Obstacle scaling
-  const numWalls = Math.floor(levelIdx / 6);
-  const numBombs = Math.floor(levelIdx / 12);
+  const numWalls = Math.floor(levelIdx / 4);
+  const numBombs = Math.floor(levelIdx / 8);
   
   const grid: ({ type: "arrow" | "wall" | "bomb", dir?: Dir } | null)[][] = 
     Array.from({ length: gridSize }, () => Array(gridSize).fill(null));
@@ -117,27 +117,29 @@ export function generateLevel(levelIdx: number): { gridSize: number; arrows: Omi
 }
 
 // ─── Game Logic ─────────────────────────────────────────────────────────────
-function isPathClear(arrow: Arrow, arrows: Arrow[], obstacles: Obstacle[], gridSize: number): boolean {
-  const { row, col, dir } = arrow;
+type Blocker = { type: "wall" | "bomb" | "arrow"; row: number; col: number; id: number | string };
 
-  const checkBlocker = (r: number, c: number) => {
-    return arrows.some(a => a.row === r && a.col === c) || obstacles.some(o => o.row === r && o.col === c);
+function getFirstBlocker(arrow: Arrow, arrows: Arrow[], obstacles: Obstacle[], gridSize: number): Blocker | null {
+  const { row, col, dir } = arrow;
+  
+  const getBlockerAt = (r: number, c: number): Blocker | null => {
+    const a = arrows.find(x => x.row === r && x.col === c);
+    if (a) return { type: "arrow", row: r, col: c, id: a.id };
+    const o = obstacles.find(x => x.row === r && x.col === c);
+    if (o) return { type: o.type, row: r, col: c, id: `obs-${o.id}` };
+    return null;
   };
 
-  switch (dir) {
-    case "up":
-      for (let r = row - 1; r >= 0; r--) if (checkBlocker(r, col)) return false;
-      return true;
-    case "down":
-      for (let r = row + 1; r < gridSize; r++) if (checkBlocker(r, col)) return false;
-      return true;
-    case "left":
-      for (let c = col - 1; c >= 0; c--) if (checkBlocker(row, c)) return false;
-      return true;
-    case "right":
-      for (let c = col + 1; c < gridSize; c++) if (checkBlocker(row, c)) return false;
-      return true;
+  if (dir === "up") {
+    for (let r = row - 1; r >= 0; r--) { const b = getBlockerAt(r, col); if (b) return b; }
+  } else if (dir === "down") {
+    for (let r = row + 1; r < gridSize; r++) { const b = getBlockerAt(r, col); if (b) return b; }
+  } else if (dir === "left") {
+    for (let c = col - 1; c >= 0; c--) { const b = getBlockerAt(row, c); if (b) return b; }
+  } else if (dir === "right") {
+    for (let c = col + 1; c < gridSize; c++) { const b = getBlockerAt(row, c); if (b) return b; }
   }
+  return null;
 }
 
 // ─── Component ──────────────────────────────────────────────────────────────
@@ -155,6 +157,8 @@ export default function ArrowPuzzleGame() {
   const [showLevels, setShowLevels] = useState(false);
   const [shakeId, setShakeId] = useState<number | string | null>(null);
   const [exitingArrow, setExitingArrow] = useState<{ arrow: Arrow; exitAnim: { x: number; y: number } } | null>(null);
+  const [bouncingArrow, setBouncingArrow] = useState<{ id: number; anim: { x?: number[], y?: number[] } } | null>(null);
+  const [collisionAnim, setCollisionAnim] = useState<{ id: string, row: number, col: number, type: "wall"|"bomb"|"arrow" } | null>(null);
   const [won, setWon] = useState(false);
   const [gameOver, setGameOver] = useState(false);
 
@@ -172,15 +176,19 @@ export default function ArrowPuzzleGame() {
     setWon(false);
     setGameOver(false);
     setExitingArrow(null);
+    setBouncingArrow(null);
+    setCollisionAnim(null);
     setShakeId(null);
   }, []);
 
   useEffect(() => { initLevel(levelIdx); }, [levelIdx, initLevel]);
 
   const handleTap = useCallback((arrow: Arrow) => {
-    if (won || gameOver || exitingArrow || !levelData) return;
+    if (won || gameOver || exitingArrow || bouncingArrow || !levelData) return;
 
-    if (isPathClear(arrow, arrows, levelData.obstacles, levelData.gridSize)) {
+    const blocker = getFirstBlocker(arrow, arrows, levelData.obstacles, levelData.gridSize);
+
+    if (!blocker) {
       const exit = DIR_EXIT[arrow.dir];
       setExitingArrow({ arrow, exitAnim: exit });
       setMoves(m => m + 1);
@@ -201,31 +209,46 @@ export default function ArrowPuzzleGame() {
         setExitingArrow(null);
       }, 300);
     } else {
-      setShakeId(arrow.id);
-      setTimeout(() => setShakeId(null), 500);
-      setLives(prev => {
-        const next = prev - 1;
-        if (next <= 0) setGameOver(true);
-        return next;
-      });
+      const offset = 30;
+      const bounce = {
+         up: { y: [0, -offset, 0] },
+         down: { y: [0, offset, 0] },
+         left: { x: [0, -offset, 0] },
+         right: { x: [0, offset, 0] }
+      }[arrow.dir];
+
+      setBouncingArrow({ id: arrow.id, anim: bounce });
+      
+      setTimeout(() => {
+        setCollisionAnim({ ...blocker, id: Date.now().toString() });
+        setBouncingArrow(null);
+        setLives(prev => {
+          const next = prev - 1;
+          if (next <= 0) setGameOver(true);
+          return next;
+        });
+        setTimeout(() => setCollisionAnim(null), 500);
+      }, 150);
     }
-  }, [arrows, levelData, won, gameOver, exitingArrow, levelIdx]);
+  }, [arrows, levelData, won, gameOver, exitingArrow, bouncingArrow, levelIdx]);
 
   const handleObstacleTap = useCallback((obs: Obstacle) => {
-     if (won || gameOver) return;
+     if (won || gameOver || bouncingArrow) return;
      if (obs.type === "wall") {
         setShakeId(`obs-${obs.id}`);
         setTimeout(() => setShakeId(null), 500);
      } else if (obs.type === "bomb") {
         setShakeId(`obs-${obs.id}`);
         setTimeout(() => setShakeId(null), 500);
+        setCollisionAnim({ type: "bomb", row: obs.row, col: obs.col, id: Date.now().toString() });
+        setTimeout(() => setCollisionAnim(null), 500);
         setLives(prev => {
           const next = prev - 1;
           if (next <= 0) setGameOver(true);
           return next;
         });
      }
-  }, [won, gameOver]);
+  }, [won, gameOver, bouncingArrow]);
 
   const nextLevel = () => setLevelIdx(i => i + 1);
   const resetLevel = () => initLevel(levelIdx);
@@ -235,7 +258,7 @@ export default function ArrowPuzzleGame() {
   if (!levelData) return null;
 
   const tappableIds = new Set(
-    arrows.filter(a => !exitingArrow && isPathClear(a, arrows, levelData.obstacles, levelData.gridSize)).map(a => a.id)
+    arrows.filter(a => !exitingArrow && !getFirstBlocker(a, arrows, levelData.obstacles, levelData.gridSize)).map(a => a.id)
   );
 
   return (
@@ -335,7 +358,7 @@ export default function ArrowPuzzleGame() {
                 <motion.button
                   key={`obs-${obs.id}`}
                   onClick={() => handleObstacleTap(obs)}
-                  className={`absolute rounded-xl flex items-center justify-center border-2 shadow-sm ${obs.type === "wall" ? "bg-stone-400 border-stone-500" : "bg-rose-200 border-rose-300"}`}
+                  className={`absolute rounded-xl flex items-center justify-center border-2 shadow-sm ${obs.type === "wall" ? "bg-stone-300 border-b-4 border-stone-500 overflow-hidden" : "bg-zinc-900 border-zinc-800"}`}
                   style={{
                     gridRow: obs.row + 1,
                     gridColumn: obs.col + 1,
@@ -346,12 +369,50 @@ export default function ArrowPuzzleGame() {
                       ? { x: [0, -6, 6, -4, 4, 0], transition: { duration: 0.4 } }
                       : { x: 0 }
                   }
-                  whileTap={{ scale: 0.9 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <span className="text-xl sm:text-2xl drop-shadow-sm">{obs.type === "wall" ? "🧱" : "💣"}</span>
+                  {obs.type === "wall" && (
+                     <div className="absolute inset-0 flex flex-col justify-between opacity-30">
+                        <div className="h-[2px] w-full bg-stone-700" />
+                        <div className="h-[2px] w-full bg-stone-700" />
+                        <div className="h-[2px] w-full bg-stone-700" />
+                     </div>
+                  )}
+                  {obs.type === "bomb" && (
+                     <Bomb className="h-6 w-6 text-rose-500 animate-pulse" strokeWidth={2.5} />
+                  )}
                 </motion.button>
               );
             })}
+
+            {/* Collision Animations */}
+            <AnimatePresence>
+              {collisionAnim && (
+                <motion.div
+                  key={`col-${collisionAnim.id}`}
+                  className="absolute z-10 rounded-xl flex items-center justify-center"
+                  style={{ gridRow: collisionAnim.row + 1, gridColumn: collisionAnim.col + 1, position: "relative" }}
+                  initial={{ scale: 0.5, opacity: 1 }}
+                  animate={{ scale: 1.5, opacity: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                >
+                  {collisionAnim.type === "bomb" && (
+                     <div className="absolute bg-rose-500 rounded-full w-full h-full opacity-60 shadow-[0_0_20px_10px_rgba(244,63,94,0.6)] flex items-center justify-center">
+                        <Flame className="h-10 w-10 text-yellow-300" />
+                     </div>
+                  )}
+                  {collisionAnim.type === "wall" && (
+                     <div className="absolute w-full h-full border-4 border-stone-400 rounded-xl" />
+                  )}
+                  {collisionAnim.type === "arrow" && (
+                     <div className="absolute w-full h-full flex items-center justify-center">
+                        <X className="h-12 w-12 text-black/40" strokeWidth={4} />
+                     </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Arrow tiles */}
             <AnimatePresence>
@@ -360,6 +421,7 @@ export default function ArrowPuzzleGame() {
                 const isTappable = tappableIds.has(arrow.id);
                 const isShaking = shakeId === arrow.id;
                 const isExiting = exitingArrow?.arrow.id === arrow.id;
+                const bounceAnim = bouncingArrow?.id === arrow.id ? bouncingArrow.anim : null;
 
                 return (
                   <motion.button
@@ -382,6 +444,11 @@ export default function ArrowPuzzleGame() {
                             opacity: 0,
                             scale: 0.7,
                             transition: { duration: 0.3, ease: "easeIn" },
+                          }
+                        : bounceAnim
+                        ? {
+                            ...bounceAnim,
+                            transition: { duration: 0.3, ease: "easeInOut" }
                           }
                         : isShaking
                         ? {
