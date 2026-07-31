@@ -335,60 +335,66 @@ export default function ArrowPuzzleGame() {
       <div className="mx-auto max-w-lg px-4 py-6 space-y-5">
 
         {/* Level & Stats Dashboard */}
-        <div className="bg-[#f8fafc] p-4 shadow-[8px_8px_16px_rgba(0,0,0,0.06),inset_4px_4px_8px_rgba(255,255,255,0.9),inset_-4px_-4px_8px_rgba(0,0,0,0.03)] border-2 border-white rounded-[32px] space-y-3">
+        <div className="space-y-4">
           {/* Top Row: Level & Lives */}
-          <div className="flex items-center justify-between px-1">
+          <div className="flex items-center justify-between">
             <button 
               onClick={() => setShowLevels(true)} 
-              className="flex items-baseline gap-1.5 hover:opacity-80 transition-opacity outline-none"
+              className="flex items-center gap-2 bg-white px-5 py-2.5 rounded-full border-2 border-white shadow-[4px_4px_10px_rgba(0,0,0,0.05),inset_3px_3px_6px_rgba(255,255,255,1),inset_-3px_-3px_6px_rgba(0,0,0,0.03)] hover:scale-[1.02] active:scale-95 transition-transform outline-none"
             >
-              <span className="font-display text-2xl font-bold text-accent tracking-tight">Level {levelIdx + 1}</span>
-              <span className="text-sm font-medium text-muted-foreground flex items-center">/ 100 <ChevronDown className="h-4 w-4 ml-1 opacity-50" /></span>
+              <span className="font-display text-xl font-bold text-[#60a5fa] tracking-tight leading-none">Level {levelIdx + 1}</span>
+              <span className="text-[11px] font-bold text-[#94a3b8] flex items-center bg-[#f1f5f9] px-2.5 py-1 rounded-full shadow-[inset_1px_1px_3px_rgba(0,0,0,0.1),inset_-1px_-1px_3px_rgba(255,255,255,0.9)]">
+                / 100 <ChevronDown className="h-3 w-3 ml-1" strokeWidth={3} />
+              </span>
             </button>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5 bg-white px-4 py-2.5 rounded-full shadow-[4px_4px_10px_rgba(0,0,0,0.05),inset_3px_3px_6px_rgba(255,255,255,1),inset_-3px_-3px_6px_rgba(0,0,0,0.03)] border-2 border-white">
               {Array.from({ length: 5 }).map((_, i) => (
                 <motion.div
                   key={i}
-                  animate={i < lives ? { scale: 1, opacity: 1 } : { scale: 0.7, opacity: 0.2 }}
+                  animate={i < lives ? { scale: 1, opacity: 1 } : { scale: 0.6, opacity: 0.3 }}
                   transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                  className="relative"
                 >
                   <Heart
-                    className={`h-5 w-5 ${i < lives ? "text-rose-500 fill-rose-500" : "text-muted-foreground/30"}`}
+                    className={`h-5 w-5 ${i < lives ? "text-[#fb7185] fill-[#fb7185]" : "text-muted-foreground/30"}`}
                   />
+                  {i < lives && (
+                    <div className="absolute top-[3px] left-[3px] w-[5px] h-[5px] bg-white/70 rounded-full blur-[0.5px]" />
+                  )}
                 </motion.div>
               ))}
             </div>
           </div>
 
           {/* Bottom Row: Moves, Left, Reset */}
-          <div className="flex items-center gap-2">
-            <div className="flex-1 rounded-[20px] bg-[#f1f5f9] border border-white/60 shadow-[inset_2px_2px_4px_rgba(0,0,0,0.05),inset_-2px_-2px_4px_rgba(255,255,255,0.9)] p-2 text-center">
-              <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Moves</div>
-              <div className="font-display text-xl font-bold text-foreground leading-none">{moves}</div>
+          <div className="flex items-center gap-3">
+            <div className="flex-1 rounded-[24px] bg-white border-2 border-white shadow-[4px_4px_10px_rgba(0,0,0,0.05),inset_3px_3px_6px_rgba(255,255,255,1),inset_-3px_-3px_6px_rgba(0,0,0,0.03)] p-3 flex flex-col items-center justify-center">
+              <div className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-widest mb-1">Moves</div>
+              <div className="font-display text-2xl font-bold text-[#475569] leading-none">{moves}</div>
             </div>
-            <div className="flex-1 rounded-[20px] bg-[#f1f5f9] border border-white/60 shadow-[inset_2px_2px_4px_rgba(0,0,0,0.05),inset_-2px_-2px_4px_rgba(255,255,255,0.9)] p-2 text-center">
-              <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Left</div>
-              <div className="font-display text-xl font-bold text-foreground leading-none">{arrows.length}</div>
+            <div className="flex-1 rounded-[24px] bg-white border-2 border-white shadow-[4px_4px_10px_rgba(0,0,0,0.05),inset_3px_3px_6px_rgba(255,255,255,1),inset_-3px_-3px_6px_rgba(0,0,0,0.03)] p-3 flex flex-col items-center justify-center">
+              <div className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-widest mb-1">Left</div>
+              <div className="font-display text-2xl font-bold text-[#475569] leading-none">{arrows.length}</div>
             </div>
             <Button
               onClick={handleHint}
               disabled={hintsLeft === 0 || won || gameOver}
               variant="outline"
               size="icon"
-              className={`h-[52px] w-[52px] rounded-[20px] border border-white hover:bg-yellow-100 shrink-0 bg-[#f8fafc] shadow-[4px_4px_8px_rgba(0,0,0,0.05),inset_2px_2px_4px_rgba(255,255,255,0.9),inset_-2px_-2px_4px_rgba(0,0,0,0.02)] transition-colors ${hintsLeft > 0 ? "text-yellow-500" : "text-muted-foreground/30"}`}
+              className={`h-[68px] w-[68px] rounded-[24px] border-2 border-white bg-white hover:bg-[#fffbeb] shrink-0 shadow-[4px_4px_10px_rgba(0,0,0,0.05),inset_3px_3px_6px_rgba(255,255,255,1),inset_-3px_-3px_6px_rgba(0,0,0,0.03)] transition-all hover:scale-105 active:scale-95 ${hintsLeft > 0 ? "text-[#fbbf24]" : "text-muted-foreground/30 opacity-60"}`}
             >
               <div className="flex flex-col items-center justify-center">
-                <Lightbulb className="h-5 w-5" />
-                <span className="text-[10px] font-bold leading-tight">{hintsLeft}</span>
+                <Lightbulb className="h-6 w-6 mb-1" strokeWidth={2.5} />
+                <span className="text-[11px] font-bold leading-none bg-[#fef3c7] text-[#b45309] px-2 py-0.5 rounded-full">{hintsLeft}</span>
               </div>
             </Button>
             <Button
               onClick={resetLevel}
               variant="outline"
               size="icon"
-              className="h-[52px] w-[52px] rounded-[20px] border border-white hover:bg-muted/80 shrink-0 bg-[#f8fafc] shadow-[4px_4px_8px_rgba(0,0,0,0.05),inset_2px_2px_4px_rgba(255,255,255,0.9),inset_-2px_-2px_4px_rgba(0,0,0,0.02)] text-muted-foreground hover:text-foreground transition-colors"
+              className="h-[68px] w-[68px] rounded-[24px] border-2 border-white bg-white hover:bg-[#f8fafc] shrink-0 shadow-[4px_4px_10px_rgba(0,0,0,0.05),inset_3px_3px_6px_rgba(255,255,255,1),inset_-3px_-3px_6px_rgba(0,0,0,0.03)] text-[#94a3b8] hover:text-[#475569] transition-all hover:scale-105 active:scale-95"
             >
-              <RotateCcw className="h-5 w-5" />
+              <RotateCcw className="h-6 w-6" strokeWidth={2.5} />
             </Button>
           </div>
         </div>
@@ -558,38 +564,37 @@ export default function ArrowPuzzleGame() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 flex flex-col items-center justify-center bg-emerald-500/40 backdrop-blur-sm z-20"
-                style={{ borderRadius: "20px" }}
+                className="absolute inset-0 flex flex-col items-center justify-center bg-emerald-500/30 backdrop-blur-md z-20"
+                style={{ borderRadius: "32px" }}
               >
                 <motion.div
                   initial={{ scale: 0.6, y: 24 }}
                   animate={{ scale: 1, y: 0 }}
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  className="bg-white border-2 border-border p-6 text-center space-y-4 shadow-xl"
-                  style={{ borderRadius: WOBBLY_MD }}
+                  className="bg-white border-2 border-white p-8 text-center space-y-5 shadow-[8px_8px_20px_rgba(0,0,0,0.1),inset_4px_4px_8px_rgba(255,255,255,1),inset_-4px_-4px_8px_rgba(0,0,0,0.05)] rounded-[32px] max-w-[280px]"
                 >
                   <motion.div
                     animate={{ rotate: [0, -10, 10, -5, 5, 0] }}
                     transition={{ duration: 0.6, delay: 0.3 }}
-                    className="text-5xl"
+                    className="text-6xl drop-shadow-md"
                   >
                     🎉
                   </motion.div>
-                  <h2 className="font-display text-2xl font-bold text-foreground">
-                    {levelIdx < 99 ? "Level Cleared!" : "All Levels Done!"}
+                  <h2 className="font-display text-3xl font-bold text-foreground">
+                    {levelIdx < 99 ? "Cleared!" : "All Done!"}
                   </h2>
                   <p className="text-muted-foreground text-sm font-medium">
-                    Solved in <strong className="text-accent">{moves}</strong> moves
+                    Solved in <strong className="text-[#60a5fa]">{moves}</strong> moves
                   </p>
-                  <div className="flex gap-2 justify-center">
-                    <Button onClick={resetLevel} variant="outline" className="border-2 border-border" style={{ borderRadius: WOBBLY_MD }}>
-                      <RotateCcw className="h-4 w-4 mr-1" /> Retry
-                    </Button>
+                  <div className="flex flex-col gap-3 justify-center mt-2">
                     {levelIdx < 99 && (
-                      <Button onClick={nextLevel} className="shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] border-2 border-border" style={{ borderRadius: WOBBLY_MD }}>
-                        Next Level <Zap className="h-4 w-4 ml-1" />
+                      <Button onClick={nextLevel} className="h-12 rounded-[20px] bg-[#34d399] hover:bg-[#10b981] border-2 border-white shadow-[4px_4px_10px_rgba(0,0,0,0.1),inset_2px_2px_4px_rgba(255,255,255,0.6),inset_-2px_-2px_4px_rgba(6,78,59,0.3)] text-white text-lg font-bold">
+                        Next Level <Zap className="h-5 w-5 ml-2 fill-white" />
                       </Button>
                     )}
+                    <Button onClick={resetLevel} variant="outline" className="h-12 rounded-[20px] bg-white border-2 border-white shadow-[4px_4px_10px_rgba(0,0,0,0.05),inset_2px_2px_4px_rgba(255,255,255,1),inset_-2px_-2px_4px_rgba(0,0,0,0.03)] text-muted-foreground font-bold hover:text-foreground">
+                      <RotateCcw className="h-5 w-5 mr-2" /> Retry
+                    </Button>
                   </div>
                 </motion.div>
               </motion.div>
@@ -603,23 +608,22 @@ export default function ArrowPuzzleGame() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 backdrop-blur-sm z-20"
-                style={{ borderRadius: "20px" }}
+                className="absolute inset-0 flex flex-col items-center justify-center bg-rose-500/30 backdrop-blur-md z-20"
+                style={{ borderRadius: "32px" }}
               >
                 <motion.div
                   initial={{ scale: 0.6, y: 24 }}
                   animate={{ scale: 1, y: 0 }}
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  className="bg-white border-2 border-border p-6 text-center space-y-4 shadow-xl"
-                  style={{ borderRadius: WOBBLY_MD }}
+                  className="bg-white border-2 border-white p-8 text-center space-y-5 shadow-[8px_8px_20px_rgba(0,0,0,0.1),inset_4px_4px_8px_rgba(255,255,255,1),inset_-4px_-4px_8px_rgba(0,0,0,0.05)] rounded-[32px] max-w-[280px]"
                 >
-                  <div className="text-5xl">💔</div>
-                  <h2 className="font-display text-2xl font-bold text-foreground">Out of Lives!</h2>
+                  <div className="text-6xl drop-shadow-md">💔</div>
+                  <h2 className="font-display text-3xl font-bold text-foreground">Out of Lives!</h2>
                   <p className="text-muted-foreground text-sm font-medium">
-                    You made <strong className="text-accent">{moves}</strong> moves
+                    You made <strong className="text-[#fb7185]">{moves}</strong> moves
                   </p>
-                  <Button onClick={resetLevel} className="shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] border-2 border-border" style={{ borderRadius: WOBBLY_MD }}>
-                    <RotateCcw className="h-4 w-4 mr-2" /> Try Again
+                  <Button onClick={resetLevel} className="h-12 w-full mt-2 rounded-[20px] bg-[#fb7185] hover:bg-[#f43f5e] border-2 border-white shadow-[4px_4px_10px_rgba(0,0,0,0.1),inset_2px_2px_4px_rgba(255,255,255,0.6),inset_-2px_-2px_4px_rgba(136,19,55,0.3)] text-white text-lg font-bold">
+                    <RotateCcw className="h-5 w-5 mr-2" /> Try Again
                   </Button>
                 </motion.div>
               </motion.div>
@@ -653,8 +657,7 @@ export default function ArrowPuzzleGame() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
               onClick={e => e.stopPropagation()}
-              className="w-full max-w-sm bg-white border-2 border-border p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col relative"
-              style={{ borderRadius: WOBBLY_MD }}
+              className="w-full max-w-sm bg-[#f8fafc] border-2 border-white p-6 shadow-[8px_8px_20px_rgba(0,0,0,0.1),inset_4px_4px_8px_rgba(255,255,255,1),inset_-4px_-4px_8px_rgba(0,0,0,0.05)] flex flex-col relative rounded-[32px]"
             >
               <Button 
                 variant="ghost" 
@@ -710,17 +713,21 @@ export default function ArrowPuzzleGame() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
               onClick={e => e.stopPropagation()}
-              className="w-full max-w-sm bg-white border-2 border-border p-5 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col max-h-[80vh]"
-              style={{ borderRadius: WOBBLY_MD }}
+              className="w-full max-w-sm bg-[#f8fafc] border-2 border-white p-6 shadow-[8px_8px_16px_rgba(0,0,0,0.1),inset_4px_4px_8px_rgba(255,255,255,1),inset_-4px_-4px_8px_rgba(0,0,0,0.02)] flex flex-col max-h-[80vh] rounded-[32px] relative"
             >
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="font-display text-xl font-bold">Select Level</h2>
-                <Button variant="ghost" size="icon" onClick={() => setShowLevels(false)} className="h-8 w-8 rounded-full">
-                  <ChevronDown className="h-5 w-5" />
-                </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setShowLevels(false)} 
+                className="absolute top-4 right-4 h-8 w-8 rounded-full bg-white shadow-[2px_2px_5px_rgba(0,0,0,0.05)] hover:bg-muted text-muted-foreground"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="font-display text-2xl font-bold text-foreground">Select Level</h2>
               </div>
               <div className="flex-1 overflow-y-auto pr-2 pb-2 custom-scrollbar">
-                <div className="flex flex-wrap gap-2 justify-center">
+                <div className="flex flex-wrap gap-3 justify-center">
                   {Array.from({ length: 100 }).map((_, i) => {
                     const unlocked = i <= parseInt(typeof window !== "undefined" ? localStorage.getItem("cx_arrow_level") || "0" : "0", 10);
                     return (
@@ -733,12 +740,12 @@ export default function ArrowPuzzleGame() {
                           }
                         }}
                         disabled={!unlocked}
-                        className={`h-10 w-10 shrink-0 rounded-xl border-2 border-border font-display font-bold text-sm transition-all ${
+                        className={`h-12 w-12 shrink-0 rounded-[16px] border-2 border-white font-display font-bold text-sm transition-all outline-none ${
                           i === levelIdx
-                            ? "bg-accent text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                            ? "bg-[#60a5fa] text-white shadow-[4px_4px_8px_rgba(0,0,0,0.1),inset_2px_2px_4px_rgba(255,255,255,0.6),inset_-2px_-2px_4px_rgba(30,58,138,0.3)] scale-110 z-10"
                             : unlocked
-                            ? "bg-white text-foreground hover:bg-muted shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-none active:translate-y-[2px]"
-                            : "bg-muted/50 text-muted-foreground/40 cursor-not-allowed"
+                            ? "bg-white text-foreground hover:bg-[#f8fafc] shadow-[4px_4px_8px_rgba(0,0,0,0.05),inset_2px_2px_4px_rgba(255,255,255,1),inset_-2px_-2px_4px_rgba(0,0,0,0.03)] hover:scale-105 active:scale-95"
+                            : "bg-[#e2e8f0] text-muted-foreground/40 cursor-not-allowed shadow-[inset_2px_2px_4px_rgba(0,0,0,0.05),inset_-2px_-2px_4px_rgba(255,255,255,0.5)]"
                         }`}
                       >
                         {unlocked ? i + 1 : "🔒"}
