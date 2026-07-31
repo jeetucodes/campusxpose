@@ -30,6 +30,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ProjectsNewRouteImport } from './routes/projects.new'
 import { Route as ProjectsIdRouteImport } from './routes/projects.$id'
 import { Route as GamesMemoryMatchRouteImport } from './routes/games.memory-match'
+import { Route as GamesCandyCrushRouteImport } from './routes/games.candy-crush'
 import { Route as GamesArrowPuzzleRouteImport } from './routes/games.arrow-puzzle'
 import { Route as Games2048RouteImport } from './routes/games.2048'
 import { Route as CommunityCollegeIdRouteImport } from './routes/community.$collegeId'
@@ -158,6 +159,11 @@ const ProjectsIdRoute = ProjectsIdRouteImport.update({
 const GamesMemoryMatchRoute = GamesMemoryMatchRouteImport.update({
   id: '/games/memory-match',
   path: '/games/memory-match',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesCandyCrushRoute = GamesCandyCrushRouteImport.update({
+  id: '/games/candy-crush',
+  path: '/games/candy-crush',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GamesArrowPuzzleRoute = GamesArrowPuzzleRouteImport.update({
@@ -320,6 +326,7 @@ export interface FileRoutesByFullPath {
   '/community/$collegeId': typeof CommunityCollegeIdRoute
   '/games/2048': typeof Games2048Route
   '/games/arrow-puzzle': typeof GamesArrowPuzzleRoute
+  '/games/candy-crush': typeof GamesCandyCrushRoute
   '/games/memory-match': typeof GamesMemoryMatchRoute
   '/projects/$id': typeof ProjectsIdRoute
   '/projects/new': typeof ProjectsNewRoute
@@ -367,6 +374,7 @@ export interface FileRoutesByTo {
   '/community/$collegeId': typeof CommunityCollegeIdRoute
   '/games/2048': typeof Games2048Route
   '/games/arrow-puzzle': typeof GamesArrowPuzzleRoute
+  '/games/candy-crush': typeof GamesCandyCrushRoute
   '/games/memory-match': typeof GamesMemoryMatchRoute
   '/projects/$id': typeof ProjectsIdRoute
   '/projects/new': typeof ProjectsNewRoute
@@ -415,6 +423,7 @@ export interface FileRoutesById {
   '/community/$collegeId': typeof CommunityCollegeIdRoute
   '/games/2048': typeof Games2048Route
   '/games/arrow-puzzle': typeof GamesArrowPuzzleRoute
+  '/games/candy-crush': typeof GamesCandyCrushRoute
   '/games/memory-match': typeof GamesMemoryMatchRoute
   '/projects/$id': typeof ProjectsIdRoute
   '/projects/new': typeof ProjectsNewRoute
@@ -464,6 +473,7 @@ export interface FileRouteTypes {
     | '/community/$collegeId'
     | '/games/2048'
     | '/games/arrow-puzzle'
+    | '/games/candy-crush'
     | '/games/memory-match'
     | '/projects/$id'
     | '/projects/new'
@@ -511,6 +521,7 @@ export interface FileRouteTypes {
     | '/community/$collegeId'
     | '/games/2048'
     | '/games/arrow-puzzle'
+    | '/games/candy-crush'
     | '/games/memory-match'
     | '/projects/$id'
     | '/projects/new'
@@ -558,6 +569,7 @@ export interface FileRouteTypes {
     | '/community/$collegeId'
     | '/games/2048'
     | '/games/arrow-puzzle'
+    | '/games/candy-crush'
     | '/games/memory-match'
     | '/projects/$id'
     | '/projects/new'
@@ -606,6 +618,7 @@ export interface RootRouteChildren {
   CommunityCollegeIdRoute: typeof CommunityCollegeIdRoute
   Games2048Route: typeof Games2048Route
   GamesArrowPuzzleRoute: typeof GamesArrowPuzzleRoute
+  GamesCandyCrushRoute: typeof GamesCandyCrushRoute
   GamesMemoryMatchRoute: typeof GamesMemoryMatchRoute
   ProjectsIdRoute: typeof ProjectsIdRoute
   ProjectsNewRoute: typeof ProjectsNewRoute
@@ -762,6 +775,13 @@ declare module '@tanstack/react-router' {
       path: '/games/memory-match'
       fullPath: '/games/memory-match'
       preLoaderRoute: typeof GamesMemoryMatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games/candy-crush': {
+      id: '/games/candy-crush'
+      path: '/games/candy-crush'
+      fullPath: '/games/candy-crush'
+      preLoaderRoute: typeof GamesCandyCrushRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/games/arrow-puzzle': {
@@ -974,6 +994,7 @@ const rootRouteChildren: RootRouteChildren = {
   CommunityCollegeIdRoute: CommunityCollegeIdRoute,
   Games2048Route: Games2048Route,
   GamesArrowPuzzleRoute: GamesArrowPuzzleRoute,
+  GamesCandyCrushRoute: GamesCandyCrushRoute,
   GamesMemoryMatchRoute: GamesMemoryMatchRoute,
   ProjectsIdRoute: ProjectsIdRoute,
   ProjectsNewRoute: ProjectsNewRoute,

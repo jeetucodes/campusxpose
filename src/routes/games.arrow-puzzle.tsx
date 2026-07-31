@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, RotateCcw, ChevronRight, ChevronLeft, ChevronUp, ChevronDown, Trophy, Zap, Heart, Flame, Bomb, X, Lightbulb } from "lucide-react";
@@ -152,8 +152,8 @@ export function generateLevel(levelIdx: number): { gridSize: number; arrows: Omi
 type Blocker = { type: "wall" | "bomb" | "arrow"; row: number; col: number; id: number | string };
 type PathPoint = { r: number, c: number };
 
-function tracePath(
-  arrow: Arrow, arrows: Arrow[], obstacles: Obstacle[], gridSize: number
+function tracePathFast(
+  arrow: Arrow, arrowMap: Map<string, Arrow>, obsMap: Map<string, Obstacle>, gridSize: number
 ): { blocker: Blocker | null, path: PathPoint[] } {
   let r = arrow.row;
   let c = arrow.col;
@@ -178,10 +178,11 @@ function tracePath(
     
     path.push({r, c});
     
-    const a = arrows.find(x => x.row === r && x.col === c);
+    const key = `${r},${c}`;
+    const a = arrowMap.get(key);
     if (a && a.id !== arrow.id) return { blocker: { type: "arrow", row: r, col: c, id: a.id }, path };
     
-    const o = obstacles.find(x => x.row === r && x.col === c);
+    const o = obsMap.get(key);
     if (o) {
       if (o.type === "mirror-slash") {
         if (d === "up") d = "right";
@@ -204,10 +205,22 @@ function tracePath(
 
 // ─── Component ──────────────────────────────────────────────────────────────
 export default function ArrowPuzzleGame() {
-  const [levelIdx, setLevelIdx] = useState(() => {
-    if (typeof window === "undefined") return 0;
-    return parseInt(localStorage.getItem("cx_arrow_level") || "0", 10);
-  });
+  const [isMounted, setIsMounted] = useState(false);
+  const [levelIdx, setLevelIdx] = useState(0);
+  const [highestUnlocked, setHighestUnlocked] = useState(0);
+
+  useEffect(() => {
+    setIsMounted(true);
+    try {
+      const savedLevel = parseInt(localStorage.getItem("cx_arrow_level") || "0", 10);
+      if (!isNaN(savedLevel)) {
+        setLevelIdx(savedLevel);
+        setHighestUnlocked(savedLevel);
+      }
+    } catch (e) {
+      console.warn("localStorage error", e);
+    }
+  }, []);
   
   const [levelData, setLevelData] = useState<{ gridSize: number, arrows: Arrow[], obstacles: Obstacle[] } | null>(null);
   const [arrows, setArrows] = useState<Arrow[]>([]);
@@ -252,7 +265,13 @@ export default function ArrowPuzzleGame() {
 
     if (hintedArrowId === arrow.id) setHintedArrowId(null);
 
-    const { blocker, path } = tracePath(arrow, arrows, levelData.obstacles, levelData.gridSize);
+    const arrowMap = new Map<string, Arrow>();
+    for (const a of arrows) arrowMap.set(`${a.row},${a.col}`, a);
+    
+    const obsMap = new Map<string, Obstacle>();
+    for (const o of levelData.obstacles) obsMap.set(`${o.row},${o.col}`, o);
+
+    const { blocker, path } = tracePathFast(arrow, arrowMap, obsMap, levelData.gridSize);
 
     if (!blocker) {
       setExitingArrow({ arrow, path });
@@ -265,10 +284,15 @@ export default function ArrowPuzzleGame() {
           if (next.length === 0) {
             setWon(true);
             const nextLevel = levelIdx + 1;
-            const savedLevel = parseInt(localStorage.getItem("cx_arrow_level") || "0", 10);
-            if (nextLevel > savedLevel) {
-              localStorage.setItem("cx_arrow_level", String(nextLevel));
-            }
+            setHighestUnlocked(prev => {
+              const max = Math.max(prev, nextLevel);
+              try {
+                localStorage.setItem("cx_arrow_level", String(max));
+              } catch (e) {
+                console.warn("localStorage error", e);
+              }
+              return max;
+            });
           }
           return next;
         });
@@ -319,11 +343,21 @@ export default function ArrowPuzzleGame() {
   const nextLevel = () => setLevelIdx(i => i + 1);
   const resetLevel = () => initLevel(levelIdx);
 
-  if (!levelData) return null;
+  const tappableIds = React.useMemo(() => {
+    if (!levelData) return new Set<number>();
+    
+    const arrowMap = new Map<string, Arrow>();
+    for (const a of arrows) arrowMap.set(`${a.row},${a.col}`, a);
+    
+    const obsMap = new Map<string, Obstacle>();
+    for (const o of levelData.obstacles) obsMap.set(`${o.row},${o.col}`, o);
 
-  const tappableIds = new Set(
-    arrows.filter(a => !exitingArrow && !tracePath(a, arrows, levelData.obstacles, levelData.gridSize).blocker).map(a => a.id)
-  );
+    return new Set(
+      arrows.filter(a => !exitingArrow && !tracePathFast(a, arrowMap, obsMap, levelData.gridSize).blocker).map(a => a.id)
+    );
+  }, [arrows, levelData, exitingArrow]);
+
+  if (!isMounted || !levelData) return <div className="min-h-screen bg-background" />;
 
   const handleHint = () => {
     if (hintsLeft > 0 && !won && !gameOver && tappableIds.size > 0) {
@@ -738,7 +772,7 @@ export default function ArrowPuzzleGame() {
               <div className="flex-1 overflow-y-auto pr-2 pb-2 custom-scrollbar">
                 <div className="flex flex-wrap gap-3 justify-center">
                   {Array.from({ length: 100 }).map((_, i) => {
-                    const unlocked = i <= parseInt(typeof window !== "undefined" ? localStorage.getItem("cx_arrow_level") || "0" : "0", 10);
+                    const unlocked = i <= highestUnlocked;
                     return (
                       <button
                         key={i}
