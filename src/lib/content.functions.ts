@@ -95,7 +95,7 @@ export const submitMessage = createServerFn({ method: "POST" })
         isIncidentSignal: z.boolean().default(false),
         replyToId: z.string().uuid().optional(),
         replyToUsername: z.string().max(40).optional(),
-        replyToContent: z.string().max(280).optional(),
+        replyToContent: z.string().max(3000).optional(),
         imageUrl: z.string().url().optional(),
       })
       .parse(d),
@@ -305,7 +305,7 @@ export const submitGlobalMessage = createServerFn({ method: "POST" })
         content: z.string().max(1000),
         replyToId: z.string().uuid().optional(),
         replyToUsername: z.string().max(40).optional(),
-        replyToContent: z.string().max(280).optional(),
+        replyToContent: z.string().max(3000).optional(),
         imageUrl: z.string().url().optional(),
       })
       .parse(d),
@@ -359,7 +359,7 @@ export const submitDirectMessage = createServerFn({ method: "POST" })
         content: z.string().max(1000),
         replyToId: z.string().uuid().optional(),
         replyToUsername: z.string().max(40).optional(),
-        replyToContent: z.string().max(280).optional(),
+        replyToContent: z.string().max(3000).optional(),
         imageUrl: z.string().url().optional(),
       })
       .parse(d),
