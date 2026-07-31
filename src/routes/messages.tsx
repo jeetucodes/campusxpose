@@ -26,6 +26,7 @@ import { cn } from "@/lib/utils";
 import { useVerifiedUsernames } from "@/hooks/useVerified";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { Linkify } from "@/components/Linkify";
+import { motion } from "framer-motion";
 
 type Search = { to?: string };
 
@@ -77,7 +78,9 @@ function Messages() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isScanning, setIsScanning] = useState(false);
+  const [isScanning, setIsScanning] = useState(() => {
+    return typeof window !== 'undefined' && localStorage.getItem("camera_permission_granted") === "true";
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { byMessage, toggle } = useReactions("direct", hashedId);
 
@@ -296,12 +299,12 @@ function Messages() {
       {/* Conversation list */}
       <aside
         className={cn(
-          "w-full flex-col border-r border-border/40 bg-surface-1/20 md:flex md:w-[320px] shadow-[1px_0_10px_rgba(0,0,0,0.02)]",
+          "w-full flex-col border-r-2 border-ink bg-paper md:flex md:w-[320px] shadow-ink",
           active ? "hidden md:flex" : "flex",
         )}
       >
-        <header className="flex items-center gap-2 border-b border-border/40 px-4 py-3 bg-background/80 backdrop-blur-md sticky top-0 z-10">
-          <Button asChild variant="ghost" size="icon" className="hover:bg-accent/10">
+        <header className="flex items-center gap-2 border-b-2 border-ink px-4 py-3 bg-paper sticky top-0 z-10 shadow-ink-soft">
+          <Button asChild variant="ghost" size="icon" className="hover:bg-muted text-ink">
             <Link to="/">
               <ArrowLeft className="h-5 w-5" />
             </Link>
@@ -311,23 +314,25 @@ function Messages() {
           
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
             setIsDialogOpen(open);
-            if (!open) setIsScanning(false);
+            if (!open && localStorage.getItem("camera_permission_granted") !== "true") {
+              setIsScanning(false);
+            }
           }}>
             <DialogTrigger asChild>
               <Button variant="ghost" size="icon" className="ml-auto text-accent hover:text-accent hover:bg-accent/10 transition-colors" aria-label="Add Friends">
                 <UserPlus className="h-5 w-5" />
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md border-border/50 bg-background/95 backdrop-blur-xl shadow-2xl">
+            <DialogContent className="sm:max-w-md border-2 border-ink bg-paper shadow-ink-lg wobbly-md overflow-hidden">
               <Tabs defaultValue="my-code" className="w-full">
                 <DialogHeader className="mb-4">
                   <div className="flex items-center justify-between">
-                    <DialogTitle className="flex items-center gap-2 text-xl font-display">
-                      <UserPlus className="h-5 w-5 text-accent" /> Chat with Friends
+                    <DialogTitle className="flex items-center gap-2 text-xl font-display text-ink">
+                      <UserPlus className="h-5 w-5 text-marker" /> Chat with Friends
                     </DialogTitle>
-                    <TabsList>
-                      <TabsTrigger value="my-code">My Code</TabsTrigger>
-                      <TabsTrigger value="scan">Scan</TabsTrigger>
+                    <TabsList className="bg-surface-2 border-2 border-ink shadow-ink-soft wobbly-sm p-1">
+                      <TabsTrigger value="my-code" className="wobbly-sm data-[state=active]:bg-marker data-[state=active]:text-white">My Code</TabsTrigger>
+                      <TabsTrigger value="scan" className="wobbly-sm data-[state=active]:bg-marker data-[state=active]:text-white">Scan</TabsTrigger>
                     </TabsList>
                   </div>
                   <DialogDescription className="text-base">
@@ -335,31 +340,41 @@ function Messages() {
                   </DialogDescription>
                 </DialogHeader>
                 
-                <TabsContent value="my-code">
-                  <div className="flex flex-col items-center justify-center gap-6 py-4">
-                    <div className="rounded-2xl bg-white p-5 shadow-[0_8px_30px_rgba(0,0,0,0.12)] ring-1 ring-black/5 transition-transform hover:scale-105 duration-300">
+                <TabsContent value="my-code" className="mt-2 min-h-[420px] flex flex-col items-center justify-center w-full outline-none">
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.95, y: 10 }} 
+                    animate={{ opacity: 1, scale: 1, y: 0 }} 
+                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                    className="flex w-full flex-col items-center justify-center gap-5 py-2"
+                  >
+                    <motion.div 
+                      animate={{ y: [0, -4, 0], rotate: [0, -1, 1, 0] }}
+                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                      className="sketch-card wobbly-md p-5 bg-white relative cursor-pointer"
+                    >
                       <QRCode 
                         value={`https://campusxpose.online/messages?to=${username}`} 
-                        size={200} 
+                        size={180} 
                         style={{ height: "auto", maxWidth: "100%", width: "100%" }}
                         viewBox={`0 0 256 256`}
-                        fgColor="#0f172a"
+                        fgColor="var(--ink)"
+                        bgColor="transparent"
                       />
-                    </div>
+                    </motion.div>
                     <div className="text-center space-y-1">
                       <p className="font-display font-bold text-xl tracking-tight text-foreground">@{username}</p>
                       <p className="text-sm text-muted-foreground">Scan with phone camera to open chat</p>
                     </div>
-                    <div className="flex w-full items-center gap-2">
+                    <div className="flex w-full items-center gap-2 bg-white p-2 wobbly-sm border-2 border-ink shadow-ink-soft">
                       <Input 
                         readOnly 
                         value={`https://campusxpose.online/messages?to=${username}`} 
-                        className="flex-1 bg-surface-2/50 border-border/50 text-xs font-mono truncate" 
+                        className="flex-1 bg-transparent border-none text-xs font-mono truncate shadow-none focus-visible:ring-0 px-2 text-ink" 
                       />
                       <Button 
                         size="icon" 
-                        variant="outline" 
-                        className="shrink-0 hover:bg-accent hover:text-accent-foreground transition-colors"
+                        variant="ghost" 
+                        className="shrink-0 h-8 w-8 hover:bg-muted hover:text-ink transition-colors wobbly-sm"
                         onClick={() => {
                           navigator.clipboard.writeText(`https://campusxpose.online/messages?to=${username}`);
                           toast.success("Link copied to clipboard!");
@@ -369,8 +384,7 @@ function Messages() {
                       </Button>
                       <Button 
                         size="icon"
-                        variant="default" 
-                        className="shrink-0 bg-accent text-accent-foreground hover:bg-accent/90 shadow-md shadow-accent/20 transition-all"
+                        className="shrink-0 h-8 w-8 bg-marker text-white hover:bg-marker/90 border-2 border-ink shadow-ink-soft transition-all wobbly-sm hover:-translate-y-0.5"
                         onClick={() => {
                           const shareUrl = `https://campusxpose.online/messages?to=${username}`;
                           if (typeof navigator !== "undefined" && navigator.share) {
@@ -390,32 +404,55 @@ function Messages() {
                         <Share2 className="h-4 w-4" />
                       </Button>
                     </div>
-                  </div>
+                  </motion.div>
                 </TabsContent>
                 
-                <TabsContent value="scan">
-                  <div className="flex flex-col items-center justify-center py-4">
+                <TabsContent value="scan" className="mt-2 min-h-[420px] flex flex-col items-center justify-center w-full outline-none">
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.95, y: 10 }} 
+                    animate={{ opacity: 1, scale: 1, y: 0 }} 
+                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                    className="flex w-full flex-col items-center justify-center py-2"
+                  >
                     {!isScanning ? (
-                      <div className="flex flex-col items-center justify-center gap-4 py-8 text-center px-4">
-                        <div className="rounded-full bg-accent/10 p-4">
-                          <ImageIcon className="h-8 w-8 text-accent" />
+                      <div className="flex flex-col items-center justify-center gap-4 py-8 text-center px-4 sketch-card wobbly-md w-full h-[320px] relative overflow-hidden bg-white">
+                        <motion.div 
+                          animate={{ scale: [1, 1.1, 1], rotate: [-3, 3, -3] }} 
+                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                          className="wobbly-oval bg-secondary p-5 border-2 border-ink shadow-ink-soft relative z-10"
+                        >
+                          <ImageIcon className="h-10 w-10 text-marker" />
+                        </motion.div>
+                        <div className="relative z-10">
+                          <h3 className="font-display font-bold text-ink text-xl">Camera Permission</h3>
+                          <p className="text-sm text-muted-foreground mt-1 max-w-[250px] font-sans">We need your permission to use the camera for scanning QR codes.</p>
                         </div>
-                        <div>
-                          <h3 className="font-semibold text-foreground">Camera Permission</h3>
-                          <p className="text-sm text-muted-foreground mt-1">We need your permission to use the camera for scanning QR codes.</p>
-                        </div>
-                        <Button onClick={() => setIsScanning(true)} className="mt-2 shadow-md hover:shadow-lg transition-all">
+                        <Button onClick={() => {
+                          setIsScanning(true);
+                          localStorage.setItem("camera_permission_granted", "true");
+                        }} className="mt-2 bg-marker text-white hover:bg-marker/90 border-2 border-ink shadow-ink transition-all wobbly-sm px-6 hover:-translate-y-1 active:translate-y-0 relative z-10">
                           Enable Camera & Scan
                         </Button>
                       </div>
                     ) : (
-                      <div className="w-full max-w-[300px] overflow-hidden rounded-xl shadow-inner border border-border/50 bg-black/5">
+                      <motion.div 
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                        className="w-full max-w-[280px] overflow-hidden wobbly-md border-2 border-ink shadow-ink bg-white aspect-square relative flex items-center justify-center"
+                      >
+                        <motion.div 
+                          animate={{ top: ["0%", "100%", "0%"] }} 
+                          transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                          className="absolute left-0 w-full h-[4px] bg-marker z-20 pointer-events-none opacity-80" 
+                        />
                         <Scanner
                           formats={['qr_code']}
                           constraints={{ facingMode: 'environment' }}
                           onError={(error: any) => {
                             console.error("Scanner Error:", error);
                             setIsScanning(false);
+                            localStorage.removeItem("camera_permission_granted");
                             
                             // Specific error handling for permissions
                             if (error?.name === 'NotAllowedError' || error?.message?.toLowerCase().includes('permission denied')) {
@@ -435,7 +472,6 @@ function Messages() {
                                   const scannedUsername = parsedUrl.searchParams.get("to");
                                   if (scannedUsername) {
                                     setIsDialogOpen(false);
-                                    setIsScanning(false);
                                     navigate({ to: "/messages", search: { to: scannedUsername } });
                                     toast.success(`Chatting with ${scannedUsername}`);
                                   }
@@ -448,26 +484,26 @@ function Messages() {
                             }
                           }}
                         />
-                      </div>
+                      </motion.div>
                     )}
-                    <p className="mt-4 text-xs text-muted-foreground text-center px-4">Point your camera at a friend's CampusXpose QR code.</p>
-                  </div>
+                    <p className="mt-6 text-xs text-muted-foreground text-center px-4 font-medium h-[20px]">Point your camera at a friend's CampusXpose QR code.</p>
+                  </motion.div>
                 </TabsContent>
               </Tabs>
             </DialogContent>
           </Dialog>
         </header>
 
-        <div className="border-b border-border/40 bg-surface-1/10 p-3">
-          <div className="flex items-center gap-2">
+        <div className="border-b-2 border-ink bg-surface-2 p-3">
+          <div className="flex items-center gap-2 bg-white wobbly-sm border-2 border-ink shadow-ink-soft pr-1">
             <Input
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && startNew()}
               placeholder="Username to message..."
-              className="bg-background/50 border-border/60 focus-visible:ring-accent/50 focus-visible:border-accent"
+              className="bg-transparent border-none focus-visible:ring-0 shadow-none text-ink placeholder:text-muted-foreground flex-1"
             />
-            <Button onClick={startNew} size="icon" variant="secondary" className="shrink-0 hover:bg-accent hover:text-accent-foreground transition-colors">
+            <Button onClick={startNew} size="icon" className="shrink-0 bg-marker text-white hover:bg-marker/90 wobbly-sm h-8 w-8 transition-transform hover:-translate-y-0.5 shadow-none border-none">
               <Plus className="h-4 w-4" />
             </Button>
           </div>
@@ -490,8 +526,8 @@ function Messages() {
               <div
                 key={c.name}
                 className={cn(
-                  "group flex items-center gap-3 border-b border-border/30 px-4 py-3 transition-all hover:bg-accent/5 cursor-pointer relative overflow-hidden",
-                  active === c.name && "bg-accent/5 before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-accent",
+                  "group flex items-center gap-3 border-b-2 border-ink px-4 py-3 transition-all hover:bg-muted cursor-pointer relative",
+                  active === c.name && "bg-postit",
                 )}
               >
                 <Link
@@ -504,7 +540,7 @@ function Messages() {
                     <div className="flex items-center gap-2 truncate font-medium">
                       {c.name}{c.name && verified.has(c.name) && <VerifiedBadge className="h-3.5 w-3.5" />}
                       {unread > 0 && active !== c.name && (
-                        <span className="grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[10px] font-bold leading-none text-accent-foreground">
+                        <span className="grid h-5 min-w-5 place-items-center bg-marker px-1 text-[10px] font-bold leading-none text-white wobbly-sm shadow-ink-soft">
                           {unread > 9 ? "9+" : unread}
                         </span>
                       )}
@@ -537,12 +573,12 @@ function Messages() {
 
       {/* Active thread */}
       <section
-        className={cn("min-h-0 flex-1 flex-col", active ? "flex" : "hidden md:flex")}
+        className={cn("min-h-0 flex-1 flex-col bg-paper", active ? "flex" : "hidden md:flex")}
       >
         {active ? (
           <>
-            <header className="flex items-center gap-3 border-b border-border/40 px-4 py-3 bg-background/80 backdrop-blur-md sticky top-0 z-10 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-              <Button asChild variant="ghost" size="icon" className="hover:bg-accent/10">
+            <header className="flex items-center gap-3 border-b-2 border-ink px-4 py-3 bg-paper sticky top-0 z-10 shadow-ink-soft">
+              <Button asChild variant="ghost" size="icon" className="hover:bg-muted text-ink">
                 <Link to="/messages" search={{}}>
                   <ArrowLeft className="h-5 w-5" />
                 </Link>
@@ -576,13 +612,13 @@ function Messages() {
             </header>
 
             {thread.some((m) => m.pinned) && (
-              <div className="border-b border-border/40 bg-accent/5 px-4 py-2">
+              <div className="border-b-2 border-ink bg-postit px-4 py-2 shadow-ink-soft z-10 relative">
                 <div className="mx-auto w-full max-w-2xl space-y-1">
                   {thread.filter((m) => m.pinned).map((m) => (
                     <div key={m.id} className="flex items-center gap-2 text-xs">
-                      <Pin className="h-3.5 w-3.5 shrink-0 text-accent" />
-                      <span className="shrink-0 font-semibold text-accent">{m.sender_username}:</span>
-                      <span className="truncate text-muted-foreground"><Linkify text={m.content} /></span>
+                      <Pin className="h-3.5 w-3.5 shrink-0 text-marker" />
+                      <span className="shrink-0 font-semibold text-marker">{m.sender_username}:</span>
+                      <span className="truncate text-ink"><Linkify text={m.content} /></span>
                       <button
                         onClick={() => pinMessage(m)}
                         className="ml-auto shrink-0 text-muted-foreground hover:text-destructive"
@@ -602,10 +638,9 @@ function Messages() {
                   <div key={i} className={cn("flex w-full", i % 2 === 0 ? "justify-end" : "justify-start")}>
                     <div
                       className={cn(
-                        "h-12 w-[60%] border-2 border-border/20 bg-muted/20 animate-pulse",
+                        "h-12 w-[60%] border-2 border-ink bg-muted/20 animate-pulse wobbly-md shadow-ink-soft",
                         i % 2 === 0 ? "bg-accent/10" : ""
                       )}
-                      style={{ borderRadius: "16px 6px 18px 6px / 6px 18px 6px 16px" }}
                     />
                   </div>
                 ))
@@ -629,17 +664,12 @@ function Messages() {
                       />
                       <div
                         className={cn(
-                          "relative w-fit max-w-full border-2 border-border px-3 py-2 text-sm shadow-ink-soft",
-                          own ? "bg-accent text-accent-foreground" : "bg-white",
+                          "relative w-fit max-w-full border-2 border-ink px-3 py-2 text-sm shadow-ink-soft wobbly-sm",
+                          own ? "bg-marker text-white" : "bg-white text-ink",
                         )}
-                        style={{
-                          borderRadius: own
-                            ? "18px 6px 18px 18px"
-                            : "6px 18px 18px 18px",
-                        }}
                       >
                         {m.pinned && (
-                          <Pin className="absolute -right-1.5 -top-1.5 h-3.5 w-3.5 rotate-45 text-accent" />
+                          <Pin className="absolute -right-2 -top-2 h-4 w-4 rotate-45 text-marker bg-postit rounded-full p-0.5 border border-ink shadow-sm" />
                         )}
                         <ReplyQuote username={m.reply_to_username} content={m.reply_to_content} align={own ? "end" : "start"} />
                         {m.image_url && (
@@ -653,7 +683,7 @@ function Messages() {
                               <Linkify text={m.content} />
                             </span>
                           )}
-                          <span className={cn("shrink-0 text-[10px]", own ? "text-accent-foreground/70" : "text-muted-foreground")}>
+                          <span className={cn("shrink-0 text-[10px]", own ? "text-white/80" : "text-muted-foreground")}>
                             {timeAgo(m.created_at)}
                           </span>
                         </div>
@@ -674,23 +704,23 @@ function Messages() {
             </div>
 
             {active === "admin" ? (
-              <div className="shrink-0 border-t border-border/40 bg-background/80 backdrop-blur-md px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
-                <div className="mx-auto flex w-full max-w-2xl items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-surface-2/60 px-4 py-3 text-center text-sm text-muted-foreground">
-                  <ShieldCheck className="h-4 w-4 shrink-0 text-accent" />
+              <div className="shrink-0 border-t-2 border-ink bg-paper px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+                <div className="mx-auto flex w-full max-w-2xl items-center justify-center gap-2 wobbly-md border-2 border-dashed border-ink bg-postit px-4 py-3 text-center text-sm text-ink shadow-ink-soft">
+                  <ShieldCheck className="h-4 w-4 shrink-0 text-marker" />
                   <span>This is an official admin message. You can read replies here, but can't reply back.</span>
                 </div>
               </div>
             ) : (
-              <div className="shrink-0 border-t border-border/40 bg-background/80 backdrop-blur-md px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
+              <div className="shrink-0 border-t-2 border-ink bg-paper px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-4px_0_rgba(45,45,45,1)]">
                 <div className="mx-auto w-full max-w-2xl">
                   <TypingIndicator users={typing} className="mb-1.5 px-1" />
                   {replyTo && (
-                    <div className="mb-2 flex items-center gap-2 rounded-md border border-border bg-surface-2/60 px-3 py-1.5 text-xs">
+                    <div className="mb-2 flex items-center gap-2 wobbly-sm border-2 border-ink bg-surface-2 px-3 py-1.5 text-xs shadow-ink-soft">
                       <div className="min-w-0 flex-1">
-                        <span className="font-semibold text-accent">Replying to {replyTo.content ? replyTo.sender_username : "an image"}</span>
-                        <div className="truncate text-muted-foreground">{replyTo.content || (replyTo.image_url ? "📷 Image" : "")}</div>
+                        <span className="font-semibold text-marker">Replying to {replyTo.content ? replyTo.sender_username : "an image"}</span>
+                        <div className="truncate text-ink">{replyTo.content || (replyTo.image_url ? "📷 Image" : "")}</div>
                       </div>
-                      <button onClick={() => setReplyTo(null)} aria-label="Cancel reply">
+                      <button onClick={() => setReplyTo(null)} aria-label="Cancel reply" className="hover:text-marker text-muted-foreground transition-colors">
                         <X className="h-4 w-4 text-muted-foreground" />
                       </button>
                     </div>
@@ -707,7 +737,7 @@ function Messages() {
                         </button>
                       </div>
                     )}
-                    <div className="flex items-center gap-2 rounded-2xl border-2 border-border bg-white px-2 py-1.5 shadow-ink-soft transition-colors focus-within:border-accent">
+                    <div className="flex items-center gap-2 wobbly-md border-2 border-ink bg-white px-2 py-1.5 shadow-ink transition-transform focus-within:-translate-y-1">
                       <input 
                         type="file" 
                         accept="image/*" 
@@ -721,7 +751,7 @@ function Messages() {
                       <Button 
                         variant="ghost" 
                         size="icon" 
-                        className="shrink-0 text-muted-foreground hover:bg-transparent hover:text-accent" 
+                        className="shrink-0 text-ink hover:bg-muted hover:text-marker wobbly-sm transition-colors" 
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploadingImage}
                       >
@@ -743,14 +773,14 @@ function Messages() {
                         placeholder={`Message ${active}...`}
                         maxLength={1000}
                         maxHeight={150}
-                        className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 max-h-32 pt-2.5"
+                        className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 max-h-32 pt-2.5 text-ink placeholder:text-muted-foreground font-sans"
                         disabled={uploadingImage}
                       />
                       <Button
                         onClick={send}
                         disabled={(!text.trim() && !imageFile) || uploadingImage}
                         size="icon"
-                        className="h-9 w-9 shrink-0 rounded-full transition-transform active:scale-90"
+                        className="h-10 w-10 shrink-0 bg-marker text-white hover:bg-marker/90 wobbly-sm transition-transform active:scale-90 shadow-none border-none"
                         aria-label="Send message"
                       >
                         {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
