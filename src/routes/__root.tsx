@@ -155,8 +155,15 @@ function RootComponent() {
       
       const intentUrl = `intent://campusxpose.online${pathAndQuery}#Intent;scheme=https;package=${packageName};S.browser_fallback_url=${encodeURIComponent(playStoreFallback)};end;`;
       
-      // Attempt to open the app or redirect to play store
-      window.location.href = intentUrl;
+      // Attempt to open the app or redirect to play store via intent
+      window.location.replace(intentUrl);
+
+      // Fallback for non-Chrome browsers / WebViews that don't support the intent scheme properly
+      setTimeout(() => {
+        if (!document.hidden) {
+          window.location.replace(playStoreFallback);
+        }
+      }, 2500);
     }
   }, []);
 
