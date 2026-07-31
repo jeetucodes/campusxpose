@@ -24,10 +24,13 @@ import { Route as ConfessionsRouteImport } from './routes/confessions'
 import { Route as ConfessRouteImport } from './routes/confess'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProjectsIndexRouteImport } from './routes/projects.index'
+import { Route as GamesIndexRouteImport } from './routes/games.index'
 import { Route as CollegesIndexRouteImport } from './routes/colleges.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ProjectsNewRouteImport } from './routes/projects.new'
 import { Route as ProjectsIdRouteImport } from './routes/projects.$id'
+import { Route as GamesArrowPuzzleRouteImport } from './routes/games.arrow-puzzle'
+import { Route as Games2048RouteImport } from './routes/games.2048'
 import { Route as CommunityCollegeIdRouteImport } from './routes/community.$collegeId'
 import { Route as CollegesIdRouteImport } from './routes/colleges.$id'
 import { Route as ApiSendPushRouteImport } from './routes/api.send-push'
@@ -126,6 +129,11 @@ const ProjectsIndexRoute = ProjectsIndexRouteImport.update({
   path: '/projects/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GamesIndexRoute = GamesIndexRouteImport.update({
+  id: '/games/',
+  path: '/games/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CollegesIndexRoute = CollegesIndexRouteImport.update({
   id: '/colleges/',
   path: '/colleges/',
@@ -144,6 +152,16 @@ const ProjectsNewRoute = ProjectsNewRouteImport.update({
 const ProjectsIdRoute = ProjectsIdRouteImport.update({
   id: '/projects/$id',
   path: '/projects/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesArrowPuzzleRoute = GamesArrowPuzzleRouteImport.update({
+  id: '/games/arrow-puzzle',
+  path: '/games/arrow-puzzle',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Games2048Route = Games2048RouteImport.update({
+  id: '/games/2048',
+  path: '/games/2048',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommunityCollegeIdRoute = CommunityCollegeIdRouteImport.update({
@@ -294,10 +312,13 @@ export interface FileRoutesByFullPath {
   '/api/send-push': typeof ApiSendPushRoute
   '/colleges/$id': typeof CollegesIdRoute
   '/community/$collegeId': typeof CommunityCollegeIdRoute
+  '/games/2048': typeof Games2048Route
+  '/games/arrow-puzzle': typeof GamesArrowPuzzleRoute
   '/projects/$id': typeof ProjectsIdRoute
   '/projects/new': typeof ProjectsNewRoute
   '/admin/': typeof AdminIndexRoute
   '/colleges/': typeof CollegesIndexRoute
+  '/games/': typeof GamesIndexRoute
   '/projects/': typeof ProjectsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -337,10 +358,13 @@ export interface FileRoutesByTo {
   '/api/send-push': typeof ApiSendPushRoute
   '/colleges/$id': typeof CollegesIdRoute
   '/community/$collegeId': typeof CommunityCollegeIdRoute
+  '/games/2048': typeof Games2048Route
+  '/games/arrow-puzzle': typeof GamesArrowPuzzleRoute
   '/projects/$id': typeof ProjectsIdRoute
   '/projects/new': typeof ProjectsNewRoute
   '/admin': typeof AdminIndexRoute
   '/colleges': typeof CollegesIndexRoute
+  '/games': typeof GamesIndexRoute
   '/projects': typeof ProjectsIndexRoute
 }
 export interface FileRoutesById {
@@ -381,10 +405,13 @@ export interface FileRoutesById {
   '/api/send-push': typeof ApiSendPushRoute
   '/colleges/$id': typeof CollegesIdRoute
   '/community/$collegeId': typeof CommunityCollegeIdRoute
+  '/games/2048': typeof Games2048Route
+  '/games/arrow-puzzle': typeof GamesArrowPuzzleRoute
   '/projects/$id': typeof ProjectsIdRoute
   '/projects/new': typeof ProjectsNewRoute
   '/admin/': typeof AdminIndexRoute
   '/colleges/': typeof CollegesIndexRoute
+  '/games/': typeof GamesIndexRoute
   '/projects/': typeof ProjectsIndexRoute
 }
 export interface FileRouteTypes {
@@ -426,10 +453,13 @@ export interface FileRouteTypes {
     | '/api/send-push'
     | '/colleges/$id'
     | '/community/$collegeId'
+    | '/games/2048'
+    | '/games/arrow-puzzle'
     | '/projects/$id'
     | '/projects/new'
     | '/admin/'
     | '/colleges/'
+    | '/games/'
     | '/projects/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -469,10 +499,13 @@ export interface FileRouteTypes {
     | '/api/send-push'
     | '/colleges/$id'
     | '/community/$collegeId'
+    | '/games/2048'
+    | '/games/arrow-puzzle'
     | '/projects/$id'
     | '/projects/new'
     | '/admin'
     | '/colleges'
+    | '/games'
     | '/projects'
   id:
     | '__root__'
@@ -512,10 +545,13 @@ export interface FileRouteTypes {
     | '/api/send-push'
     | '/colleges/$id'
     | '/community/$collegeId'
+    | '/games/2048'
+    | '/games/arrow-puzzle'
     | '/projects/$id'
     | '/projects/new'
     | '/admin/'
     | '/colleges/'
+    | '/games/'
     | '/projects/'
   fileRoutesById: FileRoutesById
 }
@@ -556,10 +592,13 @@ export interface RootRouteChildren {
   ApiSendPushRoute: typeof ApiSendPushRoute
   CollegesIdRoute: typeof CollegesIdRoute
   CommunityCollegeIdRoute: typeof CommunityCollegeIdRoute
+  Games2048Route: typeof Games2048Route
+  GamesArrowPuzzleRoute: typeof GamesArrowPuzzleRoute
   ProjectsIdRoute: typeof ProjectsIdRoute
   ProjectsNewRoute: typeof ProjectsNewRoute
   AdminIndexRoute: typeof AdminIndexRoute
   CollegesIndexRoute: typeof CollegesIndexRoute
+  GamesIndexRoute: typeof GamesIndexRoute
   ProjectsIndexRoute: typeof ProjectsIndexRoute
 }
 
@@ -670,6 +709,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/games/': {
+      id: '/games/'
+      path: '/games'
+      fullPath: '/games/'
+      preLoaderRoute: typeof GamesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/colleges/': {
       id: '/colleges/'
       path: '/colleges'
@@ -696,6 +742,20 @@ declare module '@tanstack/react-router' {
       path: '/projects/$id'
       fullPath: '/projects/$id'
       preLoaderRoute: typeof ProjectsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games/arrow-puzzle': {
+      id: '/games/arrow-puzzle'
+      path: '/games/arrow-puzzle'
+      fullPath: '/games/arrow-puzzle'
+      preLoaderRoute: typeof GamesArrowPuzzleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games/2048': {
+      id: '/games/2048'
+      path: '/games/2048'
+      fullPath: '/games/2048'
+      preLoaderRoute: typeof Games2048RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/community/$collegeId': {
@@ -892,10 +952,13 @@ const rootRouteChildren: RootRouteChildren = {
   ApiSendPushRoute: ApiSendPushRoute,
   CollegesIdRoute: CollegesIdRoute,
   CommunityCollegeIdRoute: CommunityCollegeIdRoute,
+  Games2048Route: Games2048Route,
+  GamesArrowPuzzleRoute: GamesArrowPuzzleRoute,
   ProjectsIdRoute: ProjectsIdRoute,
   ProjectsNewRoute: ProjectsNewRoute,
   AdminIndexRoute: AdminIndexRoute,
   CollegesIndexRoute: CollegesIndexRoute,
+  GamesIndexRoute: GamesIndexRoute,
   ProjectsIndexRoute: ProjectsIndexRoute,
 }
 export const routeTree = rootRouteImport

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Home, GraduationCap, Globe, Ghost, FolderOpen } from "lucide-react";
+import { Home, GraduationCap, Globe, Gamepad2, FolderOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items = [
@@ -7,7 +7,7 @@ const items = [
   { to: "/colleges", label: "Colleges", icon: GraduationCap, exact: false },
   { to: "/global", label: "Global", icon: Globe, exact: false },
   { to: "/projects", label: "Projects", icon: FolderOpen, exact: false },
-  { to: "/confessions", label: "Confessions", icon: Ghost, exact: false },
+  { to: "/games", label: "Games", icon: Gamepad2, exact: false },
 ] as const;
 
 export function MobileBottomNav() {

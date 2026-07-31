@@ -187,7 +187,8 @@ function RootComponent() {
   const isGlobal = useMemo(() => pathname === "/global", [pathname]);
   const isMessages = useMemo(() => pathname === "/messages", [pathname]);
   const isConfess = useMemo(() => pathname === "/confess", [pathname]);
-  const hideNav = isCommunityChat || isAdmin || isGlobal || isMessages || isConfess;
+  const isGames = useMemo(() => pathname.startsWith("/games/"), [pathname]);
+  const hideNav = isCommunityChat || isAdmin || isGlobal || isMessages || isConfess || isGames;
 
   return (
     <QueryClientProvider client={queryClient}>

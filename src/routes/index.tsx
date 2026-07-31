@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
-import { FileWarning, ArrowRight, Flame, TrendingUp, ArrowBigUp, EyeOff, MapPinOff, Megaphone } from "lucide-react";
+import { FileWarning, ArrowRight, Flame, TrendingUp, ArrowBigUp, EyeOff, MapPinOff, Megaphone, Ghost } from "lucide-react";
 import { UserSymbol } from "@/components/UserSymbol";
 import { SiteShell } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -333,6 +333,30 @@ function Home() {
             </motion.div>
           ))}
         </div>
+
+        {/* Confessions Banner */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.9 }}
+          whileHover={{ scale: 1.01 }}
+        >
+          <Link to="/confessions" className="block">
+            <div
+              className="mt-2 flex items-center gap-3 border-2 border-border bg-white p-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-muted/50 transition-colors"
+              style={{ borderRadius: WOBBLY_MD }}
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-border bg-purple-100 text-primary shadow-sm">
+                <Ghost className="h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <div className="font-display font-bold text-sm">Anonymous Confessions</div>
+                <div className="text-[11px] text-muted-foreground font-medium line-clamp-1">Share your secrets, read others' gossip. 100% untraceable.</div>
+              </div>
+              <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
+            </div>
+          </Link>
+        </motion.div>
 
       </div>
 

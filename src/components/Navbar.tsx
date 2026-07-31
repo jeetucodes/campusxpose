@@ -57,7 +57,7 @@ export function Navbar() {
             { to: "/colleges", label: "Colleges" },
             { to: "/global", label: "Global" },
             { to: "/projects/", label: "Projects" },
-            { to: "/confessions", label: "Confessions" },
+            { to: "/games", label: "Games" },
             { to: "/report", label: "Report" },
           ]
             .map((item) => (
