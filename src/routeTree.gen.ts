@@ -29,6 +29,7 @@ import { Route as CollegesIndexRouteImport } from './routes/colleges.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ProjectsNewRouteImport } from './routes/projects.new'
 import { Route as ProjectsIdRouteImport } from './routes/projects.$id'
+import { Route as GamesPipeConnectRouteImport } from './routes/games.pipe-connect'
 import { Route as GamesMemoryMatchRouteImport } from './routes/games.memory-match'
 import { Route as GamesCandyCrushRouteImport } from './routes/games.candy-crush'
 import { Route as GamesArrowPuzzleRouteImport } from './routes/games.arrow-puzzle'
@@ -154,6 +155,11 @@ const ProjectsNewRoute = ProjectsNewRouteImport.update({
 const ProjectsIdRoute = ProjectsIdRouteImport.update({
   id: '/projects/$id',
   path: '/projects/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesPipeConnectRoute = GamesPipeConnectRouteImport.update({
+  id: '/games/pipe-connect',
+  path: '/games/pipe-connect',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GamesMemoryMatchRoute = GamesMemoryMatchRouteImport.update({
@@ -328,6 +334,7 @@ export interface FileRoutesByFullPath {
   '/games/arrow-puzzle': typeof GamesArrowPuzzleRoute
   '/games/candy-crush': typeof GamesCandyCrushRoute
   '/games/memory-match': typeof GamesMemoryMatchRoute
+  '/games/pipe-connect': typeof GamesPipeConnectRoute
   '/projects/$id': typeof ProjectsIdRoute
   '/projects/new': typeof ProjectsNewRoute
   '/admin/': typeof AdminIndexRoute
@@ -376,6 +383,7 @@ export interface FileRoutesByTo {
   '/games/arrow-puzzle': typeof GamesArrowPuzzleRoute
   '/games/candy-crush': typeof GamesCandyCrushRoute
   '/games/memory-match': typeof GamesMemoryMatchRoute
+  '/games/pipe-connect': typeof GamesPipeConnectRoute
   '/projects/$id': typeof ProjectsIdRoute
   '/projects/new': typeof ProjectsNewRoute
   '/admin': typeof AdminIndexRoute
@@ -425,6 +433,7 @@ export interface FileRoutesById {
   '/games/arrow-puzzle': typeof GamesArrowPuzzleRoute
   '/games/candy-crush': typeof GamesCandyCrushRoute
   '/games/memory-match': typeof GamesMemoryMatchRoute
+  '/games/pipe-connect': typeof GamesPipeConnectRoute
   '/projects/$id': typeof ProjectsIdRoute
   '/projects/new': typeof ProjectsNewRoute
   '/admin/': typeof AdminIndexRoute
@@ -475,6 +484,7 @@ export interface FileRouteTypes {
     | '/games/arrow-puzzle'
     | '/games/candy-crush'
     | '/games/memory-match'
+    | '/games/pipe-connect'
     | '/projects/$id'
     | '/projects/new'
     | '/admin/'
@@ -523,6 +533,7 @@ export interface FileRouteTypes {
     | '/games/arrow-puzzle'
     | '/games/candy-crush'
     | '/games/memory-match'
+    | '/games/pipe-connect'
     | '/projects/$id'
     | '/projects/new'
     | '/admin'
@@ -571,6 +582,7 @@ export interface FileRouteTypes {
     | '/games/arrow-puzzle'
     | '/games/candy-crush'
     | '/games/memory-match'
+    | '/games/pipe-connect'
     | '/projects/$id'
     | '/projects/new'
     | '/admin/'
@@ -620,6 +632,7 @@ export interface RootRouteChildren {
   GamesArrowPuzzleRoute: typeof GamesArrowPuzzleRoute
   GamesCandyCrushRoute: typeof GamesCandyCrushRoute
   GamesMemoryMatchRoute: typeof GamesMemoryMatchRoute
+  GamesPipeConnectRoute: typeof GamesPipeConnectRoute
   ProjectsIdRoute: typeof ProjectsIdRoute
   ProjectsNewRoute: typeof ProjectsNewRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -768,6 +781,13 @@ declare module '@tanstack/react-router' {
       path: '/projects/$id'
       fullPath: '/projects/$id'
       preLoaderRoute: typeof ProjectsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games/pipe-connect': {
+      id: '/games/pipe-connect'
+      path: '/games/pipe-connect'
+      fullPath: '/games/pipe-connect'
+      preLoaderRoute: typeof GamesPipeConnectRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/games/memory-match': {
@@ -996,6 +1016,7 @@ const rootRouteChildren: RootRouteChildren = {
   GamesArrowPuzzleRoute: GamesArrowPuzzleRoute,
   GamesCandyCrushRoute: GamesCandyCrushRoute,
   GamesMemoryMatchRoute: GamesMemoryMatchRoute,
+  GamesPipeConnectRoute: GamesPipeConnectRoute,
   ProjectsIdRoute: ProjectsIdRoute,
   ProjectsNewRoute: ProjectsNewRoute,
   AdminIndexRoute: AdminIndexRoute,

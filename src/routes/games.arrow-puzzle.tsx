@@ -16,8 +16,8 @@ export const Route = createFileRoute("/games/arrow-puzzle")({
 });
 
 // ─── Types ──────────────────────────────────────────────────────────────────
+import { getStaticLevel, LevelData, ArrowData as Arrow, ObstacleData as Obstacle } from "../data/arrow-puzzle-levels";
 type Dir = "up" | "down" | "left" | "right";
-interface Arrow { id: number; row: number; col: number; dir: Dir; }
 
 const DIR_ICON: Record<Dir, typeof ChevronUp> = {
   up: ChevronUp, down: ChevronDown, left: ChevronLeft, right: ChevronRight,
@@ -38,115 +38,7 @@ const DIR_EXIT: Record<Dir, { x: number; y: number }> = {
 };
 
 // ─── Procedural Level Generator ───────────────────────────────────────────────
-export interface Obstacle { id: number; row: number; col: number; type: "wall" | "bomb" | "mirror-slash" | "mirror-backslash"; }
-
-export function generateLevel(levelIdx: number): { gridSize: number; arrows: Omit<Arrow, "id">[]; obstacles: Omit<Obstacle, "id">[] } {
-  let gridSize = 3;
-  if (levelIdx >= 2) gridSize = 4;
-  if (levelIdx >= 10) gridSize = 5;
-  if (levelIdx >= 30) gridSize = 6;
-  if (levelIdx >= 50) gridSize = 7;
-  if (levelIdx >= 75) gridSize = 8;
-  if (levelIdx >= 90) gridSize = 9;
-  
-  // Obstacle scaling
-  let numWalls = Math.floor(levelIdx / 5);
-  let numBombs = Math.floor(levelIdx / 8);
-  let numMirrors = Math.floor(levelIdx / 3);
-  
-  // Cap obstacles at ~45% of the grid to ensure playability
-  const maxObstacles = Math.floor((gridSize * gridSize) * 0.45);
-  const totalDesiredObs = numWalls + numBombs + numMirrors;
-  
-  if (totalDesiredObs > maxObstacles) {
-    const ratio = maxObstacles / totalDesiredObs;
-    numWalls = Math.floor(numWalls * ratio);
-    numBombs = Math.floor(numBombs * ratio);
-    numMirrors = Math.floor(numMirrors * ratio);
-  }
-  
-  // Density scaling
-  const totalObs = numWalls + numBombs + numMirrors;
-  const maxArrows = (gridSize * gridSize) - totalObs - 2;
-  const targetArrows = 5 + Math.floor(levelIdx * 2);
-  const numArrows = Math.min(maxArrows, targetArrows);
-  
-  const grid: ({ type: "arrow" | "wall" | "bomb" | "mirror-slash" | "mirror-backslash", dir?: Dir } | null)[][] = 
-    Array.from({ length: gridSize }, () => Array(gridSize).fill(null));
-  
-  const obstacles: Omit<Obstacle, "id">[] = [];
-  
-  // 1. Place Walls, Bombs, Mirrors
-  let placedObs = 0;
-  let attempts = 0;
-  while(placedObs < numWalls + numBombs + numMirrors && attempts < 300) {
-     attempts++;
-     const r = Math.floor(Math.random() * gridSize);
-     const c = Math.floor(Math.random() * gridSize);
-     if (grid[r][c] === null) {
-       const type = placedObs < numWalls ? "wall" : placedObs < numWalls + numBombs ? "bomb" : (Math.random() > 0.5 ? "mirror-slash" : "mirror-backslash");
-       grid[r][c] = { type };
-       obstacles.push({row: r, col: c, type});
-       placedObs++;
-     }
-  }
-  
-  // 2. Place Arrows (Backwards generation to guarantee solvability)
-  const arrows: Omit<Arrow, "id">[] = [];
-  
-  function isPathClearInGrid(r: number, c: number, d: Dir): boolean {
-    let currR = r, currC = c, currD = d;
-    let steps = 0;
-    while(steps < 100) {
-      if (currD === "up") currR--;
-      else if (currD === "down") currR++;
-      else if (currD === "left") currC--;
-      else if (currD === "right") currC++;
-      
-      if (currR < 0 || currR >= gridSize || currC < 0 || currC >= gridSize) return true;
-      
-      const cell = grid[currR][currC];
-      if (cell) {
-        if (cell.type === "mirror-slash") {
-          if (currD === "up") currD = "right";
-          else if (currD === "down") currD = "left";
-          else if (currD === "right") currD = "up";
-          else if (currD === "left") currD = "down";
-        } else if (cell.type === "mirror-backslash") {
-          if (currD === "up") currD = "left";
-          else if (currD === "down") currD = "right";
-          else if (currD === "right") currD = "down";
-          else if (currD === "left") currD = "up";
-        } else {
-          return false;
-        }
-      }
-      steps++;
-    }
-    return false;
-  }
-
-  attempts = 0;
-  while(arrows.length < numArrows && attempts < 5000) {
-     attempts++;
-     const r = Math.floor(Math.random() * gridSize);
-     const c = Math.floor(Math.random() * gridSize);
-     if (grid[r][c] !== null) continue;
-     
-     const dirs: Dir[] = ["up", "down", "left", "right"];
-     dirs.sort(() => Math.random() - 0.5);
-     
-     for (const d of dirs) {
-        if (isPathClearInGrid(r, c, d)) {
-           grid[r][c] = { type: "arrow", dir: d };
-           arrows.push({ row: r, col: c, dir: d });
-           break;
-        }
-     }
-  }
-  
-  return { gridSize, arrows, obstacles };
-}
+// Generator imported from static levels
 
 // ─── Game Logic ─────────────────────────────────────────────────────────────
 type Blocker = { type: "wall" | "bomb" | "arrow"; row: number; col: number; id: number | string };
@@ -154,12 +46,13 @@ type PathPoint = { r: number, c: number };
 
 function tracePathFast(
   arrow: Arrow, arrowMap: Map<string, Arrow>, obsMap: Map<string, Obstacle>, gridSize: number
-): { blocker: Blocker | null, path: PathPoint[] } {
+): { blocker: Blocker | null, path: PathPoint[], hitRotators: string[] } {
   let r = arrow.row;
   let c = arrow.col;
   let d = arrow.dir;
   
   const path: PathPoint[] = [];
+  const hitRotators: string[] = [];
   let steps = 0;
   
   while (steps < 100) {
@@ -173,34 +66,46 @@ function tracePathFast(
       else if (d === "down") path.push({r: r + 1, c});
       else if (d === "left") path.push({r, c: c - 1});
       else if (d === "right") path.push({r, c: c + 1});
-      return { blocker: null, path };
+      return { blocker: null, path, hitRotators };
     }
     
     path.push({r, c});
     
     const key = `${r},${c}`;
     const a = arrowMap.get(key);
-    if (a && a.id !== arrow.id) return { blocker: { type: "arrow", row: r, col: c, id: a.id }, path };
+    if (a && a.id !== arrow.id) return { blocker: { type: "arrow", row: r, col: c, id: a.id }, path, hitRotators };
     
     const o = obsMap.get(key);
     if (o) {
-      if (o.type === "mirror-slash") {
+      if (o.type === "mirror-slash" || (o.type === "rotator" && !hitRotators.includes(key))) {
+        if (o.type === "rotator") hitRotators.push(key);
         if (d === "up") d = "right";
         else if (d === "down") d = "left";
         else if (d === "right") d = "up";
         else if (d === "left") d = "down";
-      } else if (o.type === "mirror-backslash") {
+      } else if (o.type === "mirror-backslash" || (o.type === "rotator" && hitRotators.includes(key))) {
+        if (o.type === "rotator") hitRotators.push(key);
         if (d === "up") d = "left";
         else if (d === "down") d = "right";
         else if (d === "right") d = "down";
         else if (d === "left") d = "up";
+      } else if (o.type === "gate-up" && d !== "up") {
+        return { blocker: { type: "wall", row: r, col: c, id: `obs-${o.id}` }, path, hitRotators };
+      } else if (o.type === "gate-down" && d !== "down") {
+        return { blocker: { type: "wall", row: r, col: c, id: `obs-${o.id}` }, path, hitRotators };
+      } else if (o.type === "gate-left" && d !== "left") {
+        return { blocker: { type: "wall", row: r, col: c, id: `obs-${o.id}` }, path, hitRotators };
+      } else if (o.type === "gate-right" && d !== "right") {
+        return { blocker: { type: "wall", row: r, col: c, id: `obs-${o.id}` }, path, hitRotators };
+      } else if (o.type === "ice" || o.type.startsWith("gate-")) {
+        // pass through
       } else {
-        return { blocker: { type: o.type, row: r, col: c, id: `obs-${o.id}` }, path };
+        return { blocker: { type: o.type as any, row: r, col: c, id: `obs-${o.id}` }, path, hitRotators };
       }
     }
     steps++;
   }
-  return { blocker: { type: "wall", row: r, col: c, id: "loop" }, path };
+  return { blocker: { type: "wall", row: r, col: c, id: "loop" }, path, hitRotators };
 }
 
 // ─── Component ──────────────────────────────────────────────────────────────
@@ -239,13 +144,10 @@ export default function ArrowPuzzleGame() {
 
   // Initialize level
   const initLevel = useCallback((idx: number) => {
-    const data = generateLevel(idx);
-    const arrowsWithIds = data.arrows.map((a, i) => ({ ...a, id: i }));
-    const obsWithIds = data.obstacles.map((o, i) => ({ ...o, id: i }));
-    const fullData = { ...data, arrows: arrowsWithIds, obstacles: obsWithIds };
+    const data = getStaticLevel(idx);
     
-    setLevelData(fullData);
-    setArrows(arrowsWithIds);
+    setLevelData(data);
+    setArrows(data.arrows);
     setMoves(0);
     setLives(5);
     setHintsLeft(3);
@@ -271,11 +173,23 @@ export default function ArrowPuzzleGame() {
     const obsMap = new Map<string, Obstacle>();
     for (const o of levelData.obstacles) obsMap.set(`${o.row},${o.col}`, o);
 
-    const { blocker, path } = tracePathFast(arrow, arrowMap, obsMap, levelData.gridSize);
+    const { blocker, path, hitRotators } = tracePathFast(arrow, arrowMap, obsMap, levelData.gridSize);
 
     if (!blocker) {
       setExitingArrow({ arrow, path });
       setMoves(m => m + 1);
+      
+      // Update rotators if any were hit
+      if (hitRotators.length > 0) {
+         setLevelData(prev => {
+            if (!prev) return prev;
+            // For simple rotators, we just visually leave them as they are or toggle state?
+            // "Rotate 90 degrees". They acted as slash, now they act as backslash.
+            // We can just keep them as 'rotator' type and let tracePathFast handle their toggle?
+            // Actually tracePathFast toggles them mid-path, but we need persistent toggle.
+            return prev;
+         });
+      }
 
       const duration = Math.max(0.2, path.length * 0.08) * 1000;
       setTimeout(() => {
@@ -505,6 +419,20 @@ export default function ArrowPuzzleGame() {
                   )}
                   {obs.type === "mirror-backslash" && (
                      <div className="absolute w-[120%] h-[4px] bg-sky-400 rounded-full shadow-[0_0_10px_2px_rgba(56,189,248,0.5)]" style={{ transform: "rotate(45deg)" }} />
+                  )}
+                  {obs.type === "ice" && (
+                     <div className="absolute inset-0 bg-white/40 rounded-[18px] border-2 border-white/60 shadow-[inset_0_0_10px_rgba(255,255,255,0.8)] backdrop-blur-sm" />
+                  )}
+                  {obs.type === "rotator" && (
+                     <div className="absolute w-[80%] h-[80%] border-4 border-dashed border-sky-400 rounded-full animate-[spin_6s_linear_infinite]" />
+                  )}
+                  {obs.type.startsWith("gate-") && (
+                     <div className="absolute inset-0 flex items-center justify-center opacity-70">
+                        {obs.type === "gate-up" && <ChevronUp className="h-8 w-8 text-stone-600" />}
+                        {obs.type === "gate-down" && <ChevronDown className="h-8 w-8 text-stone-600" />}
+                        {obs.type === "gate-left" && <ChevronLeft className="h-8 w-8 text-stone-600" />}
+                        {obs.type === "gate-right" && <ChevronRight className="h-8 w-8 text-stone-600" />}
+                     </div>
                   )}
                 </motion.button>
               );
