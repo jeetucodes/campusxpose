@@ -16,6 +16,7 @@ export type Ad = {
   show_games?: boolean;
   active: boolean;
   sort_order: number;
+  timer_seconds?: number;
 };
 
 type Placement = "home" | "global" | "college" | "games";
@@ -30,6 +31,7 @@ const COLS: Record<Placement, string> = {
 /**
  * Fetches active ads for a placement, but only when the global ads master
  * switch (app_settings.ads_enabled) is turned on by the admin.
+ * Automatically attaches timer_seconds from app_settings.
  */
 export function useAds(placement: Placement): Ad[] {
   const [ads, setAds] = useState<Ad[]>([]);
@@ -38,8 +40,24 @@ export function useAds(placement: Placement): Ad[] {
     let alive = true;
 
     const load = async () => {
-      if (placement === "games") {
-        try {
+      try {
+        // Fetch timers & map settings
+        const [globalTimerRes, timersMapRes] = await Promise.all([
+          supabase.from("app_settings" as any).select("value").eq("key", "ad_timer_seconds").maybeSingle(),
+          supabase.from("app_settings" as any).select("value").eq("key", "cx_ad_timers_map").maybeSingle(),
+        ]);
+
+        const globalTimer = Number((globalTimerRes.data as any)?.value) || 3;
+        const timersMap: Record<string, number> = (timersMapRes.data as any)?.value || {};
+
+        const applyTimers = (adList: Ad[]): Ad[] => {
+          return adList.map((ad) => ({
+            ...ad,
+            timer_seconds: timersMap[ad.id] ?? globalTimer,
+          }));
+        };
+
+        if (placement === "games") {
           const { data: rawAds } = await supabase
             .from("ads" as any)
             .select("*")
@@ -58,32 +76,33 @@ export function useAds(placement: Placement): Ad[] {
           const taggedGamesAds = activeAds.filter(ad => !!gamesMap[ad.id]);
           const resultAds = taggedGamesAds.length > 0 ? taggedGamesAds : activeAds;
 
-          if (alive) setAds(resultAds);
-        } catch (e) {
-          console.warn("Error fetching game ads", e);
-          if (alive) setAds([]);
+          if (alive) setAds(applyTimers(resultAds));
+          return;
         }
-        return;
-      }
 
-      const { data: setting } = await supabase
-        .from("app_settings" as any)
-        .select("value")
-        .eq("key", "ads_enabled")
-        .maybeSingle();
-      const enabled = (setting as any)?.value === true;
-      if (!enabled) {
+        const { data: setting } = await supabase
+          .from("app_settings" as any)
+          .select("value")
+          .eq("key", "ads_enabled")
+          .maybeSingle();
+        const enabled = (setting as any)?.value === true;
+        if (!enabled) {
+          if (alive) setAds([]);
+          return;
+        }
+
+        const { data } = await supabase
+          .from("ads" as any)
+          .select("*")
+          .eq("active", true)
+          .eq(COLS[placement], true)
+          .order("sort_order", { ascending: true });
+        
+        if (alive) setAds(applyTimers(((data as any[]) ?? []) as Ad[]));
+      } catch (e) {
+        console.warn("Error fetching ads", e);
         if (alive) setAds([]);
-        return;
       }
-
-      const { data } = await supabase
-        .from("ads" as any)
-        .select("*")
-        .eq("active", true)
-        .eq(COLS[placement], true)
-        .order("sort_order", { ascending: true });
-      if (alive) setAds(((data as any[]) ?? []) as Ad[]);
     };
 
     load();

@@ -870,6 +870,7 @@ const adInput = z.object({
   show_games: z.boolean().default(false),
   active: z.boolean().default(false),
   sort_order: z.number().int().default(0),
+  timer_seconds: z.number().int().min(1).max(300).optional().nullable(),
 });
 
 export const adminListAds = createServerFn({ method: "POST" })
@@ -883,23 +884,25 @@ export const adminListAds = createServerFn({ method: "POST" })
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
-    const { data: setting } = await supabaseAdmin
-      .from("app_settings" as any)
-      .select("value")
-      .eq("key", "ads_enabled")
-      .maybeSingle();
-    const { data: gamesMapSetting } = await supabaseAdmin
-      .from("app_settings" as any)
-      .select("value")
-      .eq("key", "cx_games_ad_map")
-      .maybeSingle();
-    const gamesMap: Record<string, boolean> = (gamesMapSetting as any)?.value || {};
-    const enabled = (setting as any)?.value === true;
+    const [settingRes, gamesMapRes, globalTimerRes, timersMapRes] = await Promise.all([
+      supabaseAdmin.from("app_settings" as any).select("value").eq("key", "ads_enabled").maybeSingle(),
+      supabaseAdmin.from("app_settings" as any).select("value").eq("key", "cx_games_ad_map").maybeSingle(),
+      supabaseAdmin.from("app_settings" as any).select("value").eq("key", "ad_timer_seconds").maybeSingle(),
+      supabaseAdmin.from("app_settings" as any).select("value").eq("key", "cx_ad_timers_map").maybeSingle(),
+    ]);
+
+    const gamesMap: Record<string, boolean> = (gamesMapRes as any)?.data?.value || {};
+    const timersMap: Record<string, number> = (timersMapRes as any)?.data?.value || {};
+    const enabled = (settingRes as any)?.data?.value === true;
+    const globalTimerSeconds = Number((globalTimerRes as any)?.data?.value) || 3;
+
     const ads = (rawAds ?? []).map((ad: any) => ({
       ...ad,
       show_games: !!gamesMap[ad.id],
+      timer_seconds: timersMap[ad.id] ?? globalTimerSeconds,
     }));
-    return { ads, enabled };
+
+    return { ads, enabled, globalTimerSeconds };
   });
 
 export const adminSaveAd = createServerFn({ method: "POST" })
@@ -907,7 +910,7 @@ export const adminSaveAd = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { token, id, show_games, ...fields } = data as any;
+    const { token, id, show_games, timer_seconds, ...fields } = data as any;
     let targetId = id;
     if (id) {
       const { error } = await supabaseAdmin
@@ -943,8 +946,30 @@ export const adminSaveAd = createServerFn({ method: "POST" })
         },
         { onConflict: "key" }
       );
+
+      const { data: existingTimers } = await supabaseAdmin
+        .from("app_settings" as any)
+        .select("value")
+        .eq("key", "cx_ad_timers_map")
+        .maybeSingle();
+
+      const timersMap: Record<string, number> = (existingTimers as any)?.value || {};
+      if (timer_seconds && timer_seconds > 0) {
+        timersMap[targetId] = timer_seconds;
+      } else {
+        delete timersMap[targetId];
+      }
+
+      await supabaseAdmin.from("app_settings" as any).upsert(
+        {
+          key: "cx_ad_timers_map",
+          value: timersMap,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "key" }
+      );
     } catch (e) {
-      console.warn("Failed to update cx_games_ad_map", e);
+      console.warn("Failed to update cx_games_ad_map / ad timers", e);
     }
 
     return { ok: true, id: targetId };
@@ -958,6 +983,18 @@ export const adminDeleteAd = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin.from("ads" as any).delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
+  });
+
+export const adminSetGlobalAdTimer = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: z.string(), timerSeconds: z.number().int().min(1).max(300) }).parse(d))
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("app_settings" as any)
+      .upsert({ key: "ad_timer_seconds", value: data.timerSeconds, updated_at: new Date().toISOString() }, { onConflict: "key" });
+    if (error) throw new Error(error.message);
+    return { ok: true, timerSeconds: data.timerSeconds };
   });
 
 export const adminGetFeatures = createServerFn({ method: "POST" })

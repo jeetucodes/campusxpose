@@ -29,50 +29,6 @@ export default function HintRewardAdModal({
   const [canClose, setCanClose] = useState(false);
   const prevIsOpen = useRef(false);
 
-  // Each time modal opens -> advance to next ad
-  useEffect(() => {
-    if (isOpen && !prevIsOpen.current) {
-      globalAdOpenCount += 1;
-      setAskingConfirmation(mode === "extra-lives");
-      setCountdown(3);
-      setCanClose(false);
-      setAdKey(k => k + 1);
-    }
-    if (!isOpen) {
-      setCountdown(3);
-      setCanClose(false);
-      setAskingConfirmation(mode === "extra-lives");
-    }
-    prevIsOpen.current = isOpen;
-  }, [isOpen, mode]);
-
-  // Once ads are loaded, resolve the correct index
-  useEffect(() => {
-    if (gameAds.length > 0) {
-      setActiveAdIndex((globalAdOpenCount - 1) % gameAds.length);
-    }
-  }, [gameAds.length, isOpen]);
-
-  // Countdown timer
-  useEffect(() => {
-    if (!isOpen || askingConfirmation) return;
-    setCountdown(3);
-    setCanClose(false);
-
-    const timer = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          setCanClose(true);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [isOpen, askingConfirmation]);
-
   const FALLBACK_AD: Ad = {
     id: "campusxpose_reward_ad",
     title: "CampusXpose Student Perks 🚀",
@@ -88,10 +44,56 @@ export default function HintRewardAdModal({
     show_games: true,
     active: true,
     sort_order: 0,
+    timer_seconds: 3,
   };
 
   const ads = gameAds.length > 0 ? gameAds : [FALLBACK_AD];
   const currentAd: Ad = ads[activeAdIndex % ads.length];
+  const adDuration = Math.max(1, currentAd?.timer_seconds ?? 3);
+
+  // Each time modal opens -> advance to next ad
+  useEffect(() => {
+    if (isOpen && !prevIsOpen.current) {
+      globalAdOpenCount += 1;
+      setAskingConfirmation(mode === "extra-lives");
+      setCountdown(adDuration);
+      setCanClose(false);
+      setAdKey(k => k + 1);
+    }
+    if (!isOpen) {
+      setCountdown(adDuration);
+      setCanClose(false);
+      setAskingConfirmation(mode === "extra-lives");
+    }
+    prevIsOpen.current = isOpen;
+  }, [isOpen, mode, adDuration]);
+
+  // Once ads are loaded, resolve the correct index
+  useEffect(() => {
+    if (gameAds.length > 0) {
+      setActiveAdIndex((globalAdOpenCount - 1) % gameAds.length);
+    }
+  }, [gameAds.length, isOpen]);
+
+  // Countdown timer
+  useEffect(() => {
+    if (!isOpen || askingConfirmation) return;
+    setCountdown(adDuration);
+    setCanClose(false);
+
+    const timer = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setCanClose(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isOpen, askingConfirmation, adDuration]);
 
   if (!isOpen) return null;
 
@@ -109,7 +111,7 @@ export default function HintRewardAdModal({
   };
 
   const isVideoAd = currentAd.kind === "video" || isDirectVideo(currentAd.media_url) || !!currentAd.embed_url;
-  const progressPct = ((3 - countdown) / 3) * 100;
+  const progressPct = Math.min(100, Math.max(0, ((adDuration - countdown) / adDuration) * 100));
 
   return (
     <AnimatePresence>
@@ -203,13 +205,12 @@ export default function HintRewardAdModal({
 
               {/* Countdown badge — top-left */}
               <div className="absolute top-4 left-4 z-30">
-                <div className={`px-3 py-1 rounded-full text-xs font-display font-bold flex items-center gap-1.5 transition-all ${
-                  canClose
-                    ? "bg-[#3a8a4f] text-white"
-                    : "bg-[#2d2d2d] text-[#fff9c4] animate-pulse"
-                }`}>
+                <div className={`px-3 py-1 rounded-full text-xs font-display font-bold flex items-center gap-1.5 transition-all ${canClose
+                  ? "bg-[#3a8a4f] text-white"
+                  : "bg-[#2d2d2d] text-[#fff9c4] animate-pulse"
+                  }`}>
                   <Eye className="h-3 w-3" />
-                  {canClose ? "✓ Done" : `${countdown}s`}
+                  {canClose ? "" : `${countdown}s`}
                 </div>
               </div>
 
@@ -298,9 +299,8 @@ export default function HintRewardAdModal({
 
               {/* Mode label */}
               <div className="px-5 pt-3 flex items-center gap-2">
-                <div className={`p-2 rounded-xl border-2 border-[#2d2d2d] shadow-[2px_2px_0px_0px_#2d2d2d] ${
-                  mode === "extra-lives" ? "bg-[#ff4d4d]" : "bg-[#fff9c4]"
-                }`}>
+                <div className={`p-2 rounded-xl border-2 border-[#2d2d2d] shadow-[2px_2px_0px_0px_#2d2d2d] ${mode === "extra-lives" ? "bg-[#ff4d4d]" : "bg-[#fff9c4]"
+                  }`}>
                   {mode === "extra-lives"
                     ? <Heart className="h-4 w-4 text-white fill-white" />
                     : <Lightbulb className="h-4 w-4 text-[#2d2d2d] fill-[#2d2d2d]" />
@@ -337,11 +337,10 @@ export default function HintRewardAdModal({
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                     onClick={onRewardGranted}
-                    className={`w-full py-4 rounded-2xl font-display font-bold text-base border-2 border-[#2d2d2d] shadow-[4px_4px_0px_0px_#2d2d2d] flex items-center justify-center gap-2 cursor-pointer text-white transition-colors ${
-                      mode === "extra-lives"
-                        ? "bg-[#ff4d4d] hover:bg-[#e63939]"
-                        : "bg-[#3a8a4f] hover:bg-[#2e6f3e]"
-                    }`}
+                    className={`w-full py-4 rounded-2xl font-display font-bold text-base border-2 border-[#2d2d2d] shadow-[4px_4px_0px_0px_#2d2d2d] flex items-center justify-center gap-2 cursor-pointer text-white transition-colors ${mode === "extra-lives"
+                      ? "bg-[#ff4d4d] hover:bg-[#e63939]"
+                      : "bg-[#3a8a4f] hover:bg-[#2e6f3e]"
+                      }`}
                   >
                     <Gift className="h-5 w-5 fill-white animate-bounce" />
                     {mode === "extra-lives" ? "Claim +3 Lives & Play Now 🎁" : "Claim Free Hint Now 💡"}
