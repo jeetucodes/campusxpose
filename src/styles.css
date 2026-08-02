@@ -100,8 +100,10 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
-    background-image: radial-gradient(#e5e0d8 1px, transparent 1px);
-    background-size: 24px 24px;
+    background-image: 
+      linear-gradient(to right, #e5e0d8 2px, transparent 2px),
+      linear-gradient(to bottom, #e5e0d8 2px, transparent 2px);
+    background-size: 32px 32px;
     -webkit-font-smoothing: antialiased;
   }
   h1, h2, h3, h4, h5, h6 {

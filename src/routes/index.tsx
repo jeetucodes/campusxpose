@@ -45,9 +45,9 @@ const CYCLING_WORDS = ["truth", "voice", "power", "justice", "facts"];
 
 function AnimatedStat({ n, l, color }: { n: number; l: string; color: string }) {
   return (
-    <div className="flex flex-col items-center justify-center border border-border bg-white p-2 rounded-xl shadow-sm">
-      <div className={`font-display text-xl sm:text-2xl font-bold ${color}`}>{n}</div>
-      <div className="text-[9px] sm:text-[10px] font-semibold text-foreground mt-0.5">{l}</div>
+    <div className="flex flex-col items-center justify-center border-2 border-black bg-white p-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]" style={{ borderRadius: WOBBLY_MD }}>
+      <div className={`font-display text-xl sm:text-2xl font-black ${color}`}>{n}</div>
+      <div className="text-[9px] sm:text-[10px] font-bold text-black mt-0.5 uppercase tracking-tight">{l}</div>
     </div>
   );
 }
@@ -130,7 +130,7 @@ function Home() {
         {/* Hero Card — floating particles */}
         <motion.section
           style={{ borderRadius: WOBBLY_MD }}
-          className="relative w-full overflow-hidden border-2 border-border bg-white sm:min-h-[380px] min-h-[300px] cursor-default"
+          className="relative w-full overflow-hidden border-4 border-black bg-white sm:min-h-[380px] min-h-[300px] cursor-default shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all duration-300"
         >
           {/* Animated glow blobs */}
           <motion.div
@@ -215,7 +215,7 @@ function Home() {
           >
             <Button
               asChild
-              className="w-full shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] border-2 border-border bg-accent text-white hover:bg-accent/90 h-10 text-[11px] sm:h-12 sm:text-base px-2 sm:px-4"
+              className="w-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-[3px] border-black bg-accent text-white hover:bg-accent hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all h-10 text-[11px] sm:h-12 sm:text-base px-2 sm:px-4"
               style={{ borderRadius: WOBBLY_MD }}
             >
               <Link to="/colleges">
@@ -232,7 +232,7 @@ function Home() {
             <Button
               asChild
               variant="outline"
-              className="w-full shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] border-2 border-border bg-white text-foreground hover:bg-muted h-10 text-[11px] sm:h-12 sm:text-base px-2 sm:px-4"
+              className="w-full shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-[3px] border-black bg-white text-foreground hover:bg-[#fbcfe8] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all h-10 text-[11px] sm:h-12 sm:text-base px-2 sm:px-4"
               style={{ borderRadius: WOBBLY_MD }}
             >
               <Link to="/report">Report an Issue</Link>
@@ -247,7 +247,7 @@ function Home() {
             <Button
               asChild
               variant="outline"
-              className="w-full mt-4 h-12 border-2 border-border bg-white hover:bg-muted shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-primary font-bold flex items-center justify-center gap-2"
+              className="w-full mt-4 h-12 border-[3px] border-black bg-[#fef08a] hover:bg-[#fde047] hover:-translate-y-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all text-black font-black flex items-center justify-center gap-2"
               style={{ borderRadius: WOBBLY_MD }}
             >
               <Link to="/news">
@@ -282,10 +282,10 @@ function Home() {
         >
           <Link to="/confessions" className="block">
             <div
-              className="mt-2 flex items-center gap-3 border-2 border-border bg-white p-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-muted/50 transition-colors"
+              className="mt-2 flex items-center gap-3 border-[3px] border-black bg-[#e9d5ff] p-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all"
               style={{ borderRadius: WOBBLY_MD }}
             >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-border bg-purple-100 text-primary shadow-sm">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-[3px] border-black bg-white text-primary shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                 <Ghost className="h-5 w-5" />
               </div>
               <div className="flex-1">
