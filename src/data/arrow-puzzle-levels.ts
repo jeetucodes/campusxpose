@@ -63,7 +63,7 @@ const RAW_LEVELS: string[][] = [
   [
     ".v..",
     "..\\.",
-    ".W..",
+    "./..",
     ".<.."
   ],
   // Level 9: 5x5, 2 Walls
@@ -102,7 +102,7 @@ const RAW_LEVELS: string[][] = [
   [
     "W./.",
     "v.W.",
-    "\\..<",
+    "//..<",
     ".v.."
   ],
   // Level 14: 5x5
@@ -139,7 +139,7 @@ const RAW_LEVELS: string[][] = [
   ],
   // Level 18: 5x5
   [
-    "..W..",
+    "../..",
     ".\\./.",
     "W.^..",
     ".....",
