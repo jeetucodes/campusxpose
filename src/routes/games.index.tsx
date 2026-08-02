@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { Gamepad2, ArrowRight, Trophy, Sparkles, Play, X, Crown, Users, Activity } from "lucide-react";
 import { loadOrCreateIdentity } from "../lib/identity";
-import { getGameAnalytics, recordGameSession, RealPlayerRecord } from "../lib/gameAnalytics";
+import { getGameAnalytics, recordGameSession, subscribeGlobalAnalytics, RealPlayerRecord } from "../lib/gameAnalytics";
 
 export const Route = createFileRoute("/games/")({
   head: () => ({
@@ -170,9 +170,13 @@ export default function GamesHub() {
 
   useEffect(() => {
     loadRealLeaderboard();
+    const unsub = subscribeGlobalAnalytics(() => {
+      loadRealLeaderboard();
+    });
     window.addEventListener("cx_game_played_event", loadRealLeaderboard);
     window.addEventListener("storage", loadRealLeaderboard);
     return () => {
+      unsub();
       window.removeEventListener("cx_game_played_event", loadRealLeaderboard);
       window.removeEventListener("storage", loadRealLeaderboard);
     };
