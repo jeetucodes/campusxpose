@@ -56,24 +56,18 @@ export default function HintRewardAdModal({
     if (isOpen && !prevIsOpen.current) {
       globalAdOpenCount += 1;
       setAskingConfirmation(mode === "extra-lives");
-      setCountdown(adDuration);
+      if (gameAds.length > 0) {
+        setActiveAdIndex(Math.max(0, globalAdOpenCount - 1) % gameAds.length);
+      }
       setCanClose(false);
       setAdKey(k => k + 1);
     }
     if (!isOpen) {
-      setCountdown(adDuration);
       setCanClose(false);
       setAskingConfirmation(mode === "extra-lives");
     }
     prevIsOpen.current = isOpen;
-  }, [isOpen, mode, adDuration]);
-
-  // Once ads are loaded, resolve the correct index
-  useEffect(() => {
-    if (gameAds.length > 0) {
-      setActiveAdIndex((globalAdOpenCount - 1) % gameAds.length);
-    }
-  }, [gameAds.length, isOpen]);
+  }, [isOpen, mode, gameAds.length]);
 
   // Countdown timer
   useEffect(() => {
@@ -93,7 +87,7 @@ export default function HintRewardAdModal({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [isOpen, askingConfirmation, adDuration]);
+  }, [isOpen, askingConfirmation, adDuration, adKey]);
 
   if (!isOpen) return null;
 
@@ -204,15 +198,14 @@ export default function HintRewardAdModal({
               )}
 
               {/* Countdown badge — top-left */}
-              <div className="absolute top-4 left-4 z-30">
-                <div className={`px-3 py-1 rounded-full text-xs font-display font-bold flex items-center gap-1.5 transition-all ${canClose
-                  ? "bg-[#3a8a4f] text-white"
-                  : "bg-[#2d2d2d] text-[#fff9c4] animate-pulse"
-                  }`}>
-                  <Eye className="h-3 w-3" />
-                  {canClose ? "" : `${countdown}s`}
+              {!canClose && (
+                <div className="absolute top-4 left-4 z-30">
+                  <div className="px-3 py-1 rounded-full text-xs font-display font-bold flex items-center gap-1.5 transition-all bg-[#2d2d2d] text-[#fff9c4] animate-pulse">
+                    <Eye className="h-3 w-3" />
+                    {countdown}s
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* MEDIA HERO */}
               <AnimatePresence mode="wait">
