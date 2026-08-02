@@ -43,26 +43,10 @@ export const Route = createFileRoute("/")({
 const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
 const CYCLING_WORDS = ["truth", "voice", "courage", "justice", "truth"];
 
-// Count-up animation hook
-function useCountUp(target: number, duration = 1.5) {
-  const [val, setVal] = useState(0);
-  useEffect(() => {
-    if (target === 0) return;
-    const controls = animate(0, target, {
-      duration,
-      ease: "easeOut",
-      onUpdate(v) { setVal(Math.floor(v)); },
-    });
-    return () => controls.stop();
-  }, [target, duration]);
-  return val;
-}
-
 function AnimatedStat({ n, l, color }: { n: number; l: string; color: string }) {
-  const count = useCountUp(n);
   return (
     <div className="flex flex-col items-center justify-center border border-border bg-white p-2 rounded-xl shadow-sm">
-      <div className={`font-display text-xl sm:text-2xl font-bold ${color}`}>{count}</div>
+      <div className={`font-display text-xl sm:text-2xl font-bold ${color}`}>{n}</div>
       <div className="text-[9px] sm:text-[10px] font-semibold text-foreground mt-0.5">{l}</div>
     </div>
   );
@@ -99,13 +83,6 @@ function Home() {
   const [wordIdx, setWordIdx] = useState(0);
   const [wordVisible, setWordVisible] = useState(true);
 
-  // 3D tilt motion values for hero card
-  const heroRef = useRef<HTMLElement>(null);
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const rotateX = useTransform(mouseY, [-150, 150], [4, -4]);
-  const rotateY = useTransform(mouseX, [-150, 150], [-4, 4]);
-
   // Cycle headline word every 2.2s with a blur-fade transition
   useEffect(() => {
     const interval = setInterval(() => {
@@ -117,15 +94,6 @@ function Home() {
     }, 2200);
     return () => clearInterval(interval);
   }, []);
-
-  // Mouse tilt handlers
-  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
-    const rect = heroRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    mouseX.set(e.clientX - rect.left - rect.width / 2);
-    mouseY.set(e.clientY - rect.top - rect.height / 2);
-  };
-  const handleMouseLeave = () => { mouseX.set(0); mouseY.set(0); };
 
   // Stable floating dots config
   const dots = useMemo(() => [
@@ -159,16 +127,10 @@ function Home() {
       {/* ── Hero Section ── */}
       <div className="px-4 pt-6 pb-2 space-y-4 mx-auto max-w-4xl">
 
-        {/* Hero Card — 3D tilt on hover + floating particles */}
+        {/* Hero Card — floating particles */}
         <motion.section
-          ref={heroRef}
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
-          style={{ rotateX, rotateY, transformPerspective: 900, borderRadius: WOBBLY_MD }}
+          style={{ borderRadius: WOBBLY_MD }}
           className="relative w-full overflow-hidden border-2 border-border bg-white sm:min-h-[380px] min-h-[300px] cursor-default"
-          initial={{ opacity: 0, y: 32 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, ease: "easeOut" }}
         >
           {/* Animated glow blobs */}
           <motion.div
@@ -204,9 +166,6 @@ function Home() {
 
               {/* Headline with cycling & blurring word */}
               <motion.h1
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.6 }}
                 className="font-display text-3xl font-bold leading-tight tracking-tight sm:text-5xl md:text-6xl text-foreground"
               >
                 Speak your{" "}
@@ -238,9 +197,6 @@ function Home() {
               </motion.h1>
 
               <motion.p
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5, duration: 0.5 }}
                 className="hidden sm:block text-xs leading-relaxed text-muted-foreground sm:text-sm font-medium"
               >
                 Share the real story of your college.<br className="hidden sm:block" />
@@ -254,9 +210,6 @@ function Home() {
         <div className="flex gap-2 sm:gap-3">
           <motion.div
             className="flex-1"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.55, duration: 0.4 }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
           >
@@ -273,9 +226,6 @@ function Home() {
 
           <motion.div
             className="flex-1"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.65, duration: 0.4 }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
           >
@@ -290,12 +240,8 @@ function Home() {
           </motion.div>
         </div>
 
-        {/* News / Updates Button */}
         {data?.site_settings?.news_enabled !== false && data?.news && data.news.length > 0 && (
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.75 }}
             whileHover={{ scale: 1.01 }}
           >
             <Button
@@ -313,7 +259,7 @@ function Home() {
           </motion.div>
         )}
 
-        {/* Stats Row — count-up on mount + wobble on hover */}
+        {/* Stats Row */}
         <div className="grid grid-cols-4 gap-2 pt-2 pb-4">
           {[
             { n: data?.collegeCount ?? 0, l: "Colleges",   color: "text-accent" },
@@ -323,9 +269,6 @@ function Home() {
           ].map((s, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 * i + 0.8 }}
               whileHover={{ scale: 1.06, rotate: i % 2 === 0 ? 1.5 : -1.5 }}
             >
               <AnimatedStat {...s} />
@@ -335,9 +278,6 @@ function Home() {
 
         {/* Confessions Banner */}
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.9 }}
           whileHover={{ scale: 1.01 }}
         >
           <Link to="/confessions" className="block">

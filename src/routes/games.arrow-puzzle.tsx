@@ -24,10 +24,10 @@ const DIR_ICON: Record<Dir, typeof ChevronUp> = {
 };
 
 const DIR_COLORS: Record<Dir, string> = {
-  up: "bg-[#60a5fa] text-white shadow-[6px_6px_12px_rgba(0,0,0,0.15),inset_3px_3px_6px_rgba(255,255,255,0.6),inset_-3px_-3px_6px_rgba(30,58,138,0.3)]",
-  down: "bg-[#fb7185] text-white shadow-[6px_6px_12px_rgba(0,0,0,0.15),inset_3px_3px_6px_rgba(255,255,255,0.6),inset_-3px_-3px_6px_rgba(136,19,55,0.3)]",
-  left: "bg-[#34d399] text-white shadow-[6px_6px_12px_rgba(0,0,0,0.15),inset_3px_3px_6px_rgba(255,255,255,0.6),inset_-3px_-3px_6px_rgba(6,78,59,0.3)]",
-  right: "bg-[#fbbf24] text-white shadow-[6px_6px_12px_rgba(0,0,0,0.15),inset_3px_3px_6px_rgba(255,255,255,0.6),inset_-3px_-3px_6px_rgba(120,53,15,0.3)]",
+  up: "bg-[#60a5fa] text-white",
+  down: "bg-[#fb7185] text-white",
+  left: "bg-[#34d399] text-white",
+  right: "bg-[#fbbf24] text-white",
 };
 
 const DIR_EXIT: Record<Dir, { x: number; y: number }> = {
@@ -191,7 +191,7 @@ export default function ArrowPuzzleGame() {
          });
       }
 
-      const duration = Math.max(0.2, path.length * 0.08) * 1000;
+      const duration = 200;
       setTimeout(() => {
         setArrows(prev => {
           const next = prev.filter(a => a.id !== arrow.id);
@@ -285,7 +285,7 @@ export default function ArrowPuzzleGame() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="sticky top-0 z-40 border-b-2 border-dashed border-border bg-background/95 backdrop-blur">
+      <div className="sticky top-0 z-40 border-b border-border bg-background">
         <div className="mx-auto flex max-w-lg items-center justify-between px-4 py-3">
           <Link to="/" className="flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="h-4 w-4" /> Back
@@ -303,19 +303,19 @@ export default function ArrowPuzzleGame() {
           <div className="flex items-center justify-between">
             <button 
               onClick={() => setShowLevels(true)} 
-              className="flex items-center gap-2 bg-white px-5 py-2.5 rounded-full border-2 border-white shadow-[4px_4px_10px_rgba(0,0,0,0.05),inset_3px_3px_6px_rgba(255,255,255,1),inset_-3px_-3px_6px_rgba(0,0,0,0.03)] hover:scale-[1.02] active:scale-95 transition-transform outline-none"
+              className="flex items-center gap-2 bg-white px-5 py-2.5 rounded-full border hover:scale-[1.02] active:scale-95 transition-transform outline-none"
             >
               <span className="font-display text-xl font-bold text-[#60a5fa] tracking-tight leading-none">Level {levelIdx + 1}</span>
-              <span className="text-[11px] font-bold text-[#94a3b8] flex items-center bg-[#f1f5f9] px-2.5 py-1 rounded-full shadow-[inset_1px_1px_3px_rgba(0,0,0,0.1),inset_-1px_-1px_3px_rgba(255,255,255,0.9)]">
+              <span className="text-[11px] font-bold text-[#94a3b8] flex items-center bg-[#f1f5f9] px-2.5 py-1 rounded-full">
                 / 100 <ChevronDown className="h-3 w-3 ml-1" strokeWidth={3} />
               </span>
             </button>
-            <div className="flex items-center gap-1.5 bg-white px-4 py-2.5 rounded-full shadow-[4px_4px_10px_rgba(0,0,0,0.05),inset_3px_3px_6px_rgba(255,255,255,1),inset_-3px_-3px_6px_rgba(0,0,0,0.03)] border-2 border-white">
+            <div className="flex items-center gap-1.5 bg-white px-4 py-2.5 rounded-full border">
               {Array.from({ length: 5 }).map((_, i) => (
                 <motion.div
                   key={i}
                   animate={i < lives ? { scale: 1, opacity: 1 } : { scale: 0.6, opacity: 0.3 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                  transition={{ duration: 0.2 }}
                   className="relative"
                 >
                   <Heart
@@ -331,11 +331,11 @@ export default function ArrowPuzzleGame() {
 
           {/* Bottom Row: Moves, Left, Reset */}
           <div className="flex items-center gap-3">
-            <div className="flex-1 rounded-[24px] bg-white border-2 border-white shadow-[4px_4px_10px_rgba(0,0,0,0.05),inset_3px_3px_6px_rgba(255,255,255,1),inset_-3px_-3px_6px_rgba(0,0,0,0.03)] p-3 flex flex-col items-center justify-center">
+            <div className="flex-1 rounded-xl bg-white border p-3 flex flex-col items-center justify-center">
               <div className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-widest mb-1">Moves</div>
               <div className="font-display text-2xl font-bold text-[#475569] leading-none">{moves}</div>
             </div>
-            <div className="flex-1 rounded-[24px] bg-white border-2 border-white shadow-[4px_4px_10px_rgba(0,0,0,0.05),inset_3px_3px_6px_rgba(255,255,255,1),inset_-3px_-3px_6px_rgba(0,0,0,0.03)] p-3 flex flex-col items-center justify-center">
+            <div className="flex-1 rounded-xl bg-white border p-3 flex flex-col items-center justify-center">
               <div className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-widest mb-1">Left</div>
               <div className="font-display text-2xl font-bold text-[#475569] leading-none">{arrows.length}</div>
             </div>
@@ -344,7 +344,7 @@ export default function ArrowPuzzleGame() {
               disabled={hintsLeft === 0 || won || gameOver}
               variant="outline"
               size="icon"
-              className={`h-[68px] w-[68px] rounded-[24px] border-2 border-white bg-white hover:bg-[#fffbeb] shrink-0 shadow-[4px_4px_10px_rgba(0,0,0,0.05),inset_3px_3px_6px_rgba(255,255,255,1),inset_-3px_-3px_6px_rgba(0,0,0,0.03)] transition-all hover:scale-105 active:scale-95 ${hintsLeft > 0 ? "text-[#fbbf24]" : "text-muted-foreground/30 opacity-60"}`}
+              className={`h-16 w-16 rounded-xl border bg-white hover:bg-[#fffbeb] shrink-0 transition-all hover:scale-105 active:scale-95 ${hintsLeft > 0 ? "text-[#fbbf24]" : "text-muted-foreground/30 opacity-60"}`}
             >
               <div className="flex flex-col items-center justify-center">
                 <Lightbulb className="h-6 w-6 mb-1" strokeWidth={2.5} />
@@ -355,7 +355,7 @@ export default function ArrowPuzzleGame() {
               onClick={resetLevel}
               variant="outline"
               size="icon"
-              className="h-[68px] w-[68px] rounded-[24px] border-2 border-white bg-white hover:bg-[#f8fafc] shrink-0 shadow-[4px_4px_10px_rgba(0,0,0,0.05),inset_3px_3px_6px_rgba(255,255,255,1),inset_-3px_-3px_6px_rgba(0,0,0,0.03)] text-[#94a3b8] hover:text-[#475569] transition-all hover:scale-105 active:scale-95"
+              className="h-16 w-16 rounded-xl border bg-white hover:bg-[#f8fafc] shrink-0 text-[#94a3b8] hover:text-[#475569] transition-all hover:scale-105 active:scale-95"
             >
               <RotateCcw className="h-6 w-6" strokeWidth={2.5} />
             </Button>
@@ -363,7 +363,7 @@ export default function ArrowPuzzleGame() {
         </div>
 
         {/* Game board */}
-        <div className="relative w-full bg-[#e2e8f0] p-3 sm:p-4 select-none shadow-[inset_6px_6px_12px_rgba(0,0,0,0.1),inset_-6px_-6px_12px_rgba(255,255,255,0.7)] rounded-[32px]">
+        <div className="relative w-full bg-[#e2e8f0] p-3 sm:p-4 select-none border rounded-2xl">
           <div
             className="grid gap-2"
             style={{
@@ -391,7 +391,7 @@ export default function ArrowPuzzleGame() {
                 <motion.button
                   key={`obs-${obs.id}`}
                   onClick={() => handleObstacleTap(obs)}
-                  className={`absolute rounded-[18px] flex items-center justify-center ${obs.type === "wall" ? "bg-[#d6d3d1] shadow-[4px_4px_10px_rgba(0,0,0,0.15),inset_3px_3px_6px_rgba(255,255,255,0.6),inset_-3px_-3px_6px_rgba(68,64,60,0.4)] overflow-hidden" : obs.type === "bomb" ? "bg-[#3f3f46] shadow-[4px_4px_10px_rgba(0,0,0,0.2),inset_3px_3px_6px_rgba(255,255,255,0.2),inset_-3px_-3px_6px_rgba(0,0,0,0.7)]" : "bg-[#bae6fd] shadow-[4px_4px_10px_rgba(0,0,0,0.15),inset_3px_3px_6px_rgba(255,255,255,0.9),inset_-3px_-3px_6px_rgba(2,132,199,0.3)]"}`}
+                  className={`absolute rounded-[18px] flex items-center justify-center ${obs.type === "wall" ? "bg-[#d6d3d1] border overflow-hidden" : obs.type === "bomb" ? "bg-[#3f3f46] border" : "bg-[#bae6fd] border"}`}
                   style={{
                     gridRow: obs.row + 1,
                     gridColumn: obs.col + 1,
@@ -421,7 +421,7 @@ export default function ArrowPuzzleGame() {
                      <div className="absolute w-[120%] h-[4px] bg-sky-400 rounded-full shadow-[0_0_10px_2px_rgba(56,189,248,0.5)]" style={{ transform: "rotate(45deg)" }} />
                   )}
                   {obs.type === "ice" && (
-                     <div className="absolute inset-0 bg-white/40 rounded-[18px] border-2 border-white/60 shadow-[inset_0_0_10px_rgba(255,255,255,0.8)] backdrop-blur-sm" />
+                     <div className="absolute inset-0 bg-white/60 rounded-[18px] border-2 border-white/60" />
                   )}
                   {obs.type === "rotator" && (
                      <div className="absolute w-[80%] h-[80%] border-4 border-dashed border-sky-400 rounded-full animate-[spin_6s_linear_infinite]" />
@@ -451,7 +451,7 @@ export default function ArrowPuzzleGame() {
                   transition={{ duration: 0.4, ease: "easeOut" }}
                 >
                   {collisionAnim.type === "bomb" && (
-                     <div className="absolute bg-rose-500 rounded-full w-full h-full opacity-60 shadow-[0_0_20px_10px_rgba(244,63,94,0.6)] flex items-center justify-center">
+                     <div className="absolute bg-rose-500 rounded-full w-full h-full opacity-60 flex items-center justify-center">
                         <Flame className="h-10 w-10 text-yellow-300" />
                      </div>
                   )}
@@ -492,30 +492,24 @@ export default function ArrowPuzzleGame() {
                     initial={{ scale: 0, rotate: -90 }}
                     animate={
                       isExiting
-                        ? {
-                            x: exitingArrow!.path.map(p => `calc(${(p.c - exitingArrow!.arrow.col) * 100}% + ${(p.c - exitingArrow!.arrow.col) * 8}px)`),
-                            y: exitingArrow!.path.map(p => `calc(${(p.r - exitingArrow!.arrow.row) * 100}% + ${(p.r - exitingArrow!.arrow.row) * 8}px)`),
-                            opacity: exitingArrow!.path.map((_, i, arr) => i === arr.length - 1 ? 0 : 1),
-                            scale: exitingArrow!.path.map((_, i, arr) => i === arr.length - 1 ? 0.5 : 1),
-                            transition: { duration: Math.max(0.2, exitingArrow!.path.length * 0.08), ease: "linear" },
-                          }
+                        ? { scale: 0, opacity: 0, transition: { duration: 0.2 } }
                         : bounceAnim
                         ? {
                             ...bounceAnim,
-                            transition: { duration: 0.3, ease: "easeInOut" }
+                            transition: { duration: 0.2, ease: "linear" }
                           }
                         : isShaking
                         ? {
-                            x: [0, -6, 6, -4, 4, 0],
+                            x: [0, -4, 4, 0],
                             scale: 1,
                             rotate: 0,
                             opacity: 1,
-                            transition: { duration: 0.4 },
+                            transition: { duration: 0.2 },
                           }
                         : { scale: 1, rotate: 0, opacity: 1, x: 0, y: 0 }
                     }
                     exit={{ scale: 0, opacity: 0, transition: { duration: 0.2 } }}
-                    transition={{ type: "spring", stiffness: 400, damping: 22 }}
+                    transition={{ duration: 0.2 }}
                     whileHover={isTappable ? { scale: 1.08 } : {}}
                     whileTap={isTappable ? { scale: 0.92 } : {}}
                   >
@@ -606,7 +600,7 @@ export default function ArrowPuzzleGame() {
         {/* How to play button */}
         <button 
           onClick={() => setShowHelp(true)}
-          className="w-full bg-[#f8fafc] border-2 border-white shadow-[4px_4px_10px_rgba(0,0,0,0.05),inset_2px_2px_4px_rgba(255,255,255,0.9),inset_-2px_-2px_4px_rgba(0,0,0,0.02)] p-4 font-display font-bold text-sm text-foreground hover:opacity-90 transition-opacity rounded-[20px] flex items-center justify-center gap-2"
+          className="w-full bg-[#f8fafc] border p-4 font-display font-bold text-sm text-foreground hover:opacity-90 transition-opacity rounded-xl flex items-center justify-center gap-2"
         >
           <Lightbulb className="h-5 w-5 text-yellow-500" /> How to Play
         </button>
@@ -628,7 +622,7 @@ export default function ArrowPuzzleGame() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
               onClick={e => e.stopPropagation()}
-              className="w-full max-w-sm bg-[#f8fafc] border-2 border-white p-6 shadow-[8px_8px_20px_rgba(0,0,0,0.1),inset_4px_4px_8px_rgba(255,255,255,1),inset_-4px_-4px_8px_rgba(0,0,0,0.05)] flex flex-col relative rounded-[32px]"
+              className="w-full max-w-sm bg-[#f8fafc] border p-6 flex flex-col relative rounded-2xl"
             >
               <Button 
                 variant="ghost" 
@@ -684,7 +678,7 @@ export default function ArrowPuzzleGame() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
               onClick={e => e.stopPropagation()}
-              className="w-full max-w-sm bg-[#f8fafc] border-2 border-white p-6 shadow-[8px_8px_16px_rgba(0,0,0,0.1),inset_4px_4px_8px_rgba(255,255,255,1),inset_-4px_-4px_8px_rgba(0,0,0,0.02)] flex flex-col max-h-[80vh] rounded-[32px] relative"
+              className="w-full max-w-sm bg-[#f8fafc] border p-6 flex flex-col max-h-[80vh] rounded-2xl relative"
             >
               <Button 
                 variant="ghost" 
@@ -711,12 +705,12 @@ export default function ArrowPuzzleGame() {
                           }
                         }}
                         disabled={!unlocked}
-                        className={`h-12 w-12 shrink-0 rounded-[16px] border-2 border-white font-display font-bold text-sm transition-all outline-none ${
+                        className={`h-12 w-12 shrink-0 rounded-[16px] border font-display font-bold text-sm transition-all outline-none ${
                           i === levelIdx
-                            ? "bg-[#60a5fa] text-white shadow-[4px_4px_8px_rgba(0,0,0,0.1),inset_2px_2px_4px_rgba(255,255,255,0.6),inset_-2px_-2px_4px_rgba(30,58,138,0.3)] scale-110 z-10"
+                            ? "bg-[#60a5fa] text-white scale-110 z-10"
                             : unlocked
-                            ? "bg-white text-foreground hover:bg-[#f8fafc] shadow-[4px_4px_8px_rgba(0,0,0,0.05),inset_2px_2px_4px_rgba(255,255,255,1),inset_-2px_-2px_4px_rgba(0,0,0,0.03)] hover:scale-105 active:scale-95"
-                            : "bg-[#e2e8f0] text-muted-foreground/40 cursor-not-allowed shadow-[inset_2px_2px_4px_rgba(0,0,0,0.05),inset_-2px_-2px_4px_rgba(255,255,255,0.5)]"
+                            ? "bg-white text-foreground hover:bg-[#f8fafc] hover:scale-105 active:scale-95"
+                            : "bg-[#e2e8f0] text-muted-foreground/40 cursor-not-allowed"
                         }`}
                       >
                         {unlocked ? i + 1 : "🔒"}
