@@ -867,6 +867,7 @@ const adInput = z.object({
   show_home: z.boolean().default(false),
   show_global: z.boolean().default(false),
   show_college: z.boolean().default(false),
+  show_games: z.boolean().default(false),
   active: z.boolean().default(false),
   sort_order: z.number().int().default(0),
 });

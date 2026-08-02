@@ -13,16 +13,18 @@ export type Ad = {
   show_home: boolean;
   show_global: boolean;
   show_college: boolean;
+  show_games?: boolean;
   active: boolean;
   sort_order: number;
 };
 
-type Placement = "home" | "global" | "college";
+type Placement = "home" | "global" | "college" | "games";
 
 const COLS: Record<Placement, string> = {
   home: "show_home",
   global: "show_global",
   college: "show_college",
+  games: "show_games",
 };
 
 /**

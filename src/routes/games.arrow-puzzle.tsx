@@ -5,6 +5,7 @@ import { ArrowLeft, RotateCcw, ChevronRight, ChevronLeft, ChevronUp, ChevronDown
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { recordGameSession } from "../lib/gameAnalytics";
+import HintRewardAdModal from "@/components/HintRewardAdModal";
 
 const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
 const WOBBLY_SM = "15px 5px 12px 5px / 5px 12px 5px 15px";
@@ -301,6 +302,8 @@ export default function ArrowPuzzleGame() {
   const [won, setWon] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [customLevelsCount, setCustomLevelsCount] = useState(0);
+  const [showHintAd, setShowHintAd] = useState(false);
+  const [showLivesAd, setShowLivesAd] = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
 
   // Real-time custom levels sync listener
@@ -525,7 +528,9 @@ export default function ArrowPuzzleGame() {
         setCollisionAnim({ ...blocker, id: Date.now().toString() });
         setLives(prev => {
           const next = prev - 1;
-          if (next <= 0) setGameOver(true);
+          if (next <= 0) {
+            setShowLivesAd(true);
+          }
           return next;
         });
         setMovingArrow(null);
@@ -596,11 +601,16 @@ export default function ArrowPuzzleGame() {
 
   const handleHint = () => {
     if (hintsLeft > 0 && !won && !gameOver && tappableIds.size > 0) {
-      setHintsLeft(h => h - 1);
-      const ids = Array.from(tappableIds);
-      const randomId = ids[Math.floor(Math.random() * ids.length)];
-      setHintedArrowId(randomId);
+      setShowHintAd(true);
     }
+  };
+
+  const claimHintAfterAd = () => {
+    setHintsLeft(h => h - 1);
+    const ids = Array.from(tappableIds);
+    const randomId = ids[Math.floor(Math.random() * ids.length)];
+    setHintedArrowId(randomId);
+    setShowHintAd(false);
   };
 
   return (
@@ -1175,6 +1185,31 @@ export default function ArrowPuzzleGame() {
         )}
       </AnimatePresence>
 
+      {/* Hint Reward Ad Modal */}
+      <HintRewardAdModal
+        isOpen={showHintAd}
+        mode="hint"
+        onClose={() => setShowHintAd(false)}
+        onRewardGranted={claimHintAfterAd}
+      />
+
+      {/* Extra Lives Revival Reward Ad Modal */}
+      <HintRewardAdModal
+        isOpen={showLivesAd}
+        mode="extra-lives"
+        onClose={() => {
+          setShowLivesAd(false);
+          setGameOver(true);
+        }}
+        onRewardGranted={() => {
+          setLives(3);
+          setShowLivesAd(false);
+        }}
+        onGameOverConfirm={() => {
+          setShowLivesAd(false);
+          setGameOver(true);
+        }}
+      />
     </div>
   );
 }

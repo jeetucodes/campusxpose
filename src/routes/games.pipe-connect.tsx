@@ -3,6 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, RotateCcw, ChevronDown, Zap, Heart, X, Lightbulb, Trophy, Lock } from "lucide-react";
 import { getPipeLevel, getConnections, PipeTile, PipeLevelData, TOTAL_PIPE_LEVELS } from "../data/pipe-puzzle-levels";
+import HintRewardAdModal from "@/components/HintRewardAdModal";
 
 export const Route = createFileRoute("/games/pipe-connect")({
   head: () => ({
@@ -320,7 +321,9 @@ export default function PipeConnectGame() {
         setOverloadAnim(null);
         setLives(prev => {
           const next = prev - 1;
-          if (next <= 0) setGameOver(true);
+          if (next <= 0) {
+            setShowLivesAd(true);
+          }
           return next;
         });
         if (levelData) {
@@ -372,15 +375,23 @@ export default function PipeConnectGame() {
     setMoves(m => m + 1);
   }, [won, gameOver, moves, levelData, overloadAnim, hintedTileKey]);
 
+  const [showHintAd, setShowHintAd] = useState(false);
+  const [showLivesAd, setShowLivesAd] = useState(false);
+
   const handleHint = () => {
     if (hintsLeft > 0 && !won && !gameOver) {
-      setHintsLeft(h => h - 1);
-      const unsolved = tiles.filter(t => !t.fixed && t.type !== "empty" && t.rotation !== t.solvedRotation);
-      if (unsolved.length > 0) {
-        const hint = unsolved[Math.floor(Math.random() * unsolved.length)];
-        setHintedTileKey(`${hint.row},${hint.col}`);
-      }
+      setShowHintAd(true);
     }
+  };
+
+  const claimHintAfterAd = () => {
+    setHintsLeft(h => h - 1);
+    const unsolved = tiles.filter(t => !t.fixed && t.type !== "empty" && t.rotation !== t.solvedRotation);
+    if (unsolved.length > 0) {
+      const hint = unsolved[Math.floor(Math.random() * unsolved.length)];
+      setHintedTileKey(`${hint.row},${hint.col}`);
+    }
+    setShowHintAd(false);
   };
 
   const nextLevel = () => setLevelIdx(i => i + 1);
@@ -811,6 +822,31 @@ export default function PipeConnectGame() {
         )}
       </AnimatePresence>
 
+      {/* Hint Reward Ad Modal */}
+      <HintRewardAdModal
+        isOpen={showHintAd}
+        mode="hint"
+        onClose={() => setShowHintAd(false)}
+        onRewardGranted={claimHintAfterAd}
+      />
+
+      {/* Extra Lives Revival Reward Ad Modal */}
+      <HintRewardAdModal
+        isOpen={showLivesAd}
+        mode="extra-lives"
+        onClose={() => {
+          setShowLivesAd(false);
+          setGameOver(true);
+        }}
+        onRewardGranted={() => {
+          setLives(3);
+          setShowLivesAd(false);
+        }}
+        onGameOverConfirm={() => {
+          setShowLivesAd(false);
+          setGameOver(true);
+        }}
+      />
     </div>
   );
 }

@@ -83,13 +83,14 @@ type Ad = {
   show_home: boolean;
   show_global: boolean;
   show_college: boolean;
+  show_games: boolean;
   active: boolean;
   sort_order: number;
 };
 
 const EMPTY: Ad = {
   title: "", kind: "banner", body: "", link_url: "", media_url: "", embed_url: "",
-  cta_label: "", show_home: false, show_global: false, show_college: false,
+  cta_label: "", show_home: false, show_global: false, show_college: false, show_games: false,
   active: true, sort_order: 0,
 };
 
@@ -219,6 +220,7 @@ function AdsAdmin() {
                     {ad.show_home && <span className="rounded bg-surface-2 px-1.5 py-0.5">Home</span>}
                     {ad.show_global && <span className="rounded bg-surface-2 px-1.5 py-0.5">Global</span>}
                     {ad.show_college && <span className="rounded bg-surface-2 px-1.5 py-0.5">College</span>}
+                    {ad.show_games && <span className="rounded bg-[#bbf7d0] text-black px-1.5 py-0.5 font-bold">Games 🕹️</span>}
                   </div>
                 </div>
               </div>
@@ -377,7 +379,7 @@ function AdsAdmin() {
               {/* Placements */}
               <div className="space-y-2 rounded-xl border border-border p-3">
                 <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Show on</div>
-                {([["show_home", "Home page"], ["show_global", "Global chat"], ["show_college", "College chats"]] as const).map(([key, label]) => (
+                {([["show_home", "Home page"], ["show_global", "Global chat"], ["show_college", "College chats"], ["show_games", "Games & Hint Rewards 🕹️"]] as const).map(([key, label]) => (
                   <div key={key} className="flex items-center justify-between">
                     <span className="text-sm">{label}</span>
                     <Switch checked={editing[key]} onCheckedChange={(v) => setEditing({ ...editing, [key]: v })} />
