@@ -346,10 +346,18 @@ export default function ArrowPuzzleGame() {
   const initLevel = useCallback((idx: number) => {
     let data = getStaticLevel(idx);
 
-    // Read custom AI imported levels by Admin
+    // Read Admin edited level overrides or custom AI levels
     try {
+      const overridesRaw = localStorage.getItem("cx_arrow_level_overrides");
+      if (overridesRaw) {
+        const overrides = JSON.parse(overridesRaw);
+        if (overrides[idx]) {
+          data = overrides[idx];
+        }
+      }
+      
       const customRaw = localStorage.getItem("cx_arrow_custom_levels");
-      if (customRaw) {
+      if (customRaw && !data) {
         const customLevels = JSON.parse(customRaw);
         if (Array.isArray(customLevels) && customLevels.length > 0) {
           if (idx >= 100 && idx - 100 < customLevels.length) {
@@ -694,23 +702,10 @@ export default function ArrowPuzzleGame() {
                     <Bomb className="h-6 w-6 text-rose-500 animate-pulse" strokeWidth={2.5} />
                   )}
                   {obs.type === "mirror-slash" && (
-<<<<<<< HEAD
                     <MirrorSlashIndicator />
                   )}
                   {obs.type === "mirror-backslash" && (
                     <MirrorBackslashIndicator />
-=======
-                     <>
-                       <div className="absolute w-[120%] h-[4px] bg-sky-400 rounded-full shadow-[0_0_10px_2px_rgba(56,189,248,0.5)]" style={{ transform: "rotate(-45deg)" }} />
-                       <span className="absolute text-lg leading-none select-none" style={{ textShadow: "0 1px 2px rgba(0,0,0,0.5)" }}>↗️</span>
-                     </>
-                  )}
-                  {obs.type === "mirror-backslash" && (
-                     <>
-                       <div className="absolute w-[120%] h-[4px] bg-sky-400 rounded-full shadow-[0_0_10px_2px_rgba(56,189,248,0.5)]" style={{ transform: "rotate(45deg)" }} />
-                       <span className="absolute text-lg leading-none select-none" style={{ textShadow: "0 1px 2px rgba(0,0,0,0.5)" }}>↖️</span>
-                     </>
->>>>>>> f0aa1beb8df715067818396d66114a6345dcc469
                   )}
                   {obs.type === "ice" && (
                     <div className="absolute inset-0 bg-white/60 rounded-[18px] border-2 border-white/60" />
@@ -944,13 +939,6 @@ export default function ArrowPuzzleGame() {
                   <p className="text-xs sm:text-sm font-black leading-snug">
                     🎯 <strong>Goal:</strong> Tap arrows to send them flying off the board! Clear <span className="underline decoration-2">all arrows</span> to complete the level.
                   </p>
-                  <p className="text-sm text-black font-bold">
-                    <strong>🔷 Mirrors:</strong> The diagonal tiles bounce an arrow 90°.
-                    The little symbol on the tile (↗️ or ↖️) shows the two directions it connects —
-                    e.g. a ↗️ mirror turns an <span className="underline decoration-2">↑</span> arrow
-                    so it exits to the right.
-                  </p>
-                </div>
                 </div>
 
                 {/* Live Path Trajectory Feature */}

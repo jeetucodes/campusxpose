@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { Gamepad2, Info, Copy, Check, Plus, Trash2, Power, Sparkles, Code, Layers, X, ExternalLink, Activity, ShieldCheck, Terminal, HelpCircle } from "lucide-react";
+import { Gamepad2, Info, Copy, Check, Plus, Trash2, Power, Sparkles, Code, Layers, X, ExternalLink, Activity, ShieldCheck, Edit, Eye, Search, Save, RotateCcw, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { getStaticLevel, LevelData } from "../data/arrow-puzzle-levels";
 
 export const Route = createFileRoute("/admin/games")({
   component: AdminGamesManagement,
@@ -26,6 +27,7 @@ interface GameMeta {
   storageKey: string;
   prompt: string;
   sampleJson: string;
+  totalBuiltIn: number;
 }
 
 const ALL_GAMES: GameMeta[] = [
@@ -37,6 +39,7 @@ const ALL_GAMES: GameMeta[] = [
     desc: "100+ Logic Deflector & Mirror Levels",
     color: "from-amber-500/10 via-orange-500/10 to-amber-500/5 border-amber-500/30",
     storageKey: "cx_arrow_custom_levels",
+    totalBuiltIn: 100,
     prompt: `Act as a Level Designer for Arrow Puzzle.
 Generate a valid JSON object or JSON array for an Arrow Puzzle level.
 
@@ -71,9 +74,10 @@ Required JSON Format:
     name: "Pipe Connect",
     emoji: "⚡",
     link: "/games/pipe-connect",
-    desc: "Circuit Wiring & Electrical Node Puzzles",
+    desc: "30 Circuit Wiring Puzzles",
     color: "from-blue-500/10 via-indigo-500/10 to-blue-500/5 border-blue-500/30",
     storageKey: "cx_pipe_custom_levels",
+    totalBuiltIn: 30,
     prompt: `Act as a Level Designer for Pipe Connect Circuit Game.
 Generate a valid JSON object or JSON array for a Pipe Connect circuit level.
 
@@ -109,9 +113,10 @@ Required JSON Format:
     name: "2048 Classic",
     emoji: "🧩",
     link: "/games/2048",
-    desc: "Custom Preset Board Challenges & High Score Modes",
+    desc: "Custom Preset Board Challenges",
     color: "from-pink-500/10 via-purple-500/10 to-pink-500/5 border-pink-500/30",
     storageKey: "cx_2048_custom_levels",
+    totalBuiltIn: 1,
     prompt: `Act as a Level Designer for 2048 Puzzle Game.
 Generate a custom challenge starting board or target goal JSON.
 
@@ -142,9 +147,10 @@ Required JSON Format:
     name: "Memory Match",
     emoji: "🃏",
     link: "/games/memory-match",
-    desc: "Speed Brain Emoji Card Pairs & Timed Levels",
+    desc: "Speed Brain Emoji Card Pairs",
     color: "from-emerald-500/10 via-teal-500/10 to-emerald-500/5 border-emerald-500/30",
     storageKey: "cx_memory_custom_levels",
+    totalBuiltIn: 1,
     prompt: `Act as a Level Designer for Memory Match Game.
 Generate a valid level JSON with pair count, timer limit, and card emoji theme.
 
@@ -164,6 +170,8 @@ Required JSON Format:
   },
 ];
 
+const ARROW_OVERRIDES_KEY = "cx_arrow_level_overrides";
+
 export default function AdminGamesManagement() {
   const [gameStatus, setGameStatus] = useState<GameStatusMap>({
     "arrow-puzzle": true,
@@ -177,6 +185,13 @@ export default function AdminGamesManagement() {
   const [copiedPrompt, setCopiedPrompt] = useState(false);
   const [codeToImport, setCodeToImport] = useState("");
   const [customLevels, setCustomLevels] = useState<any[]>([]);
+  const [levelOverrides, setLevelOverrides] = useState<Record<number, any>>({});
+
+  // Level Editor State
+  const [editingLevelIndex, setEditingLevelIndex] = useState<number | null>(null);
+  const [editingLevelJson, setEditingLevelJson] = useState<string>("");
+  const [searchLevelQuery, setSearchLevelQuery] = useState<string>("");
+  const [previewLevelData, setPreviewLevelData] = useState<any | null>(null);
 
   const selectedGameMeta = ALL_GAMES.find(g => g.id === selectedGameId) || ALL_GAMES[0];
 
@@ -185,6 +200,11 @@ export default function AdminGamesManagement() {
       const savedStatus = localStorage.getItem(GAMES_STATUS_KEY);
       if (savedStatus) {
         setGameStatus(JSON.parse(savedStatus));
+      }
+
+      const savedOverrides = localStorage.getItem(ARROW_OVERRIDES_KEY);
+      if (savedOverrides) {
+        setLevelOverrides(JSON.parse(savedOverrides));
       }
     } catch (e) {
       console.warn("Storage load error", e);
@@ -256,26 +276,125 @@ export default function AdminGamesManagement() {
     toast.success("Custom level deleted");
   };
 
+  // Open Edit Modal for any level index (0..99 for built-in, 100+ for custom)
+  const handleOpenEditLevel = (index: number) => {
+    let data: any;
+    if (selectedGameId === "arrow-puzzle") {
+      if (levelOverrides[index]) {
+        data = levelOverrides[index];
+      } else if (index < 100) {
+        data = getStaticLevel(index);
+      } else {
+        data = customLevels[index - 100];
+      }
+    } else {
+      data = customLevels[index] || { title: `Level ${index + 1}` };
+    }
+
+    setEditingLevelIndex(index);
+    setEditingLevelJson(JSON.stringify(data, null, 2));
+  };
+
+  const handleSaveLevelEdit = () => {
+    if (editingLevelIndex === null) return;
+
+    try {
+      const parsed = JSON.parse(editingLevelJson);
+
+      if (selectedGameId === "arrow-puzzle") {
+        if (editingLevelIndex < 100) {
+          // Save to Level Overrides
+          const updatedOverrides = { ...levelOverrides, [editingLevelIndex]: parsed };
+          setLevelOverrides(updatedOverrides);
+          localStorage.setItem(ARROW_OVERRIDES_KEY, JSON.stringify(updatedOverrides));
+          toast.success(`Level #${editingLevelIndex + 1} updated and saved! ✏️`);
+        } else {
+          // Save to Custom Levels
+          const customIdx = editingLevelIndex - 100;
+          const updatedCustom = [...customLevels];
+          updatedCustom[customIdx] = parsed;
+          setCustomLevels(updatedCustom);
+          localStorage.setItem(selectedGameMeta.storageKey, JSON.stringify(updatedCustom));
+          toast.success(`Custom Level #${customIdx + 1} updated and saved! ✏️`);
+        }
+      } else {
+        const updatedCustom = [...customLevels];
+        updatedCustom[editingLevelIndex] = parsed;
+        setCustomLevels(updatedCustom);
+        localStorage.setItem(selectedGameMeta.storageKey, JSON.stringify(updatedCustom));
+        toast.success(`Level updated and saved! ✏️`);
+      }
+
+      setEditingLevelIndex(null);
+    } catch (e) {
+      toast.error("Invalid JSON code format! Please check your edits.");
+    }
+  };
+
+  const handleResetLevelOverride = (index: number) => {
+    if (levelOverrides[index]) {
+      const updated = { ...levelOverrides };
+      delete updated[index];
+      setLevelOverrides(updated);
+      localStorage.setItem(ARROW_OVERRIDES_KEY, JSON.stringify(updated));
+      toast.success(`Level #${index + 1} reset to built-in default! 🔄`);
+    }
+  };
+
+  // Compile list of levels to display for selected game
+  const levelListToDisplay = useMemo(() => {
+    const list: { index: number; isBuiltIn: boolean; isOverridden: boolean; data: any }[] = [];
+
+    if (selectedGameId === "arrow-puzzle") {
+      // 100 Built-in Levels
+      for (let i = 0; i < 100; i++) {
+        const isOverridden = !!levelOverrides[i];
+        const data = isOverridden ? levelOverrides[i] : getStaticLevel(i);
+        list.push({ index: i, isBuiltIn: true, isOverridden, data });
+      }
+      // Custom Levels
+      customLevels.forEach((lvl, i) => {
+        list.push({ index: 100 + i, isBuiltIn: false, isOverridden: false, data: lvl });
+      });
+    } else {
+      customLevels.forEach((lvl, i) => {
+        list.push({ index: i, isBuiltIn: false, isOverridden: false, data: lvl });
+      });
+    }
+
+    if (!searchLevelQuery.trim()) return list;
+
+    const q = searchLevelQuery.toLowerCase();
+    return list.filter(item => {
+      const lvlNum = item.index + 1;
+      return (
+        lvlNum.toString().includes(q) ||
+        (item.data.title && item.data.title.toLowerCase().includes(q)) ||
+        (item.isBuiltIn && `level ${lvlNum}`.includes(q))
+      );
+    });
+  }, [selectedGameId, levelOverrides, customLevels, searchLevelQuery]);
+
   const onlineCount = Object.values(gameStatus).filter(Boolean).length;
 
   return (
-    <div className="flex h-full flex-col p-4 md:p-8 max-w-6xl mx-auto w-full space-y-8">
+    <div className="flex h-full flex-col p-4 md:p-8 max-w-6xl mx-auto w-full space-y-8 text-foreground select-none">
       
       {/* ─── Hero Header Banner ───────────────────────────────────────── */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 p-6 md:p-8 text-white shadow-xl border border-slate-800">
         <div className="relative z-10 space-y-4">
           <div className="flex items-center gap-2">
             <span className="bg-amber-400/20 text-amber-300 border border-amber-400/30 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-1.5 backdrop-blur-sm">
-              <Sparkles className="h-3.5 w-3.5" /> ARCADE STUDIO CONTROL
+              <Sparkles className="h-3.5 w-3.5" /> ARCADE STUDIO & LEVEL EDITOR
             </span>
           </div>
 
           <div className="space-y-1">
             <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight flex items-center gap-3">
-              <Gamepad2 className="h-8 w-8 text-amber-400" /> Games & AI Level Studio
+              <Gamepad2 className="h-8 w-8 text-amber-400" /> Games & Level Management
             </h1>
             <p className="text-sm md:text-base text-slate-300 max-w-2xl font-medium leading-relaxed">
-              Control game availability, toggle maintenance statuses, and generate AI-crafted level packs for all CampusXpose mini-games.
+              Edit any level (1-100+), add custom levels via AI prompts, and control game availability in real-time.
             </p>
           </div>
 
@@ -292,8 +411,8 @@ export default function AdminGamesManagement() {
             <div className="bg-white/10 backdrop-blur-md border border-white/10 px-4 py-2 rounded-2xl flex items-center gap-3">
               <Layers className="h-5 w-5 text-amber-400" />
               <div>
-                <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Active Game</div>
-                <div className="text-lg font-black text-amber-300">{selectedGameMeta.name} {selectedGameMeta.emoji}</div>
+                <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Total Levels</div>
+                <div className="text-lg font-black text-amber-300">{levelListToDisplay.length} Available</div>
               </div>
             </div>
           </div>
@@ -312,7 +431,7 @@ export default function AdminGamesManagement() {
               <Power className="h-5 w-5 text-emerald-500" /> Mini Games Availability (ON / OFF)
             </h2>
             <p className="text-xs text-muted-foreground">
-              Toggle servers and game availability. Turning off a game instantly displays an offline maintenance card to players.
+              Turning OFF a game instantly hides it from students in real-time.
             </p>
           </div>
         </div>
@@ -352,7 +471,7 @@ export default function AdminGamesManagement() {
                 <div className="flex items-center justify-between border-t pt-3">
                   <span className="text-xs font-bold text-muted-foreground flex items-center gap-1.5">
                     <ShieldCheck className="h-4 w-4 text-emerald-500" />
-                    <span>{isOnline ? "Accessible to all students" : "Maintenance Lock Enabled"}</span>
+                    <span>{isOnline ? "Visible in Games Hub" : "Hidden from Students"}</span>
                   </span>
 
                   <button
@@ -372,32 +491,34 @@ export default function AdminGamesManagement() {
         </div>
       </div>
 
-      {/* ─── 2. UNIVERSAL AI LEVEL BUILDER STUDIO ─────────────────────── */}
+      {/* ─── 2. FULL INTERACTIVE LEVEL MANAGER (ALL 100+ LEVELS) ──────────── */}
       <div className="rounded-3xl border bg-card p-6 shadow-md space-y-6">
         
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-5">
           <div>
             <h2 className="text-xl font-black tracking-tight flex items-center gap-2">
-              <Sparkles className="h-6 w-6 text-amber-500" /> Universal AI Level Generator & Importer
+              <Layers className="h-6 w-6 text-purple-500" /> Interactive Level Manager & Editor
             </h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Select a target game, copy its optimized AI prompt, and paste the generated JSON code to add custom level packs!
+              Browse, view, edit, add, or delete levels for any selected game below!
             </p>
           </div>
 
-          {/* ℹ️ AI Prompt Info Button */}
-          <button
-            onClick={() => setShowAiPromptModal(true)}
-            className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-5 py-2.5 rounded-2xl text-xs font-extrabold shadow-md transition-all hover:scale-105 cursor-pointer shrink-0"
-          >
-            <Info className="h-4 w-4" />
-            <span>ℹ️ Get AI Prompt ({selectedGameMeta.name})</span>
-          </button>
+          <div className="flex items-center gap-2">
+            {/* ℹ️ AI Prompt Info Button */}
+            <button
+              onClick={() => setShowAiPromptModal(true)}
+              className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-4 py-2.5 rounded-2xl text-xs font-extrabold shadow-md transition-all hover:scale-105 cursor-pointer shrink-0"
+            >
+              <Info className="h-4 w-4" />
+              <span>ℹ️ AI Prompt ({selectedGameMeta.name})</span>
+            </button>
+          </div>
         </div>
 
         {/* Game Selection Tab Switcher */}
         <div className="space-y-2">
-          <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Select Game to Add Levels For:</label>
+          <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Select Game to Manage Levels:</label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {ALL_GAMES.map(g => {
               const isSelected = selectedGameId === g.id;
@@ -415,7 +536,7 @@ export default function AdminGamesManagement() {
                   <div>
                     <div className="font-extrabold text-xs leading-tight">{g.name}</div>
                     <div className={`text-[10px] ${isSelected ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
-                      Level Pack Builder
+                      Level Manager
                     </div>
                   </div>
                 </button>
@@ -424,11 +545,114 @@ export default function AdminGamesManagement() {
           </div>
         </div>
 
+        {/* Search & Code Add Toolbar */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+          <div className="relative w-full sm:w-72">
+            <Search className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search Level # (e.g. 5, 20)..."
+              value={searchLevelQuery}
+              onChange={e => setSearchLevelQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 rounded-2xl border bg-background text-xs focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+
+          <button
+            onClick={() => {
+              setCodeToImport(selectedGameMeta.sampleJson);
+              window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+            }}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-2xl text-xs font-bold shadow-md transition-all cursor-pointer w-full sm:w-auto justify-center"
+          >
+            <Plus className="h-4 w-4" /> Add New Custom Level
+          </button>
+        </div>
+
+        {/* Level List Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-[480px] overflow-y-auto pr-1 custom-scrollbar">
+          {levelListToDisplay.map((item) => {
+            const levelNum = item.index + 1;
+            const arrowsCount = item.data.arrows?.length || 0;
+            const obsCount = item.data.obstacles?.length || 0;
+            const gridSize = item.data.gridSize || 5;
+
+            return (
+              <div
+                key={item.index}
+                className={`p-4 border rounded-2xl bg-card shadow-sm flex flex-col justify-between space-y-3 relative overflow-hidden transition-all ${
+                  item.isOverridden ? "border-amber-400 bg-amber-50/20" : ""
+                }`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <div className="font-extrabold text-sm flex items-center gap-1.5">
+                      <span>Level #{levelNum}</span>
+                      {item.isOverridden && (
+                        <span className="bg-amber-500 text-white text-[9px] px-1.5 py-0.2 rounded font-black uppercase">EDITED</span>
+                      )}
+                      {!item.isBuiltIn && (
+                        <span className="bg-purple-600 text-white text-[9px] px-1.5 py-0.2 rounded font-black uppercase">CUSTOM</span>
+                      )}
+                    </div>
+                    <div className="text-xs text-muted-foreground font-mono mt-0.5">
+                      Grid {gridSize}x{gridSize} • {arrowsCount} Arrows • {obsCount} Obs
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    {/* Preview Button */}
+                    <button
+                      onClick={() => setPreviewLevelData(item.data)}
+                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-colors cursor-pointer"
+                      title="Preview Grid Layout"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </button>
+
+                    {/* Edit Button */}
+                    <button
+                      onClick={() => handleOpenEditLevel(item.index)}
+                      className="p-2 text-amber-600 hover:bg-amber-50 rounded-xl transition-colors cursor-pointer"
+                      title="Edit Level JSON"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </button>
+
+                    {/* Reset/Delete Button */}
+                    {item.isOverridden ? (
+                      <button
+                        onClick={() => handleResetLevelOverride(item.index)}
+                        className="p-2 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
+                        title="Reset to Default"
+                      >
+                        <RotateCcw className="h-4 w-4" />
+                      </button>
+                    ) : !item.isBuiltIn ? (
+                      <button
+                        onClick={() => handleDeleteCustomLevel(item.index - 100)}
+                        className="p-2 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
+                        title="Delete Level"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div className="bg-slate-900 text-slate-300 p-2.5 rounded-xl font-mono text-[10px] truncate border border-slate-800">
+                  {JSON.stringify(item.data)}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
         {/* Code Import Textarea Box */}
-        <div className="space-y-3 pt-2">
+        <div className="space-y-3 pt-4 border-t">
           <div className="flex items-center justify-between">
             <label className="text-xs font-bold flex items-center gap-2">
-              <Terminal className="h-4 w-4 text-blue-500" /> Paste AI-Generated JSON Code for <span className="text-primary font-extrabold">{selectedGameMeta.name} {selectedGameMeta.emoji}</span>
+              <Code className="h-4 w-4 text-blue-500" /> Quick Add Level Code for <span className="text-primary font-extrabold">{selectedGameMeta.name} {selectedGameMeta.emoji}</span>
             </label>
 
             <button
@@ -444,81 +668,136 @@ export default function AdminGamesManagement() {
               value={codeToImport}
               onChange={e => setCodeToImport(e.target.value)}
               placeholder={`Paste AI code snippet here for ${selectedGameMeta.name}...\nExample:\n${selectedGameMeta.sampleJson}`}
-              rows={6}
+              rows={5}
               className="w-full p-4 font-mono text-xs text-slate-100 bg-transparent focus:outline-none resize-y leading-relaxed"
             />
           </div>
 
-          <div className="flex items-center justify-between pt-1">
-            <span className="text-[11px] text-muted-foreground flex items-center gap-1">
-              <HelpCircle className="h-3.5 w-3.5" /> Supports single level object or JSON array of levels
-            </span>
-
+          <div className="flex items-center justify-end pt-1">
             <button
               onClick={handleImportLevel}
               className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl text-xs font-extrabold shadow-lg transition-all hover:scale-105 cursor-pointer"
             >
-              <Plus className="h-4 w-4" /> Import & Add Level to {selectedGameMeta.name}
+              <Plus className="h-4 w-4" /> Add Level to {selectedGameMeta.name}
             </button>
           </div>
         </div>
 
-        {/* Custom Added Levels Grid */}
-        <div className="pt-4 border-t space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-black uppercase tracking-wider flex items-center gap-2">
-              <Layers className="h-4 w-4 text-purple-500" /> Loaded Custom Levels for {selectedGameMeta.name} ({customLevels.length})
-            </h3>
-
-            {customLevels.length > 0 && (
-              <span className="text-xs bg-purple-100 text-purple-700 font-bold px-2.5 py-0.5 rounded-full">
-                Active in Game
-              </span>
-            )}
-          </div>
-
-          {customLevels.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-              {customLevels.map((lvl, idx) => (
-                <div
-                  key={idx}
-                  className="p-4 border rounded-2xl bg-card shadow-sm flex flex-col justify-between space-y-3 relative overflow-hidden"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <div className="font-extrabold text-sm text-foreground">
-                        {lvl.title ? lvl.title : `Custom Level #${idx + 1}`}
-                      </div>
-                      <div className="text-xs text-muted-foreground font-mono mt-0.5">
-                        {lvl.gridSize ? `Grid ${lvl.gridSize}x${lvl.gridSize}` : "Custom Config"}
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => handleDeleteCustomLevel(idx)}
-                      className="p-2 text-rose-500 hover:bg-rose-100 rounded-xl transition-colors cursor-pointer"
-                      title="Delete level"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-
-                  <div className="bg-slate-900 text-slate-300 p-2.5 rounded-xl font-mono text-[10px] truncate border border-slate-800">
-                    {JSON.stringify(lvl)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="p-6 border border-dashed rounded-2xl text-center space-y-2 bg-slate-50/50">
-              <p className="text-xs font-bold text-muted-foreground">No custom levels added yet for {selectedGameMeta.name}.</p>
-              <p className="text-[11px] text-muted-foreground">
-                Click the <span className="font-bold text-amber-600">"ℹ️ Get AI Prompt"</span> button above to copy the prompt and generate new level codes!
-              </p>
-            </div>
-          )}
-        </div>
       </div>
+
+      {/* ─── ✏️ EDIT LEVEL MODAL ────────────────────────────────────────── */}
+      <AnimatePresence>
+        {editingLevelIndex !== null && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-sm p-4"
+            onClick={() => setEditingLevelIndex(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 15 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 15 }}
+              onClick={e => e.stopPropagation()}
+              className="w-full max-w-xl bg-card border rounded-3xl p-6 shadow-2xl relative space-y-4"
+            >
+              <button
+                onClick={() => setEditingLevelIndex(null)}
+                className="absolute top-4 right-4 text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-muted cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-amber-500/20 text-amber-500 rounded-2xl">
+                  <Edit className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-extrabold">
+                    Edit Level #{editingLevelIndex + 1} ({selectedGameMeta.name})
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    Modify the JSON layout below. Changes save instantly!
+                  </p>
+                </div>
+              </div>
+
+              <div className="relative rounded-2xl overflow-hidden border border-slate-700 bg-slate-950 p-1 shadow-inner">
+                <textarea
+                  value={editingLevelJson}
+                  onChange={e => setEditingLevelJson(e.target.value)}
+                  rows={10}
+                  className="w-full p-4 font-mono text-xs text-slate-100 bg-transparent focus:outline-none resize-y leading-relaxed"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2 border-t">
+                <button
+                  onClick={() => setEditingLevelIndex(null)}
+                  className="px-4 py-2 text-xs font-bold text-muted-foreground hover:text-foreground cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveLevelEdit}
+                  className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-2xl text-xs font-extrabold shadow-md transition-all hover:scale-105 cursor-pointer"
+                >
+                  <Save className="h-4 w-4" /> Save Level Changes
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ─── 👁️ PREVIEW GRID MODAL ──────────────────────────────────────── */}
+      <AnimatePresence>
+        {previewLevelData && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-sm p-4"
+            onClick={() => setPreviewLevelData(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 15 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 15 }}
+              onClick={e => e.stopPropagation()}
+              className="w-full max-w-sm bg-card border rounded-3xl p-6 shadow-2xl relative space-y-4 text-center"
+            >
+              <button
+                onClick={() => setPreviewLevelData(null)}
+                className="absolute top-4 right-4 text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-muted cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+
+              <h3 className="text-lg font-extrabold">Level Grid Preview</h3>
+
+              {/* Grid Preview Display */}
+              <div className="p-4 bg-slate-900 rounded-2xl border border-slate-800 text-slate-100 flex flex-col items-center justify-center space-y-3">
+                <div className="text-xs font-bold text-amber-400">
+                  Grid Size: {previewLevelData.gridSize || 5}x{previewLevelData.gridSize || 5}
+                </div>
+
+                <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 font-mono text-xs w-full text-left max-h-48 overflow-y-auto leading-relaxed">
+                  <pre className="whitespace-pre-wrap">{JSON.stringify(previewLevelData, null, 2)}</pre>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setPreviewLevelData(null)}
+                className="w-full bg-primary text-primary-foreground py-2.5 rounded-2xl font-bold text-xs"
+              >
+                Close Preview
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ─── AI PROMPT MODAL ─────────────────────────────────────────────── */}
       <AnimatePresence>
