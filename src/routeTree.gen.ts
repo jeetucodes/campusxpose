@@ -46,6 +46,7 @@ import { Route as AdminNewsRouteImport } from './routes/admin.news'
 import { Route as AdminModerationRouteImport } from './routes/admin.moderation'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminIncidentsRouteImport } from './routes/admin.incidents'
+import { Route as AdminGamesRouteImport } from './routes/admin.games'
 import { Route as AdminFeedbackRouteImport } from './routes/admin.feedback'
 import { Route as AdminFeaturesRouteImport } from './routes/admin.features'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
@@ -242,6 +243,11 @@ const AdminIncidentsRoute = AdminIncidentsRouteImport.update({
   path: '/admin/incidents',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminGamesRoute = AdminGamesRouteImport.update({
+  id: '/admin/games',
+  path: '/admin/games',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminFeedbackRoute = AdminFeedbackRouteImport.update({
   id: '/admin/feedback',
   path: '/admin/feedback',
@@ -318,6 +324,7 @@ export interface FileRoutesByFullPath {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/features': typeof AdminFeaturesRoute
   '/admin/feedback': typeof AdminFeedbackRoute
+  '/admin/games': typeof AdminGamesRoute
   '/admin/incidents': typeof AdminIncidentsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/moderation': typeof AdminModerationRoute
@@ -367,6 +374,7 @@ export interface FileRoutesByTo {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/features': typeof AdminFeaturesRoute
   '/admin/feedback': typeof AdminFeedbackRoute
+  '/admin/games': typeof AdminGamesRoute
   '/admin/incidents': typeof AdminIncidentsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/moderation': typeof AdminModerationRoute
@@ -417,6 +425,7 @@ export interface FileRoutesById {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/features': typeof AdminFeaturesRoute
   '/admin/feedback': typeof AdminFeedbackRoute
+  '/admin/games': typeof AdminGamesRoute
   '/admin/incidents': typeof AdminIncidentsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/moderation': typeof AdminModerationRoute
@@ -468,6 +477,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/features'
     | '/admin/feedback'
+    | '/admin/games'
     | '/admin/incidents'
     | '/admin/login'
     | '/admin/moderation'
@@ -517,6 +527,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/features'
     | '/admin/feedback'
+    | '/admin/games'
     | '/admin/incidents'
     | '/admin/login'
     | '/admin/moderation'
@@ -566,6 +577,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/features'
     | '/admin/feedback'
+    | '/admin/games'
     | '/admin/incidents'
     | '/admin/login'
     | '/admin/moderation'
@@ -616,6 +628,7 @@ export interface RootRouteChildren {
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminFeaturesRoute: typeof AdminFeaturesRoute
   AdminFeedbackRoute: typeof AdminFeedbackRoute
+  AdminGamesRoute: typeof AdminGamesRoute
   AdminIncidentsRoute: typeof AdminIncidentsRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminModerationRoute: typeof AdminModerationRoute
@@ -902,6 +915,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIncidentsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/games': {
+      id: '/admin/games'
+      path: '/admin/games'
+      fullPath: '/admin/games'
+      preLoaderRoute: typeof AdminGamesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/feedback': {
       id: '/admin/feedback'
       path: '/admin/feedback'
@@ -1000,6 +1020,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminDashboardRoute: AdminDashboardRoute,
   AdminFeaturesRoute: AdminFeaturesRoute,
   AdminFeedbackRoute: AdminFeedbackRoute,
+  AdminGamesRoute: AdminGamesRoute,
   AdminIncidentsRoute: AdminIncidentsRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminModerationRoute: AdminModerationRoute,

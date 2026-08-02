@@ -2,7 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import {
   LayoutDashboard, Building2, AlertTriangle, FileText, MessageSquare,
-  Users, ShieldAlert, BarChart3, Bot, LogOut, Ghost, Megaphone, MessagesSquare, Vote, MessageSquareHeart, UserCog, Handshake,
+  Users, ShieldAlert, BarChart3, Bot, LogOut, Ghost, Megaphone, MessagesSquare, Vote, MessageSquareHeart, UserCog, Handshake, Gamepad2,
 } from "lucide-react";
 import { useAdmin } from "@/stores/admin";
 import { cn } from "@/lib/utils";
@@ -21,6 +21,7 @@ const NAV = [
   { to: "/admin/moderation", label: "Moderation", icon: ShieldAlert },
   { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/admin/ai", label: "AI Control", icon: Bot },
+  { to: "/admin/games", label: "Games & AI", icon: Gamepad2 },
   { to: "/admin/ads", label: "Ads", icon: Megaphone },
   { to: "/admin/features", label: "Features", icon: Bot },
   { to: "/admin/feedback", label: "Feedback", icon: MessageSquareHeart },

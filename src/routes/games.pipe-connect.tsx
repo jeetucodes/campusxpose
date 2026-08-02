@@ -200,8 +200,34 @@ export default function PipeConnectGame() {
   const [overloadAnim, setOverloadAnim] = useState<{ row: number; col: number } | null>(null);
   const [rotatingTile, setRotatingTile] = useState<string | null>(null);
 
+  // Check if game disabled by Admin
+  const isGameDisabled = React.useMemo(() => {
+    try {
+      const raw = localStorage.getItem("cx_games_status");
+      if (raw) {
+        const map = JSON.parse(raw);
+        return map["pipe-connect"] === false;
+      }
+    } catch (e) {}
+    return false;
+  }, []);
+
   const initLevel = useCallback((idx: number) => {
-    const data = getPipeLevel(idx);
+    let data = getPipeLevel(idx);
+
+    // Read custom AI imported levels by Admin
+    try {
+      const customRaw = localStorage.getItem("cx_pipe_custom_levels");
+      if (customRaw) {
+        const customLevels = JSON.parse(customRaw);
+        if (Array.isArray(customLevels) && customLevels.length > 0) {
+          if (idx >= 30 && idx - 30 < customLevels.length) {
+            data = customLevels[idx - 30];
+          }
+        }
+      }
+    } catch (e) {}
+
     setLevelData(data);
     setTiles(data.tiles);
     setMoves(0);
@@ -294,6 +320,25 @@ export default function PipeConnectGame() {
 
   const nextLevel = () => setLevelIdx(i => i + 1);
   const resetLevel = () => initLevel(levelIdx);
+
+  if (isGameDisabled) {
+    return (
+      <div className="min-h-screen bg-[#f4f4f5] flex flex-col items-center justify-center p-6 text-center">
+        <div className="bg-white border-4 border-black p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] max-w-md space-y-4" style={{ borderRadius: WOBBLY_MD }}>
+          <div className="text-6xl animate-bounce">🛠️</div>
+          <h2 className="font-display text-2xl font-black text-black uppercase">Under Maintenance</h2>
+          <p className="text-sm font-bold text-black/70">
+            Pipe Connect has been temporarily turned OFF by Campus Admin for level upgrades. Please check back soon!
+          </p>
+          <Link to="/games">
+            <button className="w-full h-12 bg-black text-white border-2 border-black font-black uppercase shadow-[3px_3px_0px_0px_rgba(254,240,138,1)] cursor-pointer" style={{ borderRadius: WOBBLY_SM }}>
+              Back to Games Hub
+            </button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   if (!isMounted || !levelData) return (
     <div className="min-h-screen flex items-center justify-center bg-[#f4f4f5]">
