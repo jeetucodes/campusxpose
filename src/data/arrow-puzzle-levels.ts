@@ -321,8 +321,8 @@ const RAW_LEVELS: string[][] = [
     "B....B",
     "......"
   ],
-  
- // Level 40: 6x6, 2-bounce turn (/ then \)
+
+  // Level 40: 6x6, 2-bounce turn (/ then \)
   [
     "......",
     "...\\..",
@@ -422,7 +422,7 @@ const RAW_LEVELS: string[][] = [
     ">..../"
   ],
 
-     // ═══════════════════════════════════════════════════════════════════
+  // ═══════════════════════════════════════════════════════════════════
   // HARD LEVELS 51–100  (verified solvable, very challenging)
   // ═══════════════════════════════════════════════════════════════════
   ...(() => {
@@ -1224,5 +1224,4 @@ export function getStaticLevel(levelIdx: number): LevelData {
 
   return { gridSize, arrows: filledArrows, obstacles };
 }
-      
-    
+

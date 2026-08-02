@@ -240,16 +240,31 @@ export default function PipeConnectGame() {
       data = getPipeLevel(idx);
     }
 
-    setLevelData(data);
-    setTiles(data.tiles);
-    setMoves(0);
-    setLives(5);
-    setHintsLeft(3);
-    setHintedTileKey(null);
-    setWon(false);
-    setGameOver(false);
-    setOverloadAnim(null);
-    setRotatingTile(null);
+    if (data) {
+      const normalizedData = {
+        gridSize: Number(data.gridSize) || 4,
+        maxMoves: Number(data.maxMoves) || 15,
+        tiles: (data.tiles || []).map((t: any) => ({
+          row: Number(t.row),
+          col: Number(t.col),
+          type: t.type || "straight",
+          rotation: Number(t.rotation) || 0,
+          solvedRotation: Number(t.solvedRotation) || 0,
+          fixed: !!t.fixed,
+        })),
+      };
+
+      setLevelData(normalizedData);
+      setTiles(normalizedData.tiles);
+      setMoves(0);
+      setLives(5);
+      setHintsLeft(3);
+      setHintedTileKey(null);
+      setWon(false);
+      setGameOver(false);
+      setOverloadAnim(null);
+      setRotatingTile(null);
+    }
   }, []);
 
   const [customPipeCount, setCustomPipeCount] = useState(0);

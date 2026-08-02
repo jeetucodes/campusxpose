@@ -67,40 +67,85 @@ const ALL_GAMES: GameMeta[] = [
     overridesKey: "cx_arrow_level_overrides",
     totalBuiltIn: 100,
     prompt: `Act as a Level Designer for Arrow Puzzle.
-Generate a valid JSON for Arrow Puzzle levels.
+Generate valid JSON for Arrow Puzzle levels.
 
-Game Mechanics:
-- Grid size: 5x5 or 6x6.
-- Arrows: direction "up", "down", "left", "right".
-- Mirror Slash "/": Up->Right, Down->Left, Right->Up, Left->Down.
-- Mirror Backslash "\\": Up->Left, Down->Right, Right->Down, Left->Up.
-- Obstacles: "wall", "bomb", "ice", "rotator", "gate-up", "gate-down".
+Game Mechanics & Types:
+- gridSize: 5 or 6 (default 6 for rich levels).
+- arrows: array of objects { "id": number, "row": number, "col": number, "dir": "up"|"down"|"left"|"right" }
+- obstacles: array of objects with types:
+  - "mirror-slash" (turns ↑ to →, ↓ to ←)
+  - "mirror-backslash" (turns ↑ to ←, ↓ to →)
+  - "wall" (blocks path)
+  - "bomb" (causes damage)
+  - "ice" (pass-through corridor)
+  - "rotator" (rotates 90 deg)
+  - "gate-up", "gate-down", "gate-left", "gate-right" (directional gates)
 
 Single Level Format:
 {
-  "gridSize": 5,
+  "gridSize": 6,
   "arrows": [
-    { "id": 0, "row": 1, "col": 1, "dir": "up" }
+    { "id": 0, "row": 5, "col": 0, "dir": "up" },
+    { "id": 1, "row": 0, "col": 5, "dir": "left" }
   ],
   "obstacles": [
-    { "id": 0, "row": 1, "col": 2, "type": "mirror-slash" }
+    { "id": 0, "row": 4, "col": 0, "type": "mirror-backslash" },
+    { "id": 1, "row": 4, "col": 1, "type": "mirror-slash" },
+    { "id": 2, "row": 2, "col": 0, "type": "wall" },
+    { "id": 3, "row": 0, "col": 1, "type": "bomb" }
   ]
 }`,
     sampleSingleJson: `{
-  "gridSize": 5,
-  "arrows": [{ "id": 0, "row": 1, "col": 1, "dir": "up" }],
-  "obstacles": [{ "id": 0, "row": 1, "col": 2, "type": "mirror-slash" }]
+  "gridSize": 6,
+  "arrows": [
+    { "id": 0, "row": 5, "col": 0, "dir": "up" },
+    { "id": 1, "row": 0, "col": 5, "dir": "left" },
+    { "id": 2, "row": 5, "col": 5, "dir": "up" }
+  ],
+  "obstacles": [
+    { "id": 0, "row": 4, "col": 0, "type": "mirror-backslash" },
+    { "id": 1, "row": 4, "col": 1, "type": "mirror-slash" },
+    { "id": 2, "row": 3, "col": 2, "type": "mirror-backslash" },
+    { "id": 3, "row": 2, "col": 2, "type": "mirror-slash" },
+    { "id": 4, "row": 1, "col": 3, "type": "mirror-backslash" },
+    { "id": 5, "row": 0, "col": 3, "type": "mirror-slash" },
+    { "id": 6, "row": 1, "col": 5, "type": "mirror-slash" },
+    { "id": 7, "row": 2, "col": 4, "type": "mirror-backslash" },
+    { "id": 8, "row": 3, "col": 4, "type": "mirror-slash" },
+    { "id": 9, "row": 4, "col": 5, "type": "mirror-backslash" },
+    { "id": 10, "row": 2, "col": 0, "type": "wall" },
+    { "id": 11, "row": 2, "col": 5, "type": "wall" },
+    { "id": 12, "row": 5, "col": 2, "type": "wall" },
+    { "id": 13, "row": 3, "col": 1, "type": "ice" },
+    { "id": 14, "row": 1, "col": 1, "type": "rotator" },
+    { "id": 15, "row": 4, "col": 3, "type": "gate-up" },
+    { "id": 16, "row": 2, "col": 3, "type": "gate-down" },
+    { "id": 17, "row": 0, "col": 1, "type": "bomb" }
+  ]
 }`,
     sampleMultipleJson: `[
   {
-    "gridSize": 5,
-    "arrows": [{ "id": 0, "row": 1, "col": 1, "dir": "up" }],
-    "obstacles": [{ "id": 0, "row": 1, "col": 2, "type": "mirror-slash" }]
+    "gridSize": 6,
+    "arrows": [
+      { "id": 0, "row": 5, "col": 0, "dir": "up" },
+      { "id": 1, "row": 0, "col": 5, "dir": "left" }
+    ],
+    "obstacles": [
+      { "id": 0, "row": 4, "col": 0, "type": "mirror-backslash" },
+      { "id": 1, "row": 4, "col": 1, "type": "mirror-slash" },
+      { "id": 2, "row": 2, "col": 0, "type": "wall" }
+    ]
   },
   {
-    "gridSize": 5,
-    "arrows": [{ "id": 0, "row": 2, "col": 2, "dir": "right" }],
-    "obstacles": [{ "id": 0, "row": 2, "col": 3, "type": "wall" }]
+    "gridSize": 6,
+    "arrows": [
+      { "id": 0, "row": 3, "col": 0, "dir": "right" },
+      { "id": 1, "row": 0, "col": 3, "dir": "down" }
+    ],
+    "obstacles": [
+      { "id": 0, "row": 3, "col": 3, "type": "mirror-slash" },
+      { "id": 1, "row": 1, "col": 1, "type": "rotator" }
+    ]
   }
 ]`,
   },

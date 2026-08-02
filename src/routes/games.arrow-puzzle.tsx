@@ -403,18 +403,37 @@ export default function ArrowPuzzleGame() {
       data = getStaticLevel(idx);
     }
 
-    setLevelData(data);
-    setArrows(data.arrows);
-    setMoves(0);
-    setLives(5);
-    setHintsLeft(3);
-    setHintedArrowId(null);
-    setHoveredArrowId(null);
-    setWon(false);
-    setGameOver(false);
-    setMovingArrow(null);
-    setCollisionAnim(null);
-    setShakeId(null);
+    if (data) {
+      const normalizedData: LevelData = {
+        gridSize: Number(data.gridSize) || 5,
+        arrows: (data.arrows || []).map((a: any, i: number) => ({
+          id: a.id ?? i,
+          row: Number(a.row),
+          col: Number(a.col),
+          dir: a.dir || "up",
+          twinId: a.twinId,
+        })),
+        obstacles: (data.obstacles || []).map((o: any, i: number) => ({
+          id: o.id ?? i,
+          row: Number(o.row),
+          col: Number(o.col),
+          type: o.type || "wall",
+        })),
+      };
+
+      setLevelData(normalizedData);
+      setArrows(normalizedData.arrows);
+      setMoves(0);
+      setLives(5);
+      setHintsLeft(3);
+      setHintedArrowId(null);
+      setHoveredArrowId(null);
+      setWon(false);
+      setGameOver(false);
+      setMovingArrow(null);
+      setCollisionAnim(null);
+      setShakeId(null);
+    }
   }, []);
 
   useEffect(() => {
