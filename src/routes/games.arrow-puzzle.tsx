@@ -559,7 +559,7 @@ export default function ArrowPuzzleGame() {
       setTimeout(() => setCollisionAnim(null), 500);
       setLives(prev => {
         const next = prev - 1;
-        if (next <= 0) setGameOver(true);
+        if (next <= 0) setShowLivesAd(true);
         return next;
       });
     }
@@ -611,7 +611,7 @@ export default function ArrowPuzzleGame() {
 
   const claimHintAfterAd = () => {
     setHintsLeft(h => h - 1);
-    const ids = tappableIds.size > 0 ? Array.from(tappableIds) : arrows.map(a => a.id);
+    const ids = arrows.map(a => a.id);
     if (ids.length > 0) {
       const randomId = ids[Math.floor(Math.random() * ids.length)];
       setHintedArrowId(randomId);

@@ -13,14 +13,10 @@ function HomeAdCard({ ad, active }: { ad: Ad; active: boolean }) {
   return (
     <div
       className={cn(
-        "relative overflow-hidden border-2 border-ink bg-white transition-all duration-500",
-        "shadow-[4px_4px_0px_0px_var(--ink)]",
+        "relative overflow-hidden border border-border/80 bg-card rounded-2xl transition-all duration-500 shadow-lg hover:shadow-xl",
         active ? "opacity-100 scale-100" : "opacity-0 scale-[0.98] absolute inset-0 pointer-events-none",
       )}
-      style={{ borderRadius: "20px 7px 22px 7px / 7px 22px 7px 20px" }}
     >
-      {/* Tape strip decoration */}
-      <div className="absolute -top-1.5 left-8 z-10 h-5 w-16 -rotate-1 rounded-sm bg-yellow-200 border border-yellow-300/80 pointer-events-none" />
 
       {/* VIDEO — full width stacked layout */}
       {isVideo ? (
@@ -42,16 +38,21 @@ function HomeAdCard({ ad, active }: { ad: Ad; active: boolean }) {
       ) : hasImage ? (
         /* IMAGE — two-column on md+, stacked on mobile */
         <div className="flex flex-col md:flex-row md:min-h-[200px]">
-          {/* Image column — fills left half */}
-          <div className="relative md:w-1/2 shrink-0 overflow-hidden bg-surface-2">
+          {/* Image column — fills left half with uncropped full photo */}
+          <div className="relative md:w-1/2 shrink-0 overflow-hidden bg-slate-900 flex items-center justify-center min-h-[180px] max-h-[280px]">
+            <img
+              src={ad.media_url!}
+              alt=""
+              aria-hidden="true"
+              className="absolute inset-0 w-full h-full object-cover blur-sm opacity-40 scale-110 pointer-events-none"
+            />
             <img
               src={ad.media_url!}
               alt={ad.title}
               loading="eager"
-              className="h-full w-full object-cover"
-              style={{ minHeight: "180px", maxHeight: "280px" }}
+              className="relative z-10 w-full h-full max-h-[280px] object-contain p-1"
             />
-            <span className="absolute top-3 left-3 rounded-full border border-accent/30 bg-white/90 backdrop-blur-sm px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-accent shadow-sm">
+            <span className="absolute top-3 left-3 z-20 rounded-full border border-accent/30 bg-white/90 backdrop-blur-sm px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-accent shadow-sm">
               Sponsored
             </span>
           </div>
@@ -76,8 +77,7 @@ function HomeAdCard({ ad, active }: { ad: Ad; active: boolean }) {
                 href={ad.link_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="self-start inline-flex items-center gap-2 border-2 border-ink bg-accent px-4 py-2 text-sm font-bold text-white shadow-[3px_3px_0_0_var(--ink)] transition-all hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_var(--ink)] active:translate-y-0"
-                style={{ borderRadius: "10px 3px 12px 3px / 3px 12px 3px 10px" }}
+                className="self-start inline-flex items-center gap-2 bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground rounded-xl shadow-md transition-all hover:opacity-90 active:scale-95"
               >
                 {ad.cta_label || "Learn more"}
                 <ArrowRight className="h-3.5 w-3.5" />

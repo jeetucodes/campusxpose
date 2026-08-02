@@ -362,7 +362,7 @@ export default function PipeConnectGame() {
     if (!levelData) return;
     const movesLeft = levelData.maxMoves - moves;
     if (movesLeft <= 0) {
-      setGameOver(true);
+      setShowLivesAd(true);
       return;
     }
     if (hintedTileKey === `${tile.row},${tile.col}`) setHintedTileKey(null);
