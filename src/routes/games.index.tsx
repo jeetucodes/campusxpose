@@ -139,6 +139,53 @@ export default function GamesHub() {
           return "🌱 Campus Rookie";
         };
 
+const INITIAL_CAMPUS_PLAYERS: LeaderboardPlayer[] = [
+  {
+    id: "p_aarav",
+    name: "@Aarav_IITD",
+    college: "IIT Delhi",
+    score: 2850,
+    arrowLevel: 18,
+    best2048: 2048,
+    badge: "👑 Grandmaster",
+    updatedAt: Date.now() - 3600000,
+    isCurrentUser: false,
+  },
+  {
+    id: "p_priya",
+    name: "@Priya_BITS",
+    college: "BITS Pilani",
+    score: 2100,
+    arrowLevel: 14,
+    best2048: 1024,
+    badge: "⚡ Logic Wizard",
+    updatedAt: Date.now() - 7200000,
+    isCurrentUser: false,
+  },
+  {
+    id: "p_rohan",
+    name: "@Rohan_DTU",
+    college: "DTU Delhi",
+    score: 1650,
+    arrowLevel: 11,
+    best2048: 512,
+    badge: "⚡ Logic Wizard",
+    updatedAt: Date.now() - 10800000,
+    isCurrentUser: false,
+  },
+  {
+    id: "p_sneha",
+    name: "@Sneha_NITK",
+    college: "NIT Surathkal",
+    score: 1200,
+    arrowLevel: 8,
+    best2048: 512,
+    badge: "🏹 Arrow Pioneer",
+    updatedAt: Date.now() - 14400000,
+    isCurrentUser: false,
+  },
+];
+
         // Load existing real leaderboard entries from storage
         let storedPlayers: LeaderboardPlayer[] = [];
         try {
@@ -146,6 +193,16 @@ export default function GamesHub() {
           if (raw) storedPlayers = JSON.parse(raw);
         } catch (e) {
           console.warn("Storage parse error", e);
+        }
+
+        if (!storedPlayers || storedPlayers.length === 0) {
+          storedPlayers = [...INITIAL_CAMPUS_PLAYERS];
+        } else {
+          INITIAL_CAMPUS_PLAYERS.forEach(defaultP => {
+            if (!storedPlayers.some(p => p.id === defaultP.id || p.name === defaultP.name)) {
+              storedPlayers.push(defaultP);
+            }
+          });
         }
 
         // Upsert current user's real verified score
