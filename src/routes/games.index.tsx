@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { Gamepad2, ArrowRight, Trophy, Sparkles, Play, X, Crown } from "lucide-react";
+import { Gamepad2, ArrowRight, Trophy, Sparkles, Play, X, Crown, Users, Activity } from "lucide-react";
 import { loadOrCreateIdentity } from "../lib/identity";
+import { getGameAnalytics, recordGameSession, RealPlayerRecord } from "../lib/gameAnalytics";
 
 export const Route = createFileRoute("/games/")({
   head: () => ({
@@ -30,8 +31,6 @@ export interface LeaderboardPlayer {
   updatedAt: number;
   isCurrentUser?: boolean;
 }
-
-const LEADERBOARD_STORAGE_KEY = "cx_campus_game_leaderboard";
 
 export default function GamesHub() {
   const [username, setUsername] = useState<string>("Campus Gamer");
@@ -91,7 +90,6 @@ export default function GamesHub() {
   // Rotating featured game index (auto-changes every 4 seconds)
   const [featuredIndexOffset, setFeaturedIndexOffset] = useState<number>(0);
 
-  // Auto-rotation timer for featured hero banner
   useEffect(() => {
     const timer = setInterval(() => {
       setFeaturedIndexOffset(prev => prev + 1);
@@ -99,160 +97,92 @@ export default function GamesHub() {
     return () => clearInterval(timer);
   }, []);
 
-  useEffect(() => {
-    async function loadRealData() {
-      try {
-        const idObj = await loadOrCreateIdentity();
-        const currentName = idObj?.username || "Campus Gamer";
-        setUsername(currentName);
+  // Load STRICTLY REAL player leaderboard data (NO FAKE DATA)
+  const loadRealLeaderboard = async () => {
+    try {
+      const idObj = await loadOrCreateIdentity();
+      const currentName = idObj?.username || "Campus Gamer";
+      setUsername(currentName);
 
-        const savedCollege = localStorage.getItem("cx_selected_college") || localStorage.getItem("selected_college_name") || "Campus Student";
-        setCollege(savedCollege);
+      const savedCollege = localStorage.getItem("cx_selected_college") || localStorage.getItem("selected_college_name") || "Campus Student";
+      setCollege(savedCollege);
 
-        const arrowLvl = parseInt(localStorage.getItem("cx_arrow_level") || "0", 10);
-        const pipeLvl = parseInt(localStorage.getItem("cx_pipe_level") || "0", 10);
-        const h2048 = parseInt(localStorage.getItem("cx_2048_highscore") || "0", 10);
-        const memBest = parseInt(localStorage.getItem("cx_memory_best") || "0", 10);
+      const arrowLvl = parseInt(localStorage.getItem("cx_arrow_level") || "0", 10);
+      const pipeLvl = parseInt(localStorage.getItem("cx_pipe_level") || "0", 10);
+      const h2048 = parseInt(localStorage.getItem("cx_2048_highscore") || "0", 10);
+      const memBest = parseInt(localStorage.getItem("cx_memory_best") || "0", 10);
 
-        const realArrowLvl = isNaN(arrowLvl) ? 0 : arrowLvl + 1;
-        const realPipeLvl = isNaN(pipeLvl) ? 0 : pipeLvl + 1;
-        const realH2048 = isNaN(h2048) ? 0 : h2048;
-        const realMemBest = isNaN(memBest) ? 0 : memBest;
+      const realArrowLvl = isNaN(arrowLvl) ? 0 : arrowLvl + 1;
+      const realPipeLvl = isNaN(pipeLvl) ? 0 : pipeLvl + 1;
+      const realH2048 = isNaN(h2048) ? 0 : h2048;
+      const realMemBest = isNaN(memBest) ? 0 : memBest;
 
-        setStats({
-          arrowLevel: realArrowLvl,
-          pipeLevel: realPipeLvl,
-          best2048: realH2048,
-          memoryBest: realMemBest,
-        });
+      setStats({
+        arrowLevel: realArrowLvl,
+        pipeLevel: realPipeLvl,
+        best2048: realH2048,
+        memoryBest: realMemBest,
+      });
 
-        // Compute real player score
-        const arrowPoints = realArrowLvl * 150;
-        const pipePoints = realPipeLvl * 100;
-        const totalPts = arrowPoints + pipePoints + realH2048;
+      // Fetch analytics real players map
+      const analytics = getGameAnalytics();
+      const playersMap = analytics.players || {};
 
-        const getBadgeText = (pts: number, lvl: number) => {
-          if (lvl > 20 || pts > 2000) return "👑 Grandmaster";
-          if (lvl > 10 || pts > 1000) return "⚡ Logic Wizard";
-          if (lvl > 3 || pts > 400) return "🏹 Arrow Pioneer";
-          if (pts > 0) return "🚀 Active Player";
-          return "🌱 Campus Rookie";
+      // Build real players list strictly from real recorded users
+      const currentUid = idObj?.uid || "user_local";
+      const realList: LeaderboardPlayer[] = Object.values(playersMap).map((p: RealPlayerRecord) => {
+        return {
+          id: p.uid,
+          name: p.username,
+          college: p.college,
+          score: p.totalScore,
+          arrowLevel: p.arrowLevel,
+          best2048: p.best2048,
+          badge: p.totalScore > 2000 ? "👑 Grandmaster" : p.totalScore > 1000 ? "⚡ Logic Wizard" : p.totalScore > 400 ? "🏹 Arrow Pioneer" : "🚀 Active Player",
+          updatedAt: p.lastPlayedTime,
+          isCurrentUser: p.uid === currentUid,
         };
+      });
 
-const INITIAL_CAMPUS_PLAYERS: LeaderboardPlayer[] = [
-  {
-    id: "p_aarav",
-    name: "@Aarav_IITD",
-    college: "IIT Delhi",
-    score: 2850,
-    arrowLevel: 18,
-    best2048: 2048,
-    badge: "👑 Grandmaster",
-    updatedAt: Date.now() - 3600000,
-    isCurrentUser: false,
-  },
-  {
-    id: "p_priya",
-    name: "@Priya_BITS",
-    college: "BITS Pilani",
-    score: 2100,
-    arrowLevel: 14,
-    best2048: 1024,
-    badge: "⚡ Logic Wizard",
-    updatedAt: Date.now() - 7200000,
-    isCurrentUser: false,
-  },
-  {
-    id: "p_rohan",
-    name: "@Rohan_DTU",
-    college: "DTU Delhi",
-    score: 1650,
-    arrowLevel: 11,
-    best2048: 512,
-    badge: "⚡ Logic Wizard",
-    updatedAt: Date.now() - 10800000,
-    isCurrentUser: false,
-  },
-  {
-    id: "p_sneha",
-    name: "@Sneha_NITK",
-    college: "NIT Surathkal",
-    score: 1200,
-    arrowLevel: 8,
-    best2048: 512,
-    badge: "🏹 Arrow Pioneer",
-    updatedAt: Date.now() - 14400000,
-    isCurrentUser: false,
-  },
-];
-
-        // Load existing real leaderboard entries from storage
-        let storedPlayers: LeaderboardPlayer[] = [];
-        try {
-          const raw = localStorage.getItem(LEADERBOARD_STORAGE_KEY);
-          if (raw) storedPlayers = JSON.parse(raw);
-        } catch (e) {
-          console.warn("Storage parse error", e);
-        }
-
-        if (!storedPlayers || storedPlayers.length === 0) {
-          storedPlayers = [...INITIAL_CAMPUS_PLAYERS];
-        } else {
-          INITIAL_CAMPUS_PLAYERS.forEach(defaultP => {
-            if (!storedPlayers.some(p => p.id === defaultP.id || p.name === defaultP.name)) {
-              storedPlayers.push(defaultP);
-            }
-          });
-        }
-
-        // Upsert current user's real verified score
-        const userRecord: LeaderboardPlayer = {
-          id: idObj.uid || "user_local",
+      // Ensure current real user is included in real list
+      const totalPts = (realArrowLvl * 150) + (realPipeLvl * 100) + realH2048;
+      const hasUser = realList.some(p => p.id === currentUid);
+      if (!hasUser) {
+        realList.push({
+          id: currentUid,
           name: `@${currentName}`,
           college: savedCollege,
           score: totalPts,
           arrowLevel: realArrowLvl,
           best2048: realH2048,
-          badge: getBadgeText(totalPts, realArrowLvl),
+          badge: totalPts > 2000 ? "👑 Grandmaster" : totalPts > 1000 ? "⚡ Logic Wizard" : totalPts > 400 ? "🏹 Arrow Pioneer" : "🚀 Active Player",
           updatedAt: Date.now(),
           isCurrentUser: true,
-        };
-
-        const existingIdx = storedPlayers.findIndex(
-          p => p.id === userRecord.id || p.name === userRecord.name
-        );
-
-        if (existingIdx >= 0) {
-          storedPlayers[existingIdx] = { ...userRecord, isCurrentUser: true };
-        } else {
-          storedPlayers.push(userRecord);
-        }
-
-        // Mark current user flag properly
-        storedPlayers = storedPlayers.map(p => ({
-          ...p,
-          isCurrentUser: p.id === userRecord.id || p.name === userRecord.name,
-        }));
-
-        // Sort descending by score
-        storedPlayers.sort((a, b) => b.score - a.score);
-
-        // Save back real updated store
-        localStorage.setItem(LEADERBOARD_STORAGE_KEY, JSON.stringify(storedPlayers));
-        setLeaderboardList(storedPlayers);
-
-      } catch (e) {
-        console.warn("Error reading real user game stats", e);
+        });
       }
+
+      realList.sort((a, b) => b.score - a.score);
+      setLeaderboardList(realList);
+    } catch (e) {
+      console.warn("Error loading real leaderboard", e);
     }
-    loadRealData();
+  };
+
+  useEffect(() => {
+    loadRealLeaderboard();
+    window.addEventListener("cx_game_played_event", loadRealLeaderboard);
+    window.addEventListener("storage", loadRealLeaderboard);
+    return () => {
+      window.removeEventListener("cx_game_played_event", loadRealLeaderboard);
+      window.removeEventListener("storage", loadRealLeaderboard);
+    };
   }, []);
 
   const currentUser = leaderboardList.find(p => p.isCurrentUser);
   const totalUserPoints = currentUser?.score || (stats.arrowLevel * 150) + (stats.pipeLevel * 100) + stats.best2048;
   const userRank = (leaderboardList.findIndex(p => p.isCurrentUser) >= 0 ? leaderboardList.findIndex(p => p.isCurrentUser) + 1 : 1);
 
-  // Filter leaderboard based on tab
+  // Filter leaderboard strictly for real players
   const filteredLeaderboard = React.useMemo(() => {
     let list = [...leaderboardList];
     if (lbCategory === "arrow") {
@@ -262,12 +192,12 @@ const INITIAL_CAMPUS_PLAYERS: LeaderboardPlayer[] = [
     } else {
       list.sort((a, b) => b.score - a.score);
     }
-    return list.slice(0, 5); // TOP 5 ONLY
+    return list;
   }, [leaderboardList, lbCategory]);
 
   const GAMES = [
     {
-      id: "arrow-puzzle",
+      id: "arrow-puzzle" as const,
       title: "Arrow Puzzle",
       tagline: "Clear the board using deflector logic & strategy!",
       description: `${arrowTotalLevels} levels of deflector mirrors, ice corridors & explosive bombs! Tap arrows and clear the board.`,
@@ -282,7 +212,7 @@ const INITIAL_CAMPUS_PLAYERS: LeaderboardPlayer[] = [
       icon: "🎯",
     },
     {
-      id: "pipe-connect",
+      id: "pipe-connect" as const,
       title: "Pipe Connect",
       tagline: "Wire up the circuit and power the node!",
       description: "Connect matching color power tubes and complete electrical circuit paths under time!",
@@ -297,7 +227,7 @@ const INITIAL_CAMPUS_PLAYERS: LeaderboardPlayer[] = [
       icon: "🔌",
     },
     {
-      id: "2048",
+      id: "2048" as const,
       title: "2048 Classic",
       tagline: "Slide, merge matching tiles and beat your high score!",
       description: "Join matching number tiles together to reach the legendary 2048 tile and set new high scores!",
@@ -312,7 +242,7 @@ const INITIAL_CAMPUS_PLAYERS: LeaderboardPlayer[] = [
       icon: "⭐",
     },
     {
-      id: "memory-match",
+      id: "memory-match" as const,
       title: "Memory Match",
       tagline: "Flip and match campus emoji cards under time!",
       description: "Test your focus & memory speed! Match all campus emoji card pairs before time runs out.",
@@ -328,10 +258,8 @@ const INITIAL_CAMPUS_PLAYERS: LeaderboardPlayer[] = [
     },
   ];
 
-  // ONLY INCLUDE ONLINE GAMES (Turned-OFF games are COMPLETELY HIDDEN)
   const activeOnlineGames = GAMES.filter(g => gameStatus[g.id] !== false);
 
-  // Auto-rotating active featured game calculation (only from online games)
   const activeFeaturedGame = activeOnlineGames.length > 0
     ? activeOnlineGames[featuredIndexOffset % activeOnlineGames.length]
     : null;
@@ -342,7 +270,7 @@ const INITIAL_CAMPUS_PLAYERS: LeaderboardPlayer[] = [
 
   return (
     <div className="min-h-screen bg-[#f4f4f5] pb-28 text-black font-sans select-none">
-      {/* Sticky Header — Clean & Minimal */}
+      {/* Sticky Header */}
       <div className="sticky top-0 z-40 border-b-4 border-black bg-[#fef08a] py-3 shadow-sm">
         <div className="mx-auto max-w-2xl px-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -372,7 +300,7 @@ const INITIAL_CAMPUS_PLAYERS: LeaderboardPlayer[] = [
 
       <div className="mx-auto max-w-2xl px-4 py-6 space-y-6">
 
-        {/* Dynamic Auto-Rotating Featured Hero Banner (Only Online Games) */}
+        {/* Dynamic Auto-Rotating Featured Hero Banner */}
         {activeFeaturedGame && (
           <AnimatePresence mode="wait">
             <motion.div
@@ -391,7 +319,6 @@ const INITIAL_CAMPUS_PLAYERS: LeaderboardPlayer[] = [
                     <span>FEATURED GAME</span>
                   </div>
 
-                  {/* Animated Carousel Progress Dots */}
                   <div className="flex items-center gap-1.5 bg-white/80 px-2.5 py-1 border-2 border-black rounded-full shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                     {activeOnlineGames.map((g, idx) => (
                       <div
@@ -414,7 +341,10 @@ const INITIAL_CAMPUS_PLAYERS: LeaderboardPlayer[] = [
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3 pt-1">
-                  <Link to={activeFeaturedGame.link}>
+                  <Link
+                    to={activeFeaturedGame.link}
+                    onClick={() => recordGameSession(activeFeaturedGame.id, 0, 1)}
+                  >
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -461,10 +391,15 @@ const INITIAL_CAMPUS_PLAYERS: LeaderboardPlayer[] = [
           </div>
         )}
 
-        {/* Games Grid — ONLY ONLINE GAMES ARE RENDERED */}
+        {/* Games Grid */}
         <div className="space-y-4 pt-1">
           {filteredGames.map((game, idx) => (
-            <Link key={game.id} to={game.link} className="block outline-none">
+            <Link
+              key={game.id}
+              to={game.link}
+              onClick={() => recordGameSession(game.id, 0, 1)}
+              className="block outline-none"
+            >
               <motion.div
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -505,21 +440,11 @@ const INITIAL_CAMPUS_PLAYERS: LeaderboardPlayer[] = [
               </motion.div>
             </Link>
           ))}
-
-          {activeOnlineGames.length === 0 && (
-            <div className="p-8 bg-white border-4 border-black rounded-3xl text-center space-y-3 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
-              <div className="text-5xl animate-bounce">🛠️</div>
-              <h3 className="font-display text-2xl font-black uppercase text-black">Arcade Under Maintenance</h3>
-              <p className="text-sm font-bold text-black/70">
-                All campus mini-games are currently undergoing server upgrades by Campus Admin. Please check back shortly!
-              </p>
-            </div>
-          )}
         </div>
 
       </div>
 
-      {/* ─── Real Dynamic Campus Leaderboard Modal Overlay ───────────────────────── */}
+      {/* ─── Strictly Real Dynamic Leaderboard Modal Overlay (NO FAKE DATA) ───── */}
       <AnimatePresence>
         {showLeaderboard && (
           <motion.div
@@ -551,10 +476,10 @@ const INITIAL_CAMPUS_PLAYERS: LeaderboardPlayer[] = [
                 </div>
                 <div>
                   <h2 className="font-display text-2xl font-black uppercase tracking-tight leading-none">
-                    Top 5 Leaderboard
+                    Campus Leaderboard
                   </h2>
-                  <span className="text-xs font-bold text-black/70">
-                    Live Real-Time Player Rankings 🏆
+                  <span className="text-xs font-bold text-black/70 flex items-center gap-1">
+                    <Activity className="h-3.5 w-3.5 text-emerald-600" /> Verified Real Players Only
                   </span>
                 </div>
               </div>
@@ -598,10 +523,10 @@ const INITIAL_CAMPUS_PLAYERS: LeaderboardPlayer[] = [
                 </div>
               </div>
 
-              {/* Scrollable Top 5 Live Leaders List */}
+              {/* Scrollable Live Real Players List */}
               <div className="flex-1 overflow-y-auto pr-1 space-y-2.5 custom-scrollbar">
                 <h3 className="text-xs font-black uppercase tracking-wider text-black mb-1 flex items-center gap-1.5">
-                  <Crown className="h-4 w-4 text-amber-500 fill-amber-500" /> Top 5 Players
+                  <Crown className="h-4 w-4 text-amber-500 fill-amber-500" /> Real Active Campus Players ({filteredLeaderboard.length})
                 </h3>
 
                 {filteredLeaderboard.map((player, index) => {
@@ -652,13 +577,6 @@ const INITIAL_CAMPUS_PLAYERS: LeaderboardPlayer[] = [
                     </div>
                   );
                 })}
-
-                {filteredLeaderboard.length === 0 && (
-                  <div className="p-4 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl text-center space-y-1">
-                    <p className="text-xs font-black text-black">No game records yet!</p>
-                    <p className="text-[11px] font-bold text-black/60">Play Arrow Puzzle or 2048 to claim Rank #1!</p>
-                  </div>
-                )}
               </div>
             </motion.div>
           </motion.div>

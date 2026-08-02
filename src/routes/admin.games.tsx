@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { Gamepad2, Info, Copy, Check, Plus, Trash2, Power, Sparkles, Code, Layers, X, ExternalLink, Activity, ShieldCheck, Edit, Eye, Search, Save, RotateCcw, ArrowLeft, Radio } from "lucide-react";
+import { Gamepad2, Info, Copy, Check, Plus, Trash2, Power, Sparkles, Code, Layers, X, ExternalLink, Activity, ShieldCheck, Edit, Eye, Search, Save, RotateCcw, ArrowLeft, Radio, BarChart3, Users, Flame, TrendingDown, Clock, Award } from "lucide-react";
 import { toast } from "sonner";
 import { getStaticLevel } from "../data/arrow-puzzle-levels";
 import { getPipeLevel } from "../data/pipe-puzzle-levels";
+import { getGameAnalytics, GameAnalytics, RealPlayerRecord } from "../lib/gameAnalytics";
 
 export const Route = createFileRoute("/admin/games")({
   component: AdminGamesManagement,
@@ -230,6 +231,12 @@ export default function AdminGamesManagement() {
     "memory-match": true,
   });
 
+  const [analytics, setAnalytics] = useState<GameAnalytics>({
+    totalPlays: 0,
+    gamePlayCounts: { "arrow-puzzle": 0, "pipe-connect": 0, "2048": 0, "memory-match": 0 },
+    players: {},
+  });
+
   // Active View State: null = Games List View, GameId = Inside Game Level Detail View
   const [activeDetailGameId, setActiveDetailGameId] = useState<GameId | null>(null);
 
@@ -255,15 +262,26 @@ export default function AdminGamesManagement() {
 
   const selectedGameMeta = ALL_GAMES.find(g => g.id === activeDetailGameId) || ALL_GAMES[0];
 
-  useEffect(() => {
+  const loadData = () => {
     try {
       const savedStatus = localStorage.getItem(GAMES_STATUS_KEY);
-      if (savedStatus) {
-        setGameStatus(JSON.parse(savedStatus));
-      }
+      if (savedStatus) setGameStatus(JSON.parse(savedStatus));
+
+      const data = getGameAnalytics();
+      setAnalytics(data);
     } catch (e) {
       console.warn("Storage load error", e);
     }
+  };
+
+  useEffect(() => {
+    loadData();
+    window.addEventListener("cx_game_played_event", loadData);
+    window.addEventListener("storage", loadData);
+    return () => {
+      window.removeEventListener("cx_game_played_event", loadData);
+      window.removeEventListener("storage", loadData);
+    };
   }, []);
 
   // Reload custom levels & level overrides when active detail game changes
@@ -415,7 +433,30 @@ export default function AdminGamesManagement() {
     setSelectedLevelBox(null);
   };
 
-  // Compiled list of levels for active game (Arrow, Pipe, 2048, Memory Match)
+  // Compute game popularity metrics
+  const gamePopularityStats = useMemo(() => {
+    const counts = analytics.gamePlayCounts || { "arrow-puzzle": 0, "pipe-connect": 0, "2048": 0, "memory-match": 0 };
+    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+
+    const mostPlayedId = sorted[0]?.[0] || "arrow-puzzle";
+    const leastPlayedId = sorted[sorted.length - 1]?.[0] || "memory-match";
+
+    const mostMeta = ALL_GAMES.find(g => g.id === mostPlayedId) || ALL_GAMES[0];
+    const leastMeta = ALL_GAMES.find(g => g.id === leastPlayedId) || ALL_GAMES[ALL_GAMES.length - 1];
+
+    const realPlayersList = Object.values(analytics.players || {});
+
+    return {
+      mostPlayed: `${mostMeta.emoji} ${mostMeta.name} (${counts[mostPlayedId as GameId] || 0} Plays)`,
+      leastPlayed: `${leastMeta.emoji} ${leastMeta.name} (${counts[leastPlayedId as GameId] || 0} Plays)`,
+      totalPlayersCount: realPlayersList.length,
+      totalPlaysCount: analytics.totalPlays || 0,
+      counts,
+      playersList: realPlayersList.sort((a, b) => b.lastPlayedTime - a.lastPlayedTime),
+    };
+  }, [analytics]);
+
+  // Compiled list of levels for active game
   const levelBoxes = useMemo(() => {
     if (!activeDetailGameId) return [];
     const meta = selectedGameMeta;
@@ -457,7 +498,7 @@ export default function AdminGamesManagement() {
   return (
     <div className="min-h-screen bg-[#f4f4f5] p-4 md:p-8 max-w-5xl mx-auto w-full space-y-6 text-black font-sans select-none pb-28">
 
-      {/* ─── VIEW 1: CLEAN MAIN GAMES LIST (when activeDetailGameId === null) ─── */}
+      {/* ─── VIEW 1: CLEAN MAIN GAMES LIST & ANALYTICS (when activeDetailGameId === null) ─── */}
       {activeDetailGameId === null && (
         <div className="space-y-6">
           
@@ -472,10 +513,133 @@ export default function AdminGamesManagement() {
                   Campus Arcade Studio
                 </h1>
                 <span className="text-xs font-black text-black/70 uppercase tracking-wider">
-                  Admin Mini Games & Level Control Panel
+                  Admin Mini Games & Real-Time Player Control
                 </span>
               </div>
             </div>
+          </div>
+
+          {/* ─── REAL-TIME ANALYTICS DASHBOARD ────────────────────────────── */}
+          <div className="p-6 bg-white border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-3xl space-y-5">
+            <div className="flex items-center justify-between border-b-2 border-black pb-3">
+              <div className="flex items-center gap-2">
+                <BarChart3 className="h-6 w-6 text-black" strokeWidth={3} />
+                <h2 className="font-display text-xl font-black uppercase text-black">
+                  Real-Time Arcade Analytics
+                </h2>
+              </div>
+              <span className="text-xs font-black bg-[#bbf7d0] border-2 border-black px-3 py-1 rounded-full shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] flex items-center gap-1">
+                <Activity className="h-3.5 w-3.5 text-emerald-700 animate-pulse" /> LIVE TRACKING
+              </span>
+            </div>
+
+            {/* Stat Cards Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="p-4 bg-[#bfdbfe] border-3 border-black rounded-2xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] space-y-1">
+                <div className="text-[10px] font-black uppercase text-black/70 flex items-center gap-1">
+                  <Users className="h-3.5 w-3.5 text-blue-800" /> Active Players
+                </div>
+                <div className="font-display text-2xl font-black text-black leading-none">
+                  {gamePopularityStats.totalPlayersCount} Real Users
+                </div>
+              </div>
+
+              <div className="p-4 bg-[#fef08a] border-3 border-black rounded-2xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] space-y-1">
+                <div className="text-[10px] font-black uppercase text-black/70 flex items-center gap-1">
+                  <Flame className="h-3.5 w-3.5 text-amber-700" /> Most Played
+                </div>
+                <div className="font-display text-sm font-black text-black line-clamp-2 leading-snug">
+                  {gamePopularityStats.mostPlayed}
+                </div>
+              </div>
+
+              <div className="p-4 bg-[#fca5a5] border-3 border-black rounded-2xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] space-y-1">
+                <div className="text-[10px] font-black uppercase text-black/70 flex items-center gap-1">
+                  <TrendingDown className="h-3.5 w-3.5 text-rose-800" /> Least Played
+                </div>
+                <div className="font-display text-sm font-black text-black line-clamp-2 leading-snug">
+                  {gamePopularityStats.leastPlayed}
+                </div>
+              </div>
+
+              <div className="p-4 bg-[#bbf7d0] border-3 border-black rounded-2xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] space-y-1">
+                <div className="text-[10px] font-black uppercase text-black/70 flex items-center gap-1">
+                  <Award className="h-3.5 w-3.5 text-emerald-800" /> Total Play Sessions
+                </div>
+                <div className="font-display text-2xl font-black text-black leading-none">
+                  {gamePopularityStats.totalPlaysCount} Plays
+                </div>
+              </div>
+            </div>
+
+            {/* Game Popularity Breakdown Bars */}
+            <div className="space-y-3 pt-2">
+              <label className="text-xs font-black uppercase tracking-wider text-black">
+                Game Popularity Breakdown
+              </label>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {ALL_GAMES.map(g => {
+                  const playCount = gamePopularityStats.counts[g.id] || 0;
+                  const pct = gamePopularityStats.totalPlaysCount > 0 ? Math.round((playCount / gamePopularityStats.totalPlaysCount) * 100) : 0;
+
+                  return (
+                    <div key={g.id} className="p-3 bg-gray-50 border-2 border-black rounded-xl space-y-1.5 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                      <div className="flex items-center justify-between text-xs font-black">
+                        <span>{g.emoji} {g.name}</span>
+                        <span>{playCount} Plays ({pct}%)</span>
+                      </div>
+                      <div className="h-3 bg-gray-200 border border-black rounded-full overflow-hidden">
+                        <div
+                          className={`h-full ${g.color} border-r border-black transition-all duration-500`}
+                          style={{ width: `${Math.max(pct, 5)}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Real Active Players Log */}
+            <div className="space-y-2 pt-2 border-t-2 border-black">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-black uppercase tracking-wider text-black flex items-center gap-1.5">
+                  <Clock className="h-3.5 w-3.5 text-black" /> Verified Real Player Records ({gamePopularityStats.playersList.length})
+                </label>
+                <span className="text-[10px] font-black text-black/60">Strictly Real Players</span>
+              </div>
+
+              <div className="max-h-48 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+                {gamePopularityStats.playersList.map(player => (
+                  <div key={player.uid} className="p-2.5 bg-[#fef08a]/40 border-2 border-black rounded-xl flex items-center justify-between text-xs font-bold">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 bg-white border border-black rounded-full flex items-center justify-center font-black text-[10px]">
+                        👤
+                      </div>
+                      <div>
+                        <div className="font-black text-black">{player.username} <span className="text-[10px] font-normal text-black/60">({player.college})</span></div>
+                        <div className="text-[10px] text-black/70">
+                          Last Game: <span className="font-black text-black">{player.lastPlayedGame}</span> • {player.totalGamesPlayed} sessions
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <div className="font-black text-black">{player.totalScore} Pts</div>
+                      <div className="text-[9px] text-black/60">Arrow Lvl {player.arrowLevel} • 2048: {player.best2048}</div>
+                    </div>
+                  </div>
+                ))}
+
+                {gamePopularityStats.playersList.length === 0 && (
+                  <div className="p-4 border-2 border-dashed border-gray-300 rounded-xl text-center text-xs font-bold text-black/60">
+                    No active game sessions recorded yet. Play any game to record live real analytics!
+                  </div>
+                )}
+              </div>
+            </div>
+
           </div>
 
           {/* Clean Games List Grid */}
@@ -649,7 +813,7 @@ export default function AdminGamesManagement() {
             </div>
           </div>
 
-          {/* LEVEL BOXES GRID (Click any box to inspect / edit / delete) */}
+          {/* LEVEL BOXES GRID */}
           <div className="space-y-3">
             <div className="flex items-center justify-between text-xs font-black text-black uppercase tracking-wider px-1">
               <span>LEVEL BOXES ({levelBoxes.length} Total Levels)</span>

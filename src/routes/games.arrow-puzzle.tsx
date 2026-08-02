@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, RotateCcw, ChevronRight, ChevronLeft, ChevronUp, ChevronDown, Trophy, Zap, Heart, Flame, Bomb, X, Lightbulb, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { recordGameSession } from "../lib/gameAnalytics";
 
 const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
 const WOBBLY_SM = "15px 5px 12px 5px / 5px 12px 5px 15px";
@@ -452,6 +453,7 @@ export default function ArrowPuzzleGame() {
             playGameSound("win", isMuted);
             triggerVibration([30, 30, 60, 30, 90]);
             const nextLevel = levelIdx + 1;
+            recordGameSession("arrow-puzzle", nextLevel * 150, nextLevel);
             setHighestUnlocked(prevMax => {
               const max = Math.max(prevMax, nextLevel);
               try {
