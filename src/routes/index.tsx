@@ -41,7 +41,7 @@ export const Route = createFileRoute("/")({
 });
 
 const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
-const CYCLING_WORDS = ["truth", "voice", "courage", "justice", "truth"];
+const CYCLING_WORDS = ["truth", "voice", "power", "justice", "facts"];
 
 function AnimatedStat({ n, l, color }: { n: number; l: string; color: string }) {
   return (
