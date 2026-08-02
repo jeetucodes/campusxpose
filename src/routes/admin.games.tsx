@@ -325,7 +325,7 @@ export default function AdminGamesManagement() {
       setAnalytics(data);
 
       // Fetch global status from Supabase
-      const { data: serverData } = await supabase.from("app_settings" as any).select("value").eq("key", GAMES_STATUS_KEY).maybeSingle();
+      const { data: serverData } = await (supabase as any).from("app_settings").select("value").eq("key", GAMES_STATUS_KEY).maybeSingle();
       if (serverData && serverData.value) {
         setGameStatus(serverData.value as any);
         localStorage.setItem(GAMES_STATUS_KEY, JSON.stringify(serverData.value));
@@ -364,16 +364,18 @@ export default function AdminGamesManagement() {
         setLevelOverrides(savedOverrides ? JSON.parse(savedOverrides) : {});
         
         // Fetch from Supabase
-        const { data: serverData } = await supabase.from("app_settings" as any).select("key, value").in("key", [meta.storageKey, meta.overridesKey]);
+        const { data: serverData } = await (supabase as any).from("app_settings").select("key, value").in("key", [meta.storageKey, meta.overridesKey]);
         const map = new Map((serverData || []).map((row: any) => [row.key, row.value]));
         
         if (map.has(meta.storageKey)) {
-          setCustomLevels(map.get(meta.storageKey) || []);
-          localStorage.setItem(meta.storageKey, JSON.stringify(map.get(meta.storageKey) || []));
+          const val = map.get(meta.storageKey) as any[];
+          setCustomLevels(val || []);
+          localStorage.setItem(meta.storageKey, JSON.stringify(val || []));
         }
         if (map.has(meta.overridesKey)) {
-          setLevelOverrides(map.get(meta.overridesKey) || {});
-          localStorage.setItem(meta.overridesKey, JSON.stringify(map.get(meta.overridesKey) || {}));
+          const val = map.get(meta.overridesKey) as Record<number, any>;
+          setLevelOverrides(val || {});
+          localStorage.setItem(meta.overridesKey, JSON.stringify(val || {}));
         }
       } catch (e) {
         setCustomLevels([]);
