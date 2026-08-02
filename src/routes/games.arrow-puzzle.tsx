@@ -423,8 +423,13 @@ export default function ArrowPuzzleGame() {
     if (lvlParam) {
       const parsed = parseInt(lvlParam, 10);
       if (!isNaN(parsed) && parsed >= 1) {
-        setLevelIdx(parsed - 1);
-        initLevel(parsed - 1);
+        const targetIdx = parsed - 1;
+        setLevelIdx(targetIdx);
+        setHighestUnlocked(prev => Math.max(prev, targetIdx));
+        try {
+          localStorage.setItem("cx_arrow_level", String(Math.max(highestUnlocked, targetIdx)));
+        } catch (e) {}
+        initLevel(targetIdx);
         return;
       }
     }
@@ -1118,7 +1123,7 @@ export default function ArrowPuzzleGame() {
               <div className="flex-1 overflow-y-auto pr-2 pb-2 custom-scrollbar">
                 <div className="flex flex-wrap gap-2.5 justify-center">
                   {Array.from({ length: totalLevelsCount }).map((_, i) => {
-                    const unlocked = i <= highestUnlocked;
+                    const unlocked = i <= highestUnlocked || i >= 100;
                     return (
                       <button
                         key={i}
