@@ -321,106 +321,106 @@ const RAW_LEVELS: string[][] = [
     "B....B",
     "......"
   ],
-  // Level 40: 6x6
+  
+ // Level 40: 6x6, 2-bounce turn (/ then \)
   [
     "......",
-    "BW..WB",
-    "BWW.WB",
-    "I.<..I",
-    "BW..WB",
+    "...\\..",
+    ".>./..",
+    "......",
+    "......",
     "......"
   ],
-  // Level 41: 6x6, Gate intro
+  // Level 41: 6x6, 3-bounce spiral (/ \ /)
   [
     "......",
-    ".B..B.",
-    "..U...",
-    "..^...",
-    "W.D.W.",
-    ".B..B."
+    "../.\\.",
+    "......",
+    "......",
+    ">.../.",
+    "......"
   ],
-  // Level 42: 6x6
+  // Level 42: 6x6, 4-bounce spiral (/ \ / \)
   [
-    "B....B",
-    ".WWWW.",
-    "B...B.",
+    "./...\\",
+    "......",
+    "......",
+    ".\\....",
+    "......",
+    ">....."
+  ],
+  // Level 43: 6x6, two independent multi-bounce arrows
+  [
+    ">../..",
     "../...",
-    "B.^..B",
-    "......"
+    "......",
+    "......",
+    "......",
+    "..\\..<"
   ],
-  // Level 43: 6x6
+  // Level 44: 6x6, sequencing puzzle - must clear ^ before < can pass
   [
     "......",
-    "B.U.B.",
-    "W.I.W.",
-    ".L^R..",
-    "B.D.B.",
+    "......",
+    ".^..<.",
+    "......",
+    "......",
     "......"
   ],
-  // Level 44: 6x6, Rotator intro
+  // Level 45: 6x6, wall forces an early bounce before a dead end
+  [
+    "\\.....",
+    "......",
+    "......",
+    ">/W...",
+    "......",
+    "......"
+  ],
+  // Level 46: 6x6, 3-bounce route with a decoy bomb near the path
   [
     "......",
-    ".B..B.",
-    "W.O...",
-    "..^...",
-    "W...W.",
-    "B....B"
-  ],
-  // Level 45: 6x6
-  [
-    "B....B",
-    ".WOW..",
-    "BW..WB",
-    "..O...",
-    "B.^..B",
-    "......"
-  ],
-  // Level 46: 6x6
-  [
+    "./..\\.",
+    "..B...",
     "......",
-    "BW..WB",
-    "B.UO.B",
-    ".L^R..",
-    "BW..WB",
+    ">.../.",
     "......"
   ],
-  // Level 47: 6x6
+  // Level 47: 6x6, two arrows each needing multi-bounce routes
   [
-    "B....B",
-    ".OWO..",
-    "B/..\\B",
-    "..<...",
-    "B.D..B",
-    "......"
-  ],
-  // Level 48: 6x6
-  [
+    "..\\...",
     "......",
-    "B....B",
-    "W.^.W.",
-    "..^...",
-    "B....B",
-    "......"
+    ">./...",
+    "..../.",
+    "......",
+    "...\\.<"
   ],
-  // Level 49: 6x6
+  // Level 48: 6x6, 4-bounce spiral with a pass-through ice tile on the path
   [
-    "B.^..B",
-    ".O.O..",
-    "B.v..B",
-    "..>...",
-    "B....B",
-    "......"
+    "./...\\",
+    "......",
+    "......",
+    ".....I",
+    ".\\....",
+    ">..../"
   ],
-  // Level 50: 6x6 The ultimate
+  // Level 49: 6x6, three arrows, layered multi-bounce + straight shot
   [
-    "B.^.vB",
-    ".O.O..",
-    "BLURDB",
-    "W.I..W",
-    "B.O..B",
-    "......"
+    ">.../.",
+    "......",
+    "./....",
+    "...v..",
+    "......",
+    ".\\...<"
   ],
-
+  // Level 50: 6x6 "The Gauntlet" - single arrow, 5-bounce spiral, hardest level
+  [
+    "./...\\",
+    "......",
+    "......",
+    "......",
+    ".\\./..",
+    ">..../"
+  ],
 
      // ═══════════════════════════════════════════════════════════════════
   // HARD LEVELS 51–100  (verified solvable, very challenging)
