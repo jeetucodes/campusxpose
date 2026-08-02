@@ -7,6 +7,7 @@ export interface RealPlayerRecord {
   college: string;
   arrowLevel: number;
   pipeLevel: number;
+  archeryLevel: number;
   best2048: number;
   memoryBest: number;
   totalScore: number;
@@ -20,6 +21,7 @@ export interface GameAnalytics {
   gamePlayCounts: {
     "arrow-puzzle": number;
     "pipe-connect": number;
+    "archery": number;
     "2048": number;
     "memory-match": number;
   };
@@ -43,6 +45,7 @@ export function getGameAnalytics(): GameAnalytics {
     gamePlayCounts: {
       "arrow-puzzle": 0,
       "pipe-connect": 0,
+      "archery": 0,
       "2048": 0,
       "memory-match": 0,
     },
@@ -63,6 +66,7 @@ function mergeAnalytics(local: GameAnalytics, remote: GameAnalytics): GameAnalyt
   const mergedCounts = {
     "arrow-puzzle": Math.max(local.gamePlayCounts?.["arrow-puzzle"] || 0, remote.gamePlayCounts?.["arrow-puzzle"] || 0),
     "pipe-connect": Math.max(local.gamePlayCounts?.["pipe-connect"] || 0, remote.gamePlayCounts?.["pipe-connect"] || 0),
+    "archery": Math.max(local.gamePlayCounts?.["archery"] || 0, remote.gamePlayCounts?.["archery"] || 0),
     "2048": Math.max(local.gamePlayCounts?.["2048"] || 0, remote.gamePlayCounts?.["2048"] || 0),
     "memory-match": Math.max(local.gamePlayCounts?.["memory-match"] || 0, remote.gamePlayCounts?.["memory-match"] || 0),
   };
@@ -104,7 +108,7 @@ export async function fetchGlobalAnalyticsFromSupabase(): Promise<GameAnalytics 
 }
 
 export async function recordGameSession(
-  gameId: "arrow-puzzle" | "pipe-connect" | "2048" | "memory-match",
+  gameId: "arrow-puzzle" | "pipe-connect" | "archery" | "2048" | "memory-match",
   achievedScore: number = 0,
   levelReached: number = 1
 ) {
@@ -131,17 +135,18 @@ export async function recordGameSession(
     // Increment play counts
     analytics.totalPlays = (analytics.totalPlays || 0) + 1;
     if (!analytics.gamePlayCounts) {
-      analytics.gamePlayCounts = { "arrow-puzzle": 0, "pipe-connect": 0, "2048": 0, "memory-match": 0 };
+      analytics.gamePlayCounts = { "arrow-puzzle": 0, "pipe-connect": 0, "archery": 0, "2048": 0, "memory-match": 0 };
     }
     analytics.gamePlayCounts[gameId] = (analytics.gamePlayCounts[gameId] || 0) + 1;
 
     // Load user current level records
     const arrowLvl = parseInt(localStorage.getItem("cx_arrow_level") || "0", 10) + 1;
     const pipeLvl = parseInt(localStorage.getItem("cx_pipe_level") || "0", 10) + 1;
+    const archeryLvl = parseInt(localStorage.getItem("cx_archery_level") || "0", 10) + 1;
     const h2048 = parseInt(localStorage.getItem("cx_2048_highscore") || "0", 10);
     const memBest = parseInt(localStorage.getItem("cx_memory_best") || "0", 10);
 
-    const calcTotalScore = (arrowLvl * 150) + (pipeLvl * 100) + h2048;
+    const calcTotalScore = (arrowLvl * 150) + (pipeLvl * 100) + (archeryLvl * 200) + h2048;
 
     const existingPlayer: RealPlayerRecord = analytics.players[uid] || {
       uid,
@@ -149,6 +154,7 @@ export async function recordGameSession(
       college,
       arrowLevel: arrowLvl,
       pipeLevel: pipeLvl,
+      archeryLevel: archeryLvl,
       best2048: h2048,
       memoryBest: memBest,
       totalScore: calcTotalScore,
@@ -164,11 +170,12 @@ export async function recordGameSession(
     existingPlayer.totalGamesPlayed = (existingPlayer.totalGamesPlayed || 0) + 1;
     existingPlayer.arrowLevel = Math.max(existingPlayer.arrowLevel || 0, arrowLvl);
     existingPlayer.pipeLevel = Math.max(existingPlayer.pipeLevel || 0, pipeLvl);
+    existingPlayer.archeryLevel = Math.max(existingPlayer.archeryLevel || 0, archeryLvl);
     existingPlayer.best2048 = Math.max(existingPlayer.best2048 || 0, h2048);
     if (memBest > 0) {
       existingPlayer.memoryBest = existingPlayer.memoryBest === 0 ? memBest : Math.min(existingPlayer.memoryBest, memBest);
     }
-    existingPlayer.totalScore = (existingPlayer.arrowLevel * 150) + (existingPlayer.pipeLevel * 100) + existingPlayer.best2048;
+    existingPlayer.totalScore = (existingPlayer.arrowLevel * 150) + (existingPlayer.pipeLevel * 100) + (existingPlayer.archeryLevel * 200) + existingPlayer.best2048;
 
     analytics.players[uid] = existingPlayer;
 

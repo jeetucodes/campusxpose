@@ -33,6 +33,7 @@ import { Route as GamesPipeConnectRouteImport } from './routes/games.pipe-connec
 import { Route as GamesMemoryMatchRouteImport } from './routes/games.memory-match'
 import { Route as GamesCandyCrushRouteImport } from './routes/games.candy-crush'
 import { Route as GamesArrowPuzzleRouteImport } from './routes/games.arrow-puzzle'
+import { Route as GamesArcheryRouteImport } from './routes/games.archery'
 import { Route as Games2048RouteImport } from './routes/games.2048'
 import { Route as CommunityCollegeIdRouteImport } from './routes/community.$collegeId'
 import { Route as CollegesIdRouteImport } from './routes/colleges.$id'
@@ -176,6 +177,11 @@ const GamesCandyCrushRoute = GamesCandyCrushRouteImport.update({
 const GamesArrowPuzzleRoute = GamesArrowPuzzleRouteImport.update({
   id: '/games/arrow-puzzle',
   path: '/games/arrow-puzzle',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesArcheryRoute = GamesArcheryRouteImport.update({
+  id: '/games/archery',
+  path: '/games/archery',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Games2048Route = Games2048RouteImport.update({
@@ -338,6 +344,7 @@ export interface FileRoutesByFullPath {
   '/colleges/$id': typeof CollegesIdRoute
   '/community/$collegeId': typeof CommunityCollegeIdRoute
   '/games/2048': typeof Games2048Route
+  '/games/archery': typeof GamesArcheryRoute
   '/games/arrow-puzzle': typeof GamesArrowPuzzleRoute
   '/games/candy-crush': typeof GamesCandyCrushRoute
   '/games/memory-match': typeof GamesMemoryMatchRoute
@@ -388,6 +395,7 @@ export interface FileRoutesByTo {
   '/colleges/$id': typeof CollegesIdRoute
   '/community/$collegeId': typeof CommunityCollegeIdRoute
   '/games/2048': typeof Games2048Route
+  '/games/archery': typeof GamesArcheryRoute
   '/games/arrow-puzzle': typeof GamesArrowPuzzleRoute
   '/games/candy-crush': typeof GamesCandyCrushRoute
   '/games/memory-match': typeof GamesMemoryMatchRoute
@@ -439,6 +447,7 @@ export interface FileRoutesById {
   '/colleges/$id': typeof CollegesIdRoute
   '/community/$collegeId': typeof CommunityCollegeIdRoute
   '/games/2048': typeof Games2048Route
+  '/games/archery': typeof GamesArcheryRoute
   '/games/arrow-puzzle': typeof GamesArrowPuzzleRoute
   '/games/candy-crush': typeof GamesCandyCrushRoute
   '/games/memory-match': typeof GamesMemoryMatchRoute
@@ -491,6 +500,7 @@ export interface FileRouteTypes {
     | '/colleges/$id'
     | '/community/$collegeId'
     | '/games/2048'
+    | '/games/archery'
     | '/games/arrow-puzzle'
     | '/games/candy-crush'
     | '/games/memory-match'
@@ -541,6 +551,7 @@ export interface FileRouteTypes {
     | '/colleges/$id'
     | '/community/$collegeId'
     | '/games/2048'
+    | '/games/archery'
     | '/games/arrow-puzzle'
     | '/games/candy-crush'
     | '/games/memory-match'
@@ -591,6 +602,7 @@ export interface FileRouteTypes {
     | '/colleges/$id'
     | '/community/$collegeId'
     | '/games/2048'
+    | '/games/archery'
     | '/games/arrow-puzzle'
     | '/games/candy-crush'
     | '/games/memory-match'
@@ -642,6 +654,7 @@ export interface RootRouteChildren {
   CollegesIdRoute: typeof CollegesIdRoute
   CommunityCollegeIdRoute: typeof CommunityCollegeIdRoute
   Games2048Route: typeof Games2048Route
+  GamesArcheryRoute: typeof GamesArcheryRoute
   GamesArrowPuzzleRoute: typeof GamesArrowPuzzleRoute
   GamesCandyCrushRoute: typeof GamesCandyCrushRoute
   GamesMemoryMatchRoute: typeof GamesMemoryMatchRoute
@@ -822,6 +835,13 @@ declare module '@tanstack/react-router' {
       path: '/games/arrow-puzzle'
       fullPath: '/games/arrow-puzzle'
       preLoaderRoute: typeof GamesArrowPuzzleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games/archery': {
+      id: '/games/archery'
+      path: '/games/archery'
+      fullPath: '/games/archery'
+      preLoaderRoute: typeof GamesArcheryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/games/2048': {
@@ -1034,6 +1054,7 @@ const rootRouteChildren: RootRouteChildren = {
   CollegesIdRoute: CollegesIdRoute,
   CommunityCollegeIdRoute: CommunityCollegeIdRoute,
   Games2048Route: Games2048Route,
+  GamesArcheryRoute: GamesArcheryRoute,
   GamesArrowPuzzleRoute: GamesArrowPuzzleRoute,
   GamesCandyCrushRoute: GamesCandyCrushRoute,
   GamesMemoryMatchRoute: GamesMemoryMatchRoute,

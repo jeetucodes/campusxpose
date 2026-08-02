@@ -26,7 +26,7 @@ interface GameStatusMap {
   [gameId: string]: boolean;
 }
 
-type GameId = "arrow-puzzle" | "pipe-connect" | "2048" | "memory-match";
+type GameId = "arrow-puzzle" | "pipe-connect" | "archery" | "2048" | "memory-match";
 
 interface GameMeta {
   id: GameId;
@@ -203,6 +203,51 @@ Single Level Format:
 ]`,
   },
   {
+    id: "archery",
+    name: "Archery Master",
+    emoji: "🎯",
+    link: "/games/archery",
+    category: "Physics Arcade",
+    desc: "50 Physics-based Archery Levels",
+    color: "bg-[#fbbf24]",
+    badgeBg: "bg-[#f59e0b] text-white",
+    storageKey: "cx_archery_custom_levels",
+    overridesKey: "cx_archery_level_overrides",
+    totalBuiltIn: 50,
+    prompt: `Act as a Level Designer for Archery Master Game.
+Generate a valid JSON for Archery Master levels.`,
+    sampleSingleJson: `{
+  "id": 51,
+  "targetDistance": 85,
+  "targetY": 50,
+  "targetSize": 0.8,
+  "arrowsGiven": 3,
+  "wind": { "enabled": true, "strength": 5 },
+  "gustZones": [],
+  "targetMovement": "slide-v",
+  "movementSpeed": 1.5,
+  "obstacles": [],
+  "requiredRing": "bullseye",
+  "trajectoryPreview": "none"
+}`,
+    sampleMultipleJson: `[
+  {
+    "id": 51,
+    "targetDistance": 85,
+    "targetY": 50,
+    "targetSize": 0.8,
+    "arrowsGiven": 3,
+    "wind": { "enabled": true, "strength": 5 },
+    "gustZones": [],
+    "targetMovement": "slide-v",
+    "movementSpeed": 1.5,
+    "obstacles": [],
+    "requiredRing": "bullseye",
+    "trajectoryPreview": "none"
+  }
+]`,
+  },
+  {
     id: "2048",
     name: "2048 Classic",
     emoji: "🧩",
@@ -281,13 +326,14 @@ export default function AdminGamesManagement() {
   const [gameStatus, setGameStatus] = useState<GameStatusMap>({
     "arrow-puzzle": true,
     "pipe-connect": true,
+    "archery": true,
     "2048": true,
     "memory-match": true,
   });
 
   const [analytics, setAnalytics] = useState<GameAnalytics>({
     totalPlays: 0,
-    gamePlayCounts: { "arrow-puzzle": 0, "pipe-connect": 0, "2048": 0, "memory-match": 0 },
+    gamePlayCounts: { "arrow-puzzle": 0, "pipe-connect": 0, "archery": 0, "2048": 0, "memory-match": 0 },
     players: {},
   });
 

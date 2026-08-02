@@ -38,6 +38,7 @@ export default function GamesHub() {
   const [stats, setStats] = useState({
     arrowLevel: 0,
     pipeLevel: 0,
+    archeryLevel: 0,
     best2048: 0,
     memoryBest: 0,
   });
@@ -49,12 +50,14 @@ export default function GamesHub() {
   const [gameStatus, setGameStatus] = useState<Record<string, boolean>>({
     "arrow-puzzle": true,
     "pipe-connect": true,
+    "archery": true,
     "2048": true,
     "memory-match": true,
   });
 
   const [arrowTotalLevels, setArrowTotalLevels] = useState<number>(100);
   const [pipeTotalLevels, setPipeTotalLevels] = useState<number>(30);
+  const [archeryTotalLevels, setArcheryTotalLevels] = useState<number>(50);
 
   // Real-time game status & level count listener
   useEffect(() => {
@@ -70,6 +73,10 @@ export default function GamesHub() {
         const pipeCustom = localStorage.getItem("cx_pipe_custom_levels");
         const pipeExtra = pipeCustom ? JSON.parse(pipeCustom).length : 0;
         setPipeTotalLevels(30 + pipeExtra);
+        
+        const archeryCustom = localStorage.getItem("cx_archery_custom_levels");
+        const archeryExtra = archeryCustom ? JSON.parse(archeryCustom).length : 0;
+        setArcheryTotalLevels(50 + archeryExtra);
       } catch (e) {
         console.warn("Error reading game status", e);
       }
@@ -109,17 +116,20 @@ export default function GamesHub() {
 
       const arrowLvl = parseInt(localStorage.getItem("cx_arrow_level") || "0", 10);
       const pipeLvl = parseInt(localStorage.getItem("cx_pipe_level") || "0", 10);
+      const archeryLvl = parseInt(localStorage.getItem("cx_archery_level") || "0", 10);
       const h2048 = parseInt(localStorage.getItem("cx_2048_highscore") || "0", 10);
       const memBest = parseInt(localStorage.getItem("cx_memory_best") || "0", 10);
 
       const realArrowLvl = isNaN(arrowLvl) ? 0 : arrowLvl + 1;
       const realPipeLvl = isNaN(pipeLvl) ? 0 : pipeLvl + 1;
+      const realArcheryLvl = isNaN(archeryLvl) ? 0 : archeryLvl + 1;
       const realH2048 = isNaN(h2048) ? 0 : h2048;
       const realMemBest = isNaN(memBest) ? 0 : memBest;
 
       setStats({
         arrowLevel: realArrowLvl,
         pipeLevel: realPipeLvl,
+        archeryLevel: realArcheryLvl,
         best2048: realH2048,
         memoryBest: realMemBest,
       });
@@ -229,6 +239,21 @@ export default function GamesHub() {
       link: "/games/pipe-connect",
       statLabel: `Lvl ${stats.pipeLevel || 1} / ${pipeTotalLevels}`,
       icon: "🔌",
+    },
+    {
+      id: "archery" as const,
+      title: "Archery Master",
+      tagline: "Drag, aim & hit the bullseye!",
+      description: `${archeryTotalLevels} levels of wind, moving targets, and physics-based archery action!`,
+      emoji: "🎯",
+      bgGradient: "from-[#fef08a] via-[#f59e0b] to-[#d97706]",
+      category: "arcade",
+      badge: "NEW",
+      badgeBg: "bg-[#f59e0b] text-white",
+      color: "bg-[#fbbf24]",
+      link: "/games/archery",
+      statLabel: `Lvl ${stats.archeryLevel || 1} / ${archeryTotalLevels}`,
+      icon: "🏹",
     },
     {
       id: "2048" as const,
