@@ -215,15 +215,21 @@ export default function PipeConnectGame() {
   const initLevel = useCallback((idx: number) => {
     let data = getPipeLevel(idx);
 
-    // Read custom AI imported levels by Admin
+    // Read Admin level overrides or custom levels
     try {
+      const overridesRaw = localStorage.getItem("cx_pipe_level_overrides");
+      if (overridesRaw) {
+        const overrides = JSON.parse(overridesRaw);
+        if (overrides[idx]) {
+          data = overrides[idx];
+        }
+      }
+
       const customRaw = localStorage.getItem("cx_pipe_custom_levels");
-      if (customRaw) {
+      if (customRaw && idx >= 30) {
         const customLevels = JSON.parse(customRaw);
-        if (Array.isArray(customLevels) && customLevels.length > 0) {
-          if (idx >= 30 && idx - 30 < customLevels.length) {
-            data = customLevels[idx - 30];
-          }
+        if (Array.isArray(customLevels) && idx - 30 < customLevels.length) {
+          data = customLevels[idx - 30];
         }
       }
     } catch (e) {}

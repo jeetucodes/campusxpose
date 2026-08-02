@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Gamepad2, Info, Copy, Check, Plus, Trash2, Power, Sparkles, Code, Layers, X, ExternalLink, Activity, ShieldCheck, Edit, Eye, Search, Save, RotateCcw, ArrowLeft, Radio } from "lucide-react";
 import { toast } from "sonner";
 import { getStaticLevel } from "../data/arrow-puzzle-levels";
+import { getPipeLevel } from "../data/pipe-puzzle-levels";
 
 export const Route = createFileRoute("/admin/games")({
   component: AdminGamesManagement,
@@ -13,7 +14,6 @@ const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
 const WOBBLY_SM = "15px 5px 12px 5px / 5px 12px 5px 15px";
 
 const GAMES_STATUS_KEY = "cx_games_status";
-const ARROW_OVERRIDES_KEY = "cx_arrow_level_overrides";
 
 interface GameStatusMap {
   [gameId: string]: boolean;
@@ -31,11 +31,26 @@ interface GameMeta {
   color: string;
   badgeBg: string;
   storageKey: string;
+  overridesKey: string;
   totalBuiltIn: number;
   prompt: string;
   sampleSingleJson: string;
   sampleMultipleJson: string;
 }
+
+const STATIC_2048_LEVELS = [
+  { title: "Classic 2048 Grid", targetTile: 2048, gridSize: 4, desc: "Reach 2048 tile by merging identical numbers" },
+  { title: "4096 Master Challenge", targetTile: 4096, gridSize: 4, desc: "Pro mode: reach tile 4096" },
+  { title: "8192 Speed Rush", targetTile: 8192, gridSize: 4, desc: "Expert mode: reach tile 8192" },
+  { title: "Super Obstacle Grid", targetTile: 2048, gridSize: 4, obstacles: [[1, 1]], desc: "2048 grid with 1 blocked obstacle tile" },
+];
+
+const STATIC_MEMORY_LEVELS = [
+  { title: "Easy Emoji Match", pairsCount: 4, timeLimit: 60, emojis: ["🚀", "💻", "🤖", "⚡"] },
+  { title: "Medium Campus Match", pairsCount: 6, timeLimit: 50, emojis: ["🚀", "💻", "🤖", "⚡", "🎮", "🧠"] },
+  { title: "Hard Speed Match", pairsCount: 8, timeLimit: 40, emojis: ["🚀", "💻", "🤖", "⚡", "🎮", "🧠", "🔥", "👑"] },
+  { title: "Expert Cyber Match", pairsCount: 10, timeLimit: 30, emojis: ["🚀", "💻", "🤖", "⚡", "🎮", "🧠", "🔥", "👑", "🎯", "🏆"] },
+];
 
 const ALL_GAMES: GameMeta[] = [
   {
@@ -48,6 +63,7 @@ const ALL_GAMES: GameMeta[] = [
     color: "bg-[#fca5a5]",
     badgeBg: "bg-[#fef08a] text-black",
     storageKey: "cx_arrow_custom_levels",
+    overridesKey: "cx_arrow_level_overrides",
     totalBuiltIn: 100,
     prompt: `Act as a Level Designer for Arrow Puzzle.
 Generate a valid JSON for Arrow Puzzle levels.
@@ -97,6 +113,7 @@ Single Level Format:
     color: "bg-[#93c5fd]",
     badgeBg: "bg-[#bfdbfe] text-black",
     storageKey: "cx_pipe_custom_levels",
+    overridesKey: "cx_pipe_level_overrides",
     totalBuiltIn: 30,
     prompt: `Act as a Level Designer for Pipe Connect Circuit Game.
 Generate a valid JSON for Pipe Connect circuit levels.
@@ -143,24 +160,28 @@ Single Level Format:
     color: "bg-[#f472b6]",
     badgeBg: "bg-[#fbcfe8] text-black",
     storageKey: "cx_2048_custom_levels",
-    totalBuiltIn: 1,
+    overridesKey: "cx_2048_level_overrides",
+    totalBuiltIn: 4,
     prompt: `Act as a Level Designer for 2048 Puzzle Game.
-Generate a custom challenge board JSON.`,
+Generate a custom challenge level JSON.`,
     sampleSingleJson: `{
   "title": "Super 4096 Challenge",
   "targetTile": 4096,
-  "initialBoard": [
-    [0, 2, 4, 8],
-    [16, 32, 64, 128],
-    [256, 512, 1024, 0],
-    [0, 0, 0, 2]
-  ]
+  "gridSize": 4,
+  "desc": "Pro mode: reach tile 4096"
 }`,
     sampleMultipleJson: `[
   {
     "title": "4096 Challenge Pack 1",
     "targetTile": 4096,
-    "initialBoard": [[0, 2, 4, 8], [16, 32, 64, 128], [256, 512, 1024, 0], [0, 0, 0, 2]]
+    "gridSize": 4,
+    "desc": "Pro mode: reach tile 4096"
+  },
+  {
+    "title": "8192 Speed Rush Pack 2",
+    "targetTile": 8192,
+    "gridSize": 4,
+    "desc": "Expert mode: reach tile 8192"
   }
 ]`,
   },
@@ -174,21 +195,28 @@ Generate a custom challenge board JSON.`,
     color: "bg-[#86efac]",
     badgeBg: "bg-[#bbf7d0] text-black",
     storageKey: "cx_memory_custom_levels",
-    totalBuiltIn: 1,
+    overridesKey: "cx_memory_level_overrides",
+    totalBuiltIn: 4,
     prompt: `Act as a Level Designer for Memory Match Game.
 Generate a level JSON with pairs, time limit, and emojis.`,
     sampleSingleJson: `{
   "title": "Speed Cyber Match",
   "timeLimit": 45,
-  "gridPairs": 8,
+  "pairsCount": 8,
   "emojis": ["🚀", "💻", "🤖", "⚡", "🎮", "🧠", "🔥", "👑"]
 }`,
     sampleMultipleJson: `[
   {
     "title": "Speed Cyber Match Pack 1",
     "timeLimit": 45,
-    "gridPairs": 8,
+    "pairsCount": 8,
     "emojis": ["🚀", "💻", "🤖", "⚡", "🎮", "🧠", "🔥", "👑"]
+  },
+  {
+    "title": "Ultimate Memory Challenge",
+    "timeLimit": 30,
+    "pairsCount": 10,
+    "emojis": ["🚀", "💻", "🤖", "⚡", "🎮", "🧠", "🔥", "👑", "🎯", "🏆"]
   }
 ]`,
   },
@@ -233,17 +261,12 @@ export default function AdminGamesManagement() {
       if (savedStatus) {
         setGameStatus(JSON.parse(savedStatus));
       }
-
-      const savedOverrides = localStorage.getItem(ARROW_OVERRIDES_KEY);
-      if (savedOverrides) {
-        setLevelOverrides(JSON.parse(savedOverrides));
-      }
     } catch (e) {
       console.warn("Storage load error", e);
     }
   }, []);
 
-  // Reload custom levels when active detail game changes
+  // Reload custom levels & level overrides when active detail game changes
   useEffect(() => {
     if (!activeDetailGameId) return;
     const meta = ALL_GAMES.find(g => g.id === activeDetailGameId);
@@ -251,13 +274,13 @@ export default function AdminGamesManagement() {
 
     try {
       const savedCustom = localStorage.getItem(meta.storageKey);
-      if (savedCustom) {
-        setCustomLevels(JSON.parse(savedCustom));
-      } else {
-        setCustomLevels([]);
-      }
+      setCustomLevels(savedCustom ? JSON.parse(savedCustom) : []);
+
+      const savedOverrides = localStorage.getItem(meta.overridesKey);
+      setLevelOverrides(savedOverrides ? JSON.parse(savedOverrides) : {});
     } catch (e) {
       setCustomLevels([]);
+      setLevelOverrides({});
     }
   }, [activeDetailGameId]);
 
@@ -345,26 +368,18 @@ export default function AdminGamesManagement() {
     try {
       const parsed = JSON.parse(editingLevelJson);
 
-      if (selectedGameMeta.id === "arrow-puzzle") {
-        if (selectedLevelBox.isBuiltIn) {
-          const updatedOverrides = { ...levelOverrides, [selectedLevelBox.index]: parsed };
-          setLevelOverrides(updatedOverrides);
-          localStorage.setItem(ARROW_OVERRIDES_KEY, JSON.stringify(updatedOverrides));
-          toast.success(`Level #${selectedLevelBox.index + 1} updated! ✏️`);
-        } else {
-          const customIdx = selectedLevelBox.index - 100;
-          const updatedCustom = [...customLevels];
-          updatedCustom[customIdx] = parsed;
-          setCustomLevels(updatedCustom);
-          localStorage.setItem(selectedGameMeta.storageKey, JSON.stringify(updatedCustom));
-          toast.success(`Custom Level #${customIdx + 1} updated! ✏️`);
-        }
+      if (selectedLevelBox.isBuiltIn) {
+        const updatedOverrides = { ...levelOverrides, [selectedLevelBox.index]: parsed };
+        setLevelOverrides(updatedOverrides);
+        localStorage.setItem(selectedGameMeta.overridesKey, JSON.stringify(updatedOverrides));
+        toast.success(`Level #${selectedLevelBox.index + 1} updated! ✏️`);
       } else {
+        const customIdx = selectedLevelBox.index - selectedGameMeta.totalBuiltIn;
         const updatedCustom = [...customLevels];
-        updatedCustom[selectedLevelBox.index] = parsed;
+        updatedCustom[customIdx] = parsed;
         setCustomLevels(updatedCustom);
         localStorage.setItem(selectedGameMeta.storageKey, JSON.stringify(updatedCustom));
-        toast.success(`Level updated! ✏️`);
+        toast.success(`Custom Level #${customIdx + 1} updated! ✏️`);
       }
 
       window.dispatchEvent(new Event("cx_custom_levels_change"));
@@ -378,18 +393,18 @@ export default function AdminGamesManagement() {
   const handleDeleteSelectedLevelBox = () => {
     if (!selectedLevelBox) return;
 
-    if (selectedGameMeta.id === "arrow-puzzle" && selectedLevelBox.isBuiltIn) {
+    if (selectedLevelBox.isBuiltIn) {
       if (selectedLevelBox.isOverridden) {
         const updated = { ...levelOverrides };
         delete updated[selectedLevelBox.index];
         setLevelOverrides(updated);
-        localStorage.setItem(ARROW_OVERRIDES_KEY, JSON.stringify(updated));
+        localStorage.setItem(selectedGameMeta.overridesKey, JSON.stringify(updated));
         toast.success(`Level #${selectedLevelBox.index + 1} reset to default! 🔄`);
       } else {
         toast.info("Built-in levels cannot be deleted, but you can edit them!");
       }
     } else {
-      const targetIdx = selectedGameMeta.id === "arrow-puzzle" ? selectedLevelBox.index - 100 : selectedLevelBox.index;
+      const targetIdx = selectedLevelBox.index - selectedGameMeta.totalBuiltIn;
       const updatedList = customLevels.filter((_, i) => i !== targetIdx);
       setCustomLevels(updatedList);
       localStorage.setItem(selectedGameMeta.storageKey, JSON.stringify(updatedList));
@@ -400,29 +415,32 @@ export default function AdminGamesManagement() {
     setSelectedLevelBox(null);
   };
 
-  // Compiled list of levels for active game
+  // Compiled list of levels for active game (Arrow, Pipe, 2048, Memory Match)
   const levelBoxes = useMemo(() => {
     if (!activeDetailGameId) return [];
     const meta = selectedGameMeta;
 
     const list: { index: number; isBuiltIn: boolean; isOverridden: boolean; data: any }[] = [];
 
-    if (meta.id === "arrow-puzzle") {
-      // 100 Built-in Levels
-      for (let i = 0; i < 100; i++) {
-        const isOverridden = !!levelOverrides[i];
-        const data = isOverridden ? levelOverrides[i] : getStaticLevel(i);
-        list.push({ index: i, isBuiltIn: true, isOverridden, data });
+    // Populate built-in levels for ALL 4 games
+    for (let i = 0; i < meta.totalBuiltIn; i++) {
+      const isOverridden = !!levelOverrides[i];
+      let data = isOverridden ? levelOverrides[i] : null;
+
+      if (!data) {
+        if (meta.id === "arrow-puzzle") data = getStaticLevel(i);
+        else if (meta.id === "pipe-connect") data = getPipeLevel(i);
+        else if (meta.id === "2048") data = STATIC_2048_LEVELS[i] || STATIC_2048_LEVELS[0];
+        else if (meta.id === "memory-match") data = STATIC_MEMORY_LEVELS[i] || STATIC_MEMORY_LEVELS[0];
       }
-      // Custom Levels
-      customLevels.forEach((lvl, i) => {
-        list.push({ index: 100 + i, isBuiltIn: false, isOverridden: false, data: lvl });
-      });
-    } else {
-      customLevels.forEach((lvl, i) => {
-        list.push({ index: i, isBuiltIn: false, isOverridden: false, data: lvl });
-      });
+
+      list.push({ index: i, isBuiltIn: true, isOverridden, data });
     }
+
+    // Populate custom added levels
+    customLevels.forEach((lvl, i) => {
+      list.push({ index: meta.totalBuiltIn + i, isBuiltIn: false, isOverridden: false, data: lvl });
+    });
 
     if (!searchLevelQuery.trim()) return list;
 
@@ -431,7 +449,7 @@ export default function AdminGamesManagement() {
       const lvlNum = item.index + 1;
       return (
         lvlNum.toString().includes(q) ||
-        (item.data.title && item.data.title.toLowerCase().includes(q))
+        (item.data && item.data.title && item.data.title.toLowerCase().includes(q))
       );
     });
   }, [activeDetailGameId, selectedGameMeta, levelOverrides, customLevels, searchLevelQuery]);
