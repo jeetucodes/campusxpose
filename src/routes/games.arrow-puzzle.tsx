@@ -3,6 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, RotateCcw, ChevronRight, ChevronLeft, ChevronUp, ChevronDown, Trophy, Zap, Heart, Flame, Bomb, X, Lightbulb, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
 const WOBBLY_SM = "15px 5px 12px 5px / 5px 12px 5px 15px";
@@ -298,7 +299,31 @@ export default function ArrowPuzzleGame() {
   const [collisionAnim, setCollisionAnim] = useState<{ id: string, row: number, col: number, type: "wall" | "bomb" | "arrow" } | null>(null);
   const [won, setWon] = useState(false);
   const [gameOver, setGameOver] = useState(false);
+  const [customLevelsCount, setCustomLevelsCount] = useState(0);
   const gridRef = useRef<HTMLDivElement>(null);
+
+  // Real-time custom levels sync listener
+  useEffect(() => {
+    const syncCustom = () => {
+      try {
+        const raw = localStorage.getItem("cx_arrow_custom_levels");
+        if (raw) {
+          setCustomLevelsCount(JSON.parse(raw).length);
+        } else {
+          setCustomLevelsCount(0);
+        }
+      } catch (e) {}
+    };
+    syncCustom();
+    window.addEventListener("storage", syncCustom);
+    window.addEventListener("cx_custom_levels_change", syncCustom);
+    return () => {
+      window.removeEventListener("storage", syncCustom);
+      window.removeEventListener("cx_custom_levels_change", syncCustom);
+    };
+  }, []);
+
+  const totalLevelsCount = 100 + customLevelsCount;
 
   // Active trajectory path info
   const activePathInfo = React.useMemo(() => {
@@ -1060,12 +1085,15 @@ export default function ArrowPuzzleGame() {
               >
                 <X className="h-4 w-4" strokeWidth={3} />
               </Button>
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-4">
                 <h2 className="font-display text-2xl font-black text-black uppercase">Select Level</h2>
+                <span className="text-xs font-black bg-[#fef08a] text-black border-2 border-black px-2.5 py-1 rounded-full shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
+                  {totalLevelsCount} Levels
+                </span>
               </div>
               <div className="flex-1 overflow-y-auto pr-2 pb-2 custom-scrollbar">
-                <div className="flex flex-wrap gap-3 justify-center">
-                  {Array.from({ length: 100 }).map((_, i) => {
+                <div className="flex flex-wrap gap-2.5 justify-center">
+                  {Array.from({ length: totalLevelsCount }).map((_, i) => {
                     const unlocked = i <= highestUnlocked;
                     return (
                       <button
@@ -1074,18 +1102,21 @@ export default function ArrowPuzzleGame() {
                           if (unlocked) {
                             setLevelIdx(i);
                             setShowLevels(false);
+                          } else {
+                            toast.error(`Level ${i + 1} is locked! Clear Level ${highestUnlocked + 1} first.`);
                           }
                         }}
-                        disabled={!unlocked}
-                        className={`h-12 w-12 shrink-0 border-2 border-black font-display font-black text-sm transition-all outline-none flex items-center justify-center ${i === levelIdx
+                        className={`h-14 w-14 shrink-0 border-2 border-black font-display font-black text-xs transition-all outline-none flex flex-col items-center justify-center ${
+                          i === levelIdx
                             ? "bg-[#bfdbfe] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] scale-110 z-10"
                             : unlocked
-                              ? "bg-white text-black hover:bg-[#fbcfe8] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 active:scale-95"
-                              : "bg-gray-100 text-gray-400 cursor-not-allowed opacity-60"
-                          }`}
+                            ? "bg-white text-black hover:bg-[#fbcfe8] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 cursor-pointer"
+                            : "bg-gray-100 text-gray-500 opacity-70 cursor-pointer"
+                        }`}
                         style={{ borderRadius: WOBBLY_SM }}
                       >
-                        {unlocked ? i + 1 : "🔒"}
+                        <span>Lvl {i + 1}</span>
+                        <span className="text-[10px]">{unlocked ? "✓" : "🔒"}</span>
                       </button>
                     );
                   })}

@@ -293,6 +293,7 @@ export default function AdminGamesManagement() {
       const updatedList = [...customLevels, parsed];
       setCustomLevels(updatedList);
       localStorage.setItem(selectedGameMeta.storageKey, JSON.stringify(updatedList));
+      window.dispatchEvent(new Event("cx_custom_levels_change"));
 
       toast.success(`Added 1 Single Level to ${selectedGameMeta.name}! 🎉`);
       setSingleLevelJson("");
@@ -322,6 +323,7 @@ export default function AdminGamesManagement() {
       const updatedList = [...customLevels, ...newLevels];
       setCustomLevels(updatedList);
       localStorage.setItem(selectedGameMeta.storageKey, JSON.stringify(updatedList));
+      window.dispatchEvent(new Event("cx_custom_levels_change"));
 
       toast.success(`Successfully imported ${newLevels.length} levels to ${selectedGameMeta.name}! 🚀`);
       setBulkCodeToImport("");
@@ -365,6 +367,7 @@ export default function AdminGamesManagement() {
         toast.success(`Level updated! ✏️`);
       }
 
+      window.dispatchEvent(new Event("cx_custom_levels_change"));
       setSelectedLevelBox(null);
     } catch (e) {
       toast.error("Invalid JSON format! Please check your edits.");
@@ -393,6 +396,7 @@ export default function AdminGamesManagement() {
       toast.success("Level deleted!");
     }
 
+    window.dispatchEvent(new Event("cx_custom_levels_change"));
     setSelectedLevelBox(null);
   };
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { Gamepad2, ArrowRight, Trophy, Sparkles, Play, X, Crown, ShieldCheck } from "lucide-react";
+import { Gamepad2, ArrowRight, Trophy, Sparkles, Play, X, Crown } from "lucide-react";
 import { loadOrCreateIdentity } from "../lib/identity";
 
 export const Route = createFileRoute("/games/")({
@@ -54,14 +54,23 @@ export default function GamesHub() {
     "memory-match": true,
   });
 
-  // Real-time game status listener (updates instantly when Admin toggles ON/OFF)
+  const [arrowTotalLevels, setArrowTotalLevels] = useState<number>(100);
+  const [pipeTotalLevels, setPipeTotalLevels] = useState<number>(30);
+
+  // Real-time game status & level count listener
   useEffect(() => {
     const syncStatus = () => {
       try {
         const saved = localStorage.getItem("cx_games_status");
-        if (saved) {
-          setGameStatus(JSON.parse(saved));
-        }
+        if (saved) setGameStatus(JSON.parse(saved));
+
+        const arrowCustom = localStorage.getItem("cx_arrow_custom_levels");
+        const arrowExtra = arrowCustom ? JSON.parse(arrowCustom).length : 0;
+        setArrowTotalLevels(100 + arrowExtra);
+
+        const pipeCustom = localStorage.getItem("cx_pipe_custom_levels");
+        const pipeExtra = pipeCustom ? JSON.parse(pipeCustom).length : 0;
+        setPipeTotalLevels(30 + pipeExtra);
       } catch (e) {
         console.warn("Error reading game status", e);
       }
@@ -70,10 +79,12 @@ export default function GamesHub() {
     syncStatus();
     window.addEventListener("storage", syncStatus);
     window.addEventListener("cx_games_status_change", syncStatus);
+    window.addEventListener("cx_custom_levels_change", syncStatus);
 
     return () => {
       window.removeEventListener("storage", syncStatus);
       window.removeEventListener("cx_games_status_change", syncStatus);
+      window.removeEventListener("cx_custom_levels_change", syncStatus);
     };
   }, []);
 
@@ -202,7 +213,7 @@ export default function GamesHub() {
       id: "arrow-puzzle",
       title: "Arrow Puzzle",
       tagline: "Clear the board using deflector logic & strategy!",
-      description: "100 levels of deflector mirrors, ice corridors & explosive bombs! Tap arrows and clear the board.",
+      description: `${arrowTotalLevels} levels of deflector mirrors, ice corridors & explosive bombs! Tap arrows and clear the board.`,
       emoji: "🏹",
       bgGradient: "from-[#fef08a] via-[#fcd34d] to-[#fbbf24]",
       category: "puzzle",
@@ -210,7 +221,7 @@ export default function GamesHub() {
       badgeBg: "bg-[#fef08a] text-black",
       color: "bg-[#fca5a5]",
       link: "/games/arrow-puzzle",
-      statLabel: stats.arrowLevel > 1 ? `Level ${stats.arrowLevel} Unlocked` : "100 Mind-Bending Levels",
+      statLabel: stats.arrowLevel > 1 ? `Lvl ${stats.arrowLevel} / ${arrowTotalLevels}` : `${arrowTotalLevels} Levels Available`,
       icon: "🎯",
     },
     {
@@ -225,7 +236,7 @@ export default function GamesHub() {
       badgeBg: "bg-[#bfdbfe] text-black",
       color: "bg-[#93c5fd]",
       link: "/games/pipe-connect",
-      statLabel: stats.pipeLevel > 1 ? `Level ${stats.pipeLevel} Unlocked` : "30 Circuit Puzzles",
+      statLabel: stats.pipeLevel > 1 ? `Lvl ${stats.pipeLevel} / ${pipeTotalLevels}` : `${pipeTotalLevels} Circuit Levels`,
       icon: "🔌",
     },
     {
@@ -393,7 +404,7 @@ export default function GamesHub() {
           </div>
         )}
 
-        {/* Games Grid — ONLY ONLINE GAMES ARE RENDERED (TURNED-OFF GAMES HIDDEN) */}
+        {/* Games Grid — ONLY ONLINE GAMES ARE RENDERED */}
         <div className="space-y-4 pt-1">
           {filteredGames.map((game, idx) => (
             <Link key={game.id} to={game.link} className="block outline-none">
@@ -451,7 +462,7 @@ export default function GamesHub() {
 
       </div>
 
-      {/* ─── Real Dynamic Campus Leaderboard Modal Overlay (USER SCORE & RANK INSIDE HERE) ─── */}
+      {/* ─── Real Dynamic Campus Leaderboard Modal Overlay ───────────────────────── */}
       <AnimatePresence>
         {showLeaderboard && (
           <motion.div
