@@ -48,6 +48,28 @@ export function useAds(placement: Placement): Ad[] {
         if (alive) setAds([]);
         return;
       }
+      if (placement === "games") {
+        const { data: rawAds } = await supabase
+          .from("ads" as any)
+          .select("*")
+          .eq("active", true)
+          .order("sort_order", { ascending: true });
+
+        const { data: gamesMapSetting } = await supabase
+          .from("app_settings" as any)
+          .select("value")
+          .eq("key", "cx_games_ad_map")
+          .maybeSingle();
+
+        const gamesMap: Record<string, boolean> = (gamesMapSetting as any)?.value || {};
+        const filtered = ((rawAds as any[]) ?? [])
+          .filter(ad => !!gamesMap[ad.id])
+          .map(ad => ({ ...ad, show_games: true }));
+
+        if (alive) setAds(filtered as Ad[]);
+        return;
+      }
+
       const { data } = await supabase
         .from("ads" as any)
         .select("*")

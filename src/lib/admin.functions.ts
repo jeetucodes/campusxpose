@@ -877,7 +877,7 @@ export const adminListAds = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: ads, error } = await supabaseAdmin
+    const { data: rawAds, error } = await supabaseAdmin
       .from("ads" as any)
       .select("*")
       .order("sort_order", { ascending: true })
@@ -888,8 +888,18 @@ export const adminListAds = createServerFn({ method: "POST" })
       .select("value")
       .eq("key", "ads_enabled")
       .maybeSingle();
+    const { data: gamesMapSetting } = await supabaseAdmin
+      .from("app_settings" as any)
+      .select("value")
+      .eq("key", "cx_games_ad_map")
+      .maybeSingle();
+    const gamesMap: Record<string, boolean> = (gamesMapSetting as any)?.value || {};
     const enabled = (setting as any)?.value === true;
-    return { ads: ads ?? [], enabled };
+    const ads = (rawAds ?? []).map((ad: any) => ({
+      ...ad,
+      show_games: !!gamesMap[ad.id],
+    }));
+    return { ads, enabled };
   });
 
 export const adminSaveAd = createServerFn({ method: "POST" })
@@ -897,22 +907,47 @@ export const adminSaveAd = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { token, id, ...fields } = data as any;
+    const { token, id, show_games, ...fields } = data as any;
+    let targetId = id;
     if (id) {
       const { error } = await supabaseAdmin
         .from("ads" as any)
         .update({ ...fields, updated_at: new Date().toISOString() })
         .eq("id", id);
       if (error) throw new Error(error.message);
-      return { ok: true, id };
+    } else {
+      const { data: row, error } = await supabaseAdmin
+        .from("ads" as any)
+        .insert(fields)
+        .select("id")
+        .single();
+      if (error) throw new Error(error.message);
+      targetId = (row as any).id;
     }
-    const { data: row, error } = await supabaseAdmin
-      .from("ads" as any)
-      .insert(fields)
-      .select("id")
-      .single();
-    if (error) throw new Error(error.message);
-    return { ok: true, id: (row as any).id };
+
+    try {
+      const { data: existingSetting } = await supabaseAdmin
+        .from("app_settings" as any)
+        .select("value")
+        .eq("key", "cx_games_ad_map")
+        .maybeSingle();
+
+      const gamesMap: Record<string, boolean> = (existingSetting as any)?.value || {};
+      gamesMap[targetId] = !!show_games;
+
+      await supabaseAdmin.from("app_settings" as any).upsert(
+        {
+          key: "cx_games_ad_map",
+          value: gamesMap,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "key" }
+      );
+    } catch (e) {
+      console.warn("Failed to update cx_games_ad_map", e);
+    }
+
+    return { ok: true, id: targetId };
   });
 
 export const adminDeleteAd = createServerFn({ method: "POST" })
