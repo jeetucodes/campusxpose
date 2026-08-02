@@ -370,9 +370,9 @@ export default function ArrowPuzzleGame() {
 
   // Initialize level
   const initLevel = useCallback((idx: number) => {
-    let data = getStaticLevel(idx);
+    let data: any = null;
 
-    // Read Admin edited level overrides or custom AI levels
+    // 1. Read Admin edited level overrides
     try {
       const overridesRaw = localStorage.getItem("cx_arrow_level_overrides");
       if (overridesRaw) {
@@ -381,17 +381,27 @@ export default function ArrowPuzzleGame() {
           data = overrides[idx];
         }
       }
-      
-      const customRaw = localStorage.getItem("cx_arrow_custom_levels");
-      if (customRaw && !data) {
-        const customLevels = JSON.parse(customRaw);
-        if (Array.isArray(customLevels) && customLevels.length > 0) {
-          if (idx >= 100 && idx - 100 < customLevels.length) {
-            data = customLevels[idx - 100];
+    } catch (e) {}
+
+    // 2. Read Custom AI imported levels (for idx >= 100)
+    if (!data && idx >= 100) {
+      try {
+        const customRaw = localStorage.getItem("cx_arrow_custom_levels");
+        if (customRaw) {
+          const customLevels = JSON.parse(customRaw);
+          if (Array.isArray(customLevels) && customLevels.length > 0) {
+            if (idx - 100 < customLevels.length) {
+              data = customLevels[idx - 100];
+            }
           }
         }
-      }
-    } catch (e) {}
+      } catch (e) {}
+    }
+
+    // 3. Fallback to static built-in level
+    if (!data) {
+      data = getStaticLevel(idx);
+    }
 
     setLevelData(data);
     setArrows(data.arrows);

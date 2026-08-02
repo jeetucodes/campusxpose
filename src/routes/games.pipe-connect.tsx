@@ -213,7 +213,7 @@ export default function PipeConnectGame() {
   }, []);
 
   const initLevel = useCallback((idx: number) => {
-    let data = getPipeLevel(idx);
+    let data: any = null;
 
     // Read Admin level overrides or custom levels
     try {
@@ -225,14 +225,20 @@ export default function PipeConnectGame() {
         }
       }
 
-      const customRaw = localStorage.getItem("cx_pipe_custom_levels");
-      if (customRaw && idx >= 30) {
-        const customLevels = JSON.parse(customRaw);
-        if (Array.isArray(customLevels) && idx - 30 < customLevels.length) {
-          data = customLevels[idx - 30];
+      if (!data && idx >= 30) {
+        const customRaw = localStorage.getItem("cx_pipe_custom_levels");
+        if (customRaw) {
+          const customLevels = JSON.parse(customRaw);
+          if (Array.isArray(customLevels) && idx - 30 < customLevels.length) {
+            data = customLevels[idx - 30];
+          }
         }
       }
     } catch (e) {}
+
+    if (!data) {
+      data = getPipeLevel(idx);
+    }
 
     setLevelData(data);
     setTiles(data.tiles);

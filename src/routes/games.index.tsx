@@ -212,7 +212,7 @@ export default function GamesHub() {
       badgeBg: "bg-[#fef08a] text-black",
       color: "bg-[#fca5a5]",
       link: "/games/arrow-puzzle",
-      statLabel: stats.arrowLevel > 1 ? `Lvl ${stats.arrowLevel} / ${arrowTotalLevels}` : `${arrowTotalLevels} Levels Available`,
+      statLabel: `Lvl ${stats.arrowLevel || 1} / ${arrowTotalLevels}`,
       icon: "🎯",
     },
     {
@@ -227,7 +227,7 @@ export default function GamesHub() {
       badgeBg: "bg-[#bfdbfe] text-black",
       color: "bg-[#93c5fd]",
       link: "/games/pipe-connect",
-      statLabel: stats.pipeLevel > 1 ? `Lvl ${stats.pipeLevel} / ${pipeTotalLevels}` : `${pipeTotalLevels} Circuit Levels`,
+      statLabel: `Lvl ${stats.pipeLevel || 1} / ${pipeTotalLevels}`,
       icon: "🔌",
     },
     {
@@ -291,14 +291,6 @@ export default function GamesHub() {
             </div>
           </div>
           
-          {/* Top Nav Leaderboard Trigger */}
-          <button
-            onClick={() => setShowLeaderboard(true)}
-            className="flex items-center gap-1.5 bg-white hover:bg-yellow-100 px-3.5 py-1.5 border-2 border-black rounded-full shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] text-xs font-black transition-all hover:scale-105 active:scale-95 cursor-pointer"
-          >
-            <Trophy className="h-4 w-4 text-amber-500 fill-amber-500" />
-            <span>Leaderboard</span>
-          </button>
         </div>
       </div>
 
