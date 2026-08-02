@@ -5,6 +5,7 @@ import { ArrowLeft, RotateCcw, ChevronRight, ChevronLeft, ChevronUp, ChevronDown
 import { Button } from "@/components/ui/button";
 
 const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
+const WOBBLY_SM = "15px 5px 12px 5px / 5px 12px 5px 15px";
 export const Route = createFileRoute("/games/arrow-puzzle")({
   head: () => ({
     meta: [
@@ -24,10 +25,10 @@ const DIR_ICON: Record<Dir, typeof ChevronUp> = {
 };
 
 const DIR_COLORS: Record<Dir, string> = {
-  up: "bg-[#60a5fa] text-white",
-  down: "bg-[#fb7185] text-white",
-  left: "bg-[#34d399] text-white",
-  right: "bg-[#fbbf24] text-white",
+  up: "bg-[#bfdbfe] text-black",
+  down: "bg-[#fbcfe8] text-black",
+  left: "bg-[#bbf7d0] text-black",
+  right: "bg-[#fef08a] text-black",
 };
 
 const DIR_EXIT: Record<Dir, { x: number; y: number }> = {
@@ -283,34 +284,35 @@ export default function ArrowPuzzleGame() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#f4f4f5]">
       {/* Header */}
-      <div className="sticky top-0 z-40 border-b border-border bg-background">
+      <div className="sticky top-0 z-40 border-b-4 border-black bg-white">
         <div className="mx-auto flex max-w-lg items-center justify-between px-4 py-3">
-          <Link to="/" className="flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft className="h-4 w-4" /> Back
+          <Link to="/" className="flex items-center gap-2 text-sm font-black text-black hover:scale-105 transition-transform">
+            <ArrowLeft className="h-5 w-5" strokeWidth={3} /> Back
           </Link>
-          <h1 className="font-display text-xl font-bold tracking-tight">Arrow Puzzle</h1>
+          <h1 className="font-display text-2xl font-black tracking-tight uppercase">Arrow Puzzle</h1>
           <div className="w-14" />
         </div>
       </div>
 
-      <div className="mx-auto max-w-lg px-4 py-6 space-y-5">
+      <div className="mx-auto max-w-lg px-4 py-8 space-y-8">
 
         {/* Level & Stats Dashboard */}
-        <div className="space-y-4">
+        <div className="space-y-6">
           {/* Top Row: Level & Lives */}
           <div className="flex items-center justify-between">
             <button 
               onClick={() => setShowLevels(true)} 
-              className="flex items-center gap-2 bg-white px-5 py-2.5 rounded-full border hover:scale-[1.02] active:scale-95 transition-transform outline-none"
+              className="flex items-center gap-2 bg-[#fbcfe8] px-5 py-2.5 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all outline-none"
+              style={{ borderRadius: WOBBLY_SM }}
             >
-              <span className="font-display text-xl font-bold text-[#60a5fa] tracking-tight leading-none">Level {levelIdx + 1}</span>
-              <span className="text-[11px] font-bold text-[#94a3b8] flex items-center bg-[#f1f5f9] px-2.5 py-1 rounded-full">
-                / 100 <ChevronDown className="h-3 w-3 ml-1" strokeWidth={3} />
+              <span className="font-display text-xl font-black text-black tracking-tight uppercase">Level {levelIdx + 1}</span>
+              <span className="text-[12px] font-black text-black/70 flex items-center bg-white px-2 py-0.5 rounded-full border-2 border-black">
+                / 100 <ChevronDown className="h-3 w-3 ml-1" strokeWidth={4} />
               </span>
             </button>
-            <div className="flex items-center gap-1.5 bg-white px-4 py-2.5 rounded-full border">
+            <div className="flex items-center gap-1.5 bg-white px-4 py-2.5 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" style={{ borderRadius: WOBBLY_SM }}>
               {Array.from({ length: 5 }).map((_, i) => (
                 <motion.div
                   key={i}
@@ -319,10 +321,10 @@ export default function ArrowPuzzleGame() {
                   className="relative"
                 >
                   <Heart
-                    className={`h-5 w-5 ${i < lives ? "text-[#fb7185] fill-[#fb7185]" : "text-muted-foreground/30"}`}
+                    className={`h-5 w-5 ${i < lives ? "text-black fill-black" : "text-black/30"}`}
                   />
                   {i < lives && (
-                    <div className="absolute top-[3px] left-[3px] w-[5px] h-[5px] bg-white/70 rounded-full blur-[0.5px]" />
+                    <div className="absolute top-[3px] left-[3px] w-[5px] h-[5px] bg-white rounded-full blur-[0.5px]" />
                   )}
                 </motion.div>
               ))}
@@ -330,42 +332,40 @@ export default function ArrowPuzzleGame() {
           </div>
 
           {/* Bottom Row: Moves, Left, Reset */}
-          <div className="flex items-center gap-3">
-            <div className="flex-1 rounded-xl bg-white border p-3 flex flex-col items-center justify-center">
-              <div className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-widest mb-1">Moves</div>
-              <div className="font-display text-2xl font-bold text-[#475569] leading-none">{moves}</div>
+          <div className="flex items-stretch gap-4">
+            <div className="flex-1 bg-[#bfdbfe] border-4 border-black p-3 flex flex-col items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" style={{ borderRadius: WOBBLY_SM }}>
+              <div className="text-[12px] font-black text-black/70 uppercase tracking-widest mb-1">Moves</div>
+              <div className="font-display text-3xl font-black text-black leading-none">{moves}</div>
             </div>
-            <div className="flex-1 rounded-xl bg-white border p-3 flex flex-col items-center justify-center">
-              <div className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-widest mb-1">Left</div>
-              <div className="font-display text-2xl font-bold text-[#475569] leading-none">{arrows.length}</div>
+            <div className="flex-1 bg-[#bbf7d0] border-4 border-black p-3 flex flex-col items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" style={{ borderRadius: WOBBLY_SM }}>
+              <div className="text-[12px] font-black text-black/70 uppercase tracking-widest mb-1">Left</div>
+              <div className="font-display text-3xl font-black text-black leading-none">{arrows.length}</div>
             </div>
             <Button
               onClick={handleHint}
               disabled={hintsLeft === 0 || won || gameOver}
-              variant="outline"
-              size="icon"
-              className={`h-16 w-16 rounded-xl border bg-white hover:bg-[#fffbeb] shrink-0 transition-all hover:scale-105 active:scale-95 ${hintsLeft > 0 ? "text-[#fbbf24]" : "text-muted-foreground/30 opacity-60"}`}
+              className={`w-[60px] sm:w-[70px] h-auto flex-shrink-0 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center p-0 transition-all hover:translate-y-1 hover:shadow-none ${hintsLeft > 0 ? "bg-[#fef08a] text-black" : "bg-gray-200 text-gray-400 opacity-60"}`}
+              style={{ borderRadius: WOBBLY_SM }}
             >
               <div className="flex flex-col items-center justify-center">
-                <Lightbulb className="h-6 w-6 mb-1" strokeWidth={2.5} />
-                <span className="text-[11px] font-bold leading-none bg-[#fef3c7] text-[#b45309] px-2 py-0.5 rounded-full">{hintsLeft}</span>
+                <Lightbulb className="h-6 w-6 sm:h-7 sm:w-7 mb-1" strokeWidth={3} />
+                <span className="text-[11px] font-black leading-none bg-white border-2 border-black text-black px-2 py-0.5 rounded-full">{hintsLeft}</span>
               </div>
             </Button>
             <Button
               onClick={resetLevel}
-              variant="outline"
-              size="icon"
-              className="h-16 w-16 rounded-xl border bg-white hover:bg-[#f8fafc] shrink-0 text-[#94a3b8] hover:text-[#475569] transition-all hover:scale-105 active:scale-95"
+              className="w-[60px] sm:w-[70px] h-auto flex-shrink-0 border-4 border-black bg-white text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-gray-100 transition-all hover:translate-y-1 hover:shadow-none p-0 flex items-center justify-center"
+              style={{ borderRadius: WOBBLY_SM }}
             >
-              <RotateCcw className="h-6 w-6" strokeWidth={2.5} />
+              <RotateCcw className="h-6 w-6 sm:h-7 sm:w-7" strokeWidth={3} />
             </Button>
           </div>
         </div>
 
         {/* Game board */}
-        <div className="relative w-full bg-[#e2e8f0] p-3 sm:p-4 select-none border rounded-2xl">
+        <div className="relative w-full border-4 border-black bg-white p-3 sm:p-4 select-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]" style={{ borderRadius: WOBBLY_MD }}>
           <div
-            className="grid gap-2"
+            className="grid gap-2 sm:gap-3"
             style={{
               gridTemplateColumns: `repeat(${levelData.gridSize}, 1fr)`,
               gridTemplateRows: `repeat(${levelData.gridSize}, 1fr)`,
@@ -376,10 +376,11 @@ export default function ArrowPuzzleGame() {
             {Array.from({ length: levelData.gridSize * levelData.gridSize }).map((_, i) => (
               <div
                 key={`cell-${i}`}
-                className="rounded-[18px] bg-[#cbd5e1] opacity-40 shadow-inner"
+                className="bg-black/5 border-2 border-dashed border-black/20"
                 style={{
                   gridRow: Math.floor(i / levelData.gridSize) + 1,
                   gridColumn: (i % levelData.gridSize) + 1,
+                  borderRadius: WOBBLY_SM
                 }}
               />
             ))}
@@ -391,11 +392,12 @@ export default function ArrowPuzzleGame() {
                 <motion.button
                   key={`obs-${obs.id}`}
                   onClick={() => handleObstacleTap(obs)}
-                  className={`absolute rounded-[18px] flex items-center justify-center ${obs.type === "wall" ? "bg-[#d6d3d1] border overflow-hidden" : obs.type === "bomb" ? "bg-[#3f3f46] border" : "bg-[#bae6fd] border"}`}
+                  className={`absolute flex items-center justify-center border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${obs.type === "wall" ? "bg-[#d6d3d1] overflow-hidden" : obs.type === "bomb" ? "bg-[#f87171]" : "bg-[#bfdbfe]"}`}
                   style={{
                     gridRow: obs.row + 1,
                     gridColumn: obs.col + 1,
                     position: "relative",
+                    borderRadius: WOBBLY_SM
                   }}
                   animate={
                     isShaking
@@ -481,18 +483,25 @@ export default function ArrowPuzzleGame() {
                   <motion.button
                     key={arrow.id}
                     onClick={() => handleTap(arrow)}
-                    className={`absolute rounded-[18px] flex items-center justify-center cursor-pointer ${DIR_COLORS[arrow.dir]} transition-shadow ${
-                      isTappable ? "ring-2 ring-white/50" : "opacity-80"
-                    } ${isHinted ? "ring-4 ring-yellow-400 !shadow-[0_0_15px_rgba(250,204,21,1)] z-10" : ""}`}
+                    className={`absolute flex items-center justify-center cursor-pointer ${DIR_COLORS[arrow.dir]} transition-shadow border-2 border-black z-10 ${
+                      isTappable ? "shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:scale-105" : "opacity-70 shadow-none border-2 scale-95"
+                    } ${isHinted ? "ring-4 ring-[#fef08a] !shadow-[0_0_15px_rgba(254,240,138,1)] z-20" : ""}`}
                     style={{
                       gridRow: arrow.row + 1,
                       gridColumn: arrow.col + 1,
                       position: "relative",
+                      borderRadius: WOBBLY_SM
                     }}
                     initial={{ scale: 0, rotate: -90 }}
                     animate={
                       isExiting
-                        ? { scale: 0, opacity: 0, transition: { duration: 0.2 } }
+                        ? { 
+                            x: DIR_EXIT[arrow.dir].x, 
+                            y: DIR_EXIT[arrow.dir].y,
+                            opacity: 0, 
+                            scale: 0.8,
+                            transition: { duration: 0.2, ease: "easeIn" } 
+                          }
                         : bounceAnim
                         ? {
                             ...bounceAnim,
@@ -527,37 +536,37 @@ export default function ArrowPuzzleGame() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 flex flex-col items-center justify-center bg-emerald-500/40 z-20"
-                style={{ borderRadius: "32px" }}
+                className="absolute inset-0 flex flex-col items-center justify-center bg-[#bbf7d0]/80 backdrop-blur-sm z-30"
+                style={{ borderRadius: WOBBLY_MD }}
               >
                 <motion.div
-                  initial={{ scale: 0.6, y: 24 }}
-                  animate={{ scale: 1, y: 0 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  className="bg-white border-2 border-border p-8 text-center space-y-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] w-[90%] max-w-sm"
+                  initial={{ scale: 0.5, y: 50, rotate: 5 }}
+                  animate={{ scale: 1, y: 0, rotate: 0 }}
+                  transition={{ type: "spring", bounce: 0.6 }}
+                  className="bg-white border-4 border-black p-8 text-center space-y-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] max-w-[80%]"
                   style={{ borderRadius: WOBBLY_MD }}
                 >
                   <motion.div
                     animate={{ rotate: [0, -10, 10, -5, 5, 0] }}
                     transition={{ duration: 0.6, delay: 0.3 }}
-                    className="text-6xl drop-shadow-md"
+                    className="text-6xl"
                   >
                     🎉
                   </motion.div>
-                  <h2 className="font-display text-3xl font-bold text-foreground">
+                  <h2 className="font-display text-3xl font-black text-black uppercase">
                     {levelIdx < 99 ? "Cleared!" : "All Done!"}
                   </h2>
-                  <p className="text-muted-foreground text-sm font-medium">
-                    Solved in <strong className="text-[#60a5fa]">{moves}</strong> moves
+                  <p className="text-black/70 text-lg font-bold">
+                    Solved in <strong className="text-black">{moves}</strong> moves
                   </p>
                   <div className="flex flex-col gap-3 justify-center mt-2">
                     {levelIdx < 99 && (
-                      <Button onClick={nextLevel} className="w-full h-12 bg-accent text-white hover:bg-accent/90 border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] text-lg font-bold" style={{ borderRadius: WOBBLY_MD }}>
-                        Next Level <Zap className="h-5 w-5 ml-2 fill-white" />
+                      <Button onClick={nextLevel} className="w-full h-12 bg-[#fef08a] text-black hover:bg-[#fde047] border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all text-lg font-black" style={{ borderRadius: WOBBLY_SM }}>
+                        Next Level <Zap className="h-5 w-5 ml-2 fill-black text-black" />
                       </Button>
                     )}
-                    <Button onClick={resetLevel} variant="outline" className="w-full h-12 bg-white text-foreground hover:bg-muted border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] text-lg font-bold" style={{ borderRadius: WOBBLY_MD }}>
-                      <RotateCcw className="h-5 w-5 mr-2" /> Retry
+                    <Button onClick={resetLevel} variant="outline" className="w-full h-12 bg-white text-black hover:bg-gray-100 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all text-lg font-black" style={{ borderRadius: WOBBLY_SM }}>
+                      <RotateCcw className="h-5 w-5 mr-2" strokeWidth={3} /> Retry
                     </Button>
                   </div>
                 </motion.div>
@@ -572,23 +581,23 @@ export default function ArrowPuzzleGame() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 flex flex-col items-center justify-center bg-rose-500/40 z-20"
-                style={{ borderRadius: "32px" }}
+                className="absolute inset-0 flex flex-col items-center justify-center bg-[#fbcfe8]/80 backdrop-blur-sm z-30"
+                style={{ borderRadius: WOBBLY_MD }}
               >
                 <motion.div
-                  initial={{ scale: 0.6, y: 24 }}
-                  animate={{ scale: 1, y: 0 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  className="bg-white border-2 border-border p-8 text-center space-y-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] w-[90%] max-w-sm"
+                  initial={{ scale: 0.5, y: 50, rotate: -5 }}
+                  animate={{ scale: 1, y: 0, rotate: 0 }}
+                  transition={{ type: "spring", bounce: 0.5 }}
+                  className="bg-white border-4 border-black p-8 text-center space-y-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] max-w-[80%]"
                   style={{ borderRadius: WOBBLY_MD }}
                 >
-                  <div className="text-6xl drop-shadow-md">💔</div>
-                  <h2 className="font-display text-3xl font-bold text-foreground">Out of Lives!</h2>
-                  <p className="text-muted-foreground text-sm font-medium">
-                    You made <strong className="text-[#fb7185]">{moves}</strong> moves
+                  <div className="text-6xl animate-bounce">💔</div>
+                  <h2 className="font-display text-3xl font-black text-black uppercase">Out of Lives!</h2>
+                  <p className="text-black/70 text-lg font-bold">
+                    You made <strong className="text-black">{moves}</strong> moves
                   </p>
-                  <Button onClick={resetLevel} className="h-12 w-full mt-2 bg-rose-500 text-white hover:bg-rose-600 border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] text-lg font-bold" style={{ borderRadius: WOBBLY_MD }}>
-                    <RotateCcw className="h-5 w-5 mr-2" /> Try Again
+                  <Button onClick={resetLevel} className="h-12 w-full mt-2 bg-[#fbcfe8] text-black hover:bg-[#f9a8d4] border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all text-lg font-black" style={{ borderRadius: WOBBLY_SM }}>
+                    <RotateCcw className="h-5 w-5 mr-2" strokeWidth={3} /> Try Again
                   </Button>
                 </motion.div>
               </motion.div>
@@ -600,9 +609,10 @@ export default function ArrowPuzzleGame() {
         {/* How to play button */}
         <button 
           onClick={() => setShowHelp(true)}
-          className="w-full bg-[#f8fafc] border p-4 font-display font-bold text-sm text-foreground hover:opacity-90 transition-opacity rounded-xl flex items-center justify-center gap-2"
+          className="w-full bg-white border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-4 font-display font-black uppercase tracking-wide text-black hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-center gap-2"
+          style={{ borderRadius: WOBBLY_MD }}
         >
-          <Lightbulb className="h-5 w-5 text-yellow-500" /> How to Play
+          <Lightbulb className="h-6 w-6 text-black" strokeWidth={3} /> How to Play
         </button>
 
       </div>
@@ -614,7 +624,7 @@ export default function ArrowPuzzleGame() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
             onClick={() => setShowHelp(false)}
           >
             <motion.div
@@ -622,40 +632,41 @@ export default function ArrowPuzzleGame() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
               onClick={e => e.stopPropagation()}
-              className="w-full max-w-sm bg-[#f8fafc] border p-6 flex flex-col relative rounded-2xl"
+              className="w-full max-w-sm bg-white border-4 border-black p-6 flex flex-col relative shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
+              style={{ borderRadius: WOBBLY_MD }}
             >
               <Button 
                 variant="ghost" 
                 size="icon" 
                 onClick={() => setShowHelp(false)} 
-                className="absolute top-4 right-4 h-8 w-8 rounded-full bg-muted/50 hover:bg-muted text-muted-foreground"
+                className="absolute top-4 right-4 h-8 w-8 rounded-full bg-gray-100 hover:bg-gray-200 text-black border-2 border-black"
               >
-                <X className="h-4 w-4" />
+                <X className="h-4 w-4" strokeWidth={3} />
               </Button>
 
-              <h2 className="font-display text-2xl font-bold mb-4 flex items-center gap-2">
-                <Lightbulb className="h-6 w-6 text-yellow-500" /> How to Play
+              <h2 className="font-display text-2xl font-black mb-4 flex items-center gap-2 uppercase">
+                <Lightbulb className="h-6 w-6 text-black" strokeWidth={3} /> How to Play
               </h2>
               
               <div className="space-y-4">
-                <p className="text-sm text-muted-foreground font-medium leading-relaxed">
+                <p className="text-sm text-black/80 font-bold leading-relaxed">
                   Tap an arrow to send it flying off the board! An arrow can only move 
-                  if the path in its direction is <strong>completely clear</strong> to the edge.
-                  Clear <strong className="text-accent">all arrows</strong> to win! 🏆
+                  if the path in its direction is <span className="bg-black/10 px-1 rounded border border-black/20">completely clear</span> to the edge.
+                  Clear <span className="text-black font-black underline decoration-2">all arrows</span> to win! 🚀
                 </p>
-                <div className="p-3 bg-muted/40 rounded-xl space-y-2">
-                  <p className="text-sm text-muted-foreground font-medium">
+                <div className="p-4 bg-[#fef08a] border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] space-y-2" style={{ borderRadius: WOBBLY_SM }}>
+                  <p className="text-sm text-black font-bold">
                     <strong>🧱 Walls:</strong> Cannot be moved. Arrows must go around them.
                   </p>
-                  <p className="text-sm text-muted-foreground font-medium">
+                  <p className="text-sm text-black font-bold">
                     <strong>💣 Bombs:</strong> Explode and cost you 1 life if tapped! Don't touch them!
                   </p>
                 </div>
-                <div className="pt-2 flex flex-wrap items-center gap-3 text-sm font-medium text-foreground">
-                  <span className="inline-flex items-center gap-1.5"><span className="h-5 w-5 rounded-md bg-[#60a5fa] shadow-sm inline-block" /> Up</span>
-                  <span className="inline-flex items-center gap-1.5"><span className="h-5 w-5 rounded-md bg-[#fb7185] shadow-sm inline-block" /> Down</span>
-                  <span className="inline-flex items-center gap-1.5"><span className="h-5 w-5 rounded-md bg-[#34d399] shadow-sm inline-block" /> Left</span>
-                  <span className="inline-flex items-center gap-1.5"><span className="h-5 w-5 rounded-md bg-[#fbbf24] shadow-sm inline-block" /> Right</span>
+                <div className="pt-2 flex flex-wrap items-center gap-3 text-sm font-black text-black">
+                  <span className="inline-flex items-center gap-1.5"><span className="h-5 w-5 border-2 border-black bg-[#bfdbfe] shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] inline-block rounded" /> Up</span>
+                  <span className="inline-flex items-center gap-1.5"><span className="h-5 w-5 border-2 border-black bg-[#fbcfe8] shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] inline-block rounded" /> Down</span>
+                  <span className="inline-flex items-center gap-1.5"><span className="h-5 w-5 border-2 border-black bg-[#bbf7d0] shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] inline-block rounded" /> Left</span>
+                  <span className="inline-flex items-center gap-1.5"><span className="h-5 w-5 border-2 border-black bg-[#fef08a] shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] inline-block rounded" /> Right</span>
                 </div>
               </div>
             </motion.div>
@@ -670,7 +681,7 @@ export default function ArrowPuzzleGame() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
             onClick={() => setShowLevels(false)}
           >
             <motion.div
@@ -678,18 +689,19 @@ export default function ArrowPuzzleGame() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
               onClick={e => e.stopPropagation()}
-              className="w-full max-w-sm bg-[#f8fafc] border p-6 flex flex-col max-h-[80vh] rounded-2xl relative"
+              className="w-full max-w-sm bg-white border-4 border-black p-6 flex flex-col max-h-[80vh] relative shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
+              style={{ borderRadius: WOBBLY_MD }}
             >
               <Button 
                 variant="ghost" 
                 size="icon" 
                 onClick={() => setShowLevels(false)} 
-                className="absolute top-4 right-4 h-8 w-8 rounded-full bg-white shadow-[2px_2px_5px_rgba(0,0,0,0.05)] hover:bg-muted text-muted-foreground"
+                className="absolute top-4 right-4 h-8 w-8 rounded-full bg-gray-100 hover:bg-gray-200 border-2 border-black text-black z-10"
               >
-                <X className="h-4 w-4" />
+                <X className="h-4 w-4" strokeWidth={3} />
               </Button>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="font-display text-2xl font-bold text-foreground">Select Level</h2>
+                <h2 className="font-display text-2xl font-black text-black uppercase">Select Level</h2>
               </div>
               <div className="flex-1 overflow-y-auto pr-2 pb-2 custom-scrollbar">
                 <div className="flex flex-wrap gap-3 justify-center">
@@ -705,13 +717,14 @@ export default function ArrowPuzzleGame() {
                           }
                         }}
                         disabled={!unlocked}
-                        className={`h-12 w-12 shrink-0 rounded-[16px] border font-display font-bold text-sm transition-all outline-none ${
+                        className={`h-12 w-12 shrink-0 border-2 border-black font-display font-black text-sm transition-all outline-none flex items-center justify-center ${
                           i === levelIdx
-                            ? "bg-[#60a5fa] text-white scale-110 z-10"
+                            ? "bg-[#bfdbfe] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] scale-110 z-10"
                             : unlocked
-                            ? "bg-white text-foreground hover:bg-[#f8fafc] hover:scale-105 active:scale-95"
-                            : "bg-[#e2e8f0] text-muted-foreground/40 cursor-not-allowed"
+                            ? "bg-white text-black hover:bg-[#fbcfe8] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 active:scale-95"
+                            : "bg-gray-100 text-gray-400 cursor-not-allowed opacity-60"
                         }`}
+                        style={{ borderRadius: WOBBLY_SM }}
                       >
                         {unlocked ? i + 1 : "🔒"}
                       </button>

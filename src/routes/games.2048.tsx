@@ -20,17 +20,17 @@ type Direction = "up" | "down" | "left" | "right";
 
 // ─── Tile colours (matching CampusXpose sketch/postit palette) ─────────────
 const TILE_STYLES: Record<number, { bg: string; text: string; scale?: number }> = {
-  2:    { bg: "#f5f0e8", text: "#6b5f50" },
-  4:    { bg: "#ece0c8", text: "#6b5f50" },
-  8:    { bg: "#f2b179", text: "#fff" },
-  16:   { bg: "#f59563", text: "#fff" },
-  32:   { bg: "#f67c5f", text: "#fff" },
-  64:   { bg: "#f65e3b", text: "#fff" },
-  128:  { bg: "#edcf72", text: "#fff", scale: 0.85 },
-  256:  { bg: "#edcc61", text: "#fff", scale: 0.85 },
-  512:  { bg: "#edc850", text: "#fff", scale: 0.8 },
-  1024: { bg: "#edc53f", text: "#fff", scale: 0.7 },
-  2048: { bg: "#edc22e", text: "#fff", scale: 0.7 },
+  2:    { bg: "#ffffff", text: "#000000" },
+  4:    { bg: "#fef08a", text: "#000000" }, // Yellow
+  8:    { bg: "#fbcfe8", text: "#000000" }, // Pink
+  16:   { bg: "#bfdbfe", text: "#000000" }, // Blue
+  32:   { bg: "#bbf7d0", text: "#000000" }, // Green
+  64:   { bg: "#fcd68a", text: "#000000" }, // Orange
+  128:  { bg: "#e9d5ff", text: "#000000", scale: 0.85 }, // Purple
+  256:  { bg: "#f87171", text: "#ffffff", scale: 0.85 }, // Red
+  512:  { bg: "#60a5fa", text: "#ffffff", scale: 0.8 },  // Darker Blue
+  1024: { bg: "#34d399", text: "#ffffff", scale: 0.7 },  // Emerald
+  2048: { bg: "#fbbf24", text: "#000000", scale: 0.7 },  // Gold
 };
 
 const GRID_SIZE = 4;
@@ -220,86 +220,85 @@ function Game2048() {
   };
 
   const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
+  const WOBBLY_SM = "15px 5px 12px 5px / 5px 12px 5px 15px";
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#f4f4f5]">
       {/* Header */}
-      <div className="sticky top-0 z-40 border-b-2 border-dashed border-border bg-background/95 backdrop-blur">
+      <div className="sticky top-0 z-40 border-b-4 border-black bg-white">
         <div className="mx-auto flex max-w-lg items-center justify-between px-4 py-3">
-          <Link to="/" className="flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft className="h-4 w-4" /> Back
+          <Link to="/" className="flex items-center gap-2 text-sm font-black text-black hover:scale-105 transition-transform">
+            <ArrowLeft className="h-5 w-5" strokeWidth={3} /> Back
           </Link>
-          <h1 className="font-display text-xl font-bold tracking-tight">2048</h1>
+          <h1 className="font-display text-2xl font-black tracking-tight uppercase">2048</h1>
           <div className="w-14" />
         </div>
       </div>
 
-      <div className="mx-auto max-w-lg px-4 py-6 space-y-5">
+      <div className="mx-auto max-w-lg px-4 py-8 space-y-8">
 
         {/* Score bar */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-stretch gap-4">
           <div
-            className="flex-1 border-2 border-border bg-white p-3 text-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+            className="flex-1 border-4 border-black bg-[#bfdbfe] p-3 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
             style={{ borderRadius: WOBBLY_MD }}
           >
-            <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Score</div>
-            <div className="font-display text-2xl font-bold text-foreground">{score}</div>
+            <div className="text-[12px] font-black text-black/70 uppercase tracking-wider">Score</div>
+            <div className="font-display text-3xl font-black text-black">{score}</div>
           </div>
           <div
-            className="flex-1 border-2 border-border bg-white p-3 text-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+            className="flex-1 border-4 border-black bg-[#bbf7d0] p-3 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
             style={{ borderRadius: WOBBLY_MD }}
           >
-            <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Best</div>
-            <div className="font-display text-2xl font-bold text-accent">{best}</div>
+            <div className="text-[12px] font-black text-black/70 uppercase tracking-wider">Best</div>
+            <div className="font-display text-3xl font-black text-black">{best}</div>
           </div>
           <Button
             onClick={restart}
-            variant="outline"
-            size="icon"
-            className="h-14 w-14 border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-muted"
+            className="w-[80px] sm:w-[90px] h-auto flex-shrink-0 border-4 border-black bg-[#fbcfe8] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-[#f9a8d4] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-center p-0"
             style={{ borderRadius: WOBBLY_MD }}
           >
-            <RotateCcw className="h-5 w-5" />
+            <RotateCcw className="h-8 w-8 sm:h-10 sm:w-10" strokeWidth={3} />
           </Button>
         </div>
 
         {/* Game board */}
         <div
           ref={boardRef}
-          className="relative aspect-square w-full border-2 border-border bg-[#bbada0] p-2 sm:p-3 select-none touch-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+          className="relative aspect-square w-full border-4 border-black bg-white p-3 sm:p-4 select-none touch-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
           style={{ borderRadius: WOBBLY_MD }}
         >
           {/* Background cells */}
-          <div className="grid grid-cols-4 gap-2 sm:gap-3 h-full">
+          <div className="grid grid-cols-4 gap-3 sm:gap-4 h-full">
             {Array.from({ length: 16 }).map((_, i) => (
-              <div key={i} className="rounded-lg bg-[#cdc1b4]" />
+              <div key={i} className="bg-black/5 border-2 border-dashed border-black/20" style={{ borderRadius: WOBBLY_SM }} />
             ))}
           </div>
 
           {/* Tiles overlay */}
-          <div className="absolute inset-2 sm:inset-3 grid grid-cols-4 gap-2 sm:gap-3">
-            <AnimatePresence mode="popLayout">
+          <div className="absolute inset-3 sm:inset-4 grid grid-cols-4 gap-3 sm:gap-4">
+            <AnimatePresence>
               {grid.flatMap((row, r) =>
                 row.map((val, c) => {
                   if (val === null) return null;
-                  const style = TILE_STYLES[val] || { bg: "#3c3a32", text: "#fff", scale: 0.65 };
+                  const style = TILE_STYLES[val] || { bg: "#000", text: "#fff", scale: 0.65 };
                   const fontSize = (style.scale ?? 1);
                   return (
                     <motion.div
-                      key={`${r}-${c}`}
+                      key={`${r}-${c}-${val}`} // Unique key forces a pop animation on value change
                       layout
-                      initial={{ scale: 0, opacity: 0 }}
+                      initial={{ scale: 0.4, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0.8, opacity: 0 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 30, mass: 0.6 }}
-                      className="flex items-center justify-center rounded-lg font-display font-black"
+                      transition={{ type: "spring", stiffness: 300, damping: 20, mass: 0.8 }}
+                      className="flex items-center justify-center font-display font-black border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] z-10"
                       style={{
                         gridRow: r + 1,
                         gridColumn: c + 1,
                         backgroundColor: style.bg,
                         color: style.text,
                         fontSize: `clamp(${1.2 * fontSize}rem, ${5 * fontSize}vw, ${2.2 * fontSize}rem)`,
-                        textShadow: val >= 8 ? "0 1px 2px rgba(0,0,0,0.15)" : "none",
+                        borderRadius: WOBBLY_SM,
                       }}
                     >
                       {val}
@@ -317,20 +316,21 @@ function Game2048() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 backdrop-blur-sm z-20"
-                style={{ borderRadius: "20px" }}
+                className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm z-30"
+                style={{ borderRadius: WOBBLY_MD }}
               >
                 <motion.div
-                  initial={{ scale: 0.7, y: 20 }}
-                  animate={{ scale: 1, y: 0 }}
-                  className="bg-white border-2 border-border p-6 text-center space-y-4 shadow-xl"
+                  initial={{ scale: 0.5, y: 50, rotate: -5 }}
+                  animate={{ scale: 1, y: 0, rotate: 0 }}
+                  transition={{ type: "spring", bounce: 0.5 }}
+                  className="bg-white border-4 border-black p-8 text-center space-y-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] max-w-[80%]"
                   style={{ borderRadius: WOBBLY_MD }}
                 >
-                  <div className="text-4xl">😵</div>
-                  <h2 className="font-display text-2xl font-bold text-foreground">Game Over!</h2>
-                  <p className="text-muted-foreground text-sm font-medium">Final Score: <strong className="text-accent">{score}</strong></p>
-                  <Button onClick={restart} className="shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] border-2 border-border" style={{ borderRadius: WOBBLY_MD }}>
-                    <RotateCcw className="h-4 w-4 mr-2" /> Play Again
+                  <div className="text-6xl animate-bounce">😵</div>
+                  <h2 className="font-display text-4xl font-black text-black uppercase">Game Over!</h2>
+                  <p className="text-black/70 text-lg font-bold">Final Score: <span className="text-black text-2xl">{score}</span></p>
+                  <Button onClick={restart} className="w-full h-14 text-lg font-black bg-[#fbcfe8] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-4 border-black hover:bg-[#f9a8d4] hover:translate-y-1 hover:shadow-none transition-all" style={{ borderRadius: WOBBLY_SM }}>
+                    <RotateCcw className="h-6 w-6 mr-2" strokeWidth={3} /> Try Again
                   </Button>
                 </motion.div>
               </motion.div>
@@ -344,24 +344,25 @@ function Game2048() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 flex flex-col items-center justify-center bg-yellow-400/60 backdrop-blur-sm z-20"
-                style={{ borderRadius: "20px" }}
+                className="absolute inset-0 flex flex-col items-center justify-center bg-[#fef08a]/80 backdrop-blur-sm z-30"
+                style={{ borderRadius: WOBBLY_MD }}
               >
                 <motion.div
-                  initial={{ scale: 0.7, y: 20 }}
-                  animate={{ scale: 1, y: 0 }}
-                  className="bg-white border-2 border-border p-6 text-center space-y-4 shadow-xl"
+                  initial={{ scale: 0.5, y: 50, rotate: 5 }}
+                  animate={{ scale: 1, y: 0, rotate: 0 }}
+                  transition={{ type: "spring", bounce: 0.6 }}
+                  className="bg-white border-4 border-black p-8 text-center space-y-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] max-w-[80%]"
                   style={{ borderRadius: WOBBLY_MD }}
                 >
-                  <div className="text-4xl">🎉</div>
-                  <h2 className="font-display text-2xl font-bold text-foreground">You Win!</h2>
-                  <p className="text-muted-foreground text-sm font-medium">Score: <strong className="text-accent">{score}</strong></p>
-                  <div className="flex gap-2">
-                    <Button onClick={() => setKeepPlaying(true)} variant="outline" className="border-2 border-border" style={{ borderRadius: WOBBLY_MD }}>
+                  <div className="text-6xl animate-bounce">🏆</div>
+                  <h2 className="font-display text-4xl font-black text-black uppercase">You Win!</h2>
+                  <p className="text-black/70 text-lg font-bold">Score: <span className="text-black text-2xl">{score}</span></p>
+                  <div className="flex flex-col gap-3">
+                    <Button onClick={() => setKeepPlaying(true)} variant="outline" className="w-full h-12 font-black border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-black/5 hover:translate-y-1 hover:shadow-none transition-all" style={{ borderRadius: WOBBLY_SM }}>
                       Keep Playing
                     </Button>
-                    <Button onClick={restart} className="shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] border-2 border-border" style={{ borderRadius: WOBBLY_MD }}>
-                      <RotateCcw className="h-4 w-4 mr-2" /> New Game
+                    <Button onClick={restart} className="w-full h-12 font-black bg-[#bbf7d0] text-black border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-[#86efac] hover:translate-y-1 hover:shadow-none transition-all" style={{ borderRadius: WOBBLY_SM }}>
+                      <RotateCcw className="h-5 w-5 mr-2" strokeWidth={3} /> New Game
                     </Button>
                   </div>
                 </motion.div>
@@ -371,12 +372,12 @@ function Game2048() {
         </div>
 
         {/* How to play */}
-        <div className="border-2 border-border bg-white p-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]" style={{ borderRadius: WOBBLY_MD }}>
-          <h3 className="font-display font-bold text-sm mb-2">How to Play</h3>
-          <p className="text-xs text-muted-foreground font-medium leading-relaxed">
-            Use <strong>arrow keys</strong> or <strong>swipe</strong> to move tiles. 
-            When two tiles with the same number touch, they <strong>merge</strong>. 
-            Reach <strong className="text-accent">2048</strong> to win! 🏆
+        <div className="border-4 border-black bg-white p-5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" style={{ borderRadius: WOBBLY_MD }}>
+          <h3 className="font-display font-black text-lg mb-3 uppercase tracking-wide">How to Play</h3>
+          <p className="text-sm text-black/80 font-bold leading-relaxed">
+            Use <span className="bg-black/10 px-2 py-0.5 rounded border border-black/20">arrow keys</span> or <span className="bg-black/10 px-2 py-0.5 rounded border border-black/20">swipe</span> to move tiles. 
+            When two tiles with the same number touch, they <span className="text-black underline decoration-2 underline-offset-2">merge</span>. 
+            Reach <span className="text-black font-black text-base px-1">2048</span> to win! 🚀
           </p>
         </div>
 

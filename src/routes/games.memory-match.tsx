@@ -15,6 +15,7 @@ export const Route = createFileRoute("/games/memory-match")({
 });
 
 const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
+const WOBBLY_SM = "15px 5px 12px 5px / 5px 12px 5px 15px";
 
 const EMOJIS = ["🍕", "🍻", "📚", "🎓", "💻", "💔", "🎸", "☕"];
 
@@ -106,42 +107,41 @@ export default function MemoryMatchGame() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#f4f4f5]">
       {/* Header */}
-      <div className="sticky top-0 z-40 border-b-2 border-dashed border-border bg-background/95 backdrop-blur">
+      <div className="sticky top-0 z-40 border-b-4 border-black bg-white">
         <div className="mx-auto flex max-w-lg items-center justify-between px-4 py-3">
-          <Link to="/games" className="flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft className="h-4 w-4" /> Back
+          <Link to="/games" className="flex items-center gap-2 text-sm font-black text-black hover:scale-105 transition-transform">
+            <ArrowLeft className="h-5 w-5" strokeWidth={3} /> Back
           </Link>
-          <h1 className="font-display text-xl font-bold tracking-tight">Memory Match</h1>
+          <h1 className="font-display text-2xl font-black tracking-tight uppercase">Memory Match</h1>
           <div className="w-14" />
         </div>
       </div>
 
-      <div className="mx-auto max-w-lg px-4 py-6 space-y-5">
+      <div className="mx-auto max-w-lg px-4 py-8 space-y-8">
         
         {/* Stats Dashboard */}
-        <div className="flex items-center gap-3">
-          <div className="flex-1 rounded-[24px] bg-white border-2 border-white shadow-[4px_4px_10px_rgba(0,0,0,0.05),inset_3px_3px_6px_rgba(255,255,255,1),inset_-3px_-3px_6px_rgba(0,0,0,0.03)] p-3 flex flex-col items-center justify-center">
-            <div className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-widest mb-1">Moves</div>
-            <div className="font-display text-2xl font-bold text-[#475569] leading-none">{moves}</div>
+        <div className="flex items-stretch gap-4">
+          <div className="flex-1 bg-[#bfdbfe] border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-3 flex flex-col items-center justify-center transition-transform hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" style={{ borderRadius: WOBBLY_MD }}>
+            <div className="text-[12px] font-black text-black/70 uppercase tracking-widest mb-1">Moves</div>
+            <div className="font-display text-3xl font-black text-black leading-none">{moves}</div>
           </div>
-          <div className="flex-1 rounded-[24px] bg-white border-2 border-white shadow-[4px_4px_10px_rgba(0,0,0,0.05),inset_3px_3px_6px_rgba(255,255,255,1),inset_-3px_-3px_6px_rgba(0,0,0,0.03)] p-3 flex flex-col items-center justify-center">
-            <div className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-widest mb-1">Matches</div>
-            <div className="font-display text-2xl font-bold text-accent leading-none">{matches}/{EMOJIS.length}</div>
+          <div className="flex-1 bg-[#bbf7d0] border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-3 flex flex-col items-center justify-center transition-transform hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" style={{ borderRadius: WOBBLY_MD }}>
+            <div className="text-[12px] font-black text-black/70 uppercase tracking-widest mb-1">Matches</div>
+            <div className="font-display text-3xl font-black text-black leading-none">{matches}/{EMOJIS.length}</div>
           </div>
           <Button
             onClick={initGame}
-            variant="outline"
-            size="icon"
-            className="h-[68px] w-[68px] rounded-[24px] border-2 border-white bg-white hover:bg-[#f8fafc] shrink-0 shadow-[4px_4px_10px_rgba(0,0,0,0.05),inset_3px_3px_6px_rgba(255,255,255,1),inset_-3px_-3px_6px_rgba(0,0,0,0.03)] text-[#94a3b8] hover:text-[#475569] transition-all hover:scale-105 active:scale-95"
+            className="w-[80px] sm:w-[90px] h-auto flex-shrink-0 border-4 border-black bg-[#fbcfe8] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-[#f9a8d4] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-center p-0"
+            style={{ borderRadius: WOBBLY_MD }}
           >
-            <RotateCcw className="h-6 w-6" strokeWidth={2.5} />
+            <RotateCcw className="h-8 w-8 sm:h-10 sm:w-10" strokeWidth={3} />
           </Button>
         </div>
 
         {/* Game Board */}
-        <div className="relative w-full bg-[#e2e8f0] p-4 sm:p-5 select-none shadow-[inset_4px_4px_8px_rgba(0,0,0,0.1),inset_-4px_-4px_8px_rgba(255,255,255,0.7)] rounded-[32px]">
+        <div className="relative w-full bg-white border-4 border-black p-3 sm:p-4 select-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]" style={{ borderRadius: WOBBLY_MD }}>
           <div className="grid grid-cols-4 gap-3 sm:gap-4 aspect-square">
             {cards.map((card, index) => (
               <div 
@@ -160,19 +160,19 @@ export default function MemoryMatchGame() {
                 >
                   {/* Card Back (Hidden when flipped) */}
                   <div 
-                    className="absolute inset-0 backface-hidden bg-[#60a5fa] border-2 border-white flex items-center justify-center shadow-[4px_4px_10px_rgba(0,0,0,0.15),inset_3px_3px_6px_rgba(255,255,255,0.6),inset_-3px_-3px_6px_rgba(30,58,138,0.3)]"
-                    style={{ backfaceVisibility: "hidden", borderRadius: "20px" }}
+                    className="absolute inset-0 backface-hidden bg-[#bfdbfe] border-4 border-black flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                    style={{ backfaceVisibility: "hidden", borderRadius: WOBBLY_SM }}
                   >
-                    <span className="text-white opacity-40 font-display font-bold text-2xl sm:text-3xl">CX</span>
+                    <span className="text-black/40 font-display font-black text-2xl sm:text-3xl">CX</span>
                   </div>
                   
                   {/* Card Front (Shows Emoji) */}
                   <div 
-                    className={`absolute inset-0 backface-hidden border-2 border-white flex items-center justify-center text-4xl sm:text-5xl ${card.isMatched ? 'bg-[#34d399] shadow-[4px_4px_10px_rgba(0,0,0,0.15),inset_3px_3px_6px_rgba(255,255,255,0.6),inset_-3px_-3px_6px_rgba(6,78,59,0.3)]' : 'bg-white shadow-[4px_4px_10px_rgba(0,0,0,0.05),inset_3px_3px_6px_rgba(255,255,255,1),inset_-3px_-3px_6px_rgba(0,0,0,0.03)]'}`}
+                    className={`absolute inset-0 backface-hidden border-4 border-black flex items-center justify-center text-4xl sm:text-5xl ${card.isMatched ? 'bg-[#bbf7d0] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]' : 'bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'}`}
                     style={{ 
                       backfaceVisibility: "hidden", 
                       transform: "rotateY(180deg)",
-                      borderRadius: "20px"
+                      borderRadius: WOBBLY_SM
                     }}
                   >
                     <motion.div
@@ -194,34 +194,34 @@ export default function MemoryMatchGame() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 flex flex-col items-center justify-center bg-emerald-500/40 z-20"
-                style={{ borderRadius: "32px" }}
+                className="absolute inset-0 flex flex-col items-center justify-center bg-[#bbf7d0]/80 backdrop-blur-sm z-30"
+                style={{ borderRadius: WOBBLY_MD }}
               >
                 <motion.div
-                  initial={{ scale: 0.6, y: 24 }}
-                  animate={{ scale: 1, y: 0 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  className="bg-white border-2 border-border p-8 text-center space-y-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] w-[90%] max-w-sm"
+                  initial={{ scale: 0.5, y: 50, rotate: 5 }}
+                  animate={{ scale: 1, y: 0, rotate: 0 }}
+                  transition={{ type: "spring", bounce: 0.6 }}
+                  className="bg-white border-4 border-black p-8 text-center space-y-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] w-[90%] max-w-sm"
                   style={{ borderRadius: WOBBLY_MD }}
                 >
                   <motion.div
                     animate={{ rotate: [0, -10, 10, -5, 5, 0] }}
                     transition={{ duration: 0.6, delay: 0.3 }}
-                    className="text-6xl drop-shadow-md"
+                    className="text-6xl"
                   >
                     🎉
                   </motion.div>
-                  <h2 className="font-display text-3xl font-bold text-foreground">
+                  <h2 className="font-display text-3xl font-black text-black uppercase">
                     Sharp Memory!
                   </h2>
-                  <p className="text-muted-foreground text-sm font-medium">
-                    You found all pairs in <strong className="text-[#60a5fa]">{moves}</strong> moves
+                  <p className="text-black/70 text-lg font-bold">
+                    You found all pairs in <strong className="text-black">{moves}</strong> moves
                   </p>
                   <div className="flex flex-col gap-3 justify-center mt-2">
-                    <Button onClick={initGame} className="w-full h-12 bg-accent text-white hover:bg-accent/90 border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] text-lg font-bold" style={{ borderRadius: WOBBLY_MD }}>
-                      <RotateCcw className="h-5 w-5 mr-2" /> Play Again
+                    <Button onClick={initGame} className="w-full h-12 bg-[#fef08a] text-black hover:bg-[#fde047] border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all text-lg font-black" style={{ borderRadius: WOBBLY_SM }}>
+                      <RotateCcw className="h-5 w-5 mr-2" strokeWidth={3} /> Play Again
                     </Button>
-                    <Button asChild variant="outline" className="w-full h-12 bg-white text-foreground hover:bg-muted border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] text-lg font-bold" style={{ borderRadius: WOBBLY_MD }}>
+                    <Button asChild className="w-full h-12 bg-white text-black hover:bg-gray-100 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all text-lg font-black" style={{ borderRadius: WOBBLY_SM }}>
                       <Link to="/games">More Games</Link>
                     </Button>
                   </div>
@@ -234,9 +234,10 @@ export default function MemoryMatchGame() {
         {/* How to play button */}
         <button 
           onClick={() => setShowHelp(true)}
-          className="w-full bg-[#f8fafc] border-2 border-white shadow-[4px_4px_10px_rgba(0,0,0,0.05),inset_2px_2px_4px_rgba(255,255,255,0.9),inset_-2px_-2px_4px_rgba(0,0,0,0.02)] p-4 font-display font-bold text-sm text-foreground hover:opacity-90 transition-opacity rounded-[20px] flex items-center justify-center gap-2"
+          className="w-full bg-white border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-4 font-display font-black uppercase tracking-wide text-black hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-center gap-2"
+          style={{ borderRadius: WOBBLY_MD }}
         >
-          <Lightbulb className="h-5 w-5 text-yellow-500" /> How to Play
+          <Lightbulb className="h-6 w-6 text-black" strokeWidth={3} /> How to Play
         </button>
 
       </div>
@@ -248,7 +249,7 @@ export default function MemoryMatchGame() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
             onClick={() => setShowHelp(false)}
           >
             <motion.div
@@ -256,26 +257,27 @@ export default function MemoryMatchGame() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
               onClick={e => e.stopPropagation()}
-              className="w-full max-w-sm bg-[#f8fafc] border-2 border-white p-6 shadow-[8px_8px_20px_rgba(0,0,0,0.1),inset_4px_4px_8px_rgba(255,255,255,1),inset_-4px_-4px_8px_rgba(0,0,0,0.05)] flex flex-col relative rounded-[32px]"
+              className="w-full max-w-sm bg-white border-4 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col relative"
+              style={{ borderRadius: WOBBLY_MD }}
             >
               <Button 
                 variant="ghost" 
                 size="icon" 
                 onClick={() => setShowHelp(false)} 
-                className="absolute top-4 right-4 h-8 w-8 rounded-full bg-white shadow-[2px_2px_5px_rgba(0,0,0,0.05)] hover:bg-muted text-muted-foreground"
+                className="absolute top-4 right-4 h-8 w-8 rounded-full bg-gray-100 hover:bg-gray-200 text-black border-2 border-black"
               >
-                <X className="h-4 w-4" />
+                <X className="h-4 w-4" strokeWidth={3} />
               </Button>
 
-              <h2 className="font-display text-2xl font-bold mb-4 flex items-center gap-2">
-                <Lightbulb className="h-6 w-6 text-yellow-500" /> How to Play
+              <h2 className="font-display text-2xl font-black mb-4 flex items-center gap-2 uppercase">
+                <Lightbulb className="h-6 w-6 text-black" strokeWidth={3} /> How to Play
               </h2>
               
               <div className="space-y-4">
-                <p className="text-sm text-muted-foreground font-medium leading-relaxed">
+                <p className="text-sm text-black/80 font-bold leading-relaxed">
                   Test your memory! Tap any card to flip it over and reveal a campus emoji.
                 </p>
-                <ul className="text-sm text-muted-foreground font-medium space-y-2 list-disc pl-5">
+                <ul className="text-sm text-black font-bold space-y-2 list-disc pl-5">
                   <li>Flip two cards at a time.</li>
                   <li>If they match, they stay face up!</li>
                   <li>If they don't, they flip back over.</li>
