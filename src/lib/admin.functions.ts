@@ -1188,3 +1188,16 @@ export const adminDeleteNews = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { success: true };
   });
+
+export const adminUpdateGameSetting = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: z.string(), key: z.string(), value: z.any() }).parse(d))
+  .handler(async ({ data }) => {
+    assertToken(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("app_settings" as any).upsert(
+      { key: data.key, value: data.value, updated_at: new Date().toISOString() },
+      { onConflict: "key" }
+    );
+    if (error) throw new Error(error.message);
+    return { success: true };
+  });

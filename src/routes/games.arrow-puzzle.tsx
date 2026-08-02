@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { recordGameSession } from "../lib/gameAnalytics";
 import HintRewardAdModal from "@/components/HintRewardAdModal";
+import { useGameSync } from "@/hooks/useGameSync";
 
 const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
 const WOBBLY_SM = "15px 5px 12px 5px / 5px 12px 5px 15px";
@@ -269,6 +270,9 @@ function MirrorBackslashIndicator() {
 
 // ─── Component ──────────────────────────────────────────────────────────────
 export default function ArrowPuzzleGame() {
+  useGameSync("arrow-puzzle", "cx_arrow_custom_levels", "cx_arrow_level_overrides");
+
+  const [activeTab, setActiveTab] = useState<"menu" | "play">("menu");
   const [isMounted, setIsMounted] = useState(false);
   const [levelIdx, setLevelIdx] = useState(0);
   const [highestUnlocked, setHighestUnlocked] = useState(0);

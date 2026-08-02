@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, RotateCcw, Trophy, ChevronDown, X, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { recordGameSession } from "../lib/gameAnalytics";
+import { useGameSync } from "@/hooks/useGameSync";
 
 export const Route = createFileRoute("/games/2048")({
   head: () => ({
@@ -143,6 +145,9 @@ function hasWon(grid: Grid, target: number = 2048): boolean {
 }
 
 function Game2048() {
+  useGameSync("2048", "cx_2048_custom_levels", "cx_2048_level_overrides");
+
+  const [activeTab, setActiveTab] = useState<"menu" | "play">("menu");
   const [levelIdx, setLevelIdx] = useState(0);
   const [showLevels, setShowLevels] = useState(false);
   const [customCount, setCustomCount] = useState(0);

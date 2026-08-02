@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, RotateCcw, Lightbulb, Zap, X, ChevronDown, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { recordGameSession } from "../lib/gameAnalytics";
+import { useGameSync } from "@/hooks/useGameSync";
 
 export const Route = createFileRoute("/games/memory-match")({
   head: () => ({
@@ -35,6 +37,9 @@ type Card = {
 };
 
 export default function MemoryMatchGame() {
+  useGameSync("memory-match", "cx_memory_custom_levels", "cx_memory_level_overrides");
+
+  const [activeTab, setActiveTab] = useState<"menu" | "play">("menu");
   const [levelIdx, setLevelIdx] = useState(0);
   const [showLevels, setShowLevels] = useState(false);
   const [customCount, setCustomCount] = useState(0);

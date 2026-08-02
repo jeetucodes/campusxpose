@@ -6,9 +6,15 @@ import { toast } from "sonner";
 import { getStaticLevel } from "../data/arrow-puzzle-levels";
 import { getPipeLevel } from "../data/pipe-puzzle-levels";
 import { getGameAnalytics, subscribeGlobalAnalytics, GameAnalytics, RealPlayerRecord } from "../lib/gameAnalytics";
+import { useServerFn } from "@tanstack/react-start";
+import { useAdmin } from "@/stores/admin";
+import { adminUpdateGameSetting } from "@/lib/admin.functions";
+import { AdminShell } from "@/components/admin/AdminShell";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/admin/games")({
-  component: AdminGamesManagement,
+  head: () => ({ meta: [{ title: "Admin · Games" }, { name: "robots", content: "noindex" }] }),
+  component: () => <AdminShell><AdminGamesManagement /></AdminShell>,
 });
 
 const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
@@ -269,6 +275,9 @@ Generate a level JSON with pairs, time limit, and emojis.`,
 ];
 
 export default function AdminGamesManagement() {
+  const { token } = useAdmin();
+  const updateSetting = useServerFn(adminUpdateGameSetting);
+
   const [gameStatus, setGameStatus] = useState<GameStatusMap>({
     "arrow-puzzle": true,
     "pipe-connect": true,
@@ -307,13 +316,20 @@ export default function AdminGamesManagement() {
 
   const selectedGameMeta = ALL_GAMES.find(g => g.id === activeDetailGameId) || ALL_GAMES[0];
 
-  const loadData = () => {
+  const loadData = async () => {
     try {
       const savedStatus = localStorage.getItem(GAMES_STATUS_KEY);
       if (savedStatus) setGameStatus(JSON.parse(savedStatus));
 
       const data = getGameAnalytics();
       setAnalytics(data);
+
+      // Fetch global status from Supabase
+      const { data: serverData } = await supabase.from("app_settings" as any).select("value").eq("key", GAMES_STATUS_KEY).maybeSingle();
+      if (serverData && serverData.value) {
+        setGameStatus(serverData.value as any);
+        localStorage.setItem(GAMES_STATUS_KEY, JSON.stringify(serverData.value));
+      }
     } catch (e) {
       console.warn("Storage load error", e);
     }
@@ -339,23 +355,45 @@ export default function AdminGamesManagement() {
     const meta = ALL_GAMES.find(g => g.id === activeDetailGameId);
     if (!meta) return;
 
-    try {
-      const savedCustom = localStorage.getItem(meta.storageKey);
-      setCustomLevels(savedCustom ? JSON.parse(savedCustom) : []);
-
-      const savedOverrides = localStorage.getItem(meta.overridesKey);
-      setLevelOverrides(savedOverrides ? JSON.parse(savedOverrides) : {});
-    } catch (e) {
-      setCustomLevels([]);
-      setLevelOverrides({});
-    }
+    const fetchGameData = async () => {
+      try {
+        const savedCustom = localStorage.getItem(meta.storageKey);
+        setCustomLevels(savedCustom ? JSON.parse(savedCustom) : []);
+  
+        const savedOverrides = localStorage.getItem(meta.overridesKey);
+        setLevelOverrides(savedOverrides ? JSON.parse(savedOverrides) : {});
+        
+        // Fetch from Supabase
+        const { data: serverData } = await supabase.from("app_settings" as any).select("key, value").in("key", [meta.storageKey, meta.overridesKey]);
+        const map = new Map((serverData || []).map((row: any) => [row.key, row.value]));
+        
+        if (map.has(meta.storageKey)) {
+          setCustomLevels(map.get(meta.storageKey) || []);
+          localStorage.setItem(meta.storageKey, JSON.stringify(map.get(meta.storageKey) || []));
+        }
+        if (map.has(meta.overridesKey)) {
+          setLevelOverrides(map.get(meta.overridesKey) || {});
+          localStorage.setItem(meta.overridesKey, JSON.stringify(map.get(meta.overridesKey) || {}));
+        }
+      } catch (e) {
+        setCustomLevels([]);
+        setLevelOverrides({});
+      }
+    };
+    
+    fetchGameData();
   }, [activeDetailGameId]);
 
-  const toggleGame = (gameId: string, status: boolean) => {
+  const toggleGame = async (gameId: string, status: boolean) => {
     const updated = { ...gameStatus, [gameId]: status };
     setGameStatus(updated);
     localStorage.setItem(GAMES_STATUS_KEY, JSON.stringify(updated));
     window.dispatchEvent(new Event("cx_games_status_change"));
+    
+    if (token) {
+      await updateSetting({ data: { token, key: GAMES_STATUS_KEY, value: updated } }).catch(console.error);
+    }
+    
     toast.success(`${gameId} is now ${status ? "ONLINE" : "OFFLINE"}`);
   };
 
@@ -367,7 +405,7 @@ export default function AdminGamesManagement() {
   };
 
   // Add 1 Single Level
-  const handleAddSingleLevel = () => {
+  const handleAddSingleLevel = async () => {
     if (!singleLevelJson.trim()) {
       toast.error("Please enter level JSON code!");
       return;
@@ -384,6 +422,10 @@ export default function AdminGamesManagement() {
       setCustomLevels(updatedList);
       localStorage.setItem(selectedGameMeta.storageKey, JSON.stringify(updatedList));
       window.dispatchEvent(new Event("cx_custom_levels_change"));
+      
+      if (token) {
+        await updateSetting({ data: { token, key: selectedGameMeta.storageKey, value: updatedList } }).catch(console.error);
+      }
 
       toast.success(`Added 1 Single Level to ${selectedGameMeta.name}! 🎉`);
       setSingleLevelJson("");
@@ -394,7 +436,7 @@ export default function AdminGamesManagement() {
   };
 
   // Import Multiple Levels at Once
-  const handleBulkImportLevels = () => {
+  const handleBulkImportLevels = async () => {
     if (!bulkCodeToImport.trim()) {
       toast.error("Please paste multiple levels JSON array!");
       return;
@@ -415,6 +457,10 @@ export default function AdminGamesManagement() {
       localStorage.setItem(selectedGameMeta.storageKey, JSON.stringify(updatedList));
       window.dispatchEvent(new Event("cx_custom_levels_change"));
 
+      if (token) {
+        await updateSetting({ data: { token, key: selectedGameMeta.storageKey, value: updatedList } }).catch(console.error);
+      }
+
       toast.success(`Successfully imported ${newLevels.length} levels to ${selectedGameMeta.name}! 🚀`);
       setBulkCodeToImport("");
     } catch (e) {
@@ -429,7 +475,7 @@ export default function AdminGamesManagement() {
   };
 
   // Save changes to level box
-  const handleSaveSelectedLevelBox = () => {
+  const handleSaveSelectedLevelBox = async () => {
     if (!selectedLevelBox) return;
 
     try {
@@ -439,6 +485,7 @@ export default function AdminGamesManagement() {
         const updatedOverrides = { ...levelOverrides, [selectedLevelBox.index]: parsed };
         setLevelOverrides(updatedOverrides);
         localStorage.setItem(selectedGameMeta.overridesKey, JSON.stringify(updatedOverrides));
+        if (token) await updateSetting({ data: { token, key: selectedGameMeta.overridesKey, value: updatedOverrides } }).catch(console.error);
         toast.success(`Level #${selectedLevelBox.index + 1} updated! ✏️`);
       } else {
         const customIdx = selectedLevelBox.index - selectedGameMeta.totalBuiltIn;
@@ -446,6 +493,7 @@ export default function AdminGamesManagement() {
         updatedCustom[customIdx] = parsed;
         setCustomLevels(updatedCustom);
         localStorage.setItem(selectedGameMeta.storageKey, JSON.stringify(updatedCustom));
+        if (token) await updateSetting({ data: { token, key: selectedGameMeta.storageKey, value: updatedCustom } }).catch(console.error);
         toast.success(`Custom Level #${customIdx + 1} updated! ✏️`);
       }
 
@@ -457,7 +505,7 @@ export default function AdminGamesManagement() {
   };
 
   // Delete level box
-  const handleDeleteSelectedLevelBox = () => {
+  const handleDeleteSelectedLevelBox = async () => {
     if (!selectedLevelBox) return;
 
     if (selectedLevelBox.isBuiltIn) {
@@ -466,6 +514,7 @@ export default function AdminGamesManagement() {
         delete updated[selectedLevelBox.index];
         setLevelOverrides(updated);
         localStorage.setItem(selectedGameMeta.overridesKey, JSON.stringify(updated));
+        if (token) await updateSetting({ data: { token, key: selectedGameMeta.overridesKey, value: updated } }).catch(console.error);
         toast.success(`Level #${selectedLevelBox.index + 1} reset to default! 🔄`);
       } else {
         toast.info("Built-in levels cannot be deleted, but you can edit them!");
@@ -475,6 +524,7 @@ export default function AdminGamesManagement() {
       const updatedList = customLevels.filter((_, i) => i !== targetIdx);
       setCustomLevels(updatedList);
       localStorage.setItem(selectedGameMeta.storageKey, JSON.stringify(updatedList));
+      if (token) await updateSetting({ data: { token, key: selectedGameMeta.storageKey, value: updatedList } }).catch(console.error);
       toast.success("Level deleted!");
     }
 

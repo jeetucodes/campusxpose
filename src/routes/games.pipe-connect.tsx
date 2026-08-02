@@ -2,8 +2,11 @@ import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, RotateCcw, ChevronDown, Zap, Heart, X, Lightbulb, Trophy, Lock } from "lucide-react";
+import { toast } from "sonner";
 import { getPipeLevel, getConnections, PipeTile, PipeLevelData, TOTAL_PIPE_LEVELS } from "../data/pipe-puzzle-levels";
+import { recordGameSession } from "../lib/gameAnalytics";
 import HintRewardAdModal from "@/components/HintRewardAdModal";
+import { useGameSync } from "@/hooks/useGameSync";
 
 export const Route = createFileRoute("/games/pipe-connect")({
   head: () => ({
@@ -171,6 +174,7 @@ function getTierLabel(levelIdx: number): { label: string; color: string } {
 // ─── Component ──────────────────────────────────────────────────────────────
 
 export default function PipeConnectGame() {
+  useGameSync("pipe-connect", "cx_pipe_custom_levels", "cx_pipe_level_overrides");
   const [isMounted, setIsMounted] = useState(false);
   const [levelIdx, setLevelIdx] = useState(0);
   const [highestUnlocked, setHighestUnlocked] = useState(0);
