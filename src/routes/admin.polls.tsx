@@ -13,7 +13,11 @@ import { BarChart3, Globe, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/admin/polls")({
   head: () => ({ meta: [{ title: "Admin · Polls" }, { name: "robots", content: "noindex" }] }),
-  component: () => <AdminShell><PollsAdmin /></AdminShell>,
+  component: () => (
+    <AdminShell>
+      <PollsAdmin />
+    </AdminShell>
+  ),
 });
 
 function PollsAdmin() {
@@ -54,7 +58,10 @@ function PollsAdmin() {
 
       <form
         className="mt-4 flex gap-2"
-        onSubmit={(e) => { e.preventDefault(); setTerm(search.trim()); }}
+        onSubmit={(e) => {
+          e.preventDefault();
+          setTerm(search.trim());
+        }}
       >
         <Input
           value={search}
@@ -62,21 +69,50 @@ function PollsAdmin() {
           placeholder="Search question or username…"
           className="max-w-sm"
         />
-        <Button type="submit" variant="outline">Search</Button>
-        {term && <Button type="button" variant="ghost" onClick={() => { setSearch(""); setTerm(""); }}>Clear</Button>}
+        <Button type="submit" variant="outline">
+          Search
+        </Button>
+        {term && (
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => {
+              setSearch("");
+              setTerm("");
+            }}
+          >
+            Clear
+          </Button>
+        )}
       </form>
 
       <div className="mt-4 space-y-2">
         {q.isLoading && <p className="text-sm text-muted-foreground">Loading polls…</p>}
-        {q.isError && <p className="text-sm text-destructive">Couldn't load polls. <button className="underline" onClick={() => q.refetch()}>Retry</button></p>}
-        {!q.isLoading && !q.isError && rows.length === 0 && <p className="text-sm text-muted-foreground">No active polls.</p>}
+        {q.isError && (
+          <p className="text-sm text-destructive">
+            Couldn't load polls.{" "}
+            <button className="underline" onClick={() => q.refetch()}>
+              Retry
+            </button>
+          </p>
+        )}
+        {!q.isLoading && !q.isError && rows.length === 0 && (
+          <p className="text-sm text-muted-foreground">No active polls.</p>
+        )}
 
         {rows.map((p: any) => (
-          <div key={p.id} className="flex items-start gap-3 rounded-xl border border-border bg-surface p-3">
+          <div
+            key={p.id}
+            className="flex items-start gap-3 rounded-xl border border-border bg-surface p-3"
+          >
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                 <span className="inline-flex items-center gap-1 text-primary">
-                  {p.scope === "global" ? <Globe className="h-3 w-3" /> : <BarChart3 className="h-3 w-3" />}
+                  {p.scope === "global" ? (
+                    <Globe className="h-3 w-3" />
+                  ) : (
+                    <BarChart3 className="h-3 w-3" />
+                  )}
                   {p.scope}
                 </span>
                 <span className="font-medium text-foreground">{p.username}</span>
@@ -86,11 +122,21 @@ function PollsAdmin() {
               <p className="mt-1 break-words text-sm font-semibold">{p.question}</p>
               <div className="mt-1 flex flex-wrap gap-1.5">
                 {(p.options ?? []).map((o: string, i: number) => (
-                  <span key={i} className="rounded-full bg-surface-2 px-2 py-0.5 text-xs text-muted-foreground">{o}</span>
+                  <span
+                    key={i}
+                    className="rounded-full bg-surface-2 px-2 py-0.5 text-xs text-muted-foreground"
+                  >
+                    {o}
+                  </span>
                 ))}
               </div>
             </div>
-            <Button size="sm" variant="ghost" className="shrink-0 text-destructive" onClick={() => doDelete(p.id)}>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="shrink-0 text-destructive"
+              onClick={() => doDelete(p.id)}
+            >
               <Trash2 className="mr-1.5 h-4 w-4" /> Delete
             </Button>
           </div>

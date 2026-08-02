@@ -55,8 +55,8 @@ export function FeedbackForm({ compact = false }: { compact?: boolean }) {
         <CheckCircle2 className="h-10 w-10 text-success" />
         <h3 className="font-display text-xl font-bold">Shukriya! 🙌</h3>
         <p className="text-sm text-muted-foreground">
-          Tumhara honest review mil gaya. App ko aur behtar banane me yahi
-          sabse zyada help karta hai.
+          Tumhara honest review mil gaya. App ko aur behtar banane me yahi sabse zyada help karta
+          hai.
         </p>
         <Button variant="outline" size="sm" onClick={() => setDone(false)}>
           Aur feedback do
@@ -102,7 +102,13 @@ export function FeedbackForm({ compact = false }: { compact?: boolean }) {
       <div className="mt-3 flex items-center justify-between gap-3">
         <span className="text-xs text-muted-foreground">{message.length}/2000</span>
         <Button type="submit" disabled={busy}>
-          {busy ? "Bhej rahe…" : <>Bhejo <Send className="ml-1 h-4 w-4" /></>}
+          {busy ? (
+            "Bhej rahe…"
+          ) : (
+            <>
+              Bhejo <Send className="ml-1 h-4 w-4" />
+            </>
+          )}
         </Button>
       </div>
     </form>

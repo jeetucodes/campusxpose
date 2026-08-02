@@ -1,66 +1,69 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-export const getConfessions = createServerFn({ method: "GET" })
-  .handler(async () => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: confessions, error } = await supabaseAdmin
-      .from("confessions" as any)
-      .select("*")
-      .order("created_at", { ascending: false });
-      
-    if (error) throw error;
+export const getConfessions = createServerFn({ method: "GET" }).handler(async () => {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: confessions, error } = await supabaseAdmin
+    .from("confessions" as any)
+    .select("*")
+    .order("created_at", { ascending: false });
 
-    // Get like counts from confession_likes table
-    const { data: likeCounts } = await supabaseAdmin
-      .from("confession_likes" as any)
-      .select("confession_id");
+  if (error) throw error;
 
-    // Aggregate like counts per confession
-    const likeMap: Record<string, number> = {};
-    if (likeCounts) {
-      for (const row of likeCounts as any[]) {
-        likeMap[row.confession_id] = (likeMap[row.confession_id] || 0) + 1;
-      }
+  // Get like counts from confession_likes table
+  const { data: likeCounts } = await supabaseAdmin
+    .from("confession_likes" as any)
+    .select("confession_id");
+
+  // Aggregate like counts per confession
+  const likeMap: Record<string, number> = {};
+  if (likeCounts) {
+    for (const row of likeCounts as any[]) {
+      likeMap[row.confession_id] = (likeMap[row.confession_id] || 0) + 1;
     }
+  }
 
-    return (confessions || []).map((c: any) => ({
-      ...c,
-      likes: likeMap[c.id] || 0,
-    }));
-  });
+  return (confessions || []).map((c: any) => ({
+    ...c,
+    likes: likeMap[c.id] || 0,
+  }));
+});
 
 export const addConfession = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => {
-    return z.object({ 
-      content: z.string().min(1).max(1000),
-      username: z.string().optional()
-    }).parse(d);
+    return z
+      .object({
+        content: z.string().min(1).max(1000),
+        username: z.string().optional(),
+      })
+      .parse(d);
   })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    
+
     const { data: confession, error } = await supabaseAdmin
       .from("confessions" as any)
       .insert({
         content: data.content,
-        username: data.username || "Anonymous"
+        username: data.username || "Anonymous",
       })
       .select()
       .single();
-      
+
     if (error) throw error;
-    
+
     return { ...(confession as any), likes: 0 };
   });
 
 export const toggleLikeConfession = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => {
-    return z.object({
-      id: z.string().uuid(),
-      device_id: z.string().min(1).max(128),
-      action: z.enum(["like", "unlike"]),
-    }).parse(d);
+    return z
+      .object({
+        id: z.string().uuid(),
+        device_id: z.string().min(1).max(128),
+        action: z.enum(["like", "unlike"]),
+      })
+      .parse(d);
   })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -69,7 +72,10 @@ export const toggleLikeConfession = createServerFn({ method: "POST" })
       // Insert row — ignore if already exists (idempotent)
       await supabaseAdmin
         .from("confession_likes" as any)
-        .upsert({ confession_id: data.id, device_id: data.device_id }, { onConflict: "confession_id,device_id" });
+        .upsert(
+          { confession_id: data.id, device_id: data.device_id },
+          { onConflict: "confession_id,device_id" },
+        );
     } else {
       // Delete the like row
       await supabaseAdmin

@@ -1,6 +1,15 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { Shield, Ghost, EyeOff, Lock, Trash2, ArrowRight, MapPinOff, ShieldOff } from "lucide-react";
+import {
+  Shield,
+  Ghost,
+  EyeOff,
+  Lock,
+  Trash2,
+  ArrowRight,
+  MapPinOff,
+  ShieldOff,
+} from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -148,9 +157,7 @@ export function TrustSection() {
                 <AccordionTrigger className="text-left font-display text-base font-bold hover:text-accent">
                   {f.q}
                 </AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground">
-                  {f.a}
-                </AccordionContent>
+                <AccordionContent className="text-sm text-muted-foreground">{f.a}</AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>

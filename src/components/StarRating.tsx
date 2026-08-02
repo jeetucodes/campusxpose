@@ -12,7 +12,9 @@ export function StarRating({ value, className = "" }: { value: number; className
           />
         ))}
       </div>
-      <span className={`text-sm font-semibold ${ratingColor(Number(value))}`}>{Number(value).toFixed(1)}</span>
+      <span className={`text-sm font-semibold ${ratingColor(Number(value))}`}>
+        {Number(value).toFixed(1)}
+      </span>
     </div>
   );
 }

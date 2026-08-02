@@ -11,9 +11,9 @@ async function callAI(system: string, user: string): Promise<string> {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${key}`,
+      Authorization: `Bearer ${key}`,
       "HTTP-Referer": "https://campusxpose.com",
-      "X-Title": "CampusXpose"
+      "X-Title": "CampusXpose",
     },
     body: JSON.stringify({
       model: MODEL,
@@ -24,7 +24,8 @@ async function callAI(system: string, user: string): Promise<string> {
     }),
   });
   if (res.status === 429) throw new Error("AI rate limit reached, try again shortly.");
-  if (res.status === 402) throw new Error("AI credits exhausted. Add credits in workspace settings.");
+  if (res.status === 402)
+    throw new Error("AI credits exhausted. Add credits in workspace settings.");
   if (!res.ok) {
     const errText = await res.text();
     throw new Error(`AI error ${res.status}: ${errText}`);
@@ -35,7 +36,10 @@ async function callAI(system: string, user: string): Promise<string> {
 
 function safeJson<T>(text: string, fallback: T): T {
   try {
-    const cleaned = text.replace(/```json/gi, "").replace(/```/g, "").trim();
+    const cleaned = text
+      .replace(/```json/gi, "")
+      .replace(/```/g, "")
+      .trim();
     return JSON.parse(cleaned) as T;
   } catch {
     return fallback;
@@ -56,9 +60,7 @@ interface PostAnalysis {
 }
 
 export const analyzePost = createServerFn({ method: "POST" })
-  .inputValidator((d: { postId: string }) =>
-    z.object({ postId: z.string().uuid() }).parse(d),
-  )
+  .inputValidator((d: { postId: string }) => z.object({ postId: z.string().uuid() }).parse(d))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: post } = await supabaseAdmin
@@ -157,10 +159,7 @@ export const analyzePost = createServerFn({ method: "POST" })
         incidentId = created?.id ?? null;
       }
       if (incidentId) {
-        await supabaseAdmin
-          .from("posts")
-          .update({ incident_id: incidentId })
-          .eq("id", post.id);
+        await supabaseAdmin.from("posts").update({ incident_id: incidentId }).eq("id", post.id);
       }
     }
 
@@ -180,10 +179,12 @@ interface PreReview {
 
 export const reviewBeforePublish = createServerFn({ method: "POST" })
   .inputValidator((d: { content: string; category: string }) =>
-    z.object({
-      content: z.string().min(5).max(5000),
-      category: z.string().max(40),
-    }).parse(d),
+    z
+      .object({
+        content: z.string().min(5).max(5000),
+        category: z.string().max(40),
+      })
+      .parse(d),
   )
   .handler(async ({ data }): Promise<PreReview> => {
     const fallback = (isCritical: boolean): PreReview => ({
@@ -200,10 +201,20 @@ export const reviewBeforePublish = createServerFn({ method: "POST" })
     // Keyword-based fast path (no AI needed for obvious cases)
     const lower = data.content.toLowerCase();
     const sexualKeywords = [
-      "rape", "raping", "raped", "rapist",
-      "sexual assault", "sexual harass", "sexually harass", "sexually assault",
-      "molestation", "molest", "sexually abuse", "sexual abuse",
-      "balatkar", "balatkaari",
+      "rape",
+      "raping",
+      "raped",
+      "rapist",
+      "sexual assault",
+      "sexual harass",
+      "sexually harass",
+      "sexually assault",
+      "molestation",
+      "molest",
+      "sexually abuse",
+      "sexual abuse",
+      "balatkar",
+      "balatkaari",
     ];
     const keywordMatch = sexualKeywords.some((kw) => lower.includes(kw));
     const categoryMatch = data.category === "sexual_violence";
@@ -222,20 +233,30 @@ export const reviewBeforePublish = createServerFn({ method: "POST" })
         "CRITICAL RULE: Any mention of rape, balatkar, sexual assault, molestation = is_critical_sexual MUST be true.";
 
       const raw = await callAI(system, `Category: ${data.category}\nContent: ${data.content}`);
-      const parsed = safeJson<{ is_critical_sexual: boolean; needs_proof: boolean; severity: number; reason: string }>(raw, {
+      const parsed = safeJson<{
+        is_critical_sexual: boolean;
+        needs_proof: boolean;
+        severity: number;
+        reason: string;
+      }>(raw, {
         is_critical_sexual: keywordMatch || categoryMatch,
         needs_proof: keywordMatch || categoryMatch,
         severity: keywordMatch || categoryMatch ? 5 : 2,
-        reason: keywordMatch || categoryMatch
-          ? "Yeh ek bahut serious allegation hai. Proof upload karna zaroori hai."
-          : "Report normal lag rahi hai.",
+        reason:
+          keywordMatch || categoryMatch
+            ? "Yeh ek bahut serious allegation hai. Proof upload karna zaroori hai."
+            : "Report normal lag rahi hai.",
       });
 
       const isCritical = parsed.is_critical_sexual || keywordMatch || categoryMatch;
       const severityLabel =
-        parsed.severity >= 5 ? "CRITICAL" :
-        parsed.severity >= 4 ? "SERIOUS" :
-        parsed.severity >= 3 ? "MODERATE" : "NORMAL";
+        parsed.severity >= 5
+          ? "CRITICAL"
+          : parsed.severity >= 4
+            ? "SERIOUS"
+            : parsed.severity >= 3
+              ? "MODERATE"
+              : "NORMAL";
 
       return {
         approved: !isCritical,
@@ -251,7 +272,6 @@ export const reviewBeforePublish = createServerFn({ method: "POST" })
     }
   });
 
-
 interface ChatSummary {
   key_issues: string[];
   sentiment: string;
@@ -260,9 +280,7 @@ interface ChatSummary {
 }
 
 export const chatSummary = createServerFn({ method: "POST" })
-  .inputValidator((d: { collegeId: string }) =>
-    z.object({ collegeId: z.string().uuid() }).parse(d),
-  )
+  .inputValidator((d: { collegeId: string }) => z.object({ collegeId: z.string().uuid() }).parse(d))
   .handler(async ({ data }): Promise<ChatSummary> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: msgs } = await supabaseAdmin

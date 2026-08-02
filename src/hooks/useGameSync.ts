@@ -13,7 +13,7 @@ export function useGameSync(gameId: string, customLevelsKey: string, levelOverri
 
   useEffect(() => {
     let alive = true;
-    
+
     const sync = async () => {
       try {
         const keysToFetch = [GAMES_STATUS_KEY, customLevelsKey];
@@ -52,18 +52,18 @@ export function useGameSync(gameId: string, customLevelsKey: string, levelOverri
             levelsChanged = true;
           }
         }
-        
+
         // Sync Level Overrides
         if (levelOverridesKey) {
-           const serverOverrides = map.get(levelOverridesKey);
-           if (serverOverrides !== undefined) {
-             const localOverrides = localStorage.getItem(levelOverridesKey);
-             const serverStr = JSON.stringify(serverOverrides);
-             if (localOverrides !== serverStr) {
-               localStorage.setItem(levelOverridesKey, serverStr);
-               levelsChanged = true; // reusing levelsChanged since it triggers level reload
-             }
-           }
+          const serverOverrides = map.get(levelOverridesKey);
+          if (serverOverrides !== undefined) {
+            const localOverrides = localStorage.getItem(levelOverridesKey);
+            const serverStr = JSON.stringify(serverOverrides);
+            if (localOverrides !== serverStr) {
+              localStorage.setItem(levelOverridesKey, serverStr);
+              levelsChanged = true; // reusing levelsChanged since it triggers level reload
+            }
+          }
         }
 
         if (statusChanged) {
@@ -83,16 +83,21 @@ export function useGameSync(gameId: string, customLevelsKey: string, levelOverri
     sync();
 
     // Optionally set up a subscription for real-time updates
-    const channel = supabase.channel(`game-sync-${gameId}-${Math.random()}`)
+    const channel = supabase
+      .channel(`game-sync-${gameId}-${Math.random()}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "app_settings" },
         (payload) => {
           const changedKey = (payload.new as any)?.key;
-          if (changedKey === GAMES_STATUS_KEY || changedKey === customLevelsKey || changedKey === levelOverridesKey) {
+          if (
+            changedKey === GAMES_STATUS_KEY ||
+            changedKey === customLevelsKey ||
+            changedKey === levelOverridesKey
+          ) {
             sync();
           }
-        }
+        },
       )
       .subscribe();
 

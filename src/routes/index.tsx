@@ -2,7 +2,17 @@ import { useEffect, useRef, useState, useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
-import { FileWarning, ArrowRight, Flame, TrendingUp, ArrowBigUp, EyeOff, MapPinOff, Megaphone, Ghost } from "lucide-react";
+import {
+  FileWarning,
+  ArrowRight,
+  Flame,
+  TrendingUp,
+  ArrowBigUp,
+  EyeOff,
+  MapPinOff,
+  Megaphone,
+  Ghost,
+} from "lucide-react";
 import { UserSymbol } from "@/components/UserSymbol";
 import { SiteShell } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -32,7 +42,11 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "CampusXpose — College ka sach, bina darr ke" },
-      { name: "description", content: "Anonymous platform for Indian students. Report fake fines, placement fraud, faculty issues — 100% anonymously." },
+      {
+        name: "description",
+        content:
+          "Anonymous platform for Indian students. Report fake fines, placement fraud, faculty issues — 100% anonymously.",
+      },
       { property: "og:url", content: "https://campusxpose.online/" },
     ],
     links: [{ rel: "canonical", href: "https://campusxpose.online/" }],
@@ -53,8 +67,20 @@ function AnimatedStat({ n, l, color }: { n: number; l: string; color: string }) 
 }
 
 // Floating particle dot
-function FloatingDot({ x, y, size, delay, duration, color }: {
-  x: number; y: number; size: number; delay: number; duration: number; color: string;
+function FloatingDot({
+  x,
+  y,
+  size,
+  delay,
+  duration,
+  color,
+}: {
+  x: number;
+  y: number;
+  size: number;
+  delay: number;
+  duration: number;
+  color: string;
 }) {
   return (
     <motion.div
@@ -88,7 +114,7 @@ function Home() {
     const interval = setInterval(() => {
       setWordVisible(false);
       setTimeout(() => {
-        setWordIdx(i => (i + 1) % CYCLING_WORDS.length);
+        setWordIdx((i) => (i + 1) % CYCLING_WORDS.length);
         setWordVisible(true);
       }, 300);
     }, 2200);
@@ -96,14 +122,17 @@ function Home() {
   }, []);
 
   // Stable floating dots config
-  const dots = useMemo(() => [
-    { x: 10, y: 20, size: 18, delay: 0, duration: 5, color: "bg-accent" },
-    { x: 80, y: 10, size: 12, delay: 0.8, duration: 4, color: "bg-yellow-400" },
-    { x: 60, y: 75, size: 22, delay: 1.5, duration: 6, color: "bg-accent" },
-    { x: 25, y: 65, size: 10, delay: 0.3, duration: 4.5, color: "bg-yellow-400" },
-    { x: 90, y: 55, size: 16, delay: 2, duration: 5.5, color: "bg-accent" },
-    { x: 45, y: 15, size: 8, delay: 1.2, duration: 3.8, color: "bg-yellow-400" },
-  ], []);
+  const dots = useMemo(
+    () => [
+      { x: 10, y: 20, size: 18, delay: 0, duration: 5, color: "bg-accent" },
+      { x: 80, y: 10, size: 12, delay: 0.8, duration: 4, color: "bg-yellow-400" },
+      { x: 60, y: 75, size: 22, delay: 1.5, duration: 6, color: "bg-accent" },
+      { x: 25, y: 65, size: 10, delay: 0.3, duration: 4.5, color: "bg-yellow-400" },
+      { x: 90, y: 55, size: 16, delay: 2, duration: 5.5, color: "bg-accent" },
+      { x: 45, y: 15, size: 8, delay: 1.2, duration: 3.8, color: "bg-yellow-400" },
+    ],
+    [],
+  );
 
   // Live data subscription
   useEffect(() => {
@@ -119,14 +148,15 @@ function Home() {
         queryClient.invalidateQueries({ queryKey: ["home"] });
       })
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
   }, [queryClient]);
 
   return (
     <SiteShell>
       {/* ── Hero Section ── */}
       <div className="px-4 pt-6 pb-2 space-y-4 mx-auto max-w-4xl">
-
         {/* Hero Card — floating particles */}
         <motion.section
           style={{ borderRadius: WOBBLY_MD }}
@@ -145,7 +175,9 @@ function Home() {
           />
 
           {/* Floating accent dots */}
-          {dots.map((d, i) => <FloatingDot key={i} {...d} />)}
+          {dots.map((d, i) => (
+            <FloatingDot key={i} {...d} />
+          ))}
 
           {/* Background campus illustration */}
           <img
@@ -160,14 +192,10 @@ function Home() {
           {/* Content */}
           <div className="relative z-10 flex flex-col justify-start px-6 pt-20 pb-6 sm:px-12 sm:py-12">
             <div className="w-[85%] max-w-[300px] sm:max-w-[55%] space-y-3">
-
               {/* Live anonymous badge */}
 
-
               {/* Headline with cycling & blurring word */}
-              <motion.h1
-                className="font-display text-3xl font-bold leading-tight tracking-tight sm:text-5xl md:text-6xl text-foreground"
-              >
+              <motion.h1 className="font-display text-3xl font-bold leading-tight tracking-tight sm:text-5xl md:text-6xl text-foreground">
                 Speak your{" "}
                 <span className="relative inline-block">
                   <motion.span
@@ -196,10 +224,9 @@ function Home() {
                 without fear.
               </motion.h1>
 
-              <motion.p
-                className="hidden sm:block text-xs leading-relaxed text-muted-foreground sm:text-sm font-medium"
-              >
-                Share the real story of your college.<br className="hidden sm:block" />
+              <motion.p className="hidden sm:block text-xs leading-relaxed text-muted-foreground sm:text-sm font-medium">
+                Share the real story of your college.
+                <br className="hidden sm:block" />
                 Fake fines, placement fraud, faculty abuse — report it all, 100% anonymously.
               </motion.p>
             </div>
@@ -208,11 +235,7 @@ function Home() {
 
         {/* CTA Buttons */}
         <div className="flex gap-2 sm:gap-3">
-          <motion.div
-            className="flex-1"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
-          >
+          <motion.div className="flex-1" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
             <Button
               asChild
               className="w-full shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] border-2 border-border bg-accent text-white hover:bg-accent/90 h-10 text-[11px] sm:h-12 sm:text-base px-2 sm:px-4"
@@ -224,11 +247,7 @@ function Home() {
             </Button>
           </motion.div>
 
-          <motion.div
-            className="flex-1"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
-          >
+          <motion.div className="flex-1" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
             <Button
               asChild
               variant="outline"
@@ -241,9 +260,7 @@ function Home() {
         </div>
 
         {data?.site_settings?.news_enabled !== false && data?.news && data.news.length > 0 && (
-          <motion.div
-            whileHover={{ scale: 1.01 }}
-          >
+          <motion.div whileHover={{ scale: 1.01 }}>
             <Button
               asChild
               variant="outline"
@@ -253,7 +270,9 @@ function Home() {
               <Link to="/news">
                 <Megaphone className="w-5 h-5 animate-pulse" />
                 Latest News & Updates
-                <div className="bg-destructive text-white text-[10px] px-2 py-0.5 rounded-full ml-2">New</div>
+                <div className="bg-destructive text-white text-[10px] px-2 py-0.5 rounded-full ml-2">
+                  New
+                </div>
               </Link>
             </Button>
           </motion.div>
@@ -267,19 +286,14 @@ function Home() {
             { n: data?.incidentCount ?? 0, l: "Incidents", color: "text-accent" },
             { n: data?.userCount ?? 0, l: "Anon Users", color: "text-yellow-500" },
           ].map((s, i) => (
-            <motion.div
-              key={i}
-              whileHover={{ scale: 1.06, rotate: i % 2 === 0 ? 1.5 : -1.5 }}
-            >
+            <motion.div key={i} whileHover={{ scale: 1.06, rotate: i % 2 === 0 ? 1.5 : -1.5 }}>
               <AnimatedStat {...s} />
             </motion.div>
           ))}
         </div>
 
         {/* Confessions Banner */}
-        <motion.div
-          whileHover={{ scale: 1.01 }}
-        >
+        <motion.div whileHover={{ scale: 1.01 }}>
           <Link to="/confessions" className="block">
             <div
               className="mt-2 flex items-center gap-3 border-2 border-border bg-white p-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-muted/50 transition-colors"
@@ -290,13 +304,14 @@ function Home() {
               </div>
               <div className="flex-1">
                 <div className="font-display font-bold text-sm">Anonymous Confessions</div>
-                <div className="text-[11px] text-muted-foreground font-medium line-clamp-1">Share your secrets, read others' gossip. 100% untraceable.</div>
+                <div className="text-[11px] text-muted-foreground font-medium line-clamp-1">
+                  Share your secrets, read others' gossip. 100% untraceable.
+                </div>
               </div>
               <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
             </div>
           </Link>
         </motion.div>
-
       </div>
 
       <HomeAds />
@@ -305,7 +320,10 @@ function Home() {
       <section className="mx-auto max-w-3xl px-4 py-16">
         <div className="mb-6 flex items-center justify-between gap-3">
           <h2 className="font-display text-3xl font-bold">🔥 Top Reported Colleges</h2>
-          <span className="inline-flex items-center gap-1.5 border-2 border-border bg-white px-2.5 py-1 text-xs font-bold text-success" style={{ borderRadius: WOBBLY_MD }}>
+          <span
+            className="inline-flex items-center gap-1.5 border-2 border-border bg-white px-2.5 py-1 text-xs font-bold text-success"
+            style={{ borderRadius: WOBBLY_MD }}
+          >
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
@@ -323,7 +341,9 @@ function Home() {
               style={{ borderRadius: WOBBLY_MD }}
             >
               <div className="flex items-center gap-3">
-                <span className="font-display text-2xl font-bold text-muted-foreground">#{i + 1}</span>
+                <span className="font-display text-2xl font-bold text-muted-foreground">
+                  #{i + 1}
+                </span>
                 <div>
                   <div className="font-display text-lg font-bold">{c.name}</div>
                   <div className="text-sm text-muted-foreground">{c.city}</div>
@@ -338,7 +358,9 @@ function Home() {
             </Link>
           ))}
           {top.length === 0 && (
-            <p className="text-center text-muted-foreground">No reports yet. Be the first to speak up!</p>
+            <p className="text-center text-muted-foreground">
+              No reports yet. Be the first to speak up!
+            </p>
           )}
         </div>
       </section>
@@ -347,7 +369,10 @@ function Home() {
       <section className="mx-auto max-w-3xl px-4 py-16">
         <div className="mb-6 flex items-center justify-between gap-3">
           <h2 className="font-display text-3xl font-bold">📰 Latest Reports</h2>
-          <span className="inline-flex items-center gap-1.5 border-2 border-border bg-white px-2.5 py-1 text-xs font-bold text-success" style={{ borderRadius: WOBBLY_MD }}>
+          <span
+            className="inline-flex items-center gap-1.5 border-2 border-border bg-white px-2.5 py-1 text-xs font-bold text-success"
+            style={{ borderRadius: WOBBLY_MD }}
+          >
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
@@ -373,7 +398,8 @@ function Home() {
                     <ArrowBigUp className="h-3.5 w-3.5" /> {p.upvotes ?? 0}
                   </span>
                   <span className="border border-border bg-white px-2 py-0.5 text-[11px]">
-                    {categoryEmoji(p.category ?? "general")} {categoryLabel(p.category ?? "general")}
+                    {categoryEmoji(p.category ?? "general")}{" "}
+                    {categoryLabel(p.category ?? "general")}
                   </span>
                 </div>
                 {p.college_name && (
@@ -396,7 +422,7 @@ function Home() {
         </div>
         {recentPosts.length > 3 && (
           <div className="mt-6 text-center">
-            <Button variant="outline" onClick={() => setShowAllReports(v => !v)}>
+            <Button variant="outline" onClick={() => setShowAllReports((v) => !v)}>
               {showAllReports ? "Show less" : "Read more"}
             </Button>
           </div>
@@ -407,7 +433,9 @@ function Home() {
       <section className="mx-auto max-w-3xl px-4 py-12">
         <div className="mb-6 text-center">
           <h2 className="font-display text-3xl font-bold">🤔 Common Sawaal</h2>
-          <p className="mt-2 text-muted-foreground">Tumhare dimaag mein chal rahe kuch sawaalon ke jawaab</p>
+          <p className="mt-2 text-muted-foreground">
+            Tumhare dimaag mein chal rahe kuch sawaalon ke jawaab
+          </p>
         </div>
         <div className="sketch-card p-2 sm:p-4 bg-white" style={{ borderRadius: WOBBLY_MD }}>
           <Accordion type="single" collapsible className="w-full">
@@ -416,7 +444,8 @@ function Home() {
                 Kya mera sach mein koi naam nahi aayega?
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground font-medium">
-                Haan, bilkul! Hum na email maangte hain, na phone number, aur na hi koi location/IP data store karte hain. Tum ekdum safe aur anonymous ho.
+                Haan, bilkul! Hum na email maangte hain, na phone number, aur na hi koi location/IP
+                data store karte hain. Tum ekdum safe aur anonymous ho.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2" className="border-b-2 border-border">
@@ -424,7 +453,9 @@ function Home() {
                 College administration ko kaise pata chalega?
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground font-medium">
-                Jab tumhari post pe kaafi upvotes aur engagement aati hai, toh usey automatically attention milti hai. Yeh platform ek collective voice banata hai jise ignore karna mushkil ho jata hai.
+                Jab tumhari post pe kaafi upvotes aur engagement aati hai, toh usey automatically
+                attention milti hai. Yeh platform ek collective voice banata hai jise ignore karna
+                mushkil ho jata hai.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-3" className="border-b-2 border-border">
@@ -432,7 +463,8 @@ function Home() {
                 Kya main proof/documents upload kar sakta hoon?
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground font-medium">
-                Haan! Hum strongly encourage karte hain ki tum reports ke saath photos ya documents upload karo taaki tumhari baat sach sabit ho sake.
+                Haan! Hum strongly encourage karte hain ki tum reports ke saath photos ya documents
+                upload karo taaki tumhari baat sach sabit ho sake.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-4" className="border-b-0">
@@ -440,7 +472,9 @@ function Home() {
                 Fake reports ko kaise rokoge?
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground font-medium">
-                Hamari community hi moderation karti hai. Agar koi fake ya galat cheez post hoti hai, toh users use downvote ya report kar sakte hain. Spam accounts jaldi block kar diye jaate hain.
+                Hamari community hi moderation karti hai. Agar koi fake ya galat cheez post hoti
+                hai, toh users use downvote ya report kar sakte hain. Spam accounts jaldi block kar
+                diye jaate hain.
               </AccordionContent>
             </AccordionItem>
           </Accordion>

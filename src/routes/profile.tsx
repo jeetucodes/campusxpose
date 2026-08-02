@@ -45,10 +45,17 @@ export const Route = createFileRoute("/profile")({
   head: () => ({
     meta: [
       { title: "Your Profile — Pick an Avatar | CampusXpose" },
-      { name: "description", content: "Choose your anonymous DiceBear cartoon/anime avatar style and save it to your profile." },
+      {
+        name: "description",
+        content:
+          "Choose your anonymous DiceBear cartoon/anime avatar style and save it to your profile.",
+      },
       { name: "robots", content: "noindex" },
       { property: "og:title", content: "Your Profile — Pick an Avatar" },
-      { property: "og:description", content: "Choose your anonymous DiceBear cartoon/anime avatar." },
+      {
+        property: "og:description",
+        content: "Choose your anonymous DiceBear cartoon/anime avatar.",
+      },
     ],
   }),
   component: ProfilePage,
@@ -134,14 +141,14 @@ function RestoreConfirmDialog({
           style={{ borderRadius: "14px 5px 16px 5px / 5px 16px 5px 14px" }}
         >
           <p className="text-sm text-foreground">
-            Your current anonymous identity stays on the server — you can switch back anytime using its recovery code.
+            Your current anonymous identity stays on the server — you can switch back anytime using
+            its recovery code.
           </p>
           {recoveredUsername && (
             <div className="mt-2 flex items-center gap-2">
               <span className="text-xs text-muted-foreground">Logging in as</span>
               <span className="inline-flex items-center gap-1 rounded-full border border-ink bg-white px-2.5 py-0.5 text-sm font-bold shadow-ink-soft">
-                <User className="h-3 w-3" />
-                @{recoveredUsername}
+                <User className="h-3 w-3" />@{recoveredUsername}
               </span>
             </div>
           )}
@@ -153,9 +160,13 @@ function RestoreConfirmDialog({
           </Button>
           <Button onClick={onConfirm} disabled={loading} className="flex-1 gap-2">
             {loading ? (
-              <><RotateCcw className="h-4 w-4 animate-spin" /> Restoring…</>
+              <>
+                <RotateCcw className="h-4 w-4 animate-spin" /> Restoring…
+              </>
             ) : (
-              <><LogIn className="h-4 w-4" /> Yes, Restore</>
+              <>
+                <LogIn className="h-4 w-4" /> Yes, Restore
+              </>
             )}
           </Button>
         </div>
@@ -166,18 +177,12 @@ function RestoreConfirmDialog({
 
 // ─── Section wrapper ──────────────────────────────────────────────────────────
 
-function SectionCard({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
+function SectionCard({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <div
       className={cn(
         "border-2 border-ink bg-white p-5 shadow-ink transition-all duration-200",
-        className
+        className,
       )}
       style={{ borderRadius: "20px 7px 22px 7px / 7px 22px 7px 20px" }}
     >
@@ -236,8 +241,12 @@ function InputField({
 
   return (
     <div>
-      <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor={id}>
-        {label}{required && <span className="ml-0.5 text-destructive">*</span>}
+      <label
+        className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+        htmlFor={id}
+      >
+        {label}
+        {required && <span className="ml-0.5 text-destructive">*</span>}
       </label>
       <div className="relative">
         {rows ? (
@@ -265,11 +274,11 @@ function InputField({
             onKeyDown={onKeyDown}
           />
         )}
-        {suffix && (
-          <span className="absolute right-2.5 top-1/2 -translate-y-1/2">{suffix}</span>
-        )}
+        {suffix && <span className="absolute right-2.5 top-1/2 -translate-y-1/2">{suffix}</span>}
       </div>
-      {hint && <p className={cn("mt-1.5 flex items-center gap-1 text-xs", hintColors[hintType])}>{hint}</p>}
+      {hint && (
+        <p className={cn("mt-1.5 flex items-center gap-1 text-xs", hintColors[hintType])}>{hint}</p>
+      )}
     </div>
   );
 }
@@ -277,7 +286,18 @@ function InputField({
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 function ProfilePage() {
-  const { username, verified, avatarUrl, isReady, hashedId, secretKey, init, refresh, reset, login } = useIdentity();
+  const {
+    username,
+    verified,
+    avatarUrl,
+    isReady,
+    hashedId,
+    secretKey,
+    init,
+    refresh,
+    reset,
+    login,
+  } = useIdentity();
   const queryClient = useQueryClient();
 
   const [style, setStyle] = useState<string>(STYLES[0]);
@@ -295,8 +315,7 @@ function ProfilePage() {
 
   const backupStrength = evaluatePassphrase(backupPass);
   const passphrasesMatch = backupPass === backupPassConfirm && backupPassConfirm.length > 0;
-  const canGenerate =
-    backupStrength.score >= 2 && passphrasesMatch && !generatingCode;
+  const canGenerate = backupStrength.score >= 2 && passphrasesMatch && !generatingCode;
 
   // ── Restore state ─────────────────────────────────────────────────────────
   const [restoreCode, setRestoreCode] = useState("");
@@ -309,7 +328,12 @@ function ProfilePage() {
   const [decoding, setDecoding] = useState(false);
 
   const doDeleteAccount = async () => {
-    if (!window.confirm("Are you sure? This will wipe your account, posts, and messages. You will be assigned a brand new identity.")) return;
+    if (
+      !window.confirm(
+        "Are you sure? This will wipe your account, posts, and messages. You will be assigned a brand new identity.",
+      )
+    )
+      return;
     await reset();
     toast.success("Account deleted and reset!");
   };
@@ -349,7 +373,10 @@ function ProfilePage() {
     try {
       // decodeRecoveryCode now returns { uid, username } — username is embedded
       // directly in the code (CXv3). For old CXv2 codes username will be null.
-      const { uid, username: codeUsername } = await decodeRecoveryCode(restoreCode.trim(), restorePass);
+      const { uid, username: codeUsername } = await decodeRecoveryCode(
+        restoreCode.trim(),
+        restorePass,
+      );
 
       if (uid === secretKey) {
         toast.success("You are already logged in with this account!");
@@ -479,17 +506,22 @@ function ProfilePage() {
         open={showConfirm}
         recoveredUsername={pendingUsername}
         onConfirm={doConfirmRestore}
-        onCancel={() => { setShowConfirm(false); setPendingUid(null); setPendingUsername(null); }}
+        onCancel={() => {
+          setShowConfirm(false);
+          setPendingUid(null);
+          setPendingUsername(null);
+        }}
         loading={restoring}
       />
 
       <main className="mx-auto max-w-3xl px-4 py-8 pb-24">
-
         {/* ── Page Header ─────────────────────────────────────────────── */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-1">
             <Sparkles className="h-5 w-5 text-primary" />
-            <span className="text-xs font-semibold uppercase tracking-widest text-primary">Your Space</span>
+            <span className="text-xs font-semibold uppercase tracking-widest text-primary">
+              Your Space
+            </span>
           </div>
           <h1 className="font-display text-4xl font-bold leading-tight">Profile</h1>
           <p className="mt-1 text-muted-foreground text-sm">
@@ -510,7 +542,10 @@ function ProfilePage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
               {/* Avatar with animated ring */}
               <div className="relative shrink-0">
-                <div className="absolute inset-0 rounded-full border-4 border-dashed border-primary/30 animate-spin" style={{ animationDuration: "12s", borderRadius: "inherit" }} />
+                <div
+                  className="absolute inset-0 rounded-full border-4 border-dashed border-primary/30 animate-spin"
+                  style={{ animationDuration: "12s", borderRadius: "inherit" }}
+                />
                 <img
                   src={previewUrl}
                   alt="Your selected avatar"
@@ -526,9 +561,7 @@ function ProfilePage() {
                     {isReady ? (username ?? "anonymous") : "…"}
                   </span>
                   {verified && <VerifiedBadge className="h-5 w-5" />}
-                  <span
-                    className="rounded-full border border-border bg-surface-2 px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
-                  >
+                  <span className="rounded-full border border-border bg-surface-2 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
                     {STYLE_LABELS[style] ?? style}
                   </span>
                 </div>
@@ -537,8 +570,21 @@ function ProfilePage() {
                 </p>
 
                 <div className="flex flex-wrap gap-2">
-                  <Button size="sm" onClick={save} disabled={saving} className="gap-1.5 shadow-ink-soft">
-                    {saving ? <><RotateCcw className="h-3.5 w-3.5 animate-spin" /> Saving…</> : <><Save className="h-3.5 w-3.5" /> Save Avatar</>}
+                  <Button
+                    size="sm"
+                    onClick={save}
+                    disabled={saving}
+                    className="gap-1.5 shadow-ink-soft"
+                  >
+                    {saving ? (
+                      <>
+                        <RotateCcw className="h-3.5 w-3.5 animate-spin" /> Saving…
+                      </>
+                    ) : (
+                      <>
+                        <Save className="h-3.5 w-3.5" /> Save Avatar
+                      </>
+                    )}
                   </Button>
                   <Button
                     size="sm"
@@ -549,7 +595,13 @@ function ProfilePage() {
                     <Shuffle className="h-3.5 w-3.5" /> Shuffle
                   </Button>
                   {avatarUrl && (
-                    <Button size="sm" variant="ghost" className="gap-1.5 text-muted-foreground" onClick={resetToDefault} disabled={saving}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="gap-1.5 text-muted-foreground"
+                      onClick={resetToDefault}
+                      disabled={saving}
+                    >
                       <RefreshCw className="h-3.5 w-3.5" /> Reset
                     </Button>
                   )}
@@ -593,7 +645,14 @@ function ProfilePage() {
                     className="h-16 w-16 border border-border bg-surface-2 object-cover transition-transform duration-200 group-hover:scale-105"
                     style={{ borderRadius: "12px 4px 14px 4px / 4px 14px 4px 12px" }}
                   />
-                  <span className={cn("text-[11px] font-medium transition-colors", active ? "text-primary font-bold" : "text-muted-foreground group-hover:text-foreground")}>
+                  <span
+                    className={cn(
+                      "text-[11px] font-medium transition-colors",
+                      active
+                        ? "text-primary font-bold"
+                        : "text-muted-foreground group-hover:text-foreground",
+                    )}
+                  >
                     {STYLE_LABELS[s] ?? s}
                   </span>
                 </button>
@@ -629,7 +688,6 @@ function ProfilePage() {
           </div>
 
           <div className="space-y-4">
-
             {/* ── 1. Backup — Generate Recovery Code ───────────────────── */}
             <SectionCard>
               <div className="flex items-center gap-3 mb-3">
@@ -645,7 +703,8 @@ function ProfilePage() {
                 </span>
               </div>
               <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                Protect your anonymous account with a passphrase-encrypted code. Store it somewhere safe — it's the only way to recover your account on another device.
+                Protect your anonymous account with a passphrase-encrypted code. Store it somewhere
+                safe — it's the only way to recover your account on another device.
               </p>
 
               {backupStep === "idle" && (
@@ -664,10 +723,14 @@ function ProfilePage() {
                 <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
                   {/* Step indicator */}
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-ink text-white text-[10px] font-bold">1</span>
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-ink text-white text-[10px] font-bold">
+                      1
+                    </span>
                     <span className="font-medium text-foreground">Set passphrase</span>
                     <ChevronRight className="h-3 w-3 mx-1" />
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-border text-[10px] font-bold text-muted-foreground">2</span>
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-border text-[10px] font-bold text-muted-foreground">
+                      2
+                    </span>
                     <span>Copy code</span>
                   </div>
 
@@ -687,7 +750,11 @@ function ProfilePage() {
                         className="text-muted-foreground hover:text-foreground transition-colors"
                         tabIndex={-1}
                       >
-                        {showBackupPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        {showBackupPass ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
                       </button>
                     }
                   />
@@ -705,19 +772,26 @@ function ProfilePage() {
                     onKeyDown={(e) => e.key === "Enter" && canGenerate && doGenerateCode()}
                     suffix={
                       backupPassConfirm.length > 0 ? (
-                        passphrasesMatch
-                          ? <Check className="h-4 w-4 text-green-500" />
-                          : <AlertTriangle className="h-4 w-4 text-destructive" />
+                        passphrasesMatch ? (
+                          <Check className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <AlertTriangle className="h-4 w-4 text-destructive" />
+                        )
                       ) : null
                     }
                     hint={
-                      backupPassConfirm.length > 0 && !passphrasesMatch
-                        ? "Passphrases do not match"
-                        : backupStrength.score < 2 && backupPass.length > 0
-                        ? <><AlertTriangle className="h-3.5 w-3.5 shrink-0" /> Use at least 8 characters with mixed letters and numbers</>
-                        : undefined
+                      backupPassConfirm.length > 0 && !passphrasesMatch ? (
+                        "Passphrases do not match"
+                      ) : backupStrength.score < 2 && backupPass.length > 0 ? (
+                        <>
+                          <AlertTriangle className="h-3.5 w-3.5 shrink-0" /> Use at least 8
+                          characters with mixed letters and numbers
+                        </>
+                      ) : undefined
                     }
-                    hintType={backupPassConfirm.length > 0 && !passphrasesMatch ? "error" : "warning"}
+                    hintType={
+                      backupPassConfirm.length > 0 && !passphrasesMatch ? "error" : "warning"
+                    }
                   />
 
                   <div className="flex gap-2 pt-1">
@@ -728,12 +802,23 @@ function ProfilePage() {
                       id="backup-generate-btn"
                     >
                       {generatingCode ? (
-                        <><RotateCcw className="h-4 w-4 animate-spin" /> Generating…</>
+                        <>
+                          <RotateCcw className="h-4 w-4 animate-spin" /> Generating…
+                        </>
                       ) : (
-                        <><ShieldCheck className="h-4 w-4" /> Generate Code</>
+                        <>
+                          <ShieldCheck className="h-4 w-4" /> Generate Code
+                        </>
                       )}
                     </Button>
-                    <Button variant="ghost" onClick={() => { setBackupStep("idle"); setBackupPass(""); setBackupPassConfirm(""); }}>
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        setBackupStep("idle");
+                        setBackupPass("");
+                        setBackupPassConfirm("");
+                      }}
+                    >
                       Cancel
                     </Button>
                   </div>
@@ -744,10 +829,14 @@ function ProfilePage() {
                 <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
                   {/* Step indicator */}
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-border text-[10px] font-bold opacity-40">1</span>
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-border text-[10px] font-bold opacity-40">
+                      1
+                    </span>
                     <span className="opacity-40">Set passphrase</span>
                     <ChevronRight className="h-3 w-3 mx-1 opacity-40" />
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-green-600 text-white text-[10px] font-bold">2</span>
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-green-600 text-white text-[10px] font-bold">
+                      2
+                    </span>
                     <span className="font-medium text-foreground">Copy your code</span>
                   </div>
 
@@ -764,10 +853,21 @@ function ProfilePage() {
                         size="sm"
                         variant="outline"
                         onClick={copyCode}
-                        className={cn("gap-1.5 shrink-0 transition-all border-green-400 text-green-700 hover:bg-green-100", codeCopied && "border-green-600 bg-green-100 text-green-800")}
+                        className={cn(
+                          "gap-1.5 shrink-0 transition-all border-green-400 text-green-700 hover:bg-green-100",
+                          codeCopied && "border-green-600 bg-green-100 text-green-800",
+                        )}
                         id="backup-copy-btn"
                       >
-                        {codeCopied ? <><Check className="h-3.5 w-3.5" /> Copied!</> : <><Copy className="h-3.5 w-3.5" /> Copy</>}
+                        {codeCopied ? (
+                          <>
+                            <Check className="h-3.5 w-3.5" /> Copied!
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="h-3.5 w-3.5" /> Copy
+                          </>
+                        )}
                       </Button>
                     </div>
                     <code
@@ -778,15 +878,31 @@ function ProfilePage() {
                     </code>
                     <p className="mt-3 flex items-start gap-1.5 text-xs text-green-700">
                       <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-px" />
-                      Save this code AND your passphrase. Without both, you cannot recover your account.
+                      Save this code AND your passphrase. Without both, you cannot recover your
+                      account.
                     </p>
                   </div>
 
                   <div className="flex gap-2">
-                    <Button variant="outline" className="gap-2" onClick={() => { setBackupStep("form"); setGeneratedCode(""); setCodeCopied(false); }}>
+                    <Button
+                      variant="outline"
+                      className="gap-2"
+                      onClick={() => {
+                        setBackupStep("form");
+                        setGeneratedCode("");
+                        setCodeCopied(false);
+                      }}
+                    >
                       <RotateCcw className="h-4 w-4" /> Regenerate
                     </Button>
-                    <Button variant="ghost" onClick={() => { setBackupStep("idle"); setGeneratedCode(""); setCodeCopied(false); }}>
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        setBackupStep("idle");
+                        setGeneratedCode("");
+                        setCodeCopied(false);
+                      }}
+                    >
                       Done
                     </Button>
                   </div>
@@ -801,12 +917,15 @@ function ProfilePage() {
                   <Upload className="h-4 w-4 text-blue-600" />
                 </div>
                 <div>
-                  <h3 className="font-display font-bold text-base leading-tight">Restore Account</h3>
+                  <h3 className="font-display font-bold text-base leading-tight">
+                    Restore Account
+                  </h3>
                   <p className="text-xs text-muted-foreground">Login with a recovery code</p>
                 </div>
               </div>
               <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                Have a recovery code from another device? Paste it below along with your passphrase to restore that account.
+                Have a recovery code from another device? Paste it below along with your passphrase
+                to restore that account.
               </p>
 
               <div className="space-y-3">
@@ -821,9 +940,13 @@ function ProfilePage() {
                   hint={
                     restoreCode.trim() &&
                     !restoreCode.trim().startsWith("CXv3.") &&
-                    !restoreCode.trim().startsWith("CXv2.")
-                      ? <><ShieldAlert className="h-3.5 w-3.5 shrink-0" /> Code should start with <code className="font-mono bg-amber-100 px-1 rounded">CXv3.</code> — make sure you copied it fully.</>
-                      : undefined
+                    !restoreCode.trim().startsWith("CXv2.") ? (
+                      <>
+                        <ShieldAlert className="h-3.5 w-3.5 shrink-0" /> Code should start with{" "}
+                        <code className="font-mono bg-amber-100 px-1 rounded">CXv3.</code> — make
+                        sure you copied it fully.
+                      </>
+                    ) : undefined
                   }
                   hintType="warning"
                 />
@@ -836,7 +959,12 @@ function ProfilePage() {
                   onChange={setRestorePass}
                   placeholder="The passphrase you set when creating the code"
                   autoComplete="current-password"
-                  onKeyDown={(e) => e.key === "Enter" && restoreCode.trim() && restorePass.trim() && doDecodeAndConfirm()}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" &&
+                    restoreCode.trim() &&
+                    restorePass.trim() &&
+                    doDecodeAndConfirm()
+                  }
                   suffix={
                     <button
                       type="button"
@@ -844,7 +972,11 @@ function ProfilePage() {
                       className="text-muted-foreground hover:text-foreground transition-colors"
                       tabIndex={-1}
                     >
-                      {showRestorePass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showRestorePass ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
                     </button>
                   }
                 />
@@ -856,9 +988,13 @@ function ProfilePage() {
                   id="restore-btn"
                 >
                   {decoding ? (
-                    <><RotateCcw className="h-4 w-4 animate-spin" /> Verifying…</>
+                    <>
+                      <RotateCcw className="h-4 w-4 animate-spin" /> Verifying…
+                    </>
                   ) : (
-                    <><LogIn className="h-4 w-4" /> Restore Account</>
+                    <>
+                      <LogIn className="h-4 w-4" /> Restore Account
+                    </>
                   )}
                 </Button>
               </div>
@@ -874,18 +1010,25 @@ function ProfilePage() {
                   <Trash2 className="h-4 w-4 text-destructive" />
                 </div>
                 <div>
-                  <h3 className="font-display font-bold text-base leading-tight text-destructive">Delete Account</h3>
+                  <h3 className="font-display font-bold text-base leading-tight text-destructive">
+                    Delete Account
+                  </h3>
                   <p className="text-xs text-muted-foreground">Permanently wipe your identity</p>
                 </div>
               </div>
               <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                Permanently wipe your account activity from the server and generate a brand new anonymous identity. This cannot be undone.
+                Permanently wipe your account activity from the server and generate a brand new
+                anonymous identity. This cannot be undone.
               </p>
-              <Button variant="destructive" className="gap-2" onClick={doDeleteAccount} id="delete-account-btn">
+              <Button
+                variant="destructive"
+                className="gap-2"
+                onClick={doDeleteAccount}
+                id="delete-account-btn"
+              >
                 <Trash2 className="h-4 w-4" /> Delete My Account
               </Button>
             </div>
-
           </div>
         </section>
       </main>

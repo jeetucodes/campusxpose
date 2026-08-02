@@ -35,10 +35,14 @@ export function severityColor(severity: number): string {
 
 export function statusColor(status: string): string {
   switch (status) {
-    case "active": return "bg-destructive/20 text-destructive border-destructive/40";
-    case "investigating": return "bg-warning/20 text-warning border-warning/40";
-    case "resolved": return "bg-success/20 text-success border-success/40";
-    default: return "bg-muted text-muted-foreground border-border";
+    case "active":
+      return "bg-destructive/20 text-destructive border-destructive/40";
+    case "investigating":
+      return "bg-warning/20 text-warning border-warning/40";
+    case "resolved":
+      return "bg-success/20 text-success border-success/40";
+    default:
+      return "bg-muted text-muted-foreground border-border";
   }
 }
 
@@ -47,5 +51,9 @@ export function sanitizeText(input: string): string {
 }
 
 export function inr(amount: number): string {
-  return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(amount);
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(amount);
 }

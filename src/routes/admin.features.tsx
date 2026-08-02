@@ -21,7 +21,9 @@ function AdminFeatures() {
       </div>
 
       <div className="rounded-2xl border bg-card p-8 text-center shadow-sm">
-        <p className="text-muted-foreground">No experimental features are currently available to toggle.</p>
+        <p className="text-muted-foreground">
+          No experimental features are currently available to toggle.
+        </p>
       </div>
     </div>
   );

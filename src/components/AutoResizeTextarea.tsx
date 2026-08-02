@@ -5,7 +5,13 @@ interface AutoResizeTextareaProps extends TextareaHTMLAttributes<HTMLTextAreaEle
   maxHeight?: number;
 }
 
-export function AutoResizeTextarea({ className, maxHeight = 200, value, onChange, ...props }: AutoResizeTextareaProps) {
+export function AutoResizeTextarea({
+  className,
+  maxHeight = 200,
+  value,
+  onChange,
+  ...props
+}: AutoResizeTextareaProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -14,7 +20,7 @@ export function AutoResizeTextarea({ className, maxHeight = 200, value, onChange
       // Reset height to recalculate the actual scrollHeight
       textarea.style.height = "auto";
       const scrollHeight = textarea.scrollHeight;
-      
+
       if (maxHeight && scrollHeight > maxHeight) {
         textarea.style.height = `${maxHeight}px`;
         textarea.style.overflowY = "auto";
@@ -33,7 +39,7 @@ export function AutoResizeTextarea({ className, maxHeight = 200, value, onChange
       rows={1}
       className={cn(
         "flex w-full resize-none rounded-md bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
-        className
+        className,
       )}
       {...props}
     />

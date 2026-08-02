@@ -14,7 +14,11 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/profile")({
   head: () => ({ meta: [{ title: "Admin · Profile" }, { name: "robots", content: "noindex" }] }),
-  component: () => <AdminShell><AdminProfile /></AdminShell>,
+  component: () => (
+    <AdminShell>
+      <AdminProfile />
+    </AdminShell>
+  ),
 });
 
 function AdminProfile() {
@@ -58,7 +62,8 @@ function AdminProfile() {
     <div className="mx-auto max-w-3xl">
       <h1 className="font-display text-2xl font-bold">Admin Profile</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        Pick an official avatar for the admin account. It shows wherever the admin appears (like DM replies) and is always verified.
+        Pick an official avatar for the admin account. It shows wherever the admin appears (like DM
+        replies) and is always verified.
       </p>
 
       {/* Preview */}
@@ -88,7 +93,9 @@ function AdminProfile() {
               onClick={() => setSelected(url)}
               className={cn(
                 "relative flex items-center justify-center rounded-xl border-2 p-2 transition-colors",
-                active ? "border-primary bg-primary/10" : "border-border bg-surface hover:bg-surface-2",
+                active
+                  ? "border-primary bg-primary/10"
+                  : "border-border bg-surface hover:bg-surface-2",
               )}
             >
               {active && (

@@ -26,7 +26,10 @@ export const Route = createFileRoute("/projects/new")({
   head: () => ({
     meta: [
       { title: "Add Project — CampusXpose" },
-      { name: "description", content: "Share your student project with the CampusXpose community." },
+      {
+        name: "description",
+        content: "Share your student project with the CampusXpose community.",
+      },
     ],
   }),
   component: NewProjectPage,
@@ -79,7 +82,8 @@ function NewProjectPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!hashedId || !username) return toast.error("Please ensure you're logged in with an anonymous identity.");
+    if (!hashedId || !username)
+      return toast.error("Please ensure you're logged in with an anonymous identity.");
     if (!title.trim()) return toast.error("Project title is required.");
 
     setSubmitting(true);
@@ -142,23 +146,29 @@ function NewProjectPage() {
               <Sparkles className="h-6 w-6 text-accent" strokeWidth={2.5} />
               Publish New Project
             </h1>
-            <p className="mt-2 text-sm text-muted-foreground font-sans font-medium">Share what you've been working on with the community.</p>
+            <p className="mt-2 text-sm text-muted-foreground font-sans font-medium">
+              Share what you've been working on with the community.
+            </p>
           </div>
 
           <div className="p-8 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]">
-            <form onSubmit={handleSubmit} className="space-y-8 bg-white/90 p-2 rounded-xl backdrop-blur-sm">
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-8 bg-white/90 p-2 rounded-xl backdrop-blur-sm"
+            >
               {/* Image Upload */}
               <div>
                 <label className="mb-2 block text-sm font-bold text-foreground font-display tracking-wide">
-                  Cover Image <span className="font-sans font-normal text-muted-foreground">(Optional)</span>
+                  Cover Image{" "}
+                  <span className="font-sans font-normal text-muted-foreground">(Optional)</span>
                 </label>
                 <div
                   onClick={() => fileInputRef.current?.click()}
                   className={cn(
                     "relative flex h-56 cursor-pointer items-center justify-center overflow-hidden border-2 border-dashed transition-all wobbly-sm",
-                    imagePreview 
-                      ? "border-ink bg-accent/5" 
-                      : "border-ink/40 bg-accent/5 hover:border-ink hover:bg-accent/10"
+                    imagePreview
+                      ? "border-ink bg-accent/5"
+                      : "border-ink/40 bg-accent/5 hover:border-ink hover:bg-accent/10",
                   )}
                   style={{ borderRadius: "14px 5px 16px 5px / 5px 16px 5px 14px" }}
                 >
@@ -214,7 +224,10 @@ function NewProjectPage() {
               <div className="grid gap-8 sm:grid-cols-2">
                 {/* Title */}
                 <div className="sm:col-span-2 space-y-2">
-                  <label htmlFor="proj-title" className="block text-sm font-bold text-foreground font-display tracking-wide">
+                  <label
+                    htmlFor="proj-title"
+                    className="block text-sm font-bold text-foreground font-display tracking-wide"
+                  >
                     Project Title <span className="text-destructive">*</span>
                   </label>
                   <Input
@@ -232,10 +245,18 @@ function NewProjectPage() {
                 {/* Description */}
                 <div className="sm:col-span-2 space-y-2">
                   <div className="flex items-center justify-between">
-                    <label htmlFor="proj-desc" className="block text-sm font-bold text-foreground font-display tracking-wide">
-                      Description <span className="font-sans font-normal text-muted-foreground">(Optional)</span>
+                    <label
+                      htmlFor="proj-desc"
+                      className="block text-sm font-bold text-foreground font-display tracking-wide"
+                    >
+                      Description{" "}
+                      <span className="font-sans font-normal text-muted-foreground">
+                        (Optional)
+                      </span>
                     </label>
-                    <span className="text-xs font-mono font-bold text-muted-foreground">{description.length}/5000</span>
+                    <span className="text-xs font-mono font-bold text-muted-foreground">
+                      {description.length}/5000
+                    </span>
                   </div>
                   <textarea
                     id="proj-desc"
@@ -253,7 +274,9 @@ function NewProjectPage() {
                 <div className="sm:col-span-2 space-y-3">
                   <label className="flex items-center gap-1.5 text-sm font-bold text-foreground font-display tracking-wide">
                     <Tag className="h-4 w-4 text-ink" /> Categories
-                    <span className="ml-1 font-sans font-normal text-muted-foreground">(Select up to 6)</span>
+                    <span className="ml-1 font-sans font-normal text-muted-foreground">
+                      (Select up to 6)
+                    </span>
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {ALL_TAGS.map((tag) => (
@@ -277,7 +300,10 @@ function NewProjectPage() {
 
                 {/* GitHub URL */}
                 <div className="space-y-2">
-                  <label htmlFor="proj-github" className="flex items-center gap-1.5 text-sm font-bold text-foreground font-display tracking-wide">
+                  <label
+                    htmlFor="proj-github"
+                    className="flex items-center gap-1.5 text-sm font-bold text-foreground font-display tracking-wide"
+                  >
                     <Github className="h-4 w-4 text-ink" /> Repository URL
                   </label>
                   <Input
@@ -293,7 +319,10 @@ function NewProjectPage() {
 
                 {/* Live URL */}
                 <div className="space-y-2">
-                  <label htmlFor="proj-live" className="flex items-center gap-1.5 text-sm font-bold text-foreground font-display tracking-wide">
+                  <label
+                    htmlFor="proj-live"
+                    className="flex items-center gap-1.5 text-sm font-bold text-foreground font-display tracking-wide"
+                  >
                     <Globe className="h-4 w-4 text-ink" /> Live Demo URL
                   </label>
                   <Input
@@ -320,11 +349,20 @@ function NewProjectPage() {
                     onClick={() => setLookingForCollaborators((v) => !v)}
                   >
                     <div className="flex items-center gap-4">
-                      <div className={cn("rounded-full border-2 border-ink p-2.5 transition-colors", lookingForCollaborators ? "bg-accent text-accent-foreground shadow-ink-soft" : "bg-muted text-muted-foreground")}>
+                      <div
+                        className={cn(
+                          "rounded-full border-2 border-ink p-2.5 transition-colors",
+                          lookingForCollaborators
+                            ? "bg-accent text-accent-foreground shadow-ink-soft"
+                            : "bg-muted text-muted-foreground",
+                        )}
+                      >
                         <Users className="h-5 w-5" />
                       </div>
                       <div>
-                        <p className="text-base font-bold text-foreground font-display">Looking for Collaborators</p>
+                        <p className="text-base font-bold text-foreground font-display">
+                          Looking for Collaborators
+                        </p>
                         <p className="text-sm font-medium text-muted-foreground font-sans">
                           Allow others to send requests to join this project
                         </p>

@@ -1,7 +1,28 @@
 export type Dir = "up" | "down" | "left" | "right";
 
-export interface ArrowData { id: number; row: number; col: number; dir: Dir; twinId?: number; }
-export interface ObstacleData { id: number; row: number; col: number; type: "wall" | "bomb" | "mirror-slash" | "mirror-backslash" | "ice" | "gate-up" | "gate-down" | "gate-left" | "gate-right" | "rotator"; }
+export interface ArrowData {
+  id: number;
+  row: number;
+  col: number;
+  dir: Dir;
+  twinId?: number;
+}
+export interface ObstacleData {
+  id: number;
+  row: number;
+  col: number;
+  type:
+    | "wall"
+    | "bomb"
+    | "mirror-slash"
+    | "mirror-backslash"
+    | "ice"
+    | "gate-up"
+    | "gate-down"
+    | "gate-left"
+    | "gate-right"
+    | "rotator";
+}
 
 export interface LevelData {
   gridSize: number;
@@ -11,416 +32,106 @@ export interface LevelData {
 
 const RAW_LEVELS: string[][] = [
   // Level 1: 4x4
-  [
-    "....",
-    ".^..",
-    "....",
-    "..>."
-  ],
+  ["....", ".^..", "....", "..>."],
   // Level 2: 4x4
-  [
-    ".<..",
-    "....",
-    "....",
-    "..v."
-  ],
+  [".<..", "....", "....", "..v."],
   // Level 3: 4x4, 1 Wall
-  [
-    "....",
-    ".^..",
-    "..W.",
-    "..>."
-  ],
+  ["....", ".^..", "..W.", "..>."],
   // Level 4: 4x4
-  [
-    ".>..",
-    "..W.",
-    ".^..",
-    "...."
-  ],
+  [".>..", "..W.", ".^..", "...."],
   // Level 5: 4x4, 1 Diagonal
-  [
-    "....",
-    ".^/.",
-    "....",
-    "...."
-  ],
+  ["....", ".^/.", "....", "...."],
   // Level 6: 4x4
-  [
-    ".\\..",
-    "..>.",
-    ".v..",
-    "...."
-  ],
+  [".\\..", "..>.", ".v..", "...."],
   // Level 7: 4x4, 1 Wall, 1 Diagonal
-  [
-    "..W.",
-    ".^/.",
-    "....",
-    "..>."
-  ],
+  ["..W.", ".^/.", "....", "..>."],
   // Level 8: 4x4
-  [
-    ".v..",
-    "..\\.",
-    "./..",
-    ".<.."
-  ],
+  [".v..", "..\\.", "./..", ".<.."],
   // Level 9: 5x5, 2 Walls
-  [
-    ".....",
-    ".^.W.",
-    "...>.",
-    ".W...",
-    "..<.."
-  ],
+  [".....", ".^.W.", "...>.", ".W...", "..<.."],
   // Level 10: 5x5, 2 Walls, 1 Diag
-  [
-    ".....",
-    ".W./.",
-    "..^..",
-    ".....",
-    ".>..."
-  ],
+  [".....", ".W./.", "..^..", ".....", ".>..."],
   // Level 11: 5x5
-  [
-    ".....",
-    "./.\\.",
-    ".^.v.",
-    ".....",
-    ".W..."
-  ],
+  [".....", "./.\\.", ".^.v.", ".....", ".W..."],
   // Level 12: 5x5, L-shape trap
-  [
-    ".....",
-    ".WW..",
-    ".Wv..",
-    ".....",
-    "..>.."
-  ],
+  [".....", ".WW..", ".Wv..", ".....", "..>.."],
   // Level 13: 4x4 Dense
-  [
-    "W./.",
-    "v.W.",
-    "/..<",
-    ".v.."
-  ],
+  ["W./.", "v.W.", "/..<", ".v.."],
   // Level 14: 5x5
-  [
-    "..W..",
-    ".WWW.",
-    "..v..",
-    "./...",
-    "....."
-  ],
+  ["..W..", ".WWW.", "..v..", "./...", "....."],
   // Level 15: 5x5 Multi-dir
-  [
-    ".....",
-    "..\\..",
-    ".^.W.",
-    "W.v..",
-    "....."
-  ],
+  [".....", "..\\..", ".^.W.", "W.v..", "....."],
   // Level 16: 5x5
-  [
-    ".....",
-    ".WWW.",
-    ".W>..",
-    ".<W..",
-    "....."
-  ],
+  [".....", ".WWW.", ".W>..", ".<W..", "....."],
   // Level 17: 5x5
-  [
-    ".....",
-    "./.\\.",
-    "..^..",
-    "W...W",
-    "....."
-  ],
+  [".....", "./.\\.", "..^..", "W...W", "....."],
   // Level 18: 5x5
-  [
-    "../..",
-    ".\\./.",
-    "W.^..",
-    ".....",
-    "..W.."
-  ],
+  ["../..", ".\\./.", "W.^..", ".....", "..W.."],
   // Level 19: 5x5, Bomb intro
-  [
-    ".....",
-    ".B...",
-    "..^..",
-    ".W...",
-    "..W.."
-  ],
+  [".....", ".B...", "..^..", ".W...", "..W.."],
   // Level 20: 5x5
-  [
-    ".....",
-    ".B.W.",
-    ".W.>.",
-    "..W..",
-    "....."
-  ],
+  [".....", ".B.W.", ".W.>.", "..W..", "....."],
   // Level 21: 5x5
-  [
-    ".....",
-    "W...B",
-    ".^.\\.",
-    ".....",
-    "W...."
-  ],
+  [".....", "W...B", ".^.\\.", ".....", "W...."],
   // Level 22: 5x5
-  [
-    ".....",
-    ".B.B.",
-    "..^..",
-    ".W.W.",
-    "....."
-  ],
+  [".....", ".B.B.", "..^..", ".W.W.", "....."],
   // Level 23: 5x5
-  [
-    "W....",
-    "...B.",
-    "W.^..",
-    ".W.\\.",
-    "....."
-  ],
+  ["W....", "...B.", "W.^..", ".W.\\.", "....."],
   // Level 24: 5x5
-  [
-    ".....",
-    ".B.B.",
-    ".W^W.",
-    "..W..",
-    "....."
-  ],
+  [".....", ".B.B.", ".W^W.", "..W..", "....."],
   // Level 25: 5x5
-  [
-    ".....",
-    "./.B.",
-    "..^..",
-    ".W.W.",
-    "..W.."
-  ],
+  [".....", "./.B.", "..^..", ".W.W.", "..W.."],
   // Level 26: 5x5
-  [
-    ".....",
-    ".B.B.",
-    "W.v.W",
-    "W...W",
-    "....."
-  ],
+  [".....", ".B.B.", "W.v.W", "W...W", "....."],
   // Level 27: 5x5
-  [
-    ".B.B.",
-    ".....",
-    ".W^W.",
-    ".....",
-    "..B.."
-  ],
+  [".B.B.", ".....", ".W^W.", ".....", "..B.."],
   // Level 28: 5x5
-  [
-    ".....",
-    ".B./B",
-    "W.^..",
-    ".W.W.",
-    "....."
-  ],
+  [".....", ".B./B", "W.^..", ".W.W.", "....."],
   // Level 29: 5x5
-  [
-    "..W..",
-    ".WBW.",
-    "W.v.W",
-    ".W.W.",
-    "....."
-  ],
+  ["..W..", ".WBW.", "W.v.W", ".W.W.", "....."],
   // Level 30: 5x5
-  [
-    "B...B",
-    ".W.W.",
-    "..^..",
-    ".W.W.",
-    "B...W"
-  ],
+  ["B...B", ".W.W.", "..^..", ".W.W.", "B...W"],
   // Level 31: 6x6
-  [
-    "......",
-    ".B..B.",
-    "..W/..",
-    "..W^..",
-    "W..B..",
-    "......"
-  ],
+  ["......", ".B..B.", "..W/..", "..W^..", "W..B..", "......"],
   // Level 32: 6x6
-  [
-    "......",
-    "B.WW.B",
-    "..\\...",
-    "...>..",
-    "B....B",
-    "......"
-  ],
+  ["......", "B.WW.B", "..\\...", "...>..", "B....B", "......"],
   // Level 33: 5x5, Ice intro
-  [
-    ".....",
-    ".B.B.",
-    "I.^.I",
-    "W.W.W",
-    "..B.."
-  ],
+  [".....", ".B.B.", "I.^.I", "W.W.W", "..B.."],
   // Level 34: 6x6
-  [
-    "B....B",
-    ".WWW..",
-    ".W>...",
-    ".W..W.",
-    "B....B",
-    "......"
-  ],
+  ["B....B", ".WWW..", ".W>...", ".W..W.", "B....B", "......"],
   // Level 35: 6x6
-  [
-    "......",
-    ".B..B.",
-    ".WWWW.",
-    "I.<..I",
-    "W.B..W",
-    "......"
-  ],
+  ["......", ".B..B.", ".WWWW.", "I.<..I", "W.B..W", "......"],
   // Level 36: 6x6
-  [
-    "B....B",
-    ".W..W.",
-    "..B...",
-    ".W..W.",
-    "B.v..B",
-    "......"
-  ],
+  ["B....B", ".W..W.", "..B...", ".W..W.", "B.v..B", "......"],
   // Level 37: 6x6
-  [
-    "......",
-    ".WWWW.",
-    ".Wv.W.",
-    "B...B.",
-    ".//...",
-    "B....B"
-  ],
+  ["......", ".WWWW.", ".Wv.W.", "B...B.", ".//...", "B....B"],
   // Level 38: 6x6
-  [
-    "......",
-    "I....I",
-    "BWW..B",
-    "BW>...",
-    "......",
-    "..I..."
-  ],
+  ["......", "I....I", "BWW..B", "BW>...", "......", "..I..."],
   // Level 39: 6x6
-  [
-    "B....B",
-    ".WWWW.",
-    "B.\\...",
-    ".WvW..",
-    "B....B",
-    "......"
-  ],
+  ["B....B", ".WWWW.", "B.\\...", ".WvW..", "B....B", "......"],
 
   // Level 40: 6x6, 2-bounce turn (/ then \)
-  [
-    "......",
-    "...\\..",
-    ".>./..",
-    "......",
-    "......",
-    "......"
-  ],
+  ["......", "...\\..", ".>./..", "......", "......", "......"],
   // Level 41: 6x6, 3-bounce spiral (/ \ /)
-  [
-    "......",
-    "../.\\.",
-    "......",
-    "......",
-    ">.../.",
-    "......"
-  ],
+  ["......", "../.\\.", "......", "......", ">.../.", "......"],
   // Level 42: 6x6, 4-bounce spiral (/ \ / \)
-  [
-    "./...\\",
-    "......",
-    "......",
-    ".\\....",
-    "......",
-    ">....."
-  ],
+  ["./...\\", "......", "......", ".\\....", "......", ">....."],
   // Level 43: 6x6, two independent multi-bounce arrows
-  [
-    ">../..",
-    "../...",
-    "......",
-    "......",
-    "......",
-    "..\\..<"
-  ],
+  [">../..", "../...", "......", "......", "......", "..\\..<"],
   // Level 44: 6x6, sequencing puzzle - must clear ^ before < can pass
-  [
-    "......",
-    "......",
-    ".^..<.",
-    "......",
-    "......",
-    "......"
-  ],
+  ["......", "......", ".^..<.", "......", "......", "......"],
   // Level 45: 6x6, wall forces an early bounce before a dead end
-  [
-    "\\.....",
-    "......",
-    "......",
-    ">/W...",
-    "......",
-    "......"
-  ],
+  ["\\.....", "......", "......", ">/W...", "......", "......"],
   // Level 46: 6x6, 3-bounce route with a decoy bomb near the path
-  [
-    "......",
-    "./..\\.",
-    "..B...",
-    "......",
-    ">.../.",
-    "......"
-  ],
+  ["......", "./..\\.", "..B...", "......", ">.../.", "......"],
   // Level 47: 6x6, two arrows each needing multi-bounce routes
-  [
-    "..\\...",
-    "......",
-    ">./...",
-    "..../.",
-    "......",
-    "...\\.<"
-  ],
+  ["..\\...", "......", ">./...", "..../.", "......", "...\\.<"],
   // Level 48: 6x6, 4-bounce spiral with a pass-through ice tile on the path
-  [
-    "./...\\",
-    "......",
-    "......",
-    ".....I",
-    ".\\....",
-    ">..../"
-  ],
+  ["./...\\", "......", "......", ".....I", ".\\....", ">..../"],
   // Level 49: 6x6, three arrows, layered multi-bounce + straight shot
-  [
-    ">.../.",
-    "......",
-    "./....",
-    "...v..",
-    "......",
-    ".\\...<"
-  ],
+  [">.../.", "......", "./....", "...v..", "......", ".\\...<"],
   // Level 50: 6x6 "The Gauntlet" - single arrow, 5-bounce spiral, hardest level
-  [
-    "./...\\",
-    "......",
-    "......",
-    "......",
-    ".\\./..",
-    ">..../"
-  ],
+  ["./...\\", "......", "......", "......", ".\\./..", ">..../"],
 
   // ═══════════════════════════════════════════════════════════════════
   // HARD LEVELS 51–100  (verified solvable, very challenging)
@@ -433,7 +144,7 @@ const RAW_LEVELS: string[][] = [
         seed = (seed * 9301 + 49297) % 233280;
         return seed / 233280;
       };
-      const size = i >= 81 ? 9 : (i >= 61 ? 8 : 7);
+      const size = i >= 81 ? 9 : i >= 61 ? 8 : 7;
       const level: string[] = [];
       for (let r = 0; r < size; r++) {
         let row = "";
@@ -442,10 +153,17 @@ const RAW_LEVELS: string[][] = [
             row += rand() > 0.85 ? "W" : ".";
           } else {
             const val = rand();
-            if (val < 0.02) row += "W"; else if (val < 0.04) row += "B"; else if (val < 0.06) row += "O";
-            else if (val < 0.16) row += "/"; else if (val < 0.26) row += "\\"; else if (val < 0.30) row += "I";
-            else if (val < 0.31) row += "U"; else if (val < 0.32) row += "D"; else if (val < 0.33) row += "L";
-            else if (val < 0.34) row += "R"; else row += ".";
+            if (val < 0.02) row += "W";
+            else if (val < 0.04) row += "B";
+            else if (val < 0.06) row += "O";
+            else if (val < 0.16) row += "/";
+            else if (val < 0.26) row += "\\";
+            else if (val < 0.3) row += "I";
+            else if (val < 0.31) row += "U";
+            else if (val < 0.32) row += "D";
+            else if (val < 0.33) row += "L";
+            else if (val < 0.34) row += "R";
+            else row += ".";
           }
         }
         level.push(row);
@@ -1112,7 +830,7 @@ function seedRandom(seed: number) {
   return function () {
     seed = (seed * 9301 + 49297) % 233280;
     return seed / 233280;
-  }
+  };
 }
 
 export function getStaticLevel(levelIdx: number): LevelData {
@@ -1128,23 +846,23 @@ export function getStaticLevel(levelIdx: number): LevelData {
   for (let r = 0; r < gridSize; r++) {
     for (let c = 0; c < gridSize; c++) {
       const char = layout[r][c];
-      if (char === '.') continue;
+      if (char === ".") continue;
 
-      if (char === '^') arrows.push({ id: arrowId++, row: r, col: c, dir: "up" });
-      else if (char === 'v') arrows.push({ id: arrowId++, row: r, col: c, dir: "down" });
-      else if (char === '<') arrows.push({ id: arrowId++, row: r, col: c, dir: "left" });
-      else if (char === '>') arrows.push({ id: arrowId++, row: r, col: c, dir: "right" });
-
-      else if (char === 'W') obstacles.push({ id: obsId++, row: r, col: c, type: "wall" });
-      else if (char === 'B') obstacles.push({ id: obsId++, row: r, col: c, type: "bomb" });
-      else if (char === '/') obstacles.push({ id: obsId++, row: r, col: c, type: "mirror-slash" });
-      else if (char === '\\') obstacles.push({ id: obsId++, row: r, col: c, type: "mirror-backslash" });
-      else if (char === 'I') obstacles.push({ id: obsId++, row: r, col: c, type: "ice" });
-      else if (char === 'U') obstacles.push({ id: obsId++, row: r, col: c, type: "gate-up" });
-      else if (char === 'D') obstacles.push({ id: obsId++, row: r, col: c, type: "gate-down" });
-      else if (char === 'L') obstacles.push({ id: obsId++, row: r, col: c, type: "gate-left" });
-      else if (char === 'R') obstacles.push({ id: obsId++, row: r, col: c, type: "gate-right" });
-      else if (char === 'O') obstacles.push({ id: obsId++, row: r, col: c, type: "rotator" });
+      if (char === "^") arrows.push({ id: arrowId++, row: r, col: c, dir: "up" });
+      else if (char === "v") arrows.push({ id: arrowId++, row: r, col: c, dir: "down" });
+      else if (char === "<") arrows.push({ id: arrowId++, row: r, col: c, dir: "left" });
+      else if (char === ">") arrows.push({ id: arrowId++, row: r, col: c, dir: "right" });
+      else if (char === "W") obstacles.push({ id: obsId++, row: r, col: c, type: "wall" });
+      else if (char === "B") obstacles.push({ id: obsId++, row: r, col: c, type: "bomb" });
+      else if (char === "/") obstacles.push({ id: obsId++, row: r, col: c, type: "mirror-slash" });
+      else if (char === "\\")
+        obstacles.push({ id: obsId++, row: r, col: c, type: "mirror-backslash" });
+      else if (char === "I") obstacles.push({ id: obsId++, row: r, col: c, type: "ice" });
+      else if (char === "U") obstacles.push({ id: obsId++, row: r, col: c, type: "gate-up" });
+      else if (char === "D") obstacles.push({ id: obsId++, row: r, col: c, type: "gate-down" });
+      else if (char === "L") obstacles.push({ id: obsId++, row: r, col: c, type: "gate-left" });
+      else if (char === "R") obstacles.push({ id: obsId++, row: r, col: c, type: "gate-right" });
+      else if (char === "O") obstacles.push({ id: obsId++, row: r, col: c, type: "rotator" });
       else if (/[1-9]/.test(char)) {
         arrows.push({ id: arrowId++, row: r, col: c, dir: "up", twinId: parseInt(char) });
       }
@@ -1159,11 +877,13 @@ export function getStaticLevel(levelIdx: number): LevelData {
 
   // Create a grid representation for backward path checking
   const grid: any[][] = Array.from({ length: gridSize }, () => Array(gridSize).fill(null));
-  obstacles.forEach(o => grid[o.row][o.col] = o);
-  arrows.forEach(a => grid[a.row][a.col] = { type: "arrow", dir: a.dir });
+  obstacles.forEach((o) => (grid[o.row][o.col] = o));
+  arrows.forEach((a) => (grid[a.row][a.col] = { type: "arrow", dir: a.dir }));
 
   function isPathClear(r: number, c: number, d: Dir): boolean {
-    let currR = r, currC = c, currD = d;
+    let currR = r,
+      currC = c,
+      currD = d;
     let steps = 0;
     while (steps < 100) {
       if (currD === "up") currR--;
@@ -1190,8 +910,9 @@ export function getStaticLevel(levelIdx: number): LevelData {
         else if (cell.type === "gate-left" && currD !== "left") return false;
         else if (cell.type === "gate-right" && currD !== "right") return false;
         // simplistic ice/rotator for backwards gen
-        else if (cell.type === "ice") { /* pass through */ }
-        else if (cell.type === "rotator") return false;
+        else if (cell.type === "ice") {
+          /* pass through */
+        } else if (cell.type === "rotator") return false;
         else {
           return false;
         }
@@ -1208,7 +929,7 @@ export function getStaticLevel(levelIdx: number): LevelData {
     const c = Math.floor(random() * gridSize);
     if (grid[r][c] !== null) continue;
 
-    const hasArr = filledArrows.some(a => a.row === r && a.col === c);
+    const hasArr = filledArrows.some((a) => a.row === r && a.col === c);
     if (!hasArr) {
       const dirs: Dir[] = ["up", "down", "left", "right"];
       dirs.sort(() => random() - 0.5);
@@ -1224,4 +945,3 @@ export function getStaticLevel(levelIdx: number): LevelData {
 
   return { gridSize, arrows: filledArrows, obstacles };
 }
-

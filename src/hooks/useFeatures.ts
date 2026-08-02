@@ -27,7 +27,7 @@ export function useFeatures() {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "app_settings", filter: "key=eq.projects_enabled" },
-        load
+        load,
       )
       .subscribe();
 

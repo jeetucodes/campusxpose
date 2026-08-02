@@ -43,8 +43,16 @@ export function useAds(placement: Placement): Ad[] {
       try {
         // Fetch timers & map settings
         const [globalTimerRes, timersMapRes] = await Promise.all([
-          supabase.from("app_settings" as any).select("value").eq("key", "ad_timer_seconds").maybeSingle(),
-          supabase.from("app_settings" as any).select("value").eq("key", "cx_ad_timers_map").maybeSingle(),
+          supabase
+            .from("app_settings" as any)
+            .select("value")
+            .eq("key", "ad_timer_seconds")
+            .maybeSingle(),
+          supabase
+            .from("app_settings" as any)
+            .select("value")
+            .eq("key", "cx_ad_timers_map")
+            .maybeSingle(),
         ]);
 
         const globalTimer = Number((globalTimerRes.data as any)?.value) || 3;
@@ -73,7 +81,7 @@ export function useAds(placement: Placement): Ad[] {
             .maybeSingle();
 
           const gamesMap: Record<string, boolean> = (gamesMapSetting as any)?.value || {};
-          const taggedGamesAds = activeAds.filter(ad => !!gamesMap[ad.id]);
+          const taggedGamesAds = activeAds.filter((ad) => !!gamesMap[ad.id]);
           const resultAds = taggedGamesAds.length > 0 ? taggedGamesAds : activeAds;
 
           if (alive) setAds(applyTimers(resultAds));
@@ -97,7 +105,7 @@ export function useAds(placement: Placement): Ad[] {
           .eq("active", true)
           .eq(COLS[placement], true)
           .order("sort_order", { ascending: true });
-        
+
         if (alive) setAds(applyTimers(((data as any[]) ?? []) as Ad[]));
       } catch (e) {
         console.warn("Error fetching ads", e);

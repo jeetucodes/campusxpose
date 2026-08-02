@@ -14,10 +14,11 @@ function HomeAdCard({ ad, active }: { ad: Ad; active: boolean }) {
     <div
       className={cn(
         "relative overflow-hidden border border-border/80 bg-card rounded-2xl transition-all duration-500 shadow-lg hover:shadow-xl",
-        active ? "opacity-100 scale-100" : "opacity-0 scale-[0.98] absolute inset-0 pointer-events-none",
+        active
+          ? "opacity-100 scale-100"
+          : "opacity-0 scale-[0.98] absolute inset-0 pointer-events-none",
       )}
     >
-
       {/* VIDEO — full width stacked layout */}
       {isVideo ? (
         <div>
@@ -106,7 +107,9 @@ function AdTextRow({ ad, showBadge }: { ad: Ad; showBadge?: boolean }) {
         )}
         <h3 className="font-display text-base font-bold leading-snug truncate">{ad.title}</h3>
         {ad.body && (
-          <p className="text-xs text-muted-foreground leading-relaxed line-clamp-1 mt-0.5">{ad.body}</p>
+          <p className="text-xs text-muted-foreground leading-relaxed line-clamp-1 mt-0.5">
+            {ad.body}
+          </p>
         )}
       </div>
       {ad.link_url && (
@@ -140,7 +143,9 @@ export function HomeAds() {
 
   useEffect(() => {
     startTimer();
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
   }, [ads.length]);
 
   const go = (dir: 1 | -1) => {
@@ -168,10 +173,7 @@ export function HomeAds() {
         ) : (
           <div className="relative">
             {ads.map((ad, i) => (
-              <div
-                key={ad.id}
-                className={i === idx ? "relative z-10" : "absolute inset-0 z-0"}
-              >
+              <div key={ad.id} className={i === idx ? "relative z-10" : "absolute inset-0 z-0"}>
                 <HomeAdCard ad={ad} active={i === idx} />
               </div>
             ))}
@@ -208,7 +210,10 @@ export function HomeAds() {
             <button
               key={i}
               type="button"
-              onClick={() => { setIdx(i); startTimer(); }}
+              onClick={() => {
+                setIdx(i);
+                startTimer();
+              }}
               aria-label={`Ad ${i + 1}`}
               className={cn(
                 "h-1.5 rounded-full border border-ink/40 transition-all duration-300",

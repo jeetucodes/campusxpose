@@ -9,7 +9,7 @@ export const Route = createFileRoute("/api/send-push")({
         if (auth !== process.env.PUSH_DISPATCH_TOKEN) {
           return new Response("Unauthorized", { status: 401 });
         }
-        
+
         let body;
         try {
           body = await request.json();
@@ -21,7 +21,7 @@ export const Route = createFileRoute("/api/send-push")({
         const supabaseAdmin = createClient(
           process.env.SUPABASE_URL!,
           process.env.SUPABASE_SERVICE_ROLE_KEY!,
-          { auth: { persistSession: false } }
+          { auth: { persistSession: false } },
         );
 
         let query = supabaseAdmin.from("push_subscriptions").select("id, endpoint, p256dh, auth");
@@ -36,21 +36,21 @@ export const Route = createFileRoute("/api/send-push")({
 
         let sent = 0;
         const stale: string[] = [];
-        
+
         const { sendPushMessage } = await import("@/lib/push.server");
 
         await Promise.all(
           subs.map(async (s) => {
             const success = await sendPushMessage(
               { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
-              body.payload
+              body.payload,
             );
             if (success) {
               sent++;
             } else {
               stale.push(s.id);
             }
-          })
+          }),
         );
 
         if (stale.length > 0) {

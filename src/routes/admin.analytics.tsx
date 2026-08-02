@@ -7,7 +7,11 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/analytics")({
   head: () => ({ meta: [{ title: "Admin · Analytics" }, { name: "robots", content: "noindex" }] }),
-  component: () => <AdminShell><Analytics /></AdminShell>,
+  component: () => (
+    <AdminShell>
+      <Analytics />
+    </AdminShell>
+  ),
 });
 
 function Analytics() {
@@ -19,7 +23,11 @@ function Analytics() {
         supabase.from("incidents").select("*"),
         supabase.from("posts").select("anonymous_user_hash"),
       ]);
-      return { colleges: colleges.data ?? [], incidents: incidents.data ?? [], posts: posts.data ?? [] };
+      return {
+        colleges: colleges.data ?? [],
+        incidents: incidents.data ?? [],
+        posts: posts.data ?? [],
+      };
     },
   });
   const d = q.data;
@@ -29,7 +37,9 @@ function Analytics() {
   const totalFine = d.incidents.reduce((s, i) => s + (i.total_amount ?? 0), 0);
   const resolved = d.incidents.filter((i) => i.status === "resolved").length;
   const resolutionRate = d.incidents.length ? Math.round((resolved / d.incidents.length) * 100) : 0;
-  const mostReported = [...d.colleges].sort((a, b) => (b.incident_count ?? 0) - (a.incident_count ?? 0))[0];
+  const mostReported = [...d.colleges].sort(
+    (a, b) => (b.incident_count ?? 0) - (a.incident_count ?? 0),
+  )[0];
 
   const cities = Array.from(new Set(d.colleges.map((c) => c.city))).map((city) => {
     const cols = d.colleges.filter((c) => c.city === city);
@@ -60,7 +70,14 @@ function Analytics() {
         <h2 className="mb-3 font-semibold">City-wise Breakdown</h2>
         <div className="overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-sm">
-            <thead className="bg-surface-2 text-left text-muted-foreground"><tr><th className="p-3">City</th><th className="p-3">Colleges</th><th className="p-3">Incidents</th><th className="p-3">Avg Rating</th></tr></thead>
+            <thead className="bg-surface-2 text-left text-muted-foreground">
+              <tr>
+                <th className="p-3">City</th>
+                <th className="p-3">Colleges</th>
+                <th className="p-3">Incidents</th>
+                <th className="p-3">Avg Rating</th>
+              </tr>
+            </thead>
             <tbody>
               {cities.map((c) => (
                 <tr key={c.city} className="border-t border-border">

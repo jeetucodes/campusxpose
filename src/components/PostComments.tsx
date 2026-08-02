@@ -33,7 +33,6 @@ export type Comment = {
 
 type Node = Comment & { children: Node[] };
 
-
 function buildTree(comments: Comment[]): Node[] {
   const map = new Map<string, Node>();
   comments.forEach((c) => map.set(c.id, { ...c, children: [] }));
@@ -53,7 +52,13 @@ function buildTree(comments: Comment[]): Node[] {
   return roots;
 }
 
-export function PostComments({ postId, onCount }: { postId: string; onCount?: (n: number) => void }) {
+export function PostComments({
+  postId,
+  onCount,
+}: {
+  postId: string;
+  onCount?: (n: number) => void;
+}) {
   const { hashedId, username } = useIdentity();
   const adminToken = useAdmin((s) => s.token);
   const addComment = useServerFn(submitComment);
@@ -71,26 +76,39 @@ export function PostComments({ postId, onCount }: { postId: string; onCount?: (n
       .select("*")
       .eq("post_id", postId)
       .order("created_at", { ascending: true })
-      .then(({ data }) => { if (active) setComments((data ?? []) as Comment[]); });
+      .then(({ data }) => {
+        if (active) setComments((data ?? []) as Comment[]);
+      });
 
     const ch = supabase
       .channel(`comments-${postId}`)
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "post_comments", filter: `post_id=eq.${postId}` },
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "post_comments",
+          filter: `post_id=eq.${postId}`,
+        },
         (p) => {
           const incoming = p.new as Comment;
-          setComments((prev) => (prev.some((c) => c.id === incoming.id) ? prev : [...prev, incoming]));
+          setComments((prev) =>
+            prev.some((c) => c.id === incoming.id) ? prev : [...prev, incoming],
+          );
         },
       )
       .subscribe();
-    return () => { active = false; supabase.removeChannel(ch); };
+    return () => {
+      active = false;
+      supabase.removeChannel(ch);
+    };
   }, [postId]);
 
-  useEffect(() => { onCount?.(comments.length); }, [comments.length, onCount]);
+  useEffect(() => {
+    onCount?.(comments.length);
+  }, [comments.length, onCount]);
 
   const tree = useMemo(() => buildTree(comments), [comments]);
-
 
   const send = async () => {
     if (!text.trim() || !hashedId || !username) return;
@@ -116,7 +134,8 @@ export function PostComments({ postId, onCount }: { postId: string; onCount?: (n
     const isMine = !!hashedId && c.anonymous_user_hash === hashedId;
     const asAdmin = !isMine && !!adminToken;
     if (!isMine && !asAdmin) return;
-    if (!window.confirm(asAdmin ? "Admin: ye comment delete karein?" : "Ye comment delete karein?")) return;
+    if (!window.confirm(asAdmin ? "Admin: ye comment delete karein?" : "Ye comment delete karein?"))
+      return;
     const prev = comments;
     try {
       const res = asAdmin
@@ -140,20 +159,30 @@ export function PostComments({ postId, onCount }: { postId: string; onCount?: (n
       {tree.length > 0 && (
         <div className="space-y-3">
           {tree.map((node) => (
-            <CommentNode key={node.id} node={node} depth={0} onReply={setReplyTo} onDelete={handleDelete} myHash={hashedId} isAdmin={!!adminToken} />
+            <CommentNode
+              key={node.id}
+              node={node}
+              depth={0}
+              onReply={setReplyTo}
+              onDelete={handleDelete}
+              myHash={hashedId}
+              isAdmin={!!adminToken}
+            />
           ))}
         </div>
       )}
-
 
       <div className="mt-3">
         {replyTo && (
           <div className="mb-2 flex items-center gap-2 rounded-lg border border-border bg-surface-2/60 px-3 py-1.5 text-xs">
             <CornerDownRight className="h-3.5 w-3.5 text-primary" />
             <span className="min-w-0 flex-1 truncate">
-              <span className="font-semibold text-primary">{replyTo.username}</span> ko reply: {replyTo.content}
+              <span className="font-semibold text-primary">{replyTo.username}</span> ko reply:{" "}
+              {replyTo.content}
             </span>
-            <button onClick={() => setReplyTo(null)} className="shrink-0 text-muted-foreground">✕</button>
+            <button onClick={() => setReplyTo(null)} className="shrink-0 text-muted-foreground">
+              ✕
+            </button>
           </div>
         )}
         <div className="flex items-center gap-2 rounded-full border border-border bg-surface-2 px-2 py-1 transition-colors focus-within:border-primary/50">
@@ -165,7 +194,12 @@ export function PostComments({ postId, onCount }: { postId: string; onCount?: (n
             disabled={!hashedId || busy}
             className="h-8 flex-1 border-0 bg-transparent px-2 text-sm shadow-none focus-visible:ring-0"
           />
-          <Button onClick={send} disabled={!text.trim() || busy} size="icon" className="h-8 w-8 shrink-0 rounded-full">
+          <Button
+            onClick={send}
+            disabled={!text.trim() || busy}
+            size="icon"
+            className="h-8 w-8 shrink-0 rounded-full"
+          >
             <Send className="h-3.5 w-3.5" />
           </Button>
         </div>
@@ -174,13 +208,26 @@ export function PostComments({ postId, onCount }: { postId: string; onCount?: (n
   );
 }
 
-function CommentNode({ node, depth, onReply, onDelete, myHash, isAdmin }: { node: Node; depth: number; onReply: (c: Comment) => void; onDelete: (c: Comment) => void; myHash: string | null; isAdmin: boolean }) {
+function CommentNode({
+  node,
+  depth,
+  onReply,
+  onDelete,
+  myHash,
+  isAdmin,
+}: {
+  node: Node;
+  depth: number;
+  onReply: (c: Comment) => void;
+  onDelete: (c: Comment) => void;
+  myHash: string | null;
+  isAdmin: boolean;
+}) {
   const isReply = depth > 0;
   const hasChildren = node.children.length > 0;
   const verified = useVerifiedUsernames();
   const isMine = !!myHash && node.anonymous_user_hash === myHash;
   const canDelete = isMine || isAdmin;
-
 
   return (
     <div className={cn("animate-fade-in", isReply && "relative")}>
@@ -201,25 +248,38 @@ function CommentNode({ node, depth, onReply, onDelete, myHash, isAdmin }: { node
         <div className="min-w-0 flex-1 pb-1">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <div className="flex flex-wrap items-center gap-1.5 min-w-0">
-              <span className="inline-flex items-center gap-1 font-medium text-foreground">{node.username}{node.username && verified.has(node.username) && <VerifiedBadge className="h-3.5 w-3.5" />}</span>
+              <span className="inline-flex items-center gap-1 font-medium text-foreground">
+                {node.username}
+                {node.username && verified.has(node.username) && (
+                  <VerifiedBadge className="h-3.5 w-3.5" />
+                )}
+              </span>
               <span>· {timeAgo(node.created_at)}</span>
             </div>
             {canDelete && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="ml-auto shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground" aria-label="Comment options">
+                  <button
+                    className="ml-auto shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
+                    aria-label="Comment options"
+                  >
                     <MoreVertical className="h-4 w-4" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => onDelete(node)}>
+                  <DropdownMenuItem
+                    className="text-destructive focus:text-destructive"
+                    onClick={() => onDelete(node)}
+                  >
                     <Trash2 className="mr-2 h-4 w-4" /> Delete
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
           </div>
-          <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-relaxed">{node.content}</p>
+          <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-relaxed">
+            {node.content}
+          </p>
 
           <button
             onClick={() => onReply(node)}
@@ -239,7 +299,15 @@ function CommentNode({ node, depth, onReply, onDelete, myHash, isAdmin }: { node
             style={{ animation: "thread-draw 0.5s ease-out forwards" }}
           />
           {node.children.map((child) => (
-            <CommentNode key={child.id} node={child} depth={depth + 1} onReply={onReply} onDelete={onDelete} myHash={myHash} isAdmin={isAdmin} />
+            <CommentNode
+              key={child.id}
+              node={child}
+              depth={depth + 1}
+              onReply={onReply}
+              onDelete={onDelete}
+              myHash={myHash}
+              isAdmin={isAdmin}
+            />
           ))}
         </div>
       )}

@@ -80,14 +80,22 @@ export function ForgetMeDialog({
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-sm font-semibold">Suggestions</span>
-            <Button variant="ghost" size="sm" className="gap-1.5" onClick={shuffle} disabled={loading}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-1.5"
+              onClick={shuffle}
+              disabled={loading}
+            >
               <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} /> Shuffle
             </Button>
           </div>
 
           <div className="grid gap-2">
             {loading && suggestions.length === 0 && (
-              <p className="py-4 text-center text-sm text-muted-foreground">Finding free usernames…</p>
+              <p className="py-4 text-center text-sm text-muted-foreground">
+                Finding free usernames…
+              </p>
             )}
             {suggestions.map((name) => {
               const active = selected === name;
@@ -98,7 +106,9 @@ export function ForgetMeDialog({
                   onClick={() => setSelected(name)}
                   className={cn(
                     "flex items-center gap-2 border-2 px-3 py-2 text-left text-sm transition-colors",
-                    active ? "border-accent bg-accent/10" : "border-border bg-white hover:bg-surface-2",
+                    active
+                      ? "border-accent bg-accent/10"
+                      : "border-border bg-white hover:bg-surface-2",
                   )}
                   style={{ borderRadius: "14px 5px 16px 5px / 5px 16px 5px 14px" }}
                 >
@@ -109,7 +119,6 @@ export function ForgetMeDialog({
               );
             })}
           </div>
-
 
           <div className="flex items-center gap-2 border border-dashed border-success bg-success/10 px-3 py-2 text-xs text-success">
             <Shield className="h-4 w-4 shrink-0" />

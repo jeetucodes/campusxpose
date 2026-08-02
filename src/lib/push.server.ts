@@ -1,6 +1,8 @@
 import webpush from "web-push";
 
-const VAPID_PUBLIC = process.env.VAPID_PUBLIC_KEY ?? "BPWZpddG52IpAo7c9Dnhd2qPYp83whDqPWrTWFhIxO_-xNbBtxlyW4mBVPrRsERoAzWRY1biAnYukpcM5TTz4_U";
+const VAPID_PUBLIC =
+  process.env.VAPID_PUBLIC_KEY ??
+  "BPWZpddG52IpAo7c9Dnhd2qPYp83whDqPWrTWFhIxO_-xNbBtxlyW4mBVPrRsERoAzWRY1biAnYukpcM5TTz4_U";
 const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY ?? "";
 const SUBJECT = "mailto:campusxpose@gmail.com";
 
@@ -10,7 +12,7 @@ if (VAPID_PUBLIC && VAPID_PRIVATE) {
 
 export async function sendPushMessage(
   subscription: { endpoint: string; keys: { p256dh: string; auth: string } },
-  payload: { title: string; body: string; url?: string }
+  payload: { title: string; body: string; url?: string },
 ) {
   if (!VAPID_PRIVATE) {
     console.warn("VAPID_PRIVATE_KEY is missing. Push notifications will not be sent.");
@@ -23,7 +25,7 @@ export async function sendPushMessage(
         endpoint: subscription.endpoint,
         keys: { p256dh: subscription.keys.p256dh, auth: subscription.keys.auth },
       },
-      JSON.stringify(payload)
+      JSON.stringify(payload),
     );
     return true;
   } catch (error: any) {

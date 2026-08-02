@@ -65,7 +65,11 @@ async function deriveKey(passphrase: string, salt: Uint8Array<ArrayBuffer>): Pro
  *
  * Old format (CXv2) is still accepted for decoding (backward-compat).
  */
-export async function generateRecoveryCode(uid: string, username: string, passphrase: string): Promise<string> {
+export async function generateRecoveryCode(
+  uid: string,
+  username: string,
+  passphrase: string,
+): Promise<string> {
   if (!passphrase || passphrase.trim().length < 8) {
     throw new Error("Passphrase must be at least 8 characters");
   }
@@ -94,7 +98,10 @@ export interface DecodedRecovery {
  *   - CXv2 codes (legacy, uid-only): username will be null.
  * Throws on wrong passphrase, tampered code, or invalid format.
  */
-export async function decodeRecoveryCode(code: string, passphrase: string): Promise<DecodedRecovery> {
+export async function decodeRecoveryCode(
+  code: string,
+  passphrase: string,
+): Promise<DecodedRecovery> {
   const parts = code.trim().split(".");
   const prefix = parts[0];
 
@@ -106,7 +113,9 @@ export async function decodeRecoveryCode(code: string, passphrase: string): Prom
     throw new Error("Passphrase must be at least 8 characters");
   }
 
-  let salt: Uint8Array<ArrayBuffer>, iv: Uint8Array<ArrayBuffer>, ciphertext: Uint8Array<ArrayBuffer>;
+  let salt: Uint8Array<ArrayBuffer>,
+    iv: Uint8Array<ArrayBuffer>,
+    ciphertext: Uint8Array<ArrayBuffer>;
   try {
     salt = fromBase64Url(parts[1]) as Uint8Array<ArrayBuffer>;
     iv = fromBase64Url(parts[2]) as Uint8Array<ArrayBuffer>;
@@ -140,7 +149,6 @@ export async function decodeRecoveryCode(code: string, passphrase: string): Prom
   // CXv2 legacy: plaintext was just the uid string
   return { uid: plaintext, username: null };
 }
-
 
 // ─── Passphrase strength helper ───────────────────────────────────────────────
 

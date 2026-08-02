@@ -53,7 +53,12 @@ export function useReactions(messageType: MessageType, hashedId: string | null) 
       .channel(`reactions-${messageType}`)
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "message_reactions", filter: `message_type=eq.${messageType}` },
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "message_reactions",
+          filter: `message_type=eq.${messageType}`,
+        },
         (p) => {
           const r = p.new as ReactionRow;
           setRows((prev) => {
@@ -70,7 +75,6 @@ export function useReactions(messageType: MessageType, hashedId: string | null) 
             return cleaned.some((x) => x.id === r.id) ? cleaned : [...cleaned, r];
           });
         },
-
       )
       .on(
         "postgres_changes",
@@ -87,7 +91,6 @@ export function useReactions(messageType: MessageType, hashedId: string | null) 
       supabase.removeChannel(ch);
     };
   }, [messageType, isDirect, refreshDirect]);
-
 
   const byMessage = useMemo(() => {
     const map = new Map<string, ReactionSummary[]>();
@@ -115,7 +118,8 @@ export function useReactions(messageType: MessageType, hashedId: string | null) 
       // Optimistic update — one reaction per user per message.
       setRows((prev) => {
         const sameEmoji = prev.find(
-          (r) => r.message_id === messageId && r.emoji === emoji && r.anonymous_user_hash === hashedId,
+          (r) =>
+            r.message_id === messageId && r.emoji === emoji && r.anonymous_user_hash === hashedId,
         );
         // Toggling the same emoji removes it.
         if (sameEmoji) return prev.filter((r) => r.id !== sameEmoji.id);
@@ -144,7 +148,6 @@ export function useReactions(messageType: MessageType, hashedId: string | null) 
       }
     },
     [hashedId, messageType, isDirect, refreshDirect],
-
   );
 
   return { byMessage, toggle };

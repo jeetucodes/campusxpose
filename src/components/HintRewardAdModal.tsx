@@ -35,7 +35,8 @@ export default function HintRewardAdModal({
     kind: "banner",
     body: "Explore verified campus chats, live student events, and arcade leaderboards across your university!",
     link_url: "/",
-    media_url: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=900&auto=format&fit=crop&q=80",
+    media_url:
+      "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=900&auto=format&fit=crop&q=80",
     embed_url: null,
     cta_label: "Explore CampusXpose",
     show_home: false,
@@ -60,7 +61,7 @@ export default function HintRewardAdModal({
         setActiveAdIndex(Math.max(0, globalAdOpenCount - 1) % gameAds.length);
       }
       setCanClose(false);
-      setAdKey(k => k + 1);
+      setAdKey((k) => k + 1);
     }
     if (!isOpen) {
       setCanClose(false);
@@ -76,7 +77,7 @@ export default function HintRewardAdModal({
     setCanClose(false);
 
     const timer = setInterval(() => {
-      setCountdown(prev => {
+      setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
           setCanClose(true);
@@ -94,7 +95,12 @@ export default function HintRewardAdModal({
   const isDirectVideo = (url: string | null) => {
     if (!url) return false;
     const lower = url.toLowerCase();
-    return lower.endsWith(".mp4") || lower.endsWith(".webm") || lower.endsWith(".ogg") || lower.endsWith(".m4v");
+    return (
+      lower.endsWith(".mp4") ||
+      lower.endsWith(".webm") ||
+      lower.endsWith(".ogg") ||
+      lower.endsWith(".m4v")
+    );
   };
 
   const getAutoPlayEmbedUrl = (url: string) => {
@@ -104,7 +110,8 @@ export default function HintRewardAdModal({
     return `${url}${sep}autoplay=1&muted=1&playsinline=1&controls=1`;
   };
 
-  const isVideoAd = currentAd.kind === "video" || isDirectVideo(currentAd.media_url) || !!currentAd.embed_url;
+  const isVideoAd =
+    currentAd.kind === "video" || isDirectVideo(currentAd.media_url) || !!currentAd.embed_url;
   const progressPct = Math.min(100, Math.max(0, ((adDuration - countdown) / adDuration) * 100));
 
   return (
@@ -122,7 +129,7 @@ export default function HintRewardAdModal({
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: "100%", opacity: 0 }}
           transition={{ type: "spring", stiffness: 340, damping: 30 }}
-          onClick={e => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
           className="w-full sm:max-w-md bg-[#fdfbf7] sm:rounded-3xl rounded-t-3xl border-2 border-[#2d2d2d] sm:shadow-[8px_8px_0px_0px_#2d2d2d] relative flex flex-col overflow-hidden text-[#2d2d2d]"
         >
           {/* Drag Handle (mobile) */}
@@ -171,7 +178,10 @@ export default function HintRewardAdModal({
                   Watch Ad for +3 Lives 🎬
                 </motion.button>
                 <button
-                  onClick={() => { if (onGameOverConfirm) onGameOverConfirm(); onClose(); }}
+                  onClick={() => {
+                    if (onGameOverConfirm) onGameOverConfirm();
+                    onClose();
+                  }}
                   className="w-full bg-[#f5f1e8] hover:bg-[#e5e0d8] text-[#6b6660] hover:text-[#2d2d2d] font-display font-bold py-2.5 rounded-2xl border border-[#2d2d2d]/40 text-sm transition-colors cursor-pointer"
                 >
                   Game Over — End Game 💀
@@ -232,35 +242,52 @@ export default function HintRewardAdModal({
                     <div className="w-full aspect-video bg-black flex items-center justify-center">
                       <video
                         src={currentAd.media_url!}
-                        autoPlay muted loop playsInline controls
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        controls
                         className="w-full h-full object-contain"
                       />
                     </div>
                   ) : currentAd.media_url ? (
-                    <div className="w-full relative flex items-center justify-center" style={{ minHeight: 210 }}>
+                    <div
+                      className="w-full relative flex items-center justify-center"
+                      style={{ minHeight: 210 }}
+                    >
                       <img
-                        src={currentAd.media_url} alt=""
+                        src={currentAd.media_url}
+                        alt=""
                         aria-hidden
                         className="absolute inset-0 w-full h-full object-cover blur-lg opacity-35 scale-110 pointer-events-none"
                       />
                       <img
-                        src={currentAd.media_url} alt={currentAd.title}
+                        src={currentAd.media_url}
+                        alt={currentAd.title}
                         className="relative z-10 max-w-full max-h-[260px] object-contain"
                       />
                     </div>
                   ) : (
                     <div className="py-12 flex flex-col items-center justify-center space-y-1">
                       <span className="text-4xl animate-bounce">⚡</span>
-                      <p className="text-xs text-white font-display font-bold uppercase tracking-wider">Campus Partner</p>
+                      <p className="text-xs text-white font-display font-bold uppercase tracking-wider">
+                        Campus Partner
+                      </p>
                     </div>
                   )}
 
                   {/* Ad type badge */}
                   <div className="absolute bottom-3 left-3 z-20">
                     <span className="bg-[#2d2d2d]/80 backdrop-blur-sm text-[#fff9c4] text-[10px] font-display font-bold uppercase tracking-wider px-2.5 py-1 rounded-full flex items-center gap-1">
-                      {isVideoAd
-                        ? <><Video className="h-3 w-3 animate-pulse" /> Video Ad</>
-                        : <><Sparkles className="h-3 w-3" /> Sponsored</>}
+                      {isVideoAd ? (
+                        <>
+                          <Video className="h-3 w-3 animate-pulse" /> Video Ad
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="h-3 w-3" /> Sponsored
+                        </>
+                      )}
                     </span>
                   </div>
                 </motion.div>
@@ -284,7 +311,9 @@ export default function HintRewardAdModal({
                   )}
                 </div>
                 {currentAd.body && (
-                  <p className="text-xs text-[#6b6660] font-sans leading-relaxed line-clamp-2">{currentAd.body}</p>
+                  <p className="text-xs text-[#6b6660] font-sans leading-relaxed line-clamp-2">
+                    {currentAd.body}
+                  </p>
                 )}
               </div>
 
@@ -292,19 +321,27 @@ export default function HintRewardAdModal({
 
               {/* Mode label */}
               <div className="px-5 pt-3 flex items-center gap-2">
-                <div className={`p-2 rounded-xl border-2 border-[#2d2d2d] shadow-[2px_2px_0px_0px_#2d2d2d] ${mode === "extra-lives" ? "bg-[#ff4d4d]" : "bg-[#fff9c4]"
-                  }`}>
-                  {mode === "extra-lives"
-                    ? <Heart className="h-4 w-4 text-white fill-white" />
-                    : <Lightbulb className="h-4 w-4 text-[#2d2d2d] fill-[#2d2d2d]" />
-                  }
+                <div
+                  className={`p-2 rounded-xl border-2 border-[#2d2d2d] shadow-[2px_2px_0px_0px_#2d2d2d] ${
+                    mode === "extra-lives" ? "bg-[#ff4d4d]" : "bg-[#fff9c4]"
+                  }`}
+                >
+                  {mode === "extra-lives" ? (
+                    <Heart className="h-4 w-4 text-white fill-white" />
+                  ) : (
+                    <Lightbulb className="h-4 w-4 text-[#2d2d2d] fill-[#2d2d2d]" />
+                  )}
                 </div>
                 <div>
                   <p className="text-[11px] font-display font-bold uppercase tracking-wider text-[#6b6660]">
-                    {mode === "extra-lives" ? "Watch Ad · Get +3 Lives" : "Watch Ad · Get Free Hint"}
+                    {mode === "extra-lives"
+                      ? "Watch Ad · Get +3 Lives"
+                      : "Watch Ad · Get Free Hint"}
                   </p>
                   <p className="text-[10px] text-[#6b6660]">
-                    {canClose ? "✨ Reward ready — claim now!" : `Wait ${countdown}s to unlock reward`}
+                    {canClose
+                      ? "✨ Reward ready — claim now!"
+                      : `Wait ${countdown}s to unlock reward`}
                   </p>
                 </div>
               </div>
@@ -330,13 +367,16 @@ export default function HintRewardAdModal({
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                     onClick={onRewardGranted}
-                    className={`w-full py-4 rounded-2xl font-display font-bold text-base border-2 border-[#2d2d2d] shadow-[4px_4px_0px_0px_#2d2d2d] flex items-center justify-center gap-2 cursor-pointer text-white transition-colors ${mode === "extra-lives"
-                      ? "bg-[#ff4d4d] hover:bg-[#e63939]"
-                      : "bg-[#3a8a4f] hover:bg-[#2e6f3e]"
-                      }`}
+                    className={`w-full py-4 rounded-2xl font-display font-bold text-base border-2 border-[#2d2d2d] shadow-[4px_4px_0px_0px_#2d2d2d] flex items-center justify-center gap-2 cursor-pointer text-white transition-colors ${
+                      mode === "extra-lives"
+                        ? "bg-[#ff4d4d] hover:bg-[#e63939]"
+                        : "bg-[#3a8a4f] hover:bg-[#2e6f3e]"
+                    }`}
                   >
                     <Gift className="h-5 w-5 fill-white animate-bounce" />
-                    {mode === "extra-lives" ? "Claim +3 Lives & Play Now 🎁" : "Claim Free Hint Now 💡"}
+                    {mode === "extra-lives"
+                      ? "Claim +3 Lives & Play Now 🎁"
+                      : "Claim Free Hint Now 💡"}
                   </motion.button>
                 ) : (
                   <button

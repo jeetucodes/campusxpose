@@ -1,5 +1,14 @@
-export async function compressImage(file: File, maxWidth = 1200, maxHeight = 1200, quality = 0.7): Promise<File> {
-  if (!file.type.startsWith("image/") || file.type === "image/gif" || file.type === "image/svg+xml") {
+export async function compressImage(
+  file: File,
+  maxWidth = 1200,
+  maxHeight = 1200,
+  quality = 0.7,
+): Promise<File> {
+  if (
+    !file.type.startsWith("image/") ||
+    file.type === "image/gif" ||
+    file.type === "image/svg+xml"
+  ) {
     return file;
   }
 
@@ -43,7 +52,7 @@ export async function compressImage(file: File, maxWidth = 1200, maxHeight = 120
             resolve(newFile);
           },
           "image/jpeg",
-          quality
+          quality,
         );
       };
       img.onerror = () => resolve(file);
@@ -56,22 +65,25 @@ export async function uploadToImgbb(file: File): Promise<string> {
   const compressedFile = await compressImage(file);
   const formData = new FormData();
   formData.append("image", compressedFile);
-  
-  const res = await fetch(`https://api.imgbb.com/1/upload?key=${import.meta.env.VITE_IMGBB_API_KEY}`, {
-    method: "POST",
-    body: formData,
-  });
-  
+
+  const res = await fetch(
+    `https://api.imgbb.com/1/upload?key=${import.meta.env.VITE_IMGBB_API_KEY}`,
+    {
+      method: "POST",
+      body: formData,
+    },
+  );
+
   let data;
   try {
     data = await res.json();
   } catch (e) {
     throw new Error(`Failed to upload image (Status: ${res.status})`);
   }
-  
+
   if (!res.ok || !data.success) {
     throw new Error(data.error?.message || `ImgBB API error: ${res.status} ${res.statusText}`);
   }
-  
+
   return data.data.url;
 }

@@ -1,9 +1,25 @@
 import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, RotateCcw, ChevronDown, Zap, Heart, X, Lightbulb, Trophy, Lock } from "lucide-react";
+import {
+  ArrowLeft,
+  RotateCcw,
+  ChevronDown,
+  Zap,
+  Heart,
+  X,
+  Lightbulb,
+  Trophy,
+  Lock,
+} from "lucide-react";
 import { toast } from "sonner";
-import { getPipeLevel, getConnections, PipeTile, PipeLevelData, TOTAL_PIPE_LEVELS } from "../data/pipe-puzzle-levels";
+import {
+  getPipeLevel,
+  getConnections,
+  PipeTile,
+  PipeLevelData,
+  TOTAL_PIPE_LEVELS,
+} from "../data/pipe-puzzle-levels";
 import { recordGameSession } from "../lib/gameAnalytics";
 import HintRewardAdModal from "@/components/HintRewardAdModal";
 import { useGameSync } from "@/hooks/useGameSync";
@@ -12,7 +28,11 @@ export const Route = createFileRoute("/games/pipe-connect")({
   head: () => ({
     meta: [
       { title: "Pipe Connect — CampusXpose Games" },
-      { name: "description", content: "Rotate wire tiles to build an electric circuit! A fun logic puzzle on CampusXpose." },
+      {
+        name: "description",
+        content:
+          "Rotate wire tiles to build an electric circuit! A fun logic puzzle on CampusXpose.",
+      },
     ],
   }),
   component: PipeConnectGame,
@@ -34,7 +54,14 @@ function StraightWire({ powered }: { powered: boolean }) {
 function ElbowWire({ powered }: { powered: boolean }) {
   return (
     <svg viewBox="0 0 60 60" className="w-full h-full">
-      <path d="M30 0 L30 30 L60 30" fill="none" stroke="#000" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M30 0 L30 30 L60 30"
+        fill="none"
+        stroke="#000"
+        strokeWidth="12"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -71,7 +98,14 @@ function DeviceIcon({ powered }: { powered: boolean }) {
   return (
     <svg viewBox="0 0 60 60" className="w-full h-full">
       <line x1="30" y1="0" x2="30" y2="30" stroke="#000" strokeWidth="12" strokeLinecap="round" />
-      <circle cx="30" cy="40" r="16" fill={powered ? "#fef08a" : "#fff"} stroke="#000" strokeWidth="6" />
+      <circle
+        cx="30"
+        cy="40"
+        r="16"
+        fill={powered ? "#fef08a" : "#fff"}
+        stroke="#000"
+        strokeWidth="6"
+      />
       {powered && <circle cx="25" cy="35" r="4" fill="#fff" />}
     </svg>
   );
@@ -92,14 +126,19 @@ function OverloadIcon({ powered }: { powered: boolean }) {
       <line x1="30" y1="0" x2="30" y2="60" stroke="#000" strokeWidth="12" strokeLinecap="round" />
       <line x1="0" y1="30" x2="60" y2="30" stroke="#000" strokeWidth="12" strokeLinecap="round" />
       <circle cx="30" cy="30" r="18" fill="#f87171" stroke="#000" strokeWidth="6" />
-      <text x="30" y="40" textAnchor="middle" fill="#000" fontSize="28" fontWeight="black">!</text>
+      <text x="30" y="40" textAnchor="middle" fill="#000" fontSize="28" fontWeight="black">
+        !
+      </text>
     </svg>
   );
 }
 
 // ─── Power Flow Logic (BFS) ──────────────────────────────────────────────────
 
-function computePoweredTiles(tiles: PipeTile[], gridSize: number): { powered: Set<string>; hitOverload: string | null } {
+function computePoweredTiles(
+  tiles: PipeTile[],
+  gridSize: number,
+): { powered: Set<string>; hitOverload: string | null } {
   const tileMap = new Map<string, PipeTile>();
   for (const t of tiles) {
     tileMap.set(`${t.row},${t.col}`, t);
@@ -128,13 +167,15 @@ function computePoweredTiles(tiles: PipeTile[], gridSize: number): { powered: Se
   while (queue.length > 0) {
     const key = queue.shift()!;
     const [rStr, cStr] = key.split(",");
-    const r = parseInt(rStr), c = parseInt(cStr);
+    const r = parseInt(rStr),
+      c = parseInt(cStr);
     const tile = tileMap.get(key)!;
     const conns = getConnections(tile.type, tile.rotation);
 
     for (const [dr, dc, sideIdx, neighborSideIdx] of DIRS) {
       if (!conns[sideIdx]) continue;
-      const nr = r + dr, nc = c + dc;
+      const nr = r + dr,
+        nc = c + dc;
       const nKey = `${nr},${nc}`;
       if (nr < 0 || nr >= gridSize || nc < 0 || nc >= gridSize) continue;
       if (powered.has(nKey)) continue;
@@ -157,9 +198,7 @@ function computePoweredTiles(tiles: PipeTile[], gridSize: number): { powered: Se
 }
 
 function checkWin(tiles: PipeTile[], powered: Set<string>): boolean {
-  return tiles
-    .filter(t => t.type === "device")
-    .every(t => powered.has(`${t.row},${t.col}`));
+  return tiles.filter((t) => t.type === "device").every((t) => powered.has(`${t.row},${t.col}`));
 }
 
 // ─── Tier Labels ─────────────────────────────────────────────────────────────
@@ -301,7 +340,7 @@ export default function PipeConnectGame() {
       if (!isNaN(parsed) && parsed >= 1) {
         const targetIdx = parsed - 1;
         setLevelIdx(targetIdx);
-        setHighestUnlocked(prev => Math.max(prev, targetIdx));
+        setHighestUnlocked((prev) => Math.max(prev, targetIdx));
         try {
           localStorage.setItem("cx_pipe_level", String(Math.max(highestUnlocked, targetIdx)));
         } catch (e) {}
@@ -323,7 +362,7 @@ export default function PipeConnectGame() {
       setOverloadAnim({ row: r, col: c });
       setTimeout(() => {
         setOverloadAnim(null);
-        setLives(prev => {
+        setLives((prev) => {
           const next = prev - 1;
           if (next <= 0) {
             setShowLivesAd(true);
@@ -344,7 +383,7 @@ export default function PipeConnectGame() {
       if (checkWin(tiles, powered)) {
         setWon(true);
         const nextLevel = levelIdx + 1;
-        setHighestUnlocked(prev => {
+        setHighestUnlocked((prev) => {
           const max = Math.max(prev, nextLevel);
           try {
             localStorage.setItem("cx_pipe_level", String(max));
@@ -357,27 +396,28 @@ export default function PipeConnectGame() {
     }
   }, [tiles, powered, won, gameOver, hitOverload, levelIdx]);
 
-  const handleTap = useCallback((tile: PipeTile) => {
-    if (won || gameOver || tile.fixed || overloadAnim) return;
-    if (!levelData) return;
-    const movesLeft = levelData.maxMoves - moves;
-    if (movesLeft <= 0) {
-      setShowLivesAd(true);
-      return;
-    }
-    if (hintedTileKey === `${tile.row},${tile.col}`) setHintedTileKey(null);
-    const key = `${tile.row},${tile.col}`;
-    setRotatingTile(key);
-    setTimeout(() => setRotatingTile(null), 250);
-    setTiles(prev =>
-      prev.map(t =>
-        t.row === tile.row && t.col === tile.col
-          ? { ...t, rotation: (t.rotation + 1) % 4 }
-          : t
-      )
-    );
-    setMoves(m => m + 1);
-  }, [won, gameOver, moves, levelData, overloadAnim, hintedTileKey]);
+  const handleTap = useCallback(
+    (tile: PipeTile) => {
+      if (won || gameOver || tile.fixed || overloadAnim) return;
+      if (!levelData) return;
+      const movesLeft = levelData.maxMoves - moves;
+      if (movesLeft <= 0) {
+        setShowLivesAd(true);
+        return;
+      }
+      if (hintedTileKey === `${tile.row},${tile.col}`) setHintedTileKey(null);
+      const key = `${tile.row},${tile.col}`;
+      setRotatingTile(key);
+      setTimeout(() => setRotatingTile(null), 250);
+      setTiles((prev) =>
+        prev.map((t) =>
+          t.row === tile.row && t.col === tile.col ? { ...t, rotation: (t.rotation + 1) % 4 } : t,
+        ),
+      );
+      setMoves((m) => m + 1);
+    },
+    [won, gameOver, moves, levelData, overloadAnim, hintedTileKey],
+  );
 
   const [showHintAd, setShowHintAd] = useState(false);
   const [showLivesAd, setShowLivesAd] = useState(false);
@@ -389,8 +429,10 @@ export default function PipeConnectGame() {
   };
 
   const claimHintAfterAd = () => {
-    setHintsLeft(h => h - 1);
-    const unsolved = tiles.filter(t => !t.fixed && t.type !== "empty" && t.rotation !== t.solvedRotation);
+    setHintsLeft((h) => h - 1);
+    const unsolved = tiles.filter(
+      (t) => !t.fixed && t.type !== "empty" && t.rotation !== t.solvedRotation,
+    );
     if (unsolved.length > 0) {
       const hint = unsolved[Math.floor(Math.random() * unsolved.length)];
       setHintedTileKey(`${hint.row},${hint.col}`);
@@ -398,20 +440,29 @@ export default function PipeConnectGame() {
     setShowHintAd(false);
   };
 
-  const nextLevel = () => setLevelIdx(i => i + 1);
+  const nextLevel = () => setLevelIdx((i) => i + 1);
   const resetLevel = () => initLevel(levelIdx);
 
   if (isGameDisabled) {
     return (
       <div className="min-h-screen bg-[#f4f4f5] flex flex-col items-center justify-center p-6 text-center">
-        <div className="bg-white border-4 border-black p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] max-w-md space-y-4" style={{ borderRadius: WOBBLY_MD }}>
+        <div
+          className="bg-white border-4 border-black p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] max-w-md space-y-4"
+          style={{ borderRadius: WOBBLY_MD }}
+        >
           <div className="text-6xl animate-bounce">🛠️</div>
-          <h2 className="font-display text-2xl font-black text-black uppercase">Under Maintenance</h2>
+          <h2 className="font-display text-2xl font-black text-black uppercase">
+            Under Maintenance
+          </h2>
           <p className="text-sm font-bold text-black/70">
-            Pipe Connect has been temporarily turned OFF by Campus Admin for level upgrades. Please check back soon!
+            Pipe Connect has been temporarily turned OFF by Campus Admin for level upgrades. Please
+            check back soon!
           </p>
           <Link to="/games">
-            <button className="w-full h-12 bg-black text-white border-2 border-black font-black uppercase shadow-[3px_3px_0px_0px_rgba(254,240,138,1)] cursor-pointer" style={{ borderRadius: WOBBLY_SM }}>
+            <button
+              className="w-full h-12 bg-black text-white border-2 border-black font-black uppercase shadow-[3px_3px_0px_0px_rgba(254,240,138,1)] cursor-pointer"
+              style={{ borderRadius: WOBBLY_SM }}
+            >
               Back to Games Hub
             </button>
           </Link>
@@ -420,27 +471,30 @@ export default function PipeConnectGame() {
     );
   }
 
-  if (!isMounted || !levelData) return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f4f4f5]">
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-        className="w-8 h-8 rounded-full border-4 border-black border-t-transparent"
-      />
-    </div>
-  );
+  if (!isMounted || !levelData)
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f4f4f5]">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-8 h-8 rounded-full border-4 border-black border-t-transparent"
+        />
+      </div>
+    );
 
   const movesLeft = levelData.maxMoves - moves;
   const tier = getTierLabel(levelIdx);
-  const progressPct = Math.round(((levelIdx) / TOTAL_PIPE_LEVELS) * 100);
+  const progressPct = Math.round((levelIdx / TOTAL_PIPE_LEVELS) * 100);
 
   return (
     <div className="min-h-screen bg-[#f4f4f5]">
-
       {/* Header */}
       <div className="sticky top-0 z-40 border-b-4 border-black bg-white">
         <div className="mx-auto flex max-w-lg items-center justify-between px-4 py-3">
-          <Link to="/" className="flex items-center gap-2 text-sm font-black text-black hover:scale-105 transition-transform">
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-sm font-black text-black hover:scale-105 transition-transform"
+          >
             <ArrowLeft className="h-5 w-5" strokeWidth={3} /> Back
           </Link>
           <div className="flex flex-col items-center">
@@ -453,22 +507,26 @@ export default function PipeConnectGame() {
       </div>
 
       <div className="mx-auto max-w-lg px-4 py-8 space-y-8">
-
         {/* Stats Dashboard */}
         <div className="space-y-6">
           {/* Top Row: Level & Lives */}
           <div className="flex items-center justify-between">
-            <button 
-              onClick={() => setShowLevels(true)} 
+            <button
+              onClick={() => setShowLevels(true)}
               className="flex items-center gap-2 bg-[#fbcfe8] px-5 py-2.5 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all outline-none"
               style={{ borderRadius: WOBBLY_SM }}
             >
-              <span className="font-display text-xl font-black text-black tracking-tight uppercase">Level {levelIdx + 1}</span>
+              <span className="font-display text-xl font-black text-black tracking-tight uppercase">
+                Level {levelIdx + 1}
+              </span>
               <span className="text-[12px] font-black text-black/70 flex items-center bg-white px-2 py-0.5 rounded-full border-2 border-black">
                 / {totalPipeLevels} <ChevronDown className="h-3 w-3 ml-1" strokeWidth={4} />
               </span>
             </button>
-            <div className="flex items-center gap-1.5 bg-white px-4 py-2.5 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" style={{ borderRadius: WOBBLY_SM }}>
+            <div
+              className="flex items-center gap-1.5 bg-white px-4 py-2.5 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+              style={{ borderRadius: WOBBLY_SM }}
+            >
               {Array.from({ length: 5 }).map((_, i) => (
                 <motion.div
                   key={i}
@@ -489,13 +547,27 @@ export default function PipeConnectGame() {
 
           {/* Bottom Row: Moves, Left, Reset */}
           <div className="flex items-stretch gap-4">
-            <div className="flex-1 bg-[#bfdbfe] border-4 border-black p-3 flex flex-col items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" style={{ borderRadius: WOBBLY_SM }}>
-              <div className="text-[12px] font-black text-black/70 uppercase tracking-widest mb-1">Moves</div>
-              <div className="font-display text-3xl font-black text-black leading-none">{moves}</div>
+            <div
+              className="flex-1 bg-[#bfdbfe] border-4 border-black p-3 flex flex-col items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+              style={{ borderRadius: WOBBLY_SM }}
+            >
+              <div className="text-[12px] font-black text-black/70 uppercase tracking-widest mb-1">
+                Moves
+              </div>
+              <div className="font-display text-3xl font-black text-black leading-none">
+                {moves}
+              </div>
             </div>
-            <div className="flex-1 bg-[#bbf7d0] border-4 border-black p-3 flex flex-col items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" style={{ borderRadius: WOBBLY_SM }}>
-              <div className="text-[12px] font-black text-black/70 uppercase tracking-widest mb-1">Left</div>
-              <div className="font-display text-3xl font-black text-black leading-none">{movesLeft}</div>
+            <div
+              className="flex-1 bg-[#bbf7d0] border-4 border-black p-3 flex flex-col items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+              style={{ borderRadius: WOBBLY_SM }}
+            >
+              <div className="text-[12px] font-black text-black/70 uppercase tracking-widest mb-1">
+                Left
+              </div>
+              <div className="font-display text-3xl font-black text-black leading-none">
+                {movesLeft}
+              </div>
             </div>
             <button
               onClick={handleHint}
@@ -505,7 +577,9 @@ export default function PipeConnectGame() {
             >
               <div className="flex flex-col items-center justify-center py-2">
                 <Lightbulb className="h-6 w-6 sm:h-7 sm:w-7 mb-1" strokeWidth={3} />
-                <span className="text-[11px] font-black leading-none bg-white border-2 border-black text-black px-2 py-0.5 rounded-full">{hintsLeft}</span>
+                <span className="text-[11px] font-black leading-none bg-white border-2 border-black text-black px-2 py-0.5 rounded-full">
+                  {hintsLeft}
+                </span>
               </div>
             </button>
             <button
@@ -523,7 +597,6 @@ export default function PipeConnectGame() {
           className="relative w-full border-4 border-black bg-white p-3 sm:p-4 select-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
           style={{ borderRadius: WOBBLY_MD }}
         >
-
           <div
             className="grid gap-2 relative z-10"
             style={{
@@ -537,7 +610,8 @@ export default function PipeConnectGame() {
               const isPowered = powered.has(key);
               const isHinted = hintedTileKey === key;
               const isRotating = rotatingTile === key;
-              const isOverloading = overloadAnim && overloadAnim.row === tile.row && overloadAnim.col === tile.col;
+              const isOverloading =
+                overloadAnim && overloadAnim.row === tile.row && overloadAnim.col === tile.col;
 
               if (tile.type === "empty") {
                 return (
@@ -547,7 +621,7 @@ export default function PipeConnectGame() {
                     style={{
                       gridRow: tile.row + 1,
                       gridColumn: tile.col + 1,
-                      borderRadius: WOBBLY_SM
+                      borderRadius: WOBBLY_SM,
                     }}
                   />
                 );
@@ -580,7 +654,9 @@ export default function PipeConnectGame() {
                   onClick={() => handleTap(tile)}
                   disabled={tile.fixed || won || gameOver}
                   className={`flex items-center justify-center relative overflow-hidden transition-shadow border-2 border-black z-10 ${
-                    tile.fixed ? "opacity-70 shadow-none scale-95 cursor-default" : "cursor-pointer hover:scale-105 active:scale-95 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                    tile.fixed
+                      ? "opacity-70 shadow-none scale-95 cursor-default"
+                      : "cursor-pointer hover:scale-105 active:scale-95 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
                   } ${isHinted ? "ring-4 ring-[#fef08a] !shadow-[0_0_15px_rgba(254,240,138,1)] z-20" : ""}`}
                   style={{
                     gridRow: tile.row + 1,
@@ -593,8 +669,8 @@ export default function PipeConnectGame() {
                     isOverloading
                       ? { scale: [1, 1.2, 0.9, 1.1, 1], transition: { duration: 0.5 } }
                       : isRotating
-                      ? { scale: [1, 0.85, 1], transition: { duration: 0.18 } }
-                      : { scale: tile.fixed ? 0.95 : 1 }
+                        ? { scale: [1, 0.85, 1], transition: { duration: 0.18 } }
+                        : { scale: tile.fixed ? 0.95 : 1 }
                   }
                 >
                   <div
@@ -650,11 +726,19 @@ export default function PipeConnectGame() {
                   </p>
                   <div className="flex flex-col gap-3 justify-center mt-2">
                     {levelIdx < TOTAL_PIPE_LEVELS - 1 && (
-                      <button onClick={nextLevel} className="w-full h-12 bg-[#fef08a] text-black hover:bg-[#fde047] border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all text-lg font-black" style={{ borderRadius: WOBBLY_SM }}>
+                      <button
+                        onClick={nextLevel}
+                        className="w-full h-12 bg-[#fef08a] text-black hover:bg-[#fde047] border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all text-lg font-black"
+                        style={{ borderRadius: WOBBLY_SM }}
+                      >
                         Next Level <Zap className="h-5 w-5 ml-2 fill-black text-black inline" />
                       </button>
                     )}
-                    <button onClick={resetLevel} className="w-full h-12 bg-white text-black hover:bg-gray-100 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all text-lg font-black" style={{ borderRadius: WOBBLY_SM }}>
+                    <button
+                      onClick={resetLevel}
+                      className="w-full h-12 bg-white text-black hover:bg-gray-100 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all text-lg font-black"
+                      style={{ borderRadius: WOBBLY_SM }}
+                    >
                       <RotateCcw className="h-5 w-5 mr-2 inline" strokeWidth={3} /> Retry
                     </button>
                   </div>
@@ -687,7 +771,11 @@ export default function PipeConnectGame() {
                   <p className="text-black/70 text-lg font-bold">
                     You made <strong className="text-black">{moves}</strong> moves
                   </p>
-                  <button onClick={resetLevel} className="h-12 w-full mt-2 bg-[#fbcfe8] text-black hover:bg-[#f9a8d4] border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all text-lg font-black" style={{ borderRadius: WOBBLY_SM }}>
+                  <button
+                    onClick={resetLevel}
+                    className="h-12 w-full mt-2 bg-[#fbcfe8] text-black hover:bg-[#f9a8d4] border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all text-lg font-black"
+                    style={{ borderRadius: WOBBLY_SM }}
+                  >
                     <RotateCcw className="h-5 w-5 mr-2 inline" strokeWidth={3} /> Try Again
                   </button>
                 </motion.div>
@@ -704,7 +792,6 @@ export default function PipeConnectGame() {
         >
           <Lightbulb className="h-6 w-6 text-black" strokeWidth={3} /> How to Play
         </button>
-
       </div>
 
       {/* How to Play Modal */}
@@ -721,7 +808,7 @@ export default function PipeConnectGame() {
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
-              onClick={e => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
               className="w-full max-w-sm bg-white border-4 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col relative"
               style={{ borderRadius: WOBBLY_MD }}
             >
@@ -736,18 +823,23 @@ export default function PipeConnectGame() {
               </h2>
               <div className="space-y-4">
                 <p className="text-sm text-black/80 font-bold leading-relaxed">
-                  Tap wire tiles to <strong className="text-black bg-black/10 px-1 rounded">rotate</strong> them 90° clockwise. Build a continuous
-                  circuit from <strong className="text-black underline">Sources</strong> to
-                  all <strong className="text-black underline">Devices</strong>.
+                  Tap wire tiles to{" "}
+                  <strong className="text-black bg-black/10 px-1 rounded">rotate</strong> them 90°
+                  clockwise. Build a continuous circuit from{" "}
+                  <strong className="text-black underline">Sources</strong> to all{" "}
+                  <strong className="text-black underline">Devices</strong>.
                 </p>
-                <div className="rounded-xl p-4 space-y-2.5 border-2 border-black bg-[#fef08a] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]" style={{ borderRadius: WOBBLY_SM }}>
+                <div
+                  className="rounded-xl p-4 space-y-2.5 border-2 border-black bg-[#fef08a] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                  style={{ borderRadius: WOBBLY_SM }}
+                >
                   {[
                     { icon: "⚡", label: "Source", desc: "Emits power." },
                     { icon: "💡", label: "Device", desc: "Light it up!" },
                     { icon: "🔌", label: "Wires", desc: "Tap to rotate." },
                     { icon: "🚫", label: "Blocked", desc: "Can't pass." },
                     { icon: "⚠️", label: "Overload", desc: "Costs 1 life!" },
-                  ].map(item => (
+                  ].map((item) => (
                     <div key={item.label} className="flex items-start gap-2">
                       <span className="text-base">{item.icon}</span>
                       <p className="text-sm text-black font-bold">
@@ -776,7 +868,7 @@ export default function PipeConnectGame() {
               initial={{ scale: 0.95, y: 30 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 30 }}
-              onClick={e => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
               className="w-full max-w-sm bg-white border-4 border-black p-6 flex flex-col max-h-[80vh] relative shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
               style={{ borderRadius: WOBBLY_MD }}
             >
@@ -787,7 +879,9 @@ export default function PipeConnectGame() {
                 <X className="h-4 w-4" strokeWidth={3} />
               </button>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-display text-2xl font-black text-black uppercase">Select Level</h2>
+                <h2 className="font-display text-2xl font-black text-black uppercase">
+                  Select Level
+                </h2>
                 <span className="text-xs font-black bg-[#bfdbfe] text-black border-2 border-black px-2.5 py-1 rounded-full shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                   {totalPipeLevels} Levels
                 </span>
@@ -809,8 +903,8 @@ export default function PipeConnectGame() {
                           i === levelIdx
                             ? "bg-[#bfdbfe] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] scale-110 z-10"
                             : unlocked
-                            ? "bg-white text-black hover:bg-[#fbcfe8] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 cursor-pointer"
-                            : "bg-gray-100 text-gray-500 opacity-70 cursor-pointer"
+                              ? "bg-white text-black hover:bg-[#fbcfe8] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 cursor-pointer"
+                              : "bg-gray-100 text-gray-500 opacity-70 cursor-pointer"
                         }`}
                         style={{ borderRadius: WOBBLY_SM }}
                       >

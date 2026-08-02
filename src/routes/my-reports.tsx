@@ -14,12 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useIdentity } from "@/stores/identity";
 import { submitProofForPost } from "@/lib/content.functions";
 import { ProofUploader } from "@/components/ProofUploader";
@@ -32,8 +27,7 @@ export const Route = createFileRoute("/my-reports")({
       { title: "My Reports — CampusXpose" },
       {
         name: "description",
-        content:
-          "View and manage all the anonymous reports you have submitted on CampusXpose.",
+        content: "View and manage all the anonymous reports you have submitted on CampusXpose.",
       },
       { name: "robots", content: "noindex" },
     ],
@@ -147,13 +141,11 @@ function MyReportsPage() {
         <div className="mb-6 rounded-xl border-2 border-warning bg-warning/10 p-4 space-y-3">
           <div className="flex items-center gap-2 font-semibold text-warning">
             <AlertTriangle className="h-5 w-5" />
-            {heldPosts.length} report{heldPosts.length > 1 ? "s" : ""} on hold
-            — proof required
+            {heldPosts.length} report{heldPosts.length > 1 ? "s" : ""} on hold — proof required
           </div>
           <p className="text-sm text-muted-foreground">
-            Our AI found these reports contain serious allegations that require
-            evidence before publishing. Upload proof and your report will go
-            live immediately.
+            Our AI found these reports contain serious allegations that require evidence before
+            publishing. Upload proof and your report will go live immediately.
           </p>
           <div className="space-y-3">
             {heldPosts.map((p: any) => (
@@ -165,9 +157,7 @@ function MyReportsPage() {
                   {p.content}
                 </p>
                 <div className="mt-2 flex items-center justify-between gap-2 flex-wrap">
-                  <span className="text-xs text-muted-foreground">
-                    {timeAgo(p.created_at)}
-                  </span>
+                  <span className="text-xs text-muted-foreground">{timeAgo(p.created_at)}</span>
                   <Button
                     size="sm"
                     variant="outline"
@@ -200,9 +190,7 @@ function MyReportsPage() {
                 <p className="text-sm text-foreground line-clamp-2 whitespace-pre-wrap">
                   {p.content}
                 </p>
-                <span className="mt-1 text-xs text-muted-foreground">
-                  {timeAgo(p.created_at)}
-                </span>
+                <span className="mt-1 text-xs text-muted-foreground">{timeAgo(p.created_at)}</span>
               </div>
               <span className="shrink-0 rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-bold text-success">
                 Published
@@ -229,14 +217,11 @@ function MyReportsPage() {
             </DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            Upload at least one piece of evidence (screenshot, document, photo)
-            to support your allegation. Once uploaded, your report will be
-            published immediately.
+            Upload at least one piece of evidence (screenshot, document, photo) to support your
+            allegation. Once uploaded, your report will be published immediately.
           </p>
 
-          <ProofUploader
-            onUploaded={(url) => setPendingUrls((p) => [...p, url])}
-          />
+          <ProofUploader onUploaded={(url) => setPendingUrls((p) => [...p, url])} />
 
           {pendingUrls.length > 0 && (
             <div className="mt-3 space-y-2">
@@ -249,11 +234,7 @@ function MyReportsPage() {
                   <span className="text-xs font-medium text-success flex-1 truncate">
                     File {i + 1} uploaded ✓
                   </span>
-                  <button
-                    onClick={() =>
-                      setPendingUrls((p) => p.filter((_, idx) => idx !== i))
-                    }
-                  >
+                  <button onClick={() => setPendingUrls((p) => p.filter((_, idx) => idx !== i))}>
                     <X className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
                   </button>
                 </div>
@@ -262,11 +243,7 @@ function MyReportsPage() {
           )}
 
           <div className="mt-4 flex gap-2">
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={() => setProofTarget(null)}
-            >
+            <Button variant="outline" className="flex-1" onClick={() => setProofTarget(null)}>
               Cancel
             </Button>
             <Button

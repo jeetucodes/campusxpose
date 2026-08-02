@@ -81,23 +81,51 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" },
+      {
+        name: "viewport",
+        content:
+          "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover",
+      },
       { name: "theme-color", content: "#111111" },
       { title: "CampusXpose — College ka sach, bina darr ke" },
-      { name: "description", content: "Anonymous platform for Indian college students to rate colleges and report fake fines, placement fraud, and harassment." },
+      {
+        name: "description",
+        content:
+          "Anonymous platform for Indian college students to rate colleges and report fake fines, placement fraud, and harassment.",
+      },
       { name: "author", content: "CampusXpose" },
       { name: "google-site-verification", content: "1BCMAogu2qMCNHNGQjFcQxKKiAa8183Lt1iPNZ1Y7s8" },
       { property: "og:title", content: "CampusXpose — College ka sach, bina darr ke" },
-      { property: "og:description", content: "Anonymous platform for Indian college students to rate colleges and report fake fines, placement fraud, and harassment." },
+      {
+        property: "og:description",
+        content:
+          "Anonymous platform for Indian college students to rate colleges and report fake fines, placement fraud, and harassment.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "CampusXpose — College ka sach, bina darr ke" },
-      { name: "twitter:description", content: "Anonymous platform for Indian college students to rate colleges and report fake fines, placement fraud, and harassment." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4775d11f-2679-4112-a831-752842265928/id-preview-b47b8bb1--5e5e5f3c-9e18-4ded-bf54-ed3632d01563.lovable.app-1782677617743.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4775d11f-2679-4112-a831-752842265928/id-preview-b47b8bb1--5e5e5f3c-9e18-4ded-bf54-ed3632d01563.lovable.app-1782677617743.png" },
+      {
+        name: "twitter:description",
+        content:
+          "Anonymous platform for Indian college students to rate colleges and report fake fines, placement fraud, and harassment.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4775d11f-2679-4112-a831-752842265928/id-preview-b47b8bb1--5e5e5f3c-9e18-4ded-bf54-ed3632d01563.lovable.app-1782677617743.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4775d11f-2679-4112-a831-752842265928/id-preview-b47b8bb1--5e5e5f3c-9e18-4ded-bf54-ed3632d01563.lovable.app-1782677617743.png",
+      },
     ],
     links: [
-      { rel: "preconnect", href: "https://mcobkriudveoevbrmrwi.supabase.co", crossOrigin: "anonymous" },
+      {
+        rel: "preconnect",
+        href: "https://mcobkriudveoevbrmrwi.supabase.co",
+        crossOrigin: "anonymous",
+      },
       { rel: "dns-prefetch", href: "https://mcobkriudveoevbrmrwi.supabase.co" },
       {
         rel: "stylesheet",
@@ -136,20 +164,21 @@ function RootComponent() {
   // Deep linking: redirect to mobile app or Play Store on Android
   useEffect(() => {
     if (typeof window === "undefined") return;
-    
+
     const isAndroid = /android/i.test(navigator.userAgent);
-    
+
     // Detect if already inside the Median wrapper
-    const isMedianWebview = /Median|gonative|co\.median\.android\.abxkxke/i.test(navigator.userAgent) || 
-                            (window as any).median || 
-                            (window as any).gonative ||
-                            (navigator.userAgent.includes('wv') && isAndroid);
-                            
+    const isMedianWebview =
+      /Median|gonative|co\.median\.android\.abxkxke/i.test(navigator.userAgent) ||
+      (window as any).median ||
+      (window as any).gonative ||
+      (navigator.userAgent.includes("wv") && isAndroid);
+
     if (isAndroid && !isMedianWebview) {
       // Prevent redirect loop if the user intentionally comes back to the browser
       if (sessionStorage.getItem("app_redirect_attempted")) return;
       sessionStorage.setItem("app_redirect_attempted", "true");
-      
+
       // Instead of forcing an automatic redirect (which Chrome blocks due to no user gesture, causing the fallback timeout to incorrectly fire),
       // we show a prompt. Chrome requires a physical click to launch an app via intent.
       (window as any).showAppPrompt = true;
@@ -158,7 +187,7 @@ function RootComponent() {
 
   const [showPrompt, setShowPrompt] = useState(false);
   useEffect(() => {
-    if (typeof window !== 'undefined' && (window as any).showAppPrompt) {
+    if (typeof window !== "undefined" && (window as any).showAppPrompt) {
       setShowPrompt(true);
     }
   }, []);
@@ -167,13 +196,13 @@ function RootComponent() {
     const pathAndQuery = window.location.pathname + window.location.search + window.location.hash;
     const packageName = "co.median.android.abxkxke";
     const playStoreFallback = `https://play.google.com/store/apps/details?id=${packageName}&pcampaignid=web_share`;
-    
-    // Using a custom scheme format to bypass same-domain intent blocks, 
+
+    // Using a custom scheme format to bypass same-domain intent blocks,
     // or standard intent with S.browser_fallback_url.
     const intentUrl = `intent://campusxpose.online${pathAndQuery}#Intent;scheme=https;package=${packageName};S.browser_fallback_url=${encodeURIComponent(playStoreFallback)};end;`;
-    
+
     window.location.href = intentUrl;
-    
+
     // Fallback if Chrome doesn't process the intent fallback correctly
     setTimeout(() => {
       if (!document.hidden) {
@@ -200,13 +229,19 @@ function RootComponent() {
             </div>
             <div>
               <h2 className="text-2xl font-bold text-foreground">Open in App</h2>
-              <p className="text-muted-foreground mt-2 font-sans text-sm">For the best experience, open this link in the CampusXpose app.</p>
+              <p className="text-muted-foreground mt-2 font-sans text-sm">
+                For the best experience, open this link in the CampusXpose app.
+              </p>
             </div>
             <div className="space-y-3 pt-2">
               <Button onClick={handleOpenApp} className="w-full text-base py-6 shadow-md" size="lg">
                 Continue in App
               </Button>
-              <Button onClick={() => setShowPrompt(false)} variant="ghost" className="w-full text-muted-foreground">
+              <Button
+                onClick={() => setShowPrompt(false)}
+                variant="ghost"
+                className="w-full text-muted-foreground"
+              >
                 Continue in Browser
               </Button>
             </div>
@@ -219,7 +254,6 @@ function RootComponent() {
       </div>
       {!hideNav && <MobileBottomNav />}
       <Toaster position="top-center" theme="light" richColors />
-
     </QueryClientProvider>
   );
 }

@@ -24,9 +24,13 @@ export const Route = createFileRoute("/sitemap.xml")({
         ];
 
         try {
-          const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
-            auth: { persistSession: false, autoRefreshToken: false },
-          });
+          const supabase = createClient(
+            process.env.SUPABASE_URL!,
+            process.env.SUPABASE_PUBLISHABLE_KEY!,
+            {
+              auth: { persistSession: false, autoRefreshToken: false },
+            },
+          );
           const { data } = await supabase.from("colleges").select("id");
           for (const c of data ?? []) {
             entries.push({ path: `/colleges/${c.id}`, changefreq: "weekly", priority: "0.7" });

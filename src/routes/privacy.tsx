@@ -1,7 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  Shield, BookOpen, ServerOff, Database, Cookie, Trash2, Scale,
-  AlertTriangle, RefreshCw, ArrowRight, FileText, Ban, Megaphone,
+  Shield,
+  BookOpen,
+  ServerOff,
+  Database,
+  Cookie,
+  Trash2,
+  Scale,
+  AlertTriangle,
+  RefreshCw,
+  ArrowRight,
+  FileText,
+  Ban,
+  Megaphone,
 } from "lucide-react";
 import { SiteShell } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -104,16 +115,13 @@ function PrivacyPage() {
             </div>
             <div className="min-w-0">
               <h1 className="font-display text-3xl font-bold">Privacy Policy</h1>
-              <p className="text-sm text-muted-foreground">
-                Effective Date: {LAST_UPDATED}
-              </p>
+              <p className="text-sm text-muted-foreground">Effective Date: {LAST_UPDATED}</p>
             </div>
           </div>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-            This Privacy Policy sets forth the legally binding terms governing data
-            collection, processing, storage, and user rights on the CampusXpose
-            Platform. By accessing or using our services, you acknowledge and agree
-            to the practices described herein.
+            This Privacy Policy sets forth the legally binding terms governing data collection,
+            processing, storage, and user rights on the CampusXpose Platform. By accessing or using
+            our services, you acknowledge and agree to the practices described herein.
           </p>
         </div>
 
@@ -154,11 +162,10 @@ function PrivacyPage() {
           <div className="flex items-start gap-3">
             <FileText className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
             <p className="text-xs leading-relaxed text-muted-foreground">
-              This document is maintained by CampusXpose as an app-owned editable
-              privacy statement. It is not an independent legal certification.
-              For questions regarding your data rights or to exercise your Right to
-              Erasure, please contact the Platform administrator through the in-app
-              feedback channel.
+              This document is maintained by CampusXpose as an app-owned editable privacy statement.
+              It is not an independent legal certification. For questions regarding your data rights
+              or to exercise your Right to Erasure, please contact the Platform administrator
+              through the in-app feedback channel.
             </p>
           </div>
         </div>

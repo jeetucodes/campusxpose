@@ -3,12 +3,25 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Ghost, Send, X, PenLine, Heart, Flame, Sparkles } from "lucide-react";
 import { SiteShell } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { getConfessions, addConfession, toggleLikeConfession, getMyLikedConfessions } from "@/lib/confessions.functions";
+import {
+  getConfessions,
+  addConfession,
+  toggleLikeConfession,
+  getMyLikedConfessions,
+} from "@/lib/confessions.functions";
 import { toast } from "sonner";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { UserSymbol } from "@/components/UserSymbol";
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from "@/components/ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
 const WOBBLY_SM = "16px 5px 14px 5px / 5px 14px 5px 16px";
@@ -37,13 +50,48 @@ const MOOD_OPTIONS = [
 ];
 
 const MOOD_COLORS: Record<string, { bg: string; border: string; text: string; accent: string }> = {
-  awkward:    { bg: "bg-yellow-50",  border: "border-yellow-200", text: "text-yellow-700",  accent: "bg-yellow-100" },
-  heartbreak: { bg: "bg-rose-50",    border: "border-rose-200",   text: "text-rose-600",    accent: "bg-rose-100" },
-  funny:      { bg: "bg-orange-50",  border: "border-orange-200", text: "text-orange-600",  accent: "bg-orange-100" },
-  frustrated: { bg: "bg-red-50",     border: "border-red-200",    text: "text-red-700",     accent: "bg-red-100" },
-  vulnerable: { bg: "bg-blue-50",    border: "border-blue-200",   text: "text-blue-700",    accent: "bg-blue-100" },
-  spicy:      { bg: "bg-pink-50",    border: "border-pink-200",   text: "text-pink-600",    accent: "bg-pink-100" },
-  default:    { bg: "bg-white",      border: "border-border",     text: "text-foreground",  accent: "bg-muted/20" },
+  awkward: {
+    bg: "bg-yellow-50",
+    border: "border-yellow-200",
+    text: "text-yellow-700",
+    accent: "bg-yellow-100",
+  },
+  heartbreak: {
+    bg: "bg-rose-50",
+    border: "border-rose-200",
+    text: "text-rose-600",
+    accent: "bg-rose-100",
+  },
+  funny: {
+    bg: "bg-orange-50",
+    border: "border-orange-200",
+    text: "text-orange-600",
+    accent: "bg-orange-100",
+  },
+  frustrated: {
+    bg: "bg-red-50",
+    border: "border-red-200",
+    text: "text-red-700",
+    accent: "bg-red-100",
+  },
+  vulnerable: {
+    bg: "bg-blue-50",
+    border: "border-blue-200",
+    text: "text-blue-700",
+    accent: "bg-blue-100",
+  },
+  spicy: {
+    bg: "bg-pink-50",
+    border: "border-pink-200",
+    text: "text-pink-600",
+    accent: "bg-pink-100",
+  },
+  default: {
+    bg: "bg-white",
+    border: "border-border",
+    text: "text-foreground",
+    accent: "bg-muted/20",
+  },
 };
 
 function getMoodColors(mood?: string) {
@@ -154,8 +202,8 @@ function ConfessionsPage() {
       const prevLiked = queryClient.getQueryData(["my_liked_confessions", deviceId]);
 
       queryClient.setQueryData(["my_liked_confessions", deviceId], (old: string[] = []) => {
-        if (action === "like") return [...old.filter(x => x !== id), id];
-        return old.filter(x => x !== id);
+        if (action === "like") return [...old.filter((x) => x !== id), id];
+        return old.filter((x) => x !== id);
       });
 
       queryClient.setQueryData(["confessions"], (old: any) => {
@@ -163,7 +211,7 @@ function ConfessionsPage() {
         return old.map((c: any) =>
           c.id === id
             ? { ...c, likes: Math.max(0, (c.likes || 0) + (action === "like" ? 1 : -1)) }
-            : c
+            : c,
         );
       });
 
@@ -173,9 +221,7 @@ function ConfessionsPage() {
       if (result && typeof result.likes === "number") {
         queryClient.setQueryData(["confessions"], (old: any) => {
           if (!old) return old;
-          return old.map((c: any) =>
-            c.id === id ? { ...c, likes: result.likes } : c
-          );
+          return old.map((c: any) => (c.id === id ? { ...c, likes: result.likes } : c));
         });
       }
     },
@@ -341,7 +387,10 @@ function ConfessionsPage() {
               </div>
 
               {/* Drawer Body */}
-              <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-y-auto p-5 pb-6 gap-4">
+              <form
+                onSubmit={handleSubmit}
+                className="flex flex-col flex-1 overflow-y-auto p-5 pb-6 gap-4"
+              >
                 {/* Name */}
                 <div>
                   <label className="block text-xs font-bold text-muted-foreground mb-1.5 uppercase tracking-wide">
@@ -397,18 +446,25 @@ function ConfessionsPage() {
                     onChange={(e) => setContent(e.target.value)}
                     disabled={postConfession.isPending}
                   />
-                  <p className={`text-xs mt-1.5 text-right font-bold ${content.length > 1000 ? "text-destructive" : "text-muted-foreground"}`}>
+                  <p
+                    className={`text-xs mt-1.5 text-right font-bold ${content.length > 1000 ? "text-destructive" : "text-muted-foreground"}`}
+                  >
                     {content.length}/1000
                   </p>
                 </div>
 
                 {/* Preview */}
-                <div className="bg-muted/20 border-2 border-dashed border-border px-3 py-2 text-sm" style={{ borderRadius: WOBBLY_SM }}>
+                <div
+                  className="bg-muted/20 border-2 border-dashed border-border px-3 py-2 text-sm"
+                  style={{ borderRadius: WOBBLY_SM }}
+                >
                   Posting as:{" "}
-                  <span className="font-bold text-foreground">{customName.trim() || "Anonymous"}</span>
+                  <span className="font-bold text-foreground">
+                    {customName.trim() || "Anonymous"}
+                  </span>
                   {selectedMood && (
                     <span className="ml-2 font-medium text-muted-foreground">
-                      · {MOOD_OPTIONS.find(m => m.value === selectedMood)?.label}
+                      · {MOOD_OPTIONS.find((m) => m.value === selectedMood)?.label}
                     </span>
                   )}
                 </div>
@@ -439,17 +495,24 @@ function ConfessionsPage() {
       </AnimatePresence>
 
       <AlertDialog open={limitErrorOpen} onOpenChange={setLimitErrorOpen}>
-        <AlertDialogContent className="border-2 border-border shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-white max-w-sm" style={{ borderRadius: WOBBLY_SM }}>
+        <AlertDialogContent
+          className="border-2 border-border shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-white max-w-sm"
+          style={{ borderRadius: WOBBLY_SM }}
+        >
           <AlertDialogHeader>
             <AlertDialogTitle className="font-display font-bold text-xl flex items-center gap-2 text-destructive">
               <span className="text-2xl">⚠️</span> Limit Exceeded
             </AlertDialogTitle>
             <AlertDialogDescription className="text-foreground/80 font-medium">
-              Your confession is too long! Keep it under 1000 characters. You are currently at {content.length} characters.
+              Your confession is too long! Keep it under 1000 characters. You are currently at{" "}
+              {content.length} characters.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction className="bg-accent text-white font-bold hover:bg-accent/90 border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-none transition-all w-full" style={{ borderRadius: "10px" }}>
+            <AlertDialogAction
+              className="bg-accent text-white font-bold hover:bg-accent/90 border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-none transition-all w-full"
+              style={{ borderRadius: "10px" }}
+            >
               Got it
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -507,7 +570,7 @@ function ConfessionCard({
             className={`text-xs font-bold px-2 py-0.5 border ${colors.accent} ${colors.border} ${colors.text}`}
             style={{ borderRadius: WOBBLY_SM }}
           >
-            {MOOD_OPTIONS.find(m => m.value === (mood ?? c.mood))?.label ?? (mood ?? c.mood)}
+            {MOOD_OPTIONS.find((m) => m.value === (mood ?? c.mood))?.label ?? mood ?? c.mood}
           </span>
         )}
 

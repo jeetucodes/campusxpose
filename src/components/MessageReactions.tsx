@@ -40,7 +40,6 @@ export function ReactionChips({
   );
 }
 
-
 export function MessageActions({
   onToggle,
   onReply,
@@ -80,7 +79,6 @@ export function MessageActions({
             </button>
           ))}
         </PopoverContent>
-
       </Popover>
       <button
         aria-label="Reply"
@@ -104,7 +102,6 @@ export function MessageActions({
     </div>
   );
 }
-
 
 export function ReplyQuote({
   username,
@@ -149,4 +146,3 @@ export function ReplyQuote({
     </div>
   );
 }
-

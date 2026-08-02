@@ -7,7 +7,9 @@ function todayStr(): string {
 }
 function assertAdmin(token: string) {
   const pw = process.env.ADMIN_PASSWORD ?? "";
-  const exp = createHash("sha256").update(pw + todayStr()).digest("hex");
+  const exp = createHash("sha256")
+    .update(pw + todayStr())
+    .digest("hex");
   const a = Buffer.from(token);
   const b = Buffer.from(exp);
   if (a.length !== b.length || !timingSafeEqual(a, b)) throw new Error("Unauthorized");
@@ -40,19 +42,30 @@ export const listProjects = createServerFn({ method: "POST" })
     // Fetch avg ratings for all projects
     const { data: ratings } = await (supabaseAdmin
       .from("project_ratings" as any)
-      .select("project_id, rating, rating_ui, rating_functionality, rating_concept, rating_bugs") as any);
+      .select(
+        "project_id, rating, rating_ui, rating_functionality, rating_concept, rating_bugs",
+      ) as any);
 
     const ratingMap = new Map<
       string,
-      { 
-        sum: number; count: number;
-        sum_ui: number; sum_func: number; sum_concept: number; sum_bugs: number;
+      {
+        sum: number;
+        count: number;
+        sum_ui: number;
+        sum_func: number;
+        sum_concept: number;
+        sum_bugs: number;
       }
     >();
-    
+
     for (const r of ratings ?? []) {
-      const entry = ratingMap.get(r.project_id) ?? { 
-        sum: 0, count: 0, sum_ui: 0, sum_func: 0, sum_concept: 0, sum_bugs: 0 
+      const entry = ratingMap.get(r.project_id) ?? {
+        sum: 0,
+        count: 0,
+        sum_ui: 0,
+        sum_func: 0,
+        sum_concept: 0,
+        sum_bugs: 0,
       };
       entry.sum += r.rating || 0;
       entry.sum_ui += r.rating_ui || 0;
@@ -71,10 +84,15 @@ export const listProjects = createServerFn({ method: "POST" })
       const avgRatingFunc = ratingCount > 0 ? rv!.sum_func / ratingCount : 0;
       const avgRatingConcept = ratingCount > 0 ? rv!.sum_concept / ratingCount : 0;
       const avgRatingBugs = ratingCount > 0 ? rv!.sum_bugs / ratingCount : 0;
-      
-      return { 
-        ...p, avgRating, ratingCount, 
-        avgRatingUi, avgRatingFunc, avgRatingConcept, avgRatingBugs 
+
+      return {
+        ...p,
+        avgRating,
+        ratingCount,
+        avgRatingUi,
+        avgRatingFunc,
+        avgRatingConcept,
+        avgRatingBugs,
       };
     });
 
@@ -98,7 +116,11 @@ export const getProject = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const [projectRes, ratingsRes] = await Promise.all([
-      supabaseAdmin.from("projects" as any).select("*").eq("id", data.id).single() as any,
+      supabaseAdmin
+        .from("projects" as any)
+        .select("*")
+        .eq("id", data.id)
+        .single() as any,
       supabaseAdmin
         .from("project_ratings" as any)
         .select("*")
@@ -110,26 +132,33 @@ export const getProject = createServerFn({ method: "POST" })
 
     const ratings = ratingsRes.data ?? [];
     const ratingCount = ratings.length;
-    
-    let avgRating = 0, avgRatingUi = 0, avgRatingFunc = 0, avgRatingConcept = 0, avgRatingBugs = 0;
-    
+
+    let avgRating = 0,
+      avgRatingUi = 0,
+      avgRatingFunc = 0,
+      avgRatingConcept = 0,
+      avgRatingBugs = 0;
+
     if (ratingCount > 0) {
       avgRating = ratings.reduce((s: number, r: any) => s + (r.rating || 0), 0) / ratingCount;
       avgRatingUi = ratings.reduce((s: number, r: any) => s + (r.rating_ui || 0), 0) / ratingCount;
-      avgRatingFunc = ratings.reduce((s: number, r: any) => s + (r.rating_functionality || 0), 0) / ratingCount;
-      avgRatingConcept = ratings.reduce((s: number, r: any) => s + (r.rating_concept || 0), 0) / ratingCount;
-      avgRatingBugs = ratings.reduce((s: number, r: any) => s + (r.rating_bugs || 0), 0) / ratingCount;
+      avgRatingFunc =
+        ratings.reduce((s: number, r: any) => s + (r.rating_functionality || 0), 0) / ratingCount;
+      avgRatingConcept =
+        ratings.reduce((s: number, r: any) => s + (r.rating_concept || 0), 0) / ratingCount;
+      avgRatingBugs =
+        ratings.reduce((s: number, r: any) => s + (r.rating_bugs || 0), 0) / ratingCount;
     }
 
-    return { 
-      project: projectRes.data, 
-      ratings, 
+    return {
+      project: projectRes.data,
+      ratings,
       ratingCount,
-      avgRating, 
-      avgRatingUi, 
-      avgRatingFunc, 
-      avgRatingConcept, 
-      avgRatingBugs
+      avgRating,
+      avgRatingUi,
+      avgRatingFunc,
+      avgRatingConcept,
+      avgRatingBugs,
     };
   });
 
@@ -247,7 +276,6 @@ export const deleteProject = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
-
 export const rateProject = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z
@@ -267,22 +295,20 @@ export const rateProject = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const { error } = await supabaseAdmin
-      .from("project_ratings" as any)
-      .upsert(
-        {
-          project_id: data.projectId,
-          rater_ghost_id: data.hashedId,
-          rater_username: data.username,
-          rating: data.rating,
-          rating_ui: data.ratingUi,
-          rating_functionality: data.ratingFunc,
-          rating_concept: data.ratingConcept,
-          rating_bugs: data.ratingBugs,
-          comment: data.comment?.trim() ?? null,
-        },
-        { onConflict: "project_id,rater_ghost_id" },
-      );
+    const { error } = await supabaseAdmin.from("project_ratings" as any).upsert(
+      {
+        project_id: data.projectId,
+        rater_ghost_id: data.hashedId,
+        rater_username: data.username,
+        rating: data.rating,
+        rating_ui: data.ratingUi,
+        rating_functionality: data.ratingFunc,
+        rating_concept: data.ratingConcept,
+        rating_bugs: data.ratingBugs,
+        comment: data.comment?.trim() ?? null,
+      },
+      { onConflict: "project_id,rater_ghost_id" },
+    );
 
     if (error) throw new Error(error.message);
     return { ok: true as const };

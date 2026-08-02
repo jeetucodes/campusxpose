@@ -18,7 +18,11 @@ function urlBase64ToUint8Array(base64: string): Uint8Array {
 /** Push only works on real published origins, never inside the Lovable preview iframe. */
 export function isPushSupported(): boolean {
   if (typeof window === "undefined") return false;
-  if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) {
+  if (
+    !("serviceWorker" in navigator) ||
+    !("PushManager" in window) ||
+    !("Notification" in window)
+  ) {
     return false;
   }
   // Refuse in dev / preview / iframe contexts (same guards as PWA skill).

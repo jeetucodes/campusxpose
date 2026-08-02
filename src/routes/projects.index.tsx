@@ -1,6 +1,18 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Plus, Star, Tag, FolderOpen, Filter, TrendingUp, Clock, Search, Bug, Zap, Layout } from "lucide-react";
+import {
+  Plus,
+  Star,
+  Tag,
+  FolderOpen,
+  Filter,
+  TrendingUp,
+  Clock,
+  Search,
+  Bug,
+  Zap,
+  Layout,
+} from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -66,7 +78,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
       params={{ id: project.id }}
       className={cn(
         "group sketch-card flex h-full flex-col overflow-hidden bg-white shadow-ink transition-transform hover:-translate-y-1 hover:shadow-ink-lg",
-        tilt
+        tilt,
       )}
       style={{ borderRadius: "20px 8px 18px 8px / 8px 18px 8px 20px" }}
     >
@@ -179,11 +191,16 @@ function ProjectsPage() {
               <span className="absolute -bottom-2 left-0 right-0 h-2 bg-accent/40 -rotate-1 rounded-sm wobbly-sm" />
             </h1>
             <p className="mt-4 text-base text-muted-foreground font-sans max-w-xl leading-relaxed font-medium">
-              Explore innovative ideas built by students. Rate UI, functionality, concept and help catch bugs!
+              Explore innovative ideas built by students. Rate UI, functionality, concept and help
+              catch bugs!
             </p>
           </div>
           <div className="shrink-0 mt-4 md:mt-0">
-            <Button asChild size="lg" className="border-2 border-ink bg-accent text-accent-foreground font-display font-bold shadow-ink wobbly-md hover:shadow-ink-lg hover:-translate-y-1 transition-all px-6">
+            <Button
+              asChild
+              size="lg"
+              className="border-2 border-ink bg-accent text-accent-foreground font-display font-bold shadow-ink wobbly-md hover:shadow-ink-lg hover:-translate-y-1 transition-all px-6"
+            >
               <Link to="/projects/new" className="flex items-center gap-2">
                 <Plus className="h-5 w-5" />
                 Submit Project
@@ -210,11 +227,14 @@ function ProjectsPage() {
 
             <div className="flex items-center gap-2">
               <span className="text-sm font-bold text-muted-foreground font-display">
-                {projects.length} project{projects.length !== 1 ? 's' : ''}
+                {projects.length} project{projects.length !== 1 ? "s" : ""}
               </span>
               {(activeTag || sort !== "newest") && (
                 <button
-                  onClick={() => { setActiveTag(undefined); setSort("newest"); }}
+                  onClick={() => {
+                    setActiveTag(undefined);
+                    setSort("newest");
+                  }}
                   className="text-xs font-bold text-accent underline underline-offset-2 ml-3 hover:text-ink"
                 >
                   Reset
@@ -234,7 +254,9 @@ function ProjectsPage() {
               >
                 <div className="space-y-5 pb-2">
                   <div>
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground font-display mb-2.5">Sort by</h3>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground font-display mb-2.5">
+                      Sort by
+                    </h3>
                     <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => setSort("newest")}
@@ -242,7 +264,7 @@ function ProjectsPage() {
                           "flex items-center gap-1.5 border-2 border-ink px-4 py-1.5 text-sm font-bold transition-transform duration-100 hover:-rotate-2 wobbly-sm",
                           sort === "newest"
                             ? "bg-foreground text-background shadow-ink-soft"
-                            : "bg-white text-muted-foreground hover:text-foreground"
+                            : "bg-white text-muted-foreground hover:text-foreground",
                         )}
                         style={{ borderRadius: "14px 5px 16px 5px / 5px 16px 5px 14px" }}
                       >
@@ -254,7 +276,7 @@ function ProjectsPage() {
                           "flex items-center gap-1.5 border-2 border-ink px-4 py-1.5 text-sm font-bold transition-transform duration-100 hover:-rotate-2 wobbly-sm",
                           sort === "rating"
                             ? "bg-foreground text-background shadow-ink-soft"
-                            : "bg-white text-muted-foreground hover:text-foreground"
+                            : "bg-white text-muted-foreground hover:text-foreground",
                         )}
                         style={{ borderRadius: "14px 5px 16px 5px / 5px 16px 5px 14px" }}
                       >
@@ -264,7 +286,9 @@ function ProjectsPage() {
                   </div>
 
                   <div>
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground font-display mb-2.5">Tags</h3>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground font-display mb-2.5">
+                      Tags
+                    </h3>
                     <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => setActiveTag(undefined)}
@@ -272,7 +296,7 @@ function ProjectsPage() {
                           "border-2 border-ink px-4 py-1.5 text-sm font-bold transition-transform duration-100 hover:-rotate-2 wobbly-sm",
                           !activeTag
                             ? "bg-accent text-accent-foreground shadow-ink-soft"
-                            : "bg-white text-muted-foreground hover:text-foreground"
+                            : "bg-white text-muted-foreground hover:text-foreground",
                         )}
                         style={{ borderRadius: "14px 5px 16px 5px / 5px 16px 5px 14px" }}
                       >
@@ -286,7 +310,7 @@ function ProjectsPage() {
                             "border-2 border-ink px-4 py-1.5 text-sm font-bold transition-transform duration-100 hover:-rotate-2 wobbly-sm",
                             activeTag === tag
                               ? "bg-accent text-accent-foreground shadow-ink-soft"
-                              : "bg-white text-muted-foreground hover:text-foreground"
+                              : "bg-white text-muted-foreground hover:text-foreground",
                           )}
                           style={{ borderRadius: "14px 5px 16px 5px / 5px 16px 5px 14px" }}
                         >
@@ -330,10 +354,15 @@ function ProjectsPage() {
             </div>
             <h3 className="font-display text-2xl font-bold text-foreground">No projects found</h3>
             <p className="mt-3 text-sm text-muted-foreground font-sans leading-relaxed">
-              {activeTag ? `No projects tagged "${activeTag}" right now.` : "Be the first to share your project with the community and get feedback!"}
+              {activeTag
+                ? `No projects tagged "${activeTag}" right now.`
+                : "Be the first to share your project with the community and get feedback!"}
             </p>
             <div className="mt-8 flex justify-center">
-              <Button asChild className="border-2 border-ink bg-accent text-accent-foreground font-bold shadow-ink wobbly-sm hover:shadow-ink-lg transition-transform hover:-translate-y-1">
+              <Button
+                asChild
+                className="border-2 border-ink bg-accent text-accent-foreground font-bold shadow-ink wobbly-sm hover:shadow-ink-lg transition-transform hover:-translate-y-1"
+              >
                 <Link to="/projects/new">
                   <Plus className="mr-2 h-4 w-4" /> Submit a Project
                 </Link>

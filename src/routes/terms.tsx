@@ -1,7 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  Scale, UserCheck, Gavel, MessageSquareWarning, ShieldBan,
-  FolderLock, EyeOff, AlertCircle, RefreshCw, ArrowRight, FileText,
+  Scale,
+  UserCheck,
+  Gavel,
+  MessageSquareWarning,
+  ShieldBan,
+  FolderLock,
+  EyeOff,
+  AlertCircle,
+  RefreshCw,
+  ArrowRight,
+  FileText,
 } from "lucide-react";
 import { SiteShell } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -71,8 +80,7 @@ export const Route = createFileRoute("/terms")({
       { property: "og:title", content: "Terms of Service — CampusXpose" },
       {
         property: "og:description",
-        content:
-          "Legal terms governing your use of the CampusXpose anonymous reporting platform.",
+        content: "Legal terms governing your use of the CampusXpose anonymous reporting platform.",
       },
       { property: "og:url", content: "https://campusxpose.online/terms" },
     ],
@@ -99,15 +107,13 @@ function TermsPage() {
             </div>
             <div className="min-w-0">
               <h1 className="font-display text-3xl font-bold">Terms of Service</h1>
-              <p className="text-sm text-muted-foreground">
-                Effective Date: {LAST_UPDATED}
-              </p>
+              <p className="text-sm text-muted-foreground">Effective Date: {LAST_UPDATED}</p>
             </div>
           </div>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-            This Terms of Service Agreement sets forth the legally binding terms
-            governing your access to and use of the CampusXpose Platform. By using
-            our services, you agree to comply with all provisions described herein.
+            This Terms of Service Agreement sets forth the legally binding terms governing your
+            access to and use of the CampusXpose Platform. By using our services, you agree to
+            comply with all provisions described herein.
           </p>
         </div>
 
@@ -148,10 +154,9 @@ function TermsPage() {
           <div className="flex items-start gap-3">
             <FileText className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
             <p className="text-xs leading-relaxed text-muted-foreground">
-              This document is maintained by CampusXpose as an app-owned editable
-              legal statement. It is not an independent legal certification.
-              For questions regarding these terms, please contact the Platform
-              administrator through the in-app feedback channel.
+              This document is maintained by CampusXpose as an app-owned editable legal statement.
+              It is not an independent legal certification. For questions regarding these terms,
+              please contact the Platform administrator through the in-app feedback channel.
             </p>
           </div>
         </div>
@@ -161,9 +166,7 @@ function TermsPage() {
           className="mt-8 -rotate-1 border-2 border-dashed border-ink bg-surface-2/60 p-6 text-center shadow-ink"
           style={{ borderRadius: WOBBLY_MD }}
         >
-          <p className="font-display text-lg font-bold">
-            Your trust is our priority.
-          </p>
+          <p className="font-display text-lg font-bold">Your trust is our priority.</p>
           <p className="mt-1 text-sm text-muted-foreground">
             Review our Privacy Policy for additional details on data practices.
           </p>

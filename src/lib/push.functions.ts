@@ -13,17 +13,15 @@ export const savePushSubscription = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => subSchema.parse(d))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
-      .from("push_subscriptions")
-      .upsert(
-        {
-          user_hash: data.hashedId,
-          endpoint: data.endpoint,
-          p256dh: data.p256dh,
-          auth: data.auth,
-        },
-        { onConflict: "endpoint" },
-      );
+    const { error } = await supabaseAdmin.from("push_subscriptions").upsert(
+      {
+        user_hash: data.hashedId,
+        endpoint: data.endpoint,
+        p256dh: data.p256dh,
+        auth: data.auth,
+      },
+      { onConflict: "endpoint" },
+    );
     if (error) throw new Error(error.message);
 
     // Send a welcome notification

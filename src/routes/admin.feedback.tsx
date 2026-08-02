@@ -13,7 +13,11 @@ import { Send, Trash2, CheckCircle2, MessageSquareHeart } from "lucide-react";
 
 export const Route = createFileRoute("/admin/feedback")({
   head: () => ({ meta: [{ title: "Admin · Feedback" }, { name: "robots", content: "noindex" }] }),
-  component: () => <AdminShell><FeedbackAdmin /></AdminShell>,
+  component: () => (
+    <AdminShell>
+      <FeedbackAdmin />
+    </AdminShell>
+  ),
 });
 
 interface FeedbackRow {
@@ -83,31 +87,48 @@ function FeedbackAdmin() {
         </h1>
         <div className="flex gap-2 text-sm">
           <div className="rounded-lg border border-border bg-surface px-3 py-1.5">
-            <span className="font-semibold">{rows.length}</span> <span className="text-muted-foreground">total</span>
+            <span className="font-semibold">{rows.length}</span>{" "}
+            <span className="text-muted-foreground">total</span>
           </div>
           <div className="rounded-lg border border-border bg-surface px-3 py-1.5">
-            <span className="font-semibold text-accent">{newCount}</span> <span className="text-muted-foreground">naye</span>
+            <span className="font-semibold text-accent">{newCount}</span>{" "}
+            <span className="text-muted-foreground">naye</span>
           </div>
         </div>
       </div>
 
       <div className="mt-4 space-y-3">
         {q.isLoading && <p className="text-sm text-muted-foreground">Loading feedback…</p>}
-        {q.isError && <p className="text-sm text-destructive">Couldn't load feedback. <button className="underline" onClick={() => q.refetch()}>Retry</button></p>}
-        {!q.isLoading && !q.isError && rows.length === 0 && <p className="text-sm text-muted-foreground">Abhi koi feedback nahi aaya.</p>}
+        {q.isError && (
+          <p className="text-sm text-destructive">
+            Couldn't load feedback.{" "}
+            <button className="underline" onClick={() => q.refetch()}>
+              Retry
+            </button>
+          </p>
+        )}
+        {!q.isLoading && !q.isError && rows.length === 0 && (
+          <p className="text-sm text-muted-foreground">Abhi koi feedback nahi aaya.</p>
+        )}
 
         {rows.map((r) => (
           <div key={r.id} className="rounded-xl border border-border bg-surface p-4">
             <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
               <span className="font-semibold text-foreground">{r.name || "Anonymous"}</span>
-              {r.user_username && <span className="rounded bg-primary/15 px-1.5 py-0.5 font-medium text-primary">@{r.user_username}</span>}
+              {r.user_username && (
+                <span className="rounded bg-primary/15 px-1.5 py-0.5 font-medium text-primary">
+                  @{r.user_username}
+                </span>
+              )}
               <span>· {timeAgo(r.created_at)}</span>
               {r.status === "replied" ? (
                 <span className="ml-auto inline-flex items-center gap-1 rounded bg-success/15 px-2 py-0.5 font-bold text-success">
                   <CheckCircle2 className="h-3 w-3" /> Replied
                 </span>
               ) : (
-                <span className="ml-auto rounded bg-accent/15 px-2 py-0.5 font-bold text-accent">NEW</span>
+                <span className="ml-auto rounded bg-accent/15 px-2 py-0.5 font-bold text-accent">
+                  NEW
+                </span>
               )}
             </div>
 
@@ -130,18 +151,36 @@ function FeedbackAdmin() {
                   maxLength={1000}
                 />
                 <div className="mt-2 flex items-center justify-between gap-2">
-                  <Button size="sm" variant="ghost" className="text-destructive" onClick={() => doDelete(r.id)}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-destructive"
+                    onClick={() => doDelete(r.id)}
+                  >
                     <Trash2 className="mr-1.5 h-4 w-4" /> Delete
                   </Button>
                   <Button size="sm" disabled={sending === r.id} onClick={() => doReply(r)}>
-                    {sending === r.id ? "Bhej rahe…" : <>DM bhejo <Send className="ml-1 h-4 w-4" /></>}
+                    {sending === r.id ? (
+                      "Bhej rahe…"
+                    ) : (
+                      <>
+                        DM bhejo <Send className="ml-1 h-4 w-4" />
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>
             ) : (
               <div className="mt-3 flex items-center justify-between gap-2">
-                <span className="text-xs text-muted-foreground">No identity attached — DM reply not possible.</span>
-                <Button size="sm" variant="ghost" className="text-destructive" onClick={() => doDelete(r.id)}>
+                <span className="text-xs text-muted-foreground">
+                  No identity attached — DM reply not possible.
+                </span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-destructive"
+                  onClick={() => doDelete(r.id)}
+                >
                   <Trash2 className="mr-1.5 h-4 w-4" /> Delete
                 </Button>
               </div>

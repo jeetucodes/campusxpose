@@ -45,9 +45,7 @@ function SetupPage() {
 
   const allVerified =
     result &&
-    ["projects", "project_ratings", "collaborate_requests"].every(
-      (t) => result.verify[t] === true,
-    );
+    ["projects", "project_ratings", "collaborate_requests"].every((t) => result.verify[t] === true);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-paper p-4">
@@ -98,9 +96,7 @@ function SetupPage() {
                   )}
                   <div className="min-w-0">
                     <div className="font-medium">{s.step}</div>
-                    {s.error && (
-                      <div className="mt-0.5 truncate text-xs opacity-80">{s.error}</div>
-                    )}
+                    {s.error && <div className="mt-0.5 truncate text-xs opacity-80">{s.error}</div>}
                   </div>
                 </div>
               ))}
@@ -136,13 +132,8 @@ function SetupPage() {
               <div className="rounded-xl border-2 border-green-400 bg-green-50 p-4 text-center">
                 <CheckCircle2 className="mx-auto mb-2 h-8 w-8 text-green-600" />
                 <p className="font-bold text-green-800">All tables created! 🎉</p>
-                <p className="mt-1 text-sm text-green-700">
-                  Projects feature is now ready to use.
-                </p>
-                <Button
-                  className="mt-3"
-                  onClick={() => navigate({ to: "/projects" })}
-                >
+                <p className="mt-1 text-sm text-green-700">Projects feature is now ready to use.</p>
+                <Button className="mt-3" onClick={() => navigate({ to: "/projects" })}>
                   Go to /projects →
                 </Button>
               </div>
@@ -151,12 +142,10 @@ function SetupPage() {
                 <div className="flex items-start gap-2">
                   <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
                   <div>
-                    <p className="font-bold text-amber-800">
-                      Automated migration may have failed
-                    </p>
+                    <p className="font-bold text-amber-800">Automated migration may have failed</p>
                     <p className="mt-1 text-sm text-amber-700">
-                      The Management API requires a Personal Access Token, not the service role
-                      key. Please run the SQL manually in Supabase:
+                      The Management API requires a Personal Access Token, not the service role key.
+                      Please run the SQL manually in Supabase:
                     </p>
                     <ol className="mt-2 list-decimal space-y-1 pl-4 text-sm text-amber-700">
                       <li>

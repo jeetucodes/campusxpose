@@ -3,8 +3,21 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
-  Megaphone, Plus, Trash2, Pencil, Loader2,
-  ImageIcon, VideoIcon, Upload, X, Clock, ExternalLink, Sparkles, CheckCircle2, AlertCircle, ShieldCheck
+  Megaphone,
+  Plus,
+  Trash2,
+  Pencil,
+  Loader2,
+  ImageIcon,
+  VideoIcon,
+  Upload,
+  X,
+  Clock,
+  ExternalLink,
+  Sparkles,
+  CheckCircle2,
+  AlertCircle,
+  ShieldCheck,
 } from "lucide-react";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { useAdmin } from "@/stores/admin";
@@ -21,7 +34,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 
 const IMGBB_KEY = import.meta.env.VITE_IMGBB_API_KEY as string;
@@ -60,16 +77,33 @@ function ImageUploader({ onUrl }: { onUrl: (url: string) => void }) {
 
   return (
     <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-dashed border-border bg-surface-2 px-3 py-1.5 text-xs text-muted-foreground transition hover:border-primary hover:text-primary">
-      {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+      {uploading ? (
+        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+      ) : (
+        <Upload className="h-3.5 w-3.5" />
+      )}
       {uploading ? "Uploading…" : "Upload photo"}
-      <input ref={ref} type="file" accept="image/*" className="hidden" onChange={handleFile} disabled={uploading} />
+      <input
+        ref={ref}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFile}
+        disabled={uploading}
+      />
     </label>
   );
 }
 
 export const Route = createFileRoute("/admin/ads")({
-  head: () => ({ meta: [{ title: "Admin · Ads Management" }, { name: "robots", content: "noindex" }] }),
-  component: () => <AdminShell><AdsAdmin /></AdminShell>,
+  head: () => ({
+    meta: [{ title: "Admin · Ads Management" }, { name: "robots", content: "noindex" }],
+  }),
+  component: () => (
+    <AdminShell>
+      <AdsAdmin />
+    </AdminShell>
+  ),
 });
 
 type Ad = {
@@ -91,9 +125,20 @@ type Ad = {
 };
 
 const EMPTY: Ad = {
-  title: "", kind: "banner", body: "", link_url: "", media_url: "", embed_url: "",
-  cta_label: "", show_home: false, show_global: false, show_college: false, show_games: false,
-  active: true, sort_order: 0, timer_seconds: null,
+  title: "",
+  kind: "banner",
+  body: "",
+  link_url: "",
+  media_url: "",
+  embed_url: "",
+  cta_label: "",
+  show_home: false,
+  show_global: false,
+  show_college: false,
+  show_games: false,
+  active: true,
+  sort_order: 0,
+  timer_seconds: null,
 };
 
 function AdsAdmin() {
@@ -127,7 +172,9 @@ function AdsAdmin() {
     }
   };
 
-  useEffect(() => { reload(); /* eslint-disable-next-line */ }, [token]);
+  useEffect(() => {
+    reload(); /* eslint-disable-next-line */
+  }, [token]);
 
   const toggleMaster = async (val: boolean) => {
     setEnabledState(val);
@@ -160,7 +207,10 @@ function AdsAdmin() {
 
   const handleSave = async () => {
     if (!editing) return;
-    if (!editing.title.trim()) { toast.error("Title is required"); return; }
+    if (!editing.title.trim()) {
+      toast.error("Title is required");
+      return;
+    }
     setBusy(true);
     try {
       await save({
@@ -168,7 +218,7 @@ function AdsAdmin() {
           token: token!,
           ...editing,
           timer_seconds: editing.timer_seconds ? Number(editing.timer_seconds) : null,
-        }
+        },
       });
       toast.success("Ad saved successfully!");
       setEditing(null);
@@ -203,8 +253,8 @@ function AdsAdmin() {
     }
   };
 
-  const activeCount = ads.filter(a => a.active).length;
-  const gamesCount = ads.filter(a => a.active && a.show_games).length;
+  const activeCount = ads.filter((a) => a.active).length;
+  const gamesCount = ads.filter((a) => a.active && a.show_games).length;
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -218,7 +268,10 @@ function AdsAdmin() {
             Manage site-wide promotions, in-game reward ads, video partners, and ad display timers.
           </p>
         </div>
-        <Button onClick={() => setEditing({ ...EMPTY })} className="rounded-xl font-bold shadow-md hover:scale-105 transition-transform shrink-0">
+        <Button
+          onClick={() => setEditing({ ...EMPTY })}
+          className="rounded-xl font-bold shadow-md hover:scale-105 transition-transform shrink-0"
+        >
           <Plus className="h-4 w-4 mr-1.5" /> New Ad Campaign
         </Button>
       </div>
@@ -226,24 +279,34 @@ function AdsAdmin() {
       {/* Quick Analytics Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="bg-surface border border-border p-4 rounded-xl space-y-1 shadow-sm">
-          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Ads</div>
+          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            Total Ads
+          </div>
           <div className="text-2xl font-black">{ads.length}</div>
         </div>
         <div className="bg-surface border border-border p-4 rounded-xl space-y-1 shadow-sm">
-          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Active Ads</div>
-          <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{activeCount}</div>
+          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            Active Ads
+          </div>
+          <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
+            {activeCount}
+          </div>
         </div>
         <div className="bg-surface border border-border p-4 rounded-xl space-y-1 shadow-sm">
           <div className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider flex items-center gap-1">
             <span>🕹️</span> Games Ads
           </div>
-          <div className="text-2xl font-black text-emerald-700 dark:text-emerald-300">{gamesCount}</div>
+          <div className="text-2xl font-black text-emerald-700 dark:text-emerald-300">
+            {gamesCount}
+          </div>
         </div>
         <div className="bg-surface border border-border p-4 rounded-xl space-y-1 shadow-sm">
           <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
             <Clock className="h-3.5 w-3.5 text-amber-500" /> Default Timer
           </div>
-          <div className="text-2xl font-black text-amber-600 dark:text-amber-400">{globalTimerSec}s</div>
+          <div className="text-2xl font-black text-amber-600 dark:text-amber-400">
+            {globalTimerSec}s
+          </div>
         </div>
       </div>
 
@@ -265,8 +328,13 @@ function AdsAdmin() {
           </div>
           <div className="flex items-center gap-2 text-xs">
             <span className="font-semibold text-muted-foreground">Current Status:</span>
-            <span className={`px-2.5 py-0.5 rounded-full font-bold uppercase text-[10px] ${enabled ? "bg-emerald-500/15 text-emerald-600 border border-emerald-500/30" : "bg-destructive/15 text-destructive border border-destructive/30"
-              }`}>
+            <span
+              className={`px-2.5 py-0.5 rounded-full font-bold uppercase text-[10px] ${
+                enabled
+                  ? "bg-emerald-500/15 text-emerald-600 border border-emerald-500/30"
+                  : "bg-destructive/15 text-destructive border border-destructive/30"
+              }`}
+            >
               {enabled ? "🟢 Ads LIVE Site-Wide" : "🔴 Ads Disabled"}
             </span>
           </div>
@@ -280,7 +348,8 @@ function AdsAdmin() {
               <span className="font-bold text-base">Default Ad Timer (Seconds)</span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              How many seconds users must watch reward ads before the close button & reward claim unlock.
+              How many seconds users must watch reward ads before the close button & reward claim
+              unlock.
             </p>
           </div>
 
@@ -292,10 +361,11 @@ function AdsAdmin() {
                   key={sec}
                   type="button"
                   onClick={() => handleUpdateGlobalTimer(sec)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${globalTimerSec === sec
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                    globalTimerSec === sec
                       ? "bg-amber-500 text-white border-amber-600 shadow-sm"
                       : "bg-surface-2 hover:bg-surface border-border text-foreground"
-                    }`}
+                  }`}
                 >
                   {sec}s
                 </button>
@@ -314,7 +384,9 @@ function AdsAdmin() {
                   className="pr-10 font-bold"
                   placeholder="Set seconds"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">sec</span>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">
+                  sec
+                </span>
               </div>
               <Button
                 size="sm"
@@ -345,8 +417,14 @@ function AdsAdmin() {
         ) : ads.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-surface p-12 text-center space-y-3">
             <Megaphone className="h-10 w-10 text-muted-foreground mx-auto opacity-50" />
-            <p className="text-sm text-muted-foreground font-medium">No ads created yet. Click "New Ad Campaign" to create your first ad.</p>
-            <Button onClick={() => setEditing({ ...EMPTY })} size="sm" className="rounded-xl font-bold">
+            <p className="text-sm text-muted-foreground font-medium">
+              No ads created yet. Click "New Ad Campaign" to create your first ad.
+            </p>
+            <Button
+              onClick={() => setEditing({ ...EMPTY })}
+              size="sm"
+              className="rounded-xl font-bold"
+            >
               <Plus className="h-4 w-4 mr-1" /> New Ad
             </Button>
           </div>
@@ -355,8 +433,9 @@ function AdsAdmin() {
             {ads.map((ad) => (
               <div
                 key={ad.id}
-                className={`rounded-2xl border bg-surface p-4 transition-all hover:shadow-md ${ad.active ? "border-border" : "border-border/60 opacity-80"
-                  }`}
+                className={`rounded-2xl border bg-surface p-4 transition-all hover:shadow-md ${
+                  ad.active ? "border-border" : "border-border/60 opacity-80"
+                }`}
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   {/* Media + Details */}
@@ -364,7 +443,11 @@ function AdsAdmin() {
                     {/* Media Thumbnail */}
                     <div className="relative shrink-0">
                       {ad.media_url ? (
-                        <img src={ad.media_url} alt="" className="h-14 w-14 rounded-xl object-cover border border-border shadow-sm bg-muted" />
+                        <img
+                          src={ad.media_url}
+                          alt=""
+                          className="h-14 w-14 rounded-xl object-cover border border-border shadow-sm bg-muted"
+                        />
                       ) : ad.kind === "video" ? (
                         <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-500">
                           <VideoIcon className="h-6 w-6" />
@@ -376,8 +459,13 @@ function AdsAdmin() {
                       )}
 
                       {/* Video / Banner badge */}
-                      <span className={`absolute -bottom-1 -right-1 rounded-md px-1.5 py-0.5 text-[9px] font-black uppercase shadow-xs ${ad.kind === "video" ? "bg-blue-600 text-white" : "bg-emerald-600 text-white"
-                        }`}>
+                      <span
+                        className={`absolute -bottom-1 -right-1 rounded-md px-1.5 py-0.5 text-[9px] font-black uppercase shadow-xs ${
+                          ad.kind === "video"
+                            ? "bg-blue-600 text-white"
+                            : "bg-emerald-600 text-white"
+                        }`}
+                      >
                         {ad.kind === "video" ? "Video" : "Banner"}
                       </span>
                     </div>
@@ -385,11 +473,15 @@ function AdsAdmin() {
                     {/* Text Details */}
                     <div className="min-w-0 flex-1 space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-bold text-base text-foreground truncate">{ad.title}</span>
+                        <span className="font-bold text-base text-foreground truncate">
+                          {ad.title}
+                        </span>
                         {/* Timer Badge */}
                         <span className="inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
                           <Clock className="h-3 w-3" />
-                          {ad.timer_seconds ? `${ad.timer_seconds}s timer` : `${globalTimerSec}s (default)`}
+                          {ad.timer_seconds
+                            ? `${ad.timer_seconds}s timer`
+                            : `${globalTimerSec}s (default)`}
                         </span>
                       </div>
 
@@ -401,10 +493,24 @@ function AdsAdmin() {
 
                       {/* Placement badges */}
                       <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-                        <span className="text-[10px] font-semibold text-muted-foreground uppercase mr-1">Placements:</span>
-                        {ad.show_home && <span className="rounded-md bg-surface-2 border border-border px-2 py-0.5 text-[10px] font-medium">Home Page</span>}
-                        {ad.show_global && <span className="rounded-md bg-surface-2 border border-border px-2 py-0.5 text-[10px] font-medium">Global Chat</span>}
-                        {ad.show_college && <span className="rounded-md bg-surface-2 border border-border px-2 py-0.5 text-[10px] font-medium">College Chats</span>}
+                        <span className="text-[10px] font-semibold text-muted-foreground uppercase mr-1">
+                          Placements:
+                        </span>
+                        {ad.show_home && (
+                          <span className="rounded-md bg-surface-2 border border-border px-2 py-0.5 text-[10px] font-medium">
+                            Home Page
+                          </span>
+                        )}
+                        {ad.show_global && (
+                          <span className="rounded-md bg-surface-2 border border-border px-2 py-0.5 text-[10px] font-medium">
+                            Global Chat
+                          </span>
+                        )}
+                        {ad.show_college && (
+                          <span className="rounded-md bg-surface-2 border border-border px-2 py-0.5 text-[10px] font-medium">
+                            College Chats
+                          </span>
+                        )}
                         {ad.show_games && (
                           <span className="rounded-md bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-bold flex items-center gap-1">
                             🕹️ Games & Rewards
@@ -427,20 +533,29 @@ function AdsAdmin() {
                   {/* Actions & Active Toggle */}
                   <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/50">
                     <div className="flex items-center gap-2">
-                      <Switch
-                        checked={ad.active}
-                        onCheckedChange={() => handleToggleActive(ad)}
-                      />
-                      <span className={`text-xs font-bold ${ad.active ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>
+                      <Switch checked={ad.active} onCheckedChange={() => handleToggleActive(ad)} />
+                      <span
+                        className={`text-xs font-bold ${ad.active ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}
+                      >
                         {ad.active ? "Active" : "Inactive"}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-1">
-                      <Button size="icon" variant="outline" className="h-9 w-9 rounded-xl" onClick={() => setEditing(ad)}>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="h-9 w-9 rounded-xl"
+                        onClick={() => setEditing(ad)}
+                      >
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button size="icon" variant="outline" className="h-9 w-9 rounded-xl text-destructive hover:bg-destructive/10" onClick={() => handleDelete(ad.id!)}>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="h-9 w-9 rounded-xl text-destructive hover:bg-destructive/10"
+                        onClick={() => handleDelete(ad.id!)}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -483,20 +598,22 @@ function AdsAdmin() {
                     <button
                       type="button"
                       onClick={() => setEditing({ ...editing, kind: "banner" })}
-                      className={`flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold transition-all ${editing.kind === "banner"
+                      className={`flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold transition-all ${
+                        editing.kind === "banner"
                           ? "bg-background shadow-sm text-primary border border-border"
                           : "text-muted-foreground hover:text-foreground"
-                        }`}
+                      }`}
                     >
                       <ImageIcon className="h-4 w-4" /> Image Banner
                     </button>
                     <button
                       type="button"
                       onClick={() => setEditing({ ...editing, kind: "video" })}
-                      className={`flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold transition-all ${editing.kind === "video"
+                      className={`flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold transition-all ${
+                        editing.kind === "video"
                           ? "bg-background shadow-sm text-primary border border-border"
                           : "text-muted-foreground hover:text-foreground"
-                        }`}
+                      }`}
                     >
                       <VideoIcon className="h-4 w-4" /> Video Ad
                     </button>
@@ -521,7 +638,9 @@ function AdsAdmin() {
                     <Label className="font-bold flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
                       <Clock className="h-4 w-4" /> Ad Display Timer (Seconds)
                     </Label>
-                    <span className="text-xs text-muted-foreground">Default: {globalTimerSec}s</span>
+                    <span className="text-xs text-muted-foreground">
+                      Default: {globalTimerSec}s
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Input
@@ -529,23 +648,28 @@ function AdsAdmin() {
                       min={1}
                       max={300}
                       value={editing.timer_seconds ?? ""}
-                      onChange={(e) => setEditing({
-                        ...editing,
-                        timer_seconds: e.target.value === "" ? null : Number(e.target.value),
-                      })}
+                      onChange={(e) =>
+                        setEditing({
+                          ...editing,
+                          timer_seconds: e.target.value === "" ? null : Number(e.target.value),
+                        })
+                      }
                       placeholder={`Custom seconds (Leave blank to use default ${globalTimerSec}s)`}
                       className="font-semibold"
                     />
                   </div>
                   <p className="text-[11px] text-muted-foreground leading-tight">
-                    Specify a custom watch duration in seconds for this ad. If left blank, it will use the global default of {globalTimerSec} seconds.
+                    Specify a custom watch duration in seconds for this ad. If left blank, it will
+                    use the global default of {globalTimerSec} seconds.
                   </p>
                 </div>
 
                 {/* BANNER media fields */}
                 {editing.kind === "banner" && (
                   <div className="space-y-3 rounded-2xl border border-border p-4 bg-surface-2/50">
-                    <Label className="font-bold text-xs uppercase tracking-wider text-muted-foreground">Banner Media</Label>
+                    <Label className="font-bold text-xs uppercase tracking-wider text-muted-foreground">
+                      Banner Media
+                    </Label>
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <Input
@@ -555,7 +679,11 @@ function AdsAdmin() {
                           className="flex-1"
                         />
                         {editing.media_url?.trim() && (
-                          <button type="button" onClick={() => setEditing({ ...editing, media_url: "" })} className="shrink-0 text-muted-foreground hover:text-destructive">
+                          <button
+                            type="button"
+                            onClick={() => setEditing({ ...editing, media_url: "" })}
+                            className="shrink-0 text-muted-foreground hover:text-destructive"
+                          >
                             <X className="h-4 w-4" />
                           </button>
                         )}
@@ -563,14 +691,24 @@ function AdsAdmin() {
                       <ImageUploader onUrl={(url) => setEditing({ ...editing, media_url: url })} />
                       {editing.media_url?.trim() && (
                         <div className="overflow-hidden rounded-xl border border-border max-h-48 bg-black/5 flex items-center justify-center p-1">
-                          <img src={editing.media_url} alt="Preview" className="max-h-44 object-contain rounded-lg"
-                            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
+                          <img
+                            src={editing.media_url}
+                            alt="Preview"
+                            className="max-h-44 object-contain rounded-lg"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).style.display = "none";
+                            }}
+                          />
                         </div>
                       )}
                     </div>
                     <div className="space-y-1 pt-1">
                       <Label className="text-xs font-bold">Target Link URL</Label>
-                      <Input value={editing.link_url ?? ""} onChange={(e) => setEditing({ ...editing, link_url: e.target.value })} placeholder="https://example.com/promo" />
+                      <Input
+                        value={editing.link_url ?? ""}
+                        onChange={(e) => setEditing({ ...editing, link_url: e.target.value })}
+                        placeholder="https://example.com/promo"
+                      />
                     </div>
                   </div>
                 )}
@@ -578,10 +716,22 @@ function AdsAdmin() {
                 {/* VIDEO media fields */}
                 {editing.kind === "video" && (
                   <div className="space-y-3 rounded-2xl border border-border p-4 bg-surface-2/50">
-                    <Label className="font-bold text-xs uppercase tracking-wider text-muted-foreground">Video Embed & Thumbnail</Label>
+                    <Label className="font-bold text-xs uppercase tracking-wider text-muted-foreground">
+                      Video Embed & Thumbnail
+                    </Label>
                     <div className="space-y-1">
                       <Label className="text-xs font-bold">Video Embed / Direct MP4 URL</Label>
-                      <Input value={editing.embed_url ?? editing.media_url ?? ""} onChange={(e) => setEditing({ ...editing, embed_url: e.target.value, media_url: e.target.value })} placeholder="https://www.youtube.com/embed/... or direct .mp4 link" />
+                      <Input
+                        value={editing.embed_url ?? editing.media_url ?? ""}
+                        onChange={(e) =>
+                          setEditing({
+                            ...editing,
+                            embed_url: e.target.value,
+                            media_url: e.target.value,
+                          })
+                        }
+                        placeholder="https://www.youtube.com/embed/... or direct .mp4 link"
+                      />
                     </div>
                     <div className="space-y-2 pt-1">
                       <Label className="text-xs font-bold">Cover Photo / Thumbnail Image</Label>
@@ -597,7 +747,11 @@ function AdsAdmin() {
                     </div>
                     <div className="space-y-1 pt-1">
                       <Label className="text-xs font-bold">Action Button Link (Optional)</Label>
-                      <Input value={editing.link_url ?? ""} onChange={(e) => setEditing({ ...editing, link_url: e.target.value })} placeholder="https://..." />
+                      <Input
+                        value={editing.link_url ?? ""}
+                        onChange={(e) => setEditing({ ...editing, link_url: e.target.value })}
+                        placeholder="https://..."
+                      />
                     </div>
                   </div>
                 )}
@@ -605,17 +759,35 @@ function AdsAdmin() {
                 {/* CTA label */}
                 <div className="space-y-1.5">
                   <Label className="font-bold">Button CTA Label</Label>
-                  <Input value={editing.cta_label ?? ""} onChange={(e) => setEditing({ ...editing, cta_label: e.target.value })} placeholder="e.g., Learn More, Claim Perks" />
+                  <Input
+                    value={editing.cta_label ?? ""}
+                    onChange={(e) => setEditing({ ...editing, cta_label: e.target.value })}
+                    placeholder="e.g., Learn More, Claim Perks"
+                  />
                 </div>
 
                 {/* Placements Selection */}
                 <div className="space-y-3 rounded-2xl border border-border p-4 bg-surface">
-                  <Label className="font-bold text-xs uppercase tracking-wider text-muted-foreground">Display Locations</Label>
+                  <Label className="font-bold text-xs uppercase tracking-wider text-muted-foreground">
+                    Display Locations
+                  </Label>
                   <div className="space-y-2">
-                    {([["show_home", "Home Page Banner"], ["show_global", "Global Chat Banner"], ["show_college", "College Chats Banner"]] as const).map(([key, label]) => (
-                      <div key={key} className="flex items-center justify-between py-1.5 border-b border-border/40 last:border-0">
+                    {(
+                      [
+                        ["show_home", "Home Page Banner"],
+                        ["show_global", "Global Chat Banner"],
+                        ["show_college", "College Chats Banner"],
+                      ] as const
+                    ).map(([key, label]) => (
+                      <div
+                        key={key}
+                        className="flex items-center justify-between py-1.5 border-b border-border/40 last:border-0"
+                      >
                         <span className="text-sm font-semibold">{label}</span>
-                        <Switch checked={editing[key]} onCheckedChange={(v) => setEditing({ ...editing, [key]: v })} />
+                        <Switch
+                          checked={editing[key]}
+                          onCheckedChange={(v) => setEditing({ ...editing, [key]: v })}
+                        />
                       </div>
                     ))}
 
@@ -647,7 +819,10 @@ function AdsAdmin() {
                       <Label className="font-bold">Active</Label>
                       <p className="text-[10px] text-muted-foreground">Show in circulation</p>
                     </div>
-                    <Switch checked={editing.active} onCheckedChange={(v) => setEditing({ ...editing, active: v })} />
+                    <Switch
+                      checked={editing.active}
+                      onCheckedChange={(v) => setEditing({ ...editing, active: v })}
+                    />
                   </div>
 
                   <div className="p-3 rounded-xl border border-border bg-surface space-y-1">
@@ -655,7 +830,9 @@ function AdsAdmin() {
                     <Input
                       type="number"
                       value={editing.sort_order}
-                      onChange={(e) => setEditing({ ...editing, sort_order: Number(e.target.value) || 0 })}
+                      onChange={(e) =>
+                        setEditing({ ...editing, sort_order: Number(e.target.value) || 0 })
+                      }
                       className="h-8 font-bold text-xs"
                     />
                   </div>
@@ -665,10 +842,18 @@ function AdsAdmin() {
           </div>
 
           <DialogFooter className="shrink-0 border-t border-border px-5 py-4 sm:px-6 gap-2">
-            <Button variant="outline" className="flex-1 rounded-xl font-bold" onClick={() => setEditing(null)}>
+            <Button
+              variant="outline"
+              className="flex-1 rounded-xl font-bold"
+              onClick={() => setEditing(null)}
+            >
               Cancel
             </Button>
-            <Button className="flex-1 rounded-xl font-bold shadow-md" onClick={handleSave} disabled={busy}>
+            <Button
+              className="flex-1 rounded-xl font-bold shadow-md"
+              onClick={handleSave}
+              disabled={busy}
+            >
               {busy && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />} Save Campaign
             </Button>
           </DialogFooter>

@@ -9,7 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/admin/login")({
-  head: () => ({ meta: [{ title: "Admin Login — CampusXpose" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "Admin Login — CampusXpose" }, { name: "robots", content: "noindex" }],
+  }),
   component: AdminLoginPage,
 });
 
@@ -64,7 +66,6 @@ function useCountdown(targetMs: number) {
   return remaining;
 }
 
-
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 function AdminLoginPage() {
@@ -118,7 +119,7 @@ function AdminLoginPage() {
         setError(
           left > 0
             ? `Wrong password. ${left} attempt${left > 1 ? "s" : ""} left before lockout.`
-            : "Wrong password."
+            : "Wrong password.",
         );
       }
 
@@ -136,11 +137,13 @@ function AdminLoginPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-background px-4 py-8 overflow-hidden">
-
       {/* Dot grid background */}
       <div
         className="pointer-events-none absolute inset-0 opacity-40"
-        style={{ backgroundImage: "radial-gradient(#d1cec8 1px, transparent 1px)", backgroundSize: "20px 20px" }}
+        style={{
+          backgroundImage: "radial-gradient(#d1cec8 1px, transparent 1px)",
+          backgroundSize: "20px 20px",
+        }}
       />
 
       {/* Decorative blobs */}
@@ -201,13 +204,17 @@ function AdminLoginPage() {
                 >
                   <div className="flex items-center gap-3 border-b border-destructive/20 bg-destructive/10 px-4 py-2.5">
                     <ShieldAlert className="h-4 w-4 text-destructive shrink-0" />
-                    <span className="text-xs font-bold text-destructive uppercase tracking-wide">Access Temporarily Blocked</span>
+                    <span className="text-xs font-bold text-destructive uppercase tracking-wide">
+                      Access Temporarily Blocked
+                    </span>
                   </div>
                   <div className="flex items-center justify-between px-4 py-3">
                     <p className="text-xs text-muted-foreground">Too many failed attempts</p>
                     <div className="flex items-center gap-1.5 rounded-full border border-destructive/30 bg-white px-3 py-1 shadow-sm">
                       <Timer className="h-3.5 w-3.5 text-destructive" />
-                      <span className="font-mono text-sm font-bold tabular-nums text-destructive">{fmt(remaining)}</span>
+                      <span className="font-mono text-sm font-bold tabular-nums text-destructive">
+                        {fmt(remaining)}
+                      </span>
                     </div>
                   </div>
                 </motion.div>
@@ -224,7 +231,9 @@ function AdminLoginPage() {
                   className="mb-4 rounded-xl border border-border bg-surface-2/60 px-3 py-2.5"
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Failed attempts</span>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      Failed attempts
+                    </span>
                     <span className="text-[10px] font-bold text-destructive">{attempts} / 3</span>
                   </div>
                   <div className="flex gap-1.5">
@@ -240,7 +249,10 @@ function AdminLoginPage() {
                   </div>
                   {attempts >= 2 && (
                     <p className="mt-1.5 text-[10px] text-amber-600 font-medium">
-                      ⚠️ {attempts === 2 ? "1 attempt left before lockout" : `Next lockout: ${lockoutSeconds(attempts + 1)}s`}
+                      ⚠️{" "}
+                      {attempts === 2
+                        ? "1 attempt left before lockout"
+                        : `Next lockout: ${lockoutSeconds(attempts + 1)}s`}
                     </p>
                   )}
                 </motion.div>
@@ -300,12 +312,26 @@ function AdminLoginPage() {
               className="mt-5 w-full h-11 gap-2 text-sm font-bold shadow-[3px_3px_0_0_var(--ink)] transition-all hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_var(--ink)] disabled:opacity-60 disabled:translate-y-0 disabled:shadow-[3px_3px_0_0_var(--ink)]"
               style={{ borderRadius: "12px 4px 14px 4px / 4px 14px 4px 12px" }}
             >
-              {busy
-                ? <><motion.span animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }} className="inline-block">⏳</motion.span> Checking…</>
-                : isLocked
-                ? <><Timer className="h-4 w-4" /> Locked · {fmt(remaining)}</>
-                : <><Lock className="h-4 w-4" /> Login to Admin</>
-              }
+              {busy ? (
+                <>
+                  <motion.span
+                    animate={{ rotate: 360 }}
+                    transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                    className="inline-block"
+                  >
+                    ⏳
+                  </motion.span>{" "}
+                  Checking…
+                </>
+              ) : isLocked ? (
+                <>
+                  <Timer className="h-4 w-4" /> Locked · {fmt(remaining)}
+                </>
+              ) : (
+                <>
+                  <Lock className="h-4 w-4" /> Login to Admin
+                </>
+              )}
             </Button>
 
             {/* Footer note */}
@@ -318,4 +344,3 @@ function AdminLoginPage() {
     </div>
   );
 }
-

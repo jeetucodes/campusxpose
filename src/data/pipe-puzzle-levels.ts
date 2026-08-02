@@ -17,15 +17,24 @@
 // through an overload tile, and maxMoves is guaranteed >= the exact number
 // of taps required by this level's seeded tile scramble (see getPipeLevel).
 
-export type PipeTileType = "straight" | "elbow" | "t-junction" | "cross" | "source" | "device" | "blocked" | "overload" | "empty";
+export type PipeTileType =
+  | "straight"
+  | "elbow"
+  | "t-junction"
+  | "cross"
+  | "source"
+  | "device"
+  | "blocked"
+  | "overload"
+  | "empty";
 
 export interface PipeTile {
   row: number;
   col: number;
   type: PipeTileType;
-  rotation: number;       // 0-3 (current rotation, player can change for non-fixed)
+  rotation: number; // 0-3 (current rotation, player can change for non-fixed)
   solvedRotation: number; // the correct rotation for the solution
-  fixed: boolean;         // source, device, blocked, overload cannot be rotated
+  fixed: boolean; // source, device, blocked, overload cannot be rotated
 }
 
 export interface PipeLevelData {
@@ -37,18 +46,21 @@ export interface PipeLevelData {
 // Connection definitions per tile type at rotation=0
 // [top, right, bottom, left]
 export const BASE_CONNECTIONS: Record<PipeTileType, [boolean, boolean, boolean, boolean]> = {
-  straight: [true, false, true, false],   // vertical pipe
-  elbow: [true, true, false, false],       // top-right corner
+  straight: [true, false, true, false], // vertical pipe
+  elbow: [true, true, false, false], // top-right corner
   "t-junction": [true, true, false, true], // top, right, left (no bottom)
-  cross: [true, true, true, true],         // all four
-  source: [false, false, true, false],     // emits downward at rot=0
-  device: [true, false, false, false],     // receives from top at rot=0
+  cross: [true, true, true, true], // all four
+  source: [false, false, true, false], // emits downward at rot=0
+  device: [true, false, false, false], // receives from top at rot=0
   blocked: [false, false, false, false],
-  overload: [true, true, true, true],      // connects all sides (it's a trap)
+  overload: [true, true, true, true], // connects all sides (it's a trap)
   empty: [false, false, false, false],
 };
 
-export function getConnections(type: PipeTileType, rotation: number): [boolean, boolean, boolean, boolean] {
+export function getConnections(
+  type: PipeTileType,
+  rotation: number,
+): [boolean, boolean, boolean, boolean] {
   const base = BASE_CONNECTIONS[type];
   if (!base) return [false, false, false, false];
   const r = ((rotation % 4) + 4) % 4;
@@ -700,7 +712,6 @@ const RAW_LEVELS: RawLevel[] = [
     ],
     maxMoves: 14,
   },
-
 ];
 
 // ─── Level Loader ────────────────────────────────────────────────────────────
@@ -713,13 +724,13 @@ function seedRandom(seed: number) {
 }
 
 const CHAR_TO_TYPE: Record<string, PipeTileType> = {
-  "S": "source",
-  "D": "device",
+  S: "source",
+  D: "device",
   "─": "straight",
-  "L": "elbow",
-  "T": "t-junction",
+  L: "elbow",
+  T: "t-junction",
   "+": "cross",
-  "X": "blocked",
+  X: "blocked",
   "!": "overload",
   ".": "empty",
 };
@@ -743,7 +754,8 @@ export function getPipeLevel(levelIdx: number): PipeLevelData {
         continue;
       }
 
-      const fixed = type === "source" || type === "device" || type === "blocked" || type === "overload";
+      const fixed =
+        type === "source" || type === "device" || type === "blocked" || type === "overload";
 
       // Scramble rotation for non-fixed tiles
       let rotation = solvedRot;

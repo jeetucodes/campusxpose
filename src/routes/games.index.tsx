@@ -1,15 +1,34 @@
 import React, { useState, useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { Gamepad2, ArrowRight, Trophy, Sparkles, Play, X, Crown, Users, Activity } from "lucide-react";
+import {
+  Gamepad2,
+  ArrowRight,
+  Trophy,
+  Sparkles,
+  Play,
+  X,
+  Crown,
+  Users,
+  Activity,
+} from "lucide-react";
 import { loadOrCreateIdentity } from "../lib/identity";
-import { getGameAnalytics, recordGameSession, subscribeGlobalAnalytics, RealPlayerRecord } from "../lib/gameAnalytics";
+import {
+  getGameAnalytics,
+  recordGameSession,
+  subscribeGlobalAnalytics,
+  RealPlayerRecord,
+} from "../lib/gameAnalytics";
 
 export const Route = createFileRoute("/games/")({
   head: () => ({
     meta: [
       { title: "Campus Games Hub — CampusXpose" },
-      { name: "description", content: "Play fun casual mini-games, track your level progress and kill time on CampusXpose!" },
+      {
+        name: "description",
+        content:
+          "Play fun casual mini-games, track your level progress and kill time on CampusXpose!",
+      },
     ],
   }),
   component: GamesHub,
@@ -26,6 +45,7 @@ export interface LeaderboardPlayer {
   college: string;
   score: number;
   arrowLevel: number;
+  knifeLevel: number;
   best2048: number;
   badge: string;
   updatedAt: number;
@@ -38,7 +58,7 @@ export default function GamesHub() {
   const [stats, setStats] = useState({
     arrowLevel: 0,
     pipeLevel: 0,
-    archeryLevel: 0,
+    knifeLevel: 0,
     best2048: 0,
     memoryBest: 0,
   });
@@ -46,18 +66,18 @@ export default function GamesHub() {
   const [selectedFilter, setSelectedFilter] = useState<"all" | "puzzle" | "arcade">("all");
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [lbCategory, setLbCategory] = useState<LeaderboardCategory>("overall");
-  
+
   const [gameStatus, setGameStatus] = useState<Record<string, boolean>>({
     "arrow-puzzle": true,
     "pipe-connect": true,
-    "archery": true,
+    "knife-thrower": true,
     "2048": true,
     "memory-match": true,
   });
 
   const [arrowTotalLevels, setArrowTotalLevels] = useState<number>(100);
   const [pipeTotalLevels, setPipeTotalLevels] = useState<number>(30);
-  const [archeryTotalLevels, setArcheryTotalLevels] = useState<number>(50);
+  const [knifeTotalLevels, setKnifeTotalLevels] = useState<number>(100);
 
   // Real-time game status & level count listener
   useEffect(() => {
@@ -73,10 +93,10 @@ export default function GamesHub() {
         const pipeCustom = localStorage.getItem("cx_pipe_custom_levels");
         const pipeExtra = pipeCustom ? JSON.parse(pipeCustom).length : 0;
         setPipeTotalLevels(30 + pipeExtra);
-        
-        const archeryCustom = localStorage.getItem("cx_archery_custom_levels");
-        const archeryExtra = archeryCustom ? JSON.parse(archeryCustom).length : 0;
-        setArcheryTotalLevels(50 + archeryExtra);
+
+        const knifeCustom = localStorage.getItem("cx_knife_custom_levels");
+        const knifeExtra = knifeCustom ? JSON.parse(knifeCustom).length : 0;
+        setKnifeTotalLevels(100 + knifeExtra);
       } catch (e) {
         console.warn("Error reading game status", e);
       }
@@ -99,7 +119,7 @@ export default function GamesHub() {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setFeaturedIndexOffset(prev => prev + 1);
+      setFeaturedIndexOffset((prev) => prev + 1);
     }, 4000);
     return () => clearInterval(timer);
   }, []);
@@ -111,25 +131,28 @@ export default function GamesHub() {
       const currentName = idObj?.username || "Campus Gamer";
       setUsername(currentName);
 
-      const savedCollege = localStorage.getItem("cx_selected_college") || localStorage.getItem("selected_college_name") || "Campus Student";
+      const savedCollege =
+        localStorage.getItem("cx_selected_college") ||
+        localStorage.getItem("selected_college_name") ||
+        "Campus Student";
       setCollege(savedCollege);
 
       const arrowLvl = parseInt(localStorage.getItem("cx_arrow_level") || "0", 10);
       const pipeLvl = parseInt(localStorage.getItem("cx_pipe_level") || "0", 10);
-      const archeryLvl = parseInt(localStorage.getItem("cx_archery_level") || "0", 10);
+      const knifeLvl = parseInt(localStorage.getItem("cx_knife_level") || "0", 10);
       const h2048 = parseInt(localStorage.getItem("cx_2048_highscore") || "0", 10);
       const memBest = parseInt(localStorage.getItem("cx_memory_best") || "0", 10);
 
       const realArrowLvl = isNaN(arrowLvl) ? 0 : arrowLvl + 1;
       const realPipeLvl = isNaN(pipeLvl) ? 0 : pipeLvl + 1;
-      const realArcheryLvl = isNaN(archeryLvl) ? 0 : archeryLvl + 1;
+      const realKnifeLvl = isNaN(knifeLvl) ? 0 : knifeLvl + 1;
       const realH2048 = isNaN(h2048) ? 0 : h2048;
       const realMemBest = isNaN(memBest) ? 0 : memBest;
 
       setStats({
         arrowLevel: realArrowLvl,
         pipeLevel: realPipeLvl,
-        archeryLevel: realArcheryLvl,
+        knifeLevel: realKnifeLvl,
         best2048: realH2048,
         memoryBest: realMemBest,
       });
@@ -147,16 +170,24 @@ export default function GamesHub() {
           college: p.college,
           score: p.totalScore,
           arrowLevel: p.arrowLevel,
+          knifeLevel: p.knifeLevel,
           best2048: p.best2048,
-          badge: p.totalScore > 2000 ? "👑 Grandmaster" : p.totalScore > 1000 ? "⚡ Logic Wizard" : p.totalScore > 400 ? "🏹 Arrow Pioneer" : "🚀 Active Player",
+          badge:
+            p.totalScore > 2000
+              ? "👑 Grandmaster"
+              : p.totalScore > 1000
+                ? "⚡ Logic Wizard"
+                : p.totalScore > 400
+                  ? "🏹 Arrow Pioneer"
+                  : "🚀 Active Player",
           updatedAt: p.lastPlayedTime,
           isCurrentUser: p.uid === currentUid,
         };
       });
 
       // Ensure current real user is included in real list
-      const totalPts = (realArrowLvl * 150) + (realPipeLvl * 100) + realH2048;
-      const hasUser = realList.some(p => p.id === currentUid);
+      const totalPts = realArrowLvl * 150 + realPipeLvl * 100 + realKnifeLvl * 120 + realH2048;
+      const hasUser = realList.some((p) => p.id === currentUid);
       if (!hasUser) {
         realList.push({
           id: currentUid,
@@ -164,8 +195,16 @@ export default function GamesHub() {
           college: savedCollege,
           score: totalPts,
           arrowLevel: realArrowLvl,
+          knifeLevel: realKnifeLvl,
           best2048: realH2048,
-          badge: totalPts > 2000 ? "👑 Grandmaster" : totalPts > 1000 ? "⚡ Logic Wizard" : totalPts > 400 ? "🏹 Arrow Pioneer" : "🚀 Active Player",
+          badge:
+            totalPts > 2000
+              ? "👑 Grandmaster"
+              : totalPts > 1000
+                ? "⚡ Logic Wizard"
+                : totalPts > 400
+                  ? "🏹 Arrow Pioneer"
+                  : "🚀 Active Player",
           updatedAt: Date.now(),
           isCurrentUser: true,
         });
@@ -192,9 +231,13 @@ export default function GamesHub() {
     };
   }, []);
 
-  const currentUser = leaderboardList.find(p => p.isCurrentUser);
-  const totalUserPoints = currentUser?.score || (stats.arrowLevel * 150) + (stats.pipeLevel * 100) + stats.best2048;
-  const userRank = (leaderboardList.findIndex(p => p.isCurrentUser) >= 0 ? leaderboardList.findIndex(p => p.isCurrentUser) + 1 : 1);
+  const currentUser = leaderboardList.find((p) => p.isCurrentUser);
+  const totalUserPoints =
+    currentUser?.score || stats.arrowLevel * 150 + stats.pipeLevel * 100 + stats.knifeLevel * 120 + stats.best2048;
+  const userRank =
+    leaderboardList.findIndex((p) => p.isCurrentUser) >= 0
+      ? leaderboardList.findIndex((p) => p.isCurrentUser) + 1
+      : 1;
 
   // Filter leaderboard strictly for real players
   const filteredLeaderboard = React.useMemo(() => {
@@ -229,7 +272,8 @@ export default function GamesHub() {
       id: "pipe-connect" as const,
       title: "Pipe Connect",
       tagline: "Wire up the circuit and power the node!",
-      description: "Connect matching color power tubes and complete electrical circuit paths under time!",
+      description:
+        "Connect matching color power tubes and complete electrical circuit paths under time!",
       emoji: "⚡",
       bgGradient: "from-[#bfdbfe] via-[#60a5fa] to-[#3b82f6]",
       category: "puzzle",
@@ -241,25 +285,26 @@ export default function GamesHub() {
       icon: "🔌",
     },
     {
-      id: "archery" as const,
-      title: "Archery Master",
-      tagline: "Drag, aim & hit the bullseye!",
-      description: `${archeryTotalLevels} levels of wind, moving targets, and physics-based archery action!`,
-      emoji: "🎯",
-      bgGradient: "from-[#fef08a] via-[#f59e0b] to-[#d97706]",
+      id: "knife-thrower" as const,
+      title: "Knife Thrower",
+      tagline: "Throw knives, hit the log, don't hit other knives!",
+      description: `${knifeTotalLevels} levels of intense physics-based knife throwing action!`,
+      emoji: "🗡️",
+      bgGradient: "from-[#94a3b8] via-[#64748b] to-[#475569]",
       category: "arcade",
       badge: "NEW",
-      badgeBg: "bg-[#f59e0b] text-white",
-      color: "bg-[#fbbf24]",
-      link: "/games/archery",
-      statLabel: `Lvl ${stats.archeryLevel || 1} / ${archeryTotalLevels}`,
-      icon: "🏹",
+      badgeBg: "bg-[#64748b] text-white",
+      color: "bg-[#94a3b8]",
+      link: "/games/knife-thrower",
+      statLabel: `Lvl ${stats.knifeLevel || 1} / ${knifeTotalLevels}`,
+      icon: "🗡️",
     },
     {
       id: "2048" as const,
       title: "2048 Classic",
       tagline: "Slide, merge matching tiles and beat your high score!",
-      description: "Join matching number tiles together to reach the legendary 2048 tile and set new high scores!",
+      description:
+        "Join matching number tiles together to reach the legendary 2048 tile and set new high scores!",
       emoji: "🧩",
       bgGradient: "from-[#fbcfe8] via-[#f472b6] to-[#ec4899]",
       category: "arcade",
@@ -274,7 +319,8 @@ export default function GamesHub() {
       id: "memory-match" as const,
       title: "Memory Match",
       tagline: "Flip and match campus emoji cards under time!",
-      description: "Test your focus & memory speed! Match all campus emoji card pairs before time runs out.",
+      description:
+        "Test your focus & memory speed! Match all campus emoji card pairs before time runs out.",
       emoji: "🃏",
       bgGradient: "from-[#bbf7d0] via-[#4ade80] to-[#22c55e]",
       category: "arcade",
@@ -287,14 +333,15 @@ export default function GamesHub() {
     },
   ];
 
-  const activeOnlineGames = GAMES.filter(g => gameStatus[g.id] !== false);
+  const activeOnlineGames = GAMES.filter((g) => gameStatus[g.id] !== false);
 
-  const activeFeaturedGame = activeOnlineGames.length > 0
-    ? activeOnlineGames[featuredIndexOffset % activeOnlineGames.length]
-    : null;
+  const activeFeaturedGame =
+    activeOnlineGames.length > 0
+      ? activeOnlineGames[featuredIndexOffset % activeOnlineGames.length]
+      : null;
 
   const filteredGames = activeOnlineGames.filter(
-    g => selectedFilter === "all" || g.category === selectedFilter
+    (g) => selectedFilter === "all" || g.category === selectedFilter,
   );
 
   return (
@@ -315,12 +362,10 @@ export default function GamesHub() {
               </span>
             </div>
           </div>
-          
         </div>
       </div>
 
       <div className="mx-auto max-w-2xl px-4 py-6 space-y-6">
-
         {/* Dynamic Auto-Rotating Featured Hero Banner */}
         {activeFeaturedGame && (
           <AnimatePresence mode="wait">
@@ -345,16 +390,19 @@ export default function GamesHub() {
                       <div
                         key={g.id}
                         className={`h-2 rounded-full transition-all duration-300 ${
-                          idx === (featuredIndexOffset % activeOnlineGames.length) ? "w-5 bg-black" : "w-2 bg-black/30"
+                          idx === featuredIndexOffset % activeOnlineGames.length
+                            ? "w-5 bg-black"
+                            : "w-2 bg-black/30"
                         }`}
                       />
                     ))}
                   </div>
                 </div>
-                
+
                 <div className="space-y-1">
                   <h2 className="font-display text-3xl font-black uppercase tracking-tight text-black flex items-center gap-2">
-                    {activeFeaturedGame.title} <span className="text-2xl">{activeFeaturedGame.emoji}</span>
+                    {activeFeaturedGame.title}{" "}
+                    <span className="text-2xl">{activeFeaturedGame.emoji}</span>
                   </h2>
                   <p className="text-sm font-bold text-black/90 leading-relaxed max-w-md">
                     {activeFeaturedGame.description}
@@ -375,7 +423,7 @@ export default function GamesHub() {
                       <Play className="h-4 w-4 fill-white" /> Play Now
                     </motion.button>
                   </Link>
-                  
+
                   <div className="bg-white/90 border-2 border-black px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                     <Trophy className="h-4 w-4 text-amber-600" />
                     <span>{activeFeaturedGame.statLabel}</span>
@@ -394,7 +442,7 @@ export default function GamesHub() {
         {activeOnlineGames.length > 0 && (
           <div className="flex items-center justify-between gap-2 pt-2">
             <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-              {(["all", "puzzle", "arcade"] as const).map(tab => (
+              {(["all", "puzzle", "arcade"] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setSelectedFilter(tab)}
@@ -405,7 +453,11 @@ export default function GamesHub() {
                   }`}
                   style={{ borderRadius: WOBBLY_SM }}
                 >
-                  {tab === "all" ? "🎮 All Games" : tab === "puzzle" ? "🧠 Logic Puzzles" : "🕹️ Arcade"}
+                  {tab === "all"
+                    ? "🎮 All Games"
+                    : tab === "puzzle"
+                      ? "🧠 Logic Puzzles"
+                      : "🕹️ Arcade"}
                 </button>
               ))}
             </div>
@@ -439,7 +491,9 @@ export default function GamesHub() {
                     <h3 className="font-display text-xl font-black text-black uppercase tracking-tight truncate">
                       {game.title}
                     </h3>
-                    <span className={`text-[10px] font-black px-2 py-0.5 border-2 border-black rounded-full shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] ${game.badgeBg}`}>
+                    <span
+                      className={`text-[10px] font-black px-2 py-0.5 border-2 border-black rounded-full shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] ${game.badgeBg}`}
+                    >
                       {game.badge}
                     </span>
                   </div>
@@ -462,7 +516,6 @@ export default function GamesHub() {
             </Link>
           ))}
         </div>
-
       </div>
 
       {/* ─── Strictly Real Dynamic Leaderboard Modal Overlay (NO FAKE DATA) ───── */}
@@ -479,7 +532,7 @@ export default function GamesHub() {
               initial={{ scale: 0.9, y: 25 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 25 }}
-              onClick={e => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
               className="w-full max-w-md bg-white border-4 border-black p-5 flex flex-col max-h-[85vh] relative shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden text-black"
               style={{ borderRadius: WOBBLY_MD }}
             >
@@ -507,12 +560,14 @@ export default function GamesHub() {
 
               {/* Category Filter Pills */}
               <div className="flex items-center gap-1.5 mb-3 bg-gray-100 p-1 border-2 border-black rounded-xl">
-                {(["overall", "arrow", "2048"] as const).map(cat => (
+                {(["overall", "arrow", "2048"] as const).map((cat) => (
                   <button
                     key={cat}
                     onClick={() => setLbCategory(cat)}
                     className={`flex-1 py-1.5 font-display font-black text-xs uppercase rounded-lg border border-black transition-all ${
-                      lbCategory === cat ? "bg-[#fef08a] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]" : "bg-white text-black/70 hover:bg-gray-200"
+                      lbCategory === cat
+                        ? "bg-[#fef08a] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                        : "bg-white text-black/70 hover:bg-gray-200"
                     }`}
                   >
                     {cat === "overall" ? "Overall 🏆" : cat === "arrow" ? "Arrow 🏹" : "2048 🧩"}
@@ -529,16 +584,25 @@ export default function GamesHub() {
                   <div>
                     <div className="text-xs font-black text-black flex items-center gap-1">
                       <span>@{username}</span>
-                      <span className="bg-black text-white text-[9px] px-1.5 py-0.2 rounded font-black uppercase">YOU</span>
+                      <span className="bg-black text-white text-[9px] px-1.5 py-0.2 rounded font-black uppercase">
+                        YOU
+                      </span>
                     </div>
                     <div className="text-[10px] font-bold text-black/70">
-                      {college} • <span className="text-black font-black">{currentUser?.badge || "Active Player"}</span>
+                      {college} •{" "}
+                      <span className="text-black font-black">
+                        {currentUser?.badge || "Active Player"}
+                      </span>
                     </div>
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="font-display text-lg font-black text-black leading-none">
-                    {lbCategory === "overall" ? `${totalUserPoints} Pts` : lbCategory === "arrow" ? `Lvl ${stats.arrowLevel}` : `${stats.best2048} Pts`}
+                    {lbCategory === "overall"
+                      ? `${totalUserPoints} Pts`
+                      : lbCategory === "arrow"
+                        ? `Lvl ${stats.arrowLevel}`
+                        : `${stats.best2048} Pts`}
                   </div>
                   <div className="text-[9px] font-bold text-black/60">Your Score</div>
                 </div>
@@ -547,7 +611,8 @@ export default function GamesHub() {
               {/* Scrollable Live Real Players List */}
               <div className="flex-1 overflow-y-auto pr-1 space-y-2.5 custom-scrollbar">
                 <h3 className="text-xs font-black uppercase tracking-wider text-black mb-1 flex items-center gap-1.5">
-                  <Crown className="h-4 w-4 text-amber-500 fill-amber-500" /> Real Active Campus Players ({filteredLeaderboard.length})
+                  <Crown className="h-4 w-4 text-amber-500 fill-amber-500" /> Real Active Campus
+                  Players ({filteredLeaderboard.length})
                 </h3>
 
                 {filteredLeaderboard.map((player, index) => {
@@ -555,7 +620,12 @@ export default function GamesHub() {
                   const isTop1 = rankNum === 1;
                   const isTop2 = rankNum === 2;
                   const isTop3 = rankNum === 3;
-                  const displayScore = lbCategory === "arrow" ? `Lvl ${player.arrowLevel}` : lbCategory === "2048" ? `${player.best2048} pts` : `${player.score.toLocaleString()} pts`;
+                  const displayScore =
+                    lbCategory === "arrow"
+                      ? `Lvl ${player.arrowLevel}`
+                      : lbCategory === "2048"
+                        ? `${player.best2048} pts`
+                        : `${player.score.toLocaleString()} pts`;
 
                   return (
                     <div
@@ -564,18 +634,26 @@ export default function GamesHub() {
                         player.isCurrentUser
                           ? "bg-[#fef08a] border-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] scale-[1.01]"
                           : isTop1
-                          ? "bg-amber-100 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-                          : isTop2
-                          ? "bg-slate-100 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-                          : isTop3
-                          ? "bg-amber-50 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-                          : "bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                            ? "bg-amber-100 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                            : isTop2
+                              ? "bg-slate-100 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                              : isTop3
+                                ? "bg-amber-50 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                                : "bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full border-2 border-black flex items-center justify-center font-display font-black text-xs shrink-0 ${
-                          isTop1 ? "bg-amber-400 text-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]" : isTop2 ? "bg-slate-300 text-black" : isTop3 ? "bg-amber-600 text-white" : "bg-gray-100 text-black"
-                        }`}>
+                        <div
+                          className={`w-8 h-8 rounded-full border-2 border-black flex items-center justify-center font-display font-black text-xs shrink-0 ${
+                            isTop1
+                              ? "bg-amber-400 text-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
+                              : isTop2
+                                ? "bg-slate-300 text-black"
+                                : isTop3
+                                  ? "bg-amber-600 text-white"
+                                  : "bg-gray-100 text-black"
+                          }`}
+                        >
                           {isTop1 ? "🥇" : isTop2 ? "🥈" : isTop3 ? "🥉" : `#${rankNum}`}
                         </div>
 
@@ -583,11 +661,14 @@ export default function GamesHub() {
                           <div className="text-xs font-black text-black flex items-center gap-1.5">
                             <span>{player.name}</span>
                             {player.isCurrentUser && (
-                              <span className="bg-black text-white text-[9px] px-1.5 py-0.2 rounded font-black uppercase">YOU</span>
+                              <span className="bg-black text-white text-[9px] px-1.5 py-0.2 rounded font-black uppercase">
+                                YOU
+                              </span>
                             )}
                           </div>
                           <div className="text-[10px] font-bold text-black/70">
-                            {player.college} • <span className="text-black font-black">{player.badge}</span>
+                            {player.college} •{" "}
+                            <span className="text-black font-black">{player.badge}</span>
                           </div>
                         </div>
                       </div>
@@ -603,7 +684,6 @@ export default function GamesHub() {
           </motion.div>
         )}
       </AnimatePresence>
-
     </div>
   );
 }

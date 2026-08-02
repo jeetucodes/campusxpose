@@ -11,7 +11,10 @@ export const Route = createFileRoute("/games/2048")({
   head: () => ({
     meta: [
       { title: "2048 — CampusXpose Games" },
-      { name: "description", content: "Play 2048 on CampusXpose. Swipe or use arrow keys to merge tiles and reach 2048!" },
+      {
+        name: "description",
+        content: "Play 2048 on CampusXpose. Swipe or use arrow keys to merge tiles and reach 2048!",
+      },
     ],
   }),
   component: Game2048,
@@ -24,15 +27,15 @@ type Grid = (number | null)[][];
 type Direction = "up" | "down" | "left" | "right";
 
 const TILE_STYLES: Record<number, { bg: string; text: string; scale?: number }> = {
-  2:    { bg: "#ffffff", text: "#000000" },
-  4:    { bg: "#fef08a", text: "#000000" },
-  8:    { bg: "#fbcfe8", text: "#000000" },
-  16:   { bg: "#bfdbfe", text: "#000000" },
-  32:   { bg: "#bbf7d0", text: "#000000" },
-  64:   { bg: "#fcd68a", text: "#000000" },
-  128:  { bg: "#e9d5ff", text: "#000000", scale: 0.85 },
-  256:  { bg: "#f87171", text: "#ffffff", scale: 0.85 },
-  512:  { bg: "#60a5fa", text: "#ffffff", scale: 0.8 },
+  2: { bg: "#ffffff", text: "#000000" },
+  4: { bg: "#fef08a", text: "#000000" },
+  8: { bg: "#fbcfe8", text: "#000000" },
+  16: { bg: "#bfdbfe", text: "#000000" },
+  32: { bg: "#bbf7d0", text: "#000000" },
+  64: { bg: "#fcd68a", text: "#000000" },
+  128: { bg: "#e9d5ff", text: "#000000", scale: 0.85 },
+  256: { bg: "#f87171", text: "#ffffff", scale: 0.85 },
+  512: { bg: "#60a5fa", text: "#ffffff", scale: 0.8 },
   1024: { bg: "#34d399", text: "#ffffff", scale: 0.7 },
   2048: { bg: "#fbbf24", text: "#000000", scale: 0.7 },
   4096: { bg: "#a855f7", text: "#ffffff", scale: 0.7 },
@@ -42,10 +45,26 @@ const TILE_STYLES: Record<number, { bg: string; text: string; scale?: number }> 
 const GRID_SIZE = 4;
 
 const STATIC_2048_LEVELS = [
-  { title: "Classic 2048 Grid", targetTile: 2048, gridSize: 4, desc: "Reach 2048 tile by merging identical numbers" },
-  { title: "4096 Master Challenge", targetTile: 4096, gridSize: 4, desc: "Pro mode: reach tile 4096" },
+  {
+    title: "Classic 2048 Grid",
+    targetTile: 2048,
+    gridSize: 4,
+    desc: "Reach 2048 tile by merging identical numbers",
+  },
+  {
+    title: "4096 Master Challenge",
+    targetTile: 4096,
+    gridSize: 4,
+    desc: "Pro mode: reach tile 4096",
+  },
   { title: "8192 Speed Rush", targetTile: 8192, gridSize: 4, desc: "Expert mode: reach tile 8192" },
-  { title: "Super Obstacle Grid", targetTile: 2048, gridSize: 4, obstacles: [[1, 1]], desc: "2048 grid with 1 blocked obstacle tile" },
+  {
+    title: "Super Obstacle Grid",
+    targetTile: 2048,
+    gridSize: 4,
+    obstacles: [[1, 1]],
+    desc: "2048 grid with 1 blocked obstacle tile",
+  },
 ];
 
 function emptyGrid(): Grid {
@@ -53,14 +72,13 @@ function emptyGrid(): Grid {
 }
 
 function cloneGrid(g: Grid): Grid {
-  return g.map(r => [...r]);
+  return g.map((r) => [...r]);
 }
 
 function emptyPositions(g: Grid): [number, number][] {
   const positions: [number, number][] = [];
   for (let r = 0; r < GRID_SIZE; r++)
-    for (let c = 0; c < GRID_SIZE; c++)
-      if (g[r][c] === null) positions.push([r, c]);
+    for (let c = 0; c < GRID_SIZE; c++) if (g[r][c] === null) positions.push([r, c]);
   return positions;
 }
 
@@ -141,7 +159,7 @@ function canMove(grid: Grid): boolean {
 }
 
 function hasWon(grid: Grid, target: number = 2048): boolean {
-  return grid.some(row => row.some(v => v !== null && v >= target));
+  return grid.some((row) => row.some((v) => v !== null && v >= target));
 }
 
 function Game2048() {
@@ -228,36 +246,48 @@ function Game2048() {
     }
   }, [score, best]);
 
-  const handleMove = useCallback((dir: Direction) => {
-    if (gameOver) return;
-    if (won && !keepPlaying) return;
+  const handleMove = useCallback(
+    (dir: Direction) => {
+      if (gameOver) return;
+      if (won && !keepPlaying) return;
 
-    setGrid(prev => {
-      const { grid: next, score: gained, moved } = moveGrid(prev, dir);
-      if (!moved) return prev;
+      setGrid((prev) => {
+        const { grid: next, score: gained, moved } = moveGrid(prev, dir);
+        if (!moved) return prev;
 
-      const withNew = addRandom(next);
-      setScore(s => s + gained);
+        const withNew = addRandom(next);
+        setScore((s) => s + gained);
 
-      if (!keepPlaying && hasWon(withNew, targetTile)) {
-        setWon(true);
-      }
-      if (!canMove(withNew)) {
-        setGameOver(true);
-      }
-      return withNew;
-    });
-  }, [gameOver, won, keepPlaying, targetTile]);
+        if (!keepPlaying && hasWon(withNew, targetTile)) {
+          setWon(true);
+        }
+        if (!canMove(withNew)) {
+          setGameOver(true);
+        }
+        return withNew;
+      });
+    },
+    [gameOver, won, keepPlaying, targetTile],
+  );
 
   // Keyboard
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const map: Record<string, Direction> = {
-        ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right",
-        w: "up", s: "down", a: "left", d: "right",
+        ArrowUp: "up",
+        ArrowDown: "down",
+        ArrowLeft: "left",
+        ArrowRight: "right",
+        w: "up",
+        s: "down",
+        a: "left",
+        d: "right",
       };
       const dir = map[e.key];
-      if (dir) { e.preventDefault(); handleMove(dir); }
+      if (dir) {
+        e.preventDefault();
+        handleMove(dir);
+      }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
@@ -267,19 +297,27 @@ function Game2048() {
   useEffect(() => {
     const el = boardRef.current;
     if (!el) return;
-    let sx = 0, sy = 0;
-    const onStart = (e: TouchEvent) => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; };
+    let sx = 0,
+      sy = 0;
+    const onStart = (e: TouchEvent) => {
+      sx = e.touches[0].clientX;
+      sy = e.touches[0].clientY;
+    };
     const onEnd = (e: TouchEvent) => {
       const dx = e.changedTouches[0].clientX - sx;
       const dy = e.changedTouches[0].clientY - sy;
-      const absDx = Math.abs(dx), absDy = Math.abs(dy);
+      const absDx = Math.abs(dx),
+        absDy = Math.abs(dy);
       if (Math.max(absDx, absDy) < 30) return;
       if (absDx > absDy) handleMove(dx > 0 ? "right" : "left");
       else handleMove(dy > 0 ? "down" : "up");
     };
     el.addEventListener("touchstart", onStart, { passive: true });
     el.addEventListener("touchend", onEnd, { passive: true });
-    return () => { el.removeEventListener("touchstart", onStart); el.removeEventListener("touchend", onEnd); };
+    return () => {
+      el.removeEventListener("touchstart", onStart);
+      el.removeEventListener("touchend", onEnd);
+    };
   }, [handleMove]);
 
   return (
@@ -287,16 +325,20 @@ function Game2048() {
       {/* Header */}
       <div className="sticky top-0 z-40 border-b-4 border-black bg-white">
         <div className="mx-auto flex max-w-lg items-center justify-between px-4 py-3">
-          <Link to="/games" className="flex items-center gap-2 text-sm font-black text-black hover:scale-105 transition-transform">
+          <Link
+            to="/games"
+            className="flex items-center gap-2 text-sm font-black text-black hover:scale-105 transition-transform"
+          >
             <ArrowLeft className="h-5 w-5" strokeWidth={3} /> Back
           </Link>
-          <h1 className="font-display text-2xl font-black tracking-tight uppercase">2048 Classic</h1>
+          <h1 className="font-display text-2xl font-black tracking-tight uppercase">
+            2048 Classic
+          </h1>
           <div className="w-10" />
         </div>
       </div>
 
       <div className="mx-auto max-w-lg px-4 py-6 space-y-6">
-
         {/* Level Select & Scores Bar */}
         <div className="space-y-4">
           <div className="flex items-center justify-between gap-3">
@@ -306,7 +348,9 @@ function Game2048() {
               className="flex items-center gap-2 bg-[#fbcfe8] px-4 py-2.5 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0.5 hover:shadow-none transition-all outline-none cursor-pointer"
               style={{ borderRadius: WOBBLY_SM }}
             >
-              <span className="font-display text-lg font-black text-black uppercase">Lvl {levelIdx + 1}</span>
+              <span className="font-display text-lg font-black text-black uppercase">
+                Lvl {levelIdx + 1}
+              </span>
               <span className="text-[11px] font-black text-black/80 flex items-center bg-white px-2 py-0.5 rounded-full border-2 border-black">
                 / {totalLevelsCount} <ChevronDown className="h-3 w-3 ml-1" strokeWidth={4} />
               </span>
@@ -329,7 +373,13 @@ function Game2048() {
 
           {/* Target Goal Banner */}
           <div className="p-3 bg-[#fef08a] border-3 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] rounded-2xl flex items-center justify-between text-xs font-black">
-            <span>Goal: Reach <span className="bg-black text-white px-2 py-0.5 rounded-md font-display">{targetTile}</span> Tile</span>
+            <span>
+              Goal: Reach{" "}
+              <span className="bg-black text-white px-2 py-0.5 rounded-md font-display">
+                {targetTile}
+              </span>{" "}
+              Tile
+            </span>
             <button
               onClick={restart}
               className="flex items-center gap-1 bg-white hover:bg-gray-100 border-2 border-black px-3 py-1 rounded-xl text-xs font-black cursor-pointer shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
@@ -340,7 +390,10 @@ function Game2048() {
         </div>
 
         {/* Board */}
-        <div className="relative border-4 border-black bg-[#18181b] p-3 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]" style={{ borderRadius: WOBBLY_MD }}>
+        <div
+          className="relative border-4 border-black bg-[#18181b] p-3 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
+          style={{ borderRadius: WOBBLY_MD }}
+        >
           <div ref={boardRef} className="grid grid-cols-4 gap-2 aspect-square">
             {grid.map((row, r) =>
               row.map((val, c) => {
@@ -365,7 +418,7 @@ function Game2048() {
                     )}
                   </div>
                 );
-              })
+              }),
             )}
           </div>
 
@@ -379,8 +432,12 @@ function Game2048() {
                 className="absolute inset-0 bg-black/80 backdrop-blur-xs flex flex-col items-center justify-center p-6 text-center text-white space-y-4 rounded-3xl"
               >
                 <div className="text-5xl">💥</div>
-                <h2 className="font-display text-3xl font-black uppercase text-[#fca5a5]">Game Over!</h2>
-                <p className="text-xs font-bold text-gray-300">No more moves possible on this board.</p>
+                <h2 className="font-display text-3xl font-black uppercase text-[#fca5a5]">
+                  Game Over!
+                </h2>
+                <p className="text-xs font-bold text-gray-300">
+                  No more moves possible on this board.
+                </p>
                 <button
                   onClick={restart}
                   className="bg-[#fef08a] hover:bg-yellow-200 text-black border-2 border-black px-6 py-2.5 rounded-2xl font-display font-black text-sm uppercase shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] cursor-pointer"
@@ -401,8 +458,12 @@ function Game2048() {
                 className="absolute inset-0 bg-[#bbf7d0]/90 backdrop-blur-xs flex flex-col items-center justify-center p-6 text-center text-black space-y-4 rounded-3xl border-4 border-black"
               >
                 <div className="text-5xl">👑</div>
-                <h2 className="font-display text-3xl font-black uppercase text-black">Target Reached!</h2>
-                <p className="text-xs font-black text-black/80">You created the {targetTile} tile!</p>
+                <h2 className="font-display text-3xl font-black uppercase text-black">
+                  Target Reached!
+                </h2>
+                <p className="text-xs font-black text-black/80">
+                  You created the {targetTile} tile!
+                </p>
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setKeepPlaying(true)}
@@ -412,7 +473,7 @@ function Game2048() {
                   </button>
                   <button
                     onClick={() => {
-                      if (levelIdx + 1 < totalLevelsCount) setLevelIdx(l => l + 1);
+                      if (levelIdx + 1 < totalLevelsCount) setLevelIdx((l) => l + 1);
                       else restart();
                     }}
                     className="bg-black text-white border-2 border-black px-5 py-2.5 rounded-xl font-display font-black text-xs uppercase shadow-[2px_2px_0px_0px_rgba(254,240,138,1)] cursor-pointer"
@@ -424,7 +485,6 @@ function Game2048() {
             )}
           </AnimatePresence>
         </div>
-
       </div>
 
       {/* ─── LEVEL SELECTOR MODAL ────────────────────────────────────── */}
@@ -441,7 +501,7 @@ function Game2048() {
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
-              onClick={e => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
               className="w-full max-w-sm bg-white border-4 border-black p-6 flex flex-col max-h-[80vh] relative shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-black"
               style={{ borderRadius: WOBBLY_MD }}
             >
@@ -453,7 +513,9 @@ function Game2048() {
               </button>
 
               <div className="flex items-center justify-between mb-4 border-b-2 border-black pb-3">
-                <h2 className="font-display text-2xl font-black uppercase text-black">Select 2048 Level</h2>
+                <h2 className="font-display text-2xl font-black uppercase text-black">
+                  Select 2048 Level
+                </h2>
                 <span className="text-xs font-black bg-[#fbcfe8] text-black border-2 border-black px-2.5 py-1 rounded-full shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                   {totalLevelsCount} Levels
                 </span>
@@ -464,10 +526,12 @@ function Game2048() {
                   let lvlData = STATIC_2048_LEVELS[i];
                   try {
                     const overridesRaw = localStorage.getItem("cx_2048_level_overrides");
-                    if (overridesRaw && JSON.parse(overridesRaw)[i]) lvlData = JSON.parse(overridesRaw)[i];
+                    if (overridesRaw && JSON.parse(overridesRaw)[i])
+                      lvlData = JSON.parse(overridesRaw)[i];
                     else if (i >= 4) {
                       const customRaw = localStorage.getItem("cx_2048_custom_levels");
-                      if (customRaw && JSON.parse(customRaw)[i - 4]) lvlData = JSON.parse(customRaw)[i - 4];
+                      if (customRaw && JSON.parse(customRaw)[i - 4])
+                        lvlData = JSON.parse(customRaw)[i - 4];
                     }
                   } catch (e) {}
 
@@ -492,13 +556,19 @@ function Game2048() {
                           #{i + 1}
                         </div>
                         <div>
-                          <div className="font-display font-black text-xs uppercase text-black leading-snug">{title}</div>
-                          <div className="text-[10px] font-bold text-black/70">Goal: Tile {target}</div>
+                          <div className="font-display font-black text-xs uppercase text-black leading-snug">
+                            {title}
+                          </div>
+                          <div className="text-[10px] font-bold text-black/70">
+                            Goal: Tile {target}
+                          </div>
                         </div>
                       </div>
 
                       {i === levelIdx && (
-                        <span className="text-[10px] font-black bg-black text-white px-2 py-0.5 rounded-full">ACTIVE</span>
+                        <span className="text-[10px] font-black bg-black text-white px-2 py-0.5 rounded-full">
+                          ACTIVE
+                        </span>
                       )}
                     </button>
                   );
@@ -508,7 +578,6 @@ function Game2048() {
           </motion.div>
         )}
       </AnimatePresence>
-
     </div>
   );
 }

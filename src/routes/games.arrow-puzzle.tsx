@@ -1,7 +1,23 @@
 import React, { useCallback, useEffect, useState, useRef } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, RotateCcw, ChevronRight, ChevronLeft, ChevronUp, ChevronDown, Trophy, Zap, Heart, Flame, Bomb, X, Lightbulb, Volume2, VolumeX } from "lucide-react";
+import {
+  ArrowLeft,
+  RotateCcw,
+  ChevronRight,
+  ChevronLeft,
+  ChevronUp,
+  ChevronDown,
+  Trophy,
+  Zap,
+  Heart,
+  Flame,
+  Bomb,
+  X,
+  Lightbulb,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { recordGameSession } from "../lib/gameAnalytics";
@@ -14,7 +30,11 @@ export const Route = createFileRoute("/games/arrow-puzzle")({
   head: () => ({
     meta: [
       { title: "Arrow Puzzle — CampusXpose Games" },
-      { name: "description", content: "Tap arrows in the right order to clear the board! A fun logic puzzle on CampusXpose." },
+      {
+        name: "description",
+        content:
+          "Tap arrows in the right order to clear the board! A fun logic puzzle on CampusXpose.",
+      },
     ],
   }),
   component: ArrowPuzzleGame,
@@ -65,7 +85,7 @@ function playGameSound(type: "launch" | "deflect" | "clear" | "hit" | "win", isM
       osc.start();
       osc.stop(ctx.currentTime + 0.18);
     } else if (type === "win") {
-      [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+      [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = "sine";
@@ -83,7 +103,11 @@ function playGameSound(type: "launch" | "deflect" | "clear" | "hit" | "win", isM
 
 // ─── Web Haptics Vibration Helper ─────────────────────────────────────────────
 function triggerVibration(pattern: number | number[]) {
-  if (typeof window !== "undefined" && "navigator" in window && typeof (navigator as any).vibrate === "function") {
+  if (
+    typeof window !== "undefined" &&
+    "navigator" in window &&
+    typeof (navigator as any).vibrate === "function"
+  ) {
     try {
       (navigator as any).vibrate(pattern);
     } catch (e) {}
@@ -91,11 +115,19 @@ function triggerVibration(pattern: number | number[]) {
 }
 
 // ─── Types ──────────────────────────────────────────────────────────────────
-import { getStaticLevel, LevelData, ArrowData as Arrow, ObstacleData as Obstacle } from "../data/arrow-puzzle-levels";
+import {
+  getStaticLevel,
+  LevelData,
+  ArrowData as Arrow,
+  ObstacleData as Obstacle,
+} from "../data/arrow-puzzle-levels";
 type Dir = "up" | "down" | "left" | "right";
 
 const DIR_ICON: Record<Dir, typeof ChevronUp> = {
-  up: ChevronUp, down: ChevronDown, left: ChevronLeft, right: ChevronRight,
+  up: ChevronUp,
+  down: ChevronDown,
+  left: ChevronLeft,
+  right: ChevronRight,
 };
 
 const DIR_COLORS: Record<Dir, string> = {
@@ -120,8 +152,11 @@ type Blocker = { type: "wall" | "bomb" | "arrow"; row: number; col: number; id: 
 type PathStep = { r: number; c: number; dir: Dir };
 
 function tracePathFast(
-  arrow: Arrow, arrowMap: Map<string, Arrow>, obsMap: Map<string, Obstacle>, gridSize: number
-): { blocker: Blocker | null, path: PathStep[], hitRotators: string[] } {
+  arrow: Arrow,
+  arrowMap: Map<string, Arrow>,
+  obsMap: Map<string, Obstacle>,
+  gridSize: number,
+): { blocker: Blocker | null; path: PathStep[]; hitRotators: string[] } {
   let r = arrow.row;
   let c = arrow.col;
   let d = arrow.dir;
@@ -145,7 +180,8 @@ function tracePathFast(
 
     const key = `${r},${c}`;
     const a = arrowMap.get(key);
-    if (a && a.id !== arrow.id) return { blocker: { type: "arrow", row: r, col: c, id: a.id }, path, hitRotators };
+    if (a && a.id !== arrow.id)
+      return { blocker: { type: "arrow", row: r, col: c, id: a.id }, path, hitRotators };
 
     const o = obsMap.get(key);
     if (o) {
@@ -155,7 +191,10 @@ function tracePathFast(
         else if (d === "down") d = "left";
         else if (d === "right") d = "up";
         else if (d === "left") d = "down";
-      } else if (o.type === "mirror-backslash" || (o.type === "rotator" && hitRotators.includes(key))) {
+      } else if (
+        o.type === "mirror-backslash" ||
+        (o.type === "rotator" && hitRotators.includes(key))
+      ) {
         if (o.type === "rotator") hitRotators.push(key);
         if (d === "up") d = "left";
         else if (d === "down") d = "right";
@@ -172,7 +211,11 @@ function tracePathFast(
       } else if (o.type === "ice" || o.type.startsWith("gate-")) {
         // pass through
       } else {
-        return { blocker: { type: o.type as any, row: r, col: c, id: `obs-${o.id}` }, path, hitRotators };
+        return {
+          blocker: { type: o.type as any, row: r, col: c, id: `obs-${o.id}` },
+          path,
+          hitRotators,
+        };
       }
     }
     steps++;
@@ -194,17 +237,33 @@ function MirrorSlashIndicator() {
   return (
     <div className="relative w-full h-full flex items-center justify-center p-0.5 overflow-hidden rounded-[8px] bg-gradient-to-br from-sky-100 via-sky-200 to-sky-300 border border-black/40 shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
       {/* Central Mirror Line */}
-      <div 
-        className="absolute w-[140%] h-[3.5px] bg-sky-500 border border-black shadow-[0_0_6px_rgba(56,189,248,1)] z-10" 
-        style={{ transform: "rotate(-45deg)" }} 
+      <div
+        className="absolute w-[140%] h-[3.5px] bg-sky-500 border border-black shadow-[0_0_6px_rgba(56,189,248,1)] z-10"
+        style={{ transform: "rotate(-45deg)" }}
       />
       {/* Curved Deflection Vector Graphic */}
       <svg viewBox="0 0 40 40" className="w-full h-full relative z-20 pointer-events-none">
         <defs>
-          <marker id="slash-head-1" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+          <marker
+            id="slash-head-1"
+            viewBox="0 0 10 10"
+            refX="6"
+            refY="5"
+            markerWidth="5"
+            markerHeight="5"
+            orient="auto"
+          >
             <path d="M 0 1 L 9 5 L 0 9 z" fill="#0284c7" stroke="#000" strokeWidth="1" />
           </marker>
-          <marker id="slash-head-2" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+          <marker
+            id="slash-head-2"
+            viewBox="0 0 10 10"
+            refX="6"
+            refY="5"
+            markerWidth="5"
+            markerHeight="5"
+            orient="auto"
+          >
             <path d="M 0 1 L 9 5 L 0 9 z" fill="#0284c7" stroke="#000" strokeWidth="1" />
           </marker>
         </defs>
@@ -233,17 +292,33 @@ function MirrorBackslashIndicator() {
   return (
     <div className="relative w-full h-full flex items-center justify-center p-0.5 overflow-hidden rounded-[8px] bg-gradient-to-br from-indigo-100 via-indigo-200 to-indigo-300 border border-black/40 shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
       {/* Central Mirror Line */}
-      <div 
-        className="absolute w-[140%] h-[3.5px] bg-indigo-500 border border-black shadow-[0_0_6px_rgba(99,102,241,1)] z-10" 
-        style={{ transform: "rotate(45deg)" }} 
+      <div
+        className="absolute w-[140%] h-[3.5px] bg-indigo-500 border border-black shadow-[0_0_6px_rgba(99,102,241,1)] z-10"
+        style={{ transform: "rotate(45deg)" }}
       />
       {/* Curved Deflection Vector Graphic */}
       <svg viewBox="0 0 40 40" className="w-full h-full relative z-20 pointer-events-none">
         <defs>
-          <marker id="backslash-head-1" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+          <marker
+            id="backslash-head-1"
+            viewBox="0 0 10 10"
+            refX="6"
+            refY="5"
+            markerWidth="5"
+            markerHeight="5"
+            orient="auto"
+          >
             <path d="M 0 1 L 9 5 L 0 9 z" fill="#4338ca" stroke="#000" strokeWidth="1" />
           </marker>
-          <marker id="backslash-head-2" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+          <marker
+            id="backslash-head-2"
+            viewBox="0 0 10 10"
+            refX="6"
+            refY="5"
+            markerWidth="5"
+            markerHeight="5"
+            orient="auto"
+          >
             <path d="M 0 1 L 9 5 L 0 9 z" fill="#4338ca" stroke="#000" strokeWidth="1" />
           </marker>
         </defs>
@@ -290,7 +365,11 @@ export default function ArrowPuzzleGame() {
     }
   }, []);
 
-  const [levelData, setLevelData] = useState<{ gridSize: number, arrows: Arrow[], obstacles: Obstacle[] } | null>(null);
+  const [levelData, setLevelData] = useState<{
+    gridSize: number;
+    arrows: Arrow[];
+    obstacles: Obstacle[];
+  } | null>(null);
   const [arrows, setArrows] = useState<Arrow[]>([]);
   const [moves, setMoves] = useState(0);
   const [lives, setLives] = useState(5);
@@ -302,7 +381,12 @@ export default function ArrowPuzzleGame() {
   const [showLevels, setShowLevels] = useState(false);
   const [shakeId, setShakeId] = useState<number | string | null>(null);
   const [movingArrow, setMovingArrow] = useState<MovingArrowAnim | null>(null);
-  const [collisionAnim, setCollisionAnim] = useState<{ id: string, row: number, col: number, type: "wall" | "bomb" | "arrow" } | null>(null);
+  const [collisionAnim, setCollisionAnim] = useState<{
+    id: string;
+    row: number;
+    col: number;
+    type: "wall" | "bomb" | "arrow";
+  } | null>(null);
   const [won, setWon] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [customLevelsCount, setCustomLevelsCount] = useState(0);
@@ -337,7 +421,7 @@ export default function ArrowPuzzleGame() {
   const activePathInfo = React.useMemo(() => {
     const activeId = hoveredArrowId ?? hintedArrowId;
     if (!activeId || !levelData || movingArrow) return null;
-    const targetArrow = arrows.find(a => a.id === activeId);
+    const targetArrow = arrows.find((a) => a.id === activeId);
     if (!targetArrow) return null;
 
     const arrowMap = new Map<string, Arrow>();
@@ -347,8 +431,11 @@ export default function ArrowPuzzleGame() {
     for (const o of levelData.obstacles) obsMap.set(`${o.row},${o.col}`, o);
 
     const { blocker, path } = tracePathFast(targetArrow, arrowMap, obsMap, levelData.gridSize);
-    
-    const keyMap = new Map<string, { isExitPoint?: boolean; isBlockerPoint?: boolean; dir?: Dir }>();
+
+    const keyMap = new Map<
+      string,
+      { isExitPoint?: boolean; isBlockerPoint?: boolean; dir?: Dir }
+    >();
     path.forEach((p, idx) => {
       if (p.r >= 0 && p.r < levelData.gridSize && p.c >= 0 && p.c < levelData.gridSize) {
         const isBlocker = !!blocker && idx === path.length - 1;
@@ -358,7 +445,9 @@ export default function ArrowPuzzleGame() {
 
     // Check exit edge
     const last = path[path.length - 1];
-    const exitEdge = !blocker && (last.r < 0 || last.r >= levelData.gridSize || last.c < 0 || last.c >= levelData.gridSize);
+    const exitEdge =
+      !blocker &&
+      (last.r < 0 || last.r >= levelData.gridSize || last.c < 0 || last.c >= levelData.gridSize);
 
     return { keyMap, isClear: !blocker, exitEdge };
   }, [hoveredArrowId, hintedArrowId, arrows, levelData, movingArrow]);
@@ -451,7 +540,7 @@ export default function ArrowPuzzleGame() {
       if (!isNaN(parsed) && parsed >= 1) {
         const targetIdx = parsed - 1;
         setLevelIdx(targetIdx);
-        setHighestUnlocked(prev => Math.max(prev, targetIdx));
+        setHighestUnlocked((prev) => Math.max(prev, targetIdx));
         try {
           localStorage.setItem("cx_arrow_level", String(Math.max(highestUnlocked, targetIdx)));
         } catch (e) {}
@@ -462,110 +551,116 @@ export default function ArrowPuzzleGame() {
     initLevel(levelIdx);
   }, [levelIdx, initLevel]);
 
-  const handleTap = useCallback((arrow: Arrow) => {
-    if (won || gameOver || movingArrow || !levelData) return;
+  const handleTap = useCallback(
+    (arrow: Arrow) => {
+      if (won || gameOver || movingArrow || !levelData) return;
 
-    if (hintedArrowId === arrow.id) setHintedArrowId(null);
+      if (hintedArrowId === arrow.id) setHintedArrowId(null);
 
-    const arrowMap = new Map<string, Arrow>();
-    for (const a of arrows) arrowMap.set(`${a.row},${a.col}`, a);
+      const arrowMap = new Map<string, Arrow>();
+      for (const a of arrows) arrowMap.set(`${a.row},${a.col}`, a);
 
-    const obsMap = new Map<string, Obstacle>();
-    for (const o of levelData.obstacles) obsMap.set(`${o.row},${o.col}`, o);
+      const obsMap = new Map<string, Obstacle>();
+      for (const o of levelData.obstacles) obsMap.set(`${o.row},${o.col}`, o);
 
-    const { blocker, path } = tracePathFast(arrow, arrowMap, obsMap, levelData.gridSize);
+      const { blocker, path } = tracePathFast(arrow, arrowMap, obsMap, levelData.gridSize);
 
-    const cellStep = gridRef.current ? gridRef.current.clientWidth / levelData.gridSize : 60;
-    const xKeyframes = path.map(p => (p.c - arrow.col) * cellStep);
-    const yKeyframes = path.map(p => (p.r - arrow.row) * cellStep);
+      const cellStep = gridRef.current ? gridRef.current.clientWidth / levelData.gridSize : 60;
+      const xKeyframes = path.map((p) => (p.c - arrow.col) * cellStep);
+      const yKeyframes = path.map((p) => (p.r - arrow.row) * cellStep);
 
-    const stepsCount = Math.max(1, path.length - 1);
-    const duration = Math.min(0.45, Math.max(0.18, stepsCount * 0.08));
+      const stepsCount = Math.max(1, path.length - 1);
+      const duration = Math.min(0.45, Math.max(0.18, stepsCount * 0.08));
 
-    playGameSound("launch", isMuted);
-    triggerVibration(15);
+      playGameSound("launch", isMuted);
+      triggerVibration(15);
 
-    setMovingArrow({
-      arrowId: arrow.id,
-      xKeyframes,
-      yKeyframes,
-      duration,
-      isExit: !blocker,
-      blocker,
-    });
-
-    if (!blocker) {
-      setMoves(m => m + 1);
-      setTimeout(() => {
-        playGameSound("deflect", isMuted);
-        triggerVibration(25);
-        setArrows(prev => {
-          const next = prev.filter(a => a.id !== arrow.id);
-          if (next.length === 0) {
-            setWon(true);
-            playGameSound("win", isMuted);
-            triggerVibration([30, 30, 60, 30, 90]);
-            const nextLevel = levelIdx + 1;
-            recordGameSession("arrow-puzzle", nextLevel * 150, nextLevel);
-            setHighestUnlocked(prevMax => {
-              const max = Math.max(prevMax, nextLevel);
-              try {
-                localStorage.setItem("cx_arrow_level", String(max));
-              } catch (e) {
-                console.warn("localStorage error", e);
-              }
-              return max;
-            });
-          }
-          return next;
-        });
-        setMovingArrow(null);
-      }, duration * 1000);
-    } else {
-      setTimeout(() => {
-        playGameSound("hit", isMuted);
-        if (blocker.type === "bomb") {
-          triggerVibration([90, 40, 110, 40, 140]);
-        } else {
-          triggerVibration([40, 30, 40]);
-        }
-        setCollisionAnim({ ...blocker, id: Date.now().toString() });
-        setLives(prev => {
-          const next = prev - 1;
-          if (next <= 0) {
-            setShowLivesAd(true);
-          }
-          return next;
-        });
-        setMovingArrow(null);
-        setTimeout(() => setCollisionAnim(null), 500);
-      }, duration * 1000);
-    }
-  }, [arrows, levelData, won, gameOver, movingArrow, levelIdx, hintedArrowId, isMuted]);
-
-  const handleObstacleTap = useCallback((obs: Obstacle) => {
-    if (won || gameOver || movingArrow) return;
-    if (obs.type === "wall") {
-      playGameSound("hit", isMuted);
-      triggerVibration([40, 30, 40]);
-      setShakeId(`obs-${obs.id}`);
-      setTimeout(() => setShakeId(null), 500);
-    } else if (obs.type === "bomb") {
-      playGameSound("hit", isMuted);
-      triggerVibration([90, 40, 110, 40, 140]);
-      setShakeId(`obs-${obs.id}`);
-      setTimeout(() => setShakeId(null), 500);
-      setCollisionAnim({ type: "bomb", row: obs.row, col: obs.col, id: Date.now().toString() });
-      setTimeout(() => setCollisionAnim(null), 500);
-      setLives(prev => {
-        const next = prev - 1;
-        if (next <= 0) setShowLivesAd(true);
-        return next;
+      setMovingArrow({
+        arrowId: arrow.id,
+        xKeyframes,
+        yKeyframes,
+        duration,
+        isExit: !blocker,
+        blocker,
       });
-    }
-  }, [won, gameOver, movingArrow, isMuted]);
 
-  const nextLevel = () => setLevelIdx(i => i + 1);
+      if (!blocker) {
+        setMoves((m) => m + 1);
+        setTimeout(() => {
+          playGameSound("deflect", isMuted);
+          triggerVibration(25);
+          setArrows((prev) => {
+            const next = prev.filter((a) => a.id !== arrow.id);
+            if (next.length === 0) {
+              setWon(true);
+              playGameSound("win", isMuted);
+              triggerVibration([30, 30, 60, 30, 90]);
+              const nextLevel = levelIdx + 1;
+              recordGameSession("arrow-puzzle", nextLevel * 150, nextLevel);
+              setHighestUnlocked((prevMax) => {
+                const max = Math.max(prevMax, nextLevel);
+                try {
+                  localStorage.setItem("cx_arrow_level", String(max));
+                } catch (e) {
+                  console.warn("localStorage error", e);
+                }
+                return max;
+              });
+            }
+            return next;
+          });
+          setMovingArrow(null);
+        }, duration * 1000);
+      } else {
+        setTimeout(() => {
+          playGameSound("hit", isMuted);
+          if (blocker.type === "bomb") {
+            triggerVibration([90, 40, 110, 40, 140]);
+          } else {
+            triggerVibration([40, 30, 40]);
+          }
+          setCollisionAnim({ ...blocker, id: Date.now().toString() });
+          setLives((prev) => {
+            const next = prev - 1;
+            if (next <= 0) {
+              setShowLivesAd(true);
+            }
+            return next;
+          });
+          setMovingArrow(null);
+          setTimeout(() => setCollisionAnim(null), 500);
+        }, duration * 1000);
+      }
+    },
+    [arrows, levelData, won, gameOver, movingArrow, levelIdx, hintedArrowId, isMuted],
+  );
+
+  const handleObstacleTap = useCallback(
+    (obs: Obstacle) => {
+      if (won || gameOver || movingArrow) return;
+      if (obs.type === "wall") {
+        playGameSound("hit", isMuted);
+        triggerVibration([40, 30, 40]);
+        setShakeId(`obs-${obs.id}`);
+        setTimeout(() => setShakeId(null), 500);
+      } else if (obs.type === "bomb") {
+        playGameSound("hit", isMuted);
+        triggerVibration([90, 40, 110, 40, 140]);
+        setShakeId(`obs-${obs.id}`);
+        setTimeout(() => setShakeId(null), 500);
+        setCollisionAnim({ type: "bomb", row: obs.row, col: obs.col, id: Date.now().toString() });
+        setTimeout(() => setCollisionAnim(null), 500);
+        setLives((prev) => {
+          const next = prev - 1;
+          if (next <= 0) setShowLivesAd(true);
+          return next;
+        });
+      }
+    },
+    [won, gameOver, movingArrow, isMuted],
+  );
+
+  const nextLevel = () => setLevelIdx((i) => i + 1);
   const resetLevel = () => initLevel(levelIdx);
 
   const tappableIds = React.useMemo(() => {
@@ -578,21 +673,34 @@ export default function ArrowPuzzleGame() {
     for (const o of levelData.obstacles) obsMap.set(`${o.row},${o.col}`, o);
 
     return new Set(
-      arrows.filter(a => !movingArrow && !tracePathFast(a, arrowMap, obsMap, levelData.gridSize).blocker).map(a => a.id)
+      arrows
+        .filter(
+          (a) => !movingArrow && !tracePathFast(a, arrowMap, obsMap, levelData.gridSize).blocker,
+        )
+        .map((a) => a.id),
     );
   }, [arrows, levelData, movingArrow]);
 
   if (isGameDisabled) {
     return (
       <div className="min-h-screen bg-[#f4f4f5] flex flex-col items-center justify-center p-6 text-center">
-        <div className="bg-white border-4 border-black p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] max-w-md space-y-4" style={{ borderRadius: WOBBLY_MD }}>
+        <div
+          className="bg-white border-4 border-black p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] max-w-md space-y-4"
+          style={{ borderRadius: WOBBLY_MD }}
+        >
           <div className="text-6xl animate-bounce">🛠️</div>
-          <h2 className="font-display text-2xl font-black text-black uppercase">Under Maintenance</h2>
+          <h2 className="font-display text-2xl font-black text-black uppercase">
+            Under Maintenance
+          </h2>
           <p className="text-sm font-bold text-black/70">
-            Arrow Puzzle has been temporarily turned OFF by Campus Admin for level upgrades. Please check back soon!
+            Arrow Puzzle has been temporarily turned OFF by Campus Admin for level upgrades. Please
+            check back soon!
           </p>
           <Link to="/games">
-            <Button className="w-full h-12 bg-black text-white border-2 border-black font-black uppercase shadow-[3px_3px_0px_0px_rgba(254,240,138,1)]" style={{ borderRadius: WOBBLY_SM }}>
+            <Button
+              className="w-full h-12 bg-black text-white border-2 border-black font-black uppercase shadow-[3px_3px_0px_0px_rgba(254,240,138,1)]"
+              style={{ borderRadius: WOBBLY_SM }}
+            >
               Back to Games Hub
             </Button>
           </Link>
@@ -610,8 +718,8 @@ export default function ArrowPuzzleGame() {
   };
 
   const claimHintAfterAd = () => {
-    setHintsLeft(h => h - 1);
-    const ids = arrows.map(a => a.id);
+    setHintsLeft((h) => h - 1);
+    const ids = arrows.map((a) => a.id);
     if (ids.length > 0) {
       const randomId = ids[Math.floor(Math.random() * ids.length)];
       setHintedArrowId(randomId);
@@ -624,22 +732,30 @@ export default function ArrowPuzzleGame() {
       {/* Header */}
       <div className="sticky top-0 z-40 border-b-4 border-black bg-white">
         <div className="mx-auto flex max-w-lg items-center justify-between px-4 py-3">
-          <Link to="/" className="flex items-center gap-2 text-sm font-black text-black hover:scale-105 transition-transform">
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-sm font-black text-black hover:scale-105 transition-transform"
+          >
             <ArrowLeft className="h-5 w-5" strokeWidth={3} /> Back
           </Link>
-          <h1 className="font-display text-2xl font-black tracking-tight uppercase">Arrow Puzzle</h1>
+          <h1 className="font-display text-2xl font-black tracking-tight uppercase">
+            Arrow Puzzle
+          </h1>
           <button
-            onClick={() => setIsMuted(m => !m)}
+            onClick={() => setIsMuted((m) => !m)}
             className="p-2 border-2 border-black rounded-lg hover:bg-gray-100 transition-colors"
             title={isMuted ? "Unmute sound" : "Mute sound"}
           >
-            {isMuted ? <VolumeX className="h-5 w-5 text-gray-500" strokeWidth={2.5} /> : <Volume2 className="h-5 w-5 text-black" strokeWidth={2.5} />}
+            {isMuted ? (
+              <VolumeX className="h-5 w-5 text-gray-500" strokeWidth={2.5} />
+            ) : (
+              <Volume2 className="h-5 w-5 text-black" strokeWidth={2.5} />
+            )}
           </button>
         </div>
       </div>
 
       <div className="mx-auto max-w-lg px-4 py-8 space-y-8">
-
         {/* Level & Stats Dashboard */}
         <div className="space-y-6">
           {/* Top Row: Level & Lives */}
@@ -649,12 +765,17 @@ export default function ArrowPuzzleGame() {
               className="flex items-center gap-2 bg-[#fbcfe8] px-5 py-2.5 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all outline-none"
               style={{ borderRadius: WOBBLY_SM }}
             >
-              <span className="font-display text-xl font-black text-black tracking-tight uppercase">Level {levelIdx + 1}</span>
+              <span className="font-display text-xl font-black text-black tracking-tight uppercase">
+                Level {levelIdx + 1}
+              </span>
               <span className="text-[12px] font-black text-black/70 flex items-center bg-white px-2 py-0.5 rounded-full border-2 border-black">
                 / {totalLevelsCount} <ChevronDown className="h-3 w-3 ml-1" strokeWidth={4} />
               </span>
             </button>
-            <div className="flex items-center gap-1.5 bg-white px-4 py-2.5 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" style={{ borderRadius: WOBBLY_SM }}>
+            <div
+              className="flex items-center gap-1.5 bg-white px-4 py-2.5 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+              style={{ borderRadius: WOBBLY_SM }}
+            >
               {Array.from({ length: 5 }).map((_, i) => (
                 <motion.div
                   key={i}
@@ -675,13 +796,27 @@ export default function ArrowPuzzleGame() {
 
           {/* Bottom Row: Moves, Left, Reset */}
           <div className="flex items-stretch gap-4">
-            <div className="flex-1 bg-[#bfdbfe] border-4 border-black p-3 flex flex-col items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" style={{ borderRadius: WOBBLY_SM }}>
-              <div className="text-[12px] font-black text-black/70 uppercase tracking-widest mb-1">Moves</div>
-              <div className="font-display text-3xl font-black text-black leading-none">{moves}</div>
+            <div
+              className="flex-1 bg-[#bfdbfe] border-4 border-black p-3 flex flex-col items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+              style={{ borderRadius: WOBBLY_SM }}
+            >
+              <div className="text-[12px] font-black text-black/70 uppercase tracking-widest mb-1">
+                Moves
+              </div>
+              <div className="font-display text-3xl font-black text-black leading-none">
+                {moves}
+              </div>
             </div>
-            <div className="flex-1 bg-[#bbf7d0] border-4 border-black p-3 flex flex-col items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" style={{ borderRadius: WOBBLY_SM }}>
-              <div className="text-[12px] font-black text-black/70 uppercase tracking-widest mb-1">Left</div>
-              <div className="font-display text-3xl font-black text-black leading-none">{arrows.length}</div>
+            <div
+              className="flex-1 bg-[#bbf7d0] border-4 border-black p-3 flex flex-col items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+              style={{ borderRadius: WOBBLY_SM }}
+            >
+              <div className="text-[12px] font-black text-black/70 uppercase tracking-widest mb-1">
+                Left
+              </div>
+              <div className="font-display text-3xl font-black text-black leading-none">
+                {arrows.length}
+              </div>
             </div>
             <Button
               onClick={handleHint}
@@ -691,7 +826,9 @@ export default function ArrowPuzzleGame() {
             >
               <div className="flex flex-col items-center justify-center">
                 <Lightbulb className="h-6 w-6 sm:h-7 sm:w-7 mb-1" strokeWidth={3} />
-                <span className="text-[11px] font-black leading-none bg-white border-2 border-black text-black px-2 py-0.5 rounded-full">{hintsLeft}</span>
+                <span className="text-[11px] font-black leading-none bg-white border-2 border-black text-black px-2 py-0.5 rounded-full">
+                  {hintsLeft}
+                </span>
               </div>
             </Button>
             <Button
@@ -705,7 +842,10 @@ export default function ArrowPuzzleGame() {
         </div>
 
         {/* Game board */}
-        <div className="relative w-full border-4 border-black bg-white p-3 sm:p-4 select-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]" style={{ borderRadius: WOBBLY_MD }}>
+        <div
+          className="relative w-full border-4 border-black bg-white p-3 sm:p-4 select-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
+          style={{ borderRadius: WOBBLY_MD }}
+        >
           <div
             className="grid gap-2 sm:gap-3"
             style={{
@@ -730,13 +870,13 @@ export default function ArrowPuzzleGame() {
                     isBlockerPoint
                       ? "bg-rose-100 border-rose-500 shadow-[inset_0_0_8px_rgba(244,63,94,0.4)]"
                       : isPathCell
-                      ? "bg-amber-100/70 border-amber-400/80 shadow-[inset_0_0_8px_rgba(251,191,36,0.3)]"
-                      : "bg-black/5 border-black/20"
+                        ? "bg-amber-100/70 border-amber-400/80 shadow-[inset_0_0_8px_rgba(251,191,36,0.3)]"
+                        : "bg-black/5 border-black/20"
                   }`}
                   style={{
                     gridRow: r + 1,
                     gridColumn: c + 1,
-                    borderRadius: WOBBLY_SM
+                    borderRadius: WOBBLY_SM,
                   }}
                 >
                   {isBlockerPoint ? (
@@ -751,7 +891,7 @@ export default function ArrowPuzzleGame() {
             })}
 
             {/* Obstacles */}
-            {levelData.obstacles.map(obs => {
+            {levelData.obstacles.map((obs) => {
               const isShaking = shakeId === `obs-${obs.id}`;
               const isMirror = obs.type === "mirror-slash" || obs.type === "mirror-backslash";
               return (
@@ -762,16 +902,16 @@ export default function ArrowPuzzleGame() {
                     obs.type === "wall"
                       ? "bg-[#d6d3d1] overflow-hidden"
                       : obs.type === "bomb"
-                      ? "bg-[#f87171]"
-                      : isMirror
-                      ? "bg-[#e0f2fe]"
-                      : "bg-[#bfdbfe]"
+                        ? "bg-[#f87171]"
+                        : isMirror
+                          ? "bg-[#e0f2fe]"
+                          : "bg-[#bfdbfe]"
                   }`}
                   style={{
                     gridRow: obs.row + 1,
                     gridColumn: obs.col + 1,
                     position: "relative",
-                    borderRadius: WOBBLY_SM
+                    borderRadius: WOBBLY_SM,
                   }}
                   animate={
                     isShaking
@@ -790,12 +930,8 @@ export default function ArrowPuzzleGame() {
                   {obs.type === "bomb" && (
                     <Bomb className="h-6 w-6 text-rose-500 animate-pulse" strokeWidth={2.5} />
                   )}
-                  {obs.type === "mirror-slash" && (
-                    <MirrorSlashIndicator />
-                  )}
-                  {obs.type === "mirror-backslash" && (
-                    <MirrorBackslashIndicator />
-                  )}
+                  {obs.type === "mirror-slash" && <MirrorSlashIndicator />}
+                  {obs.type === "mirror-backslash" && <MirrorBackslashIndicator />}
                   {obs.type === "ice" && (
                     <div className="absolute inset-0 bg-white/60 rounded-[18px] border-2 border-white/60" />
                   )}
@@ -805,9 +941,15 @@ export default function ArrowPuzzleGame() {
                   {obs.type.startsWith("gate-") && (
                     <div className="absolute inset-0 flex items-center justify-center opacity-70">
                       {obs.type === "gate-up" && <ChevronUp className="h-8 w-8 text-stone-600" />}
-                      {obs.type === "gate-down" && <ChevronDown className="h-8 w-8 text-stone-600" />}
-                      {obs.type === "gate-left" && <ChevronLeft className="h-8 w-8 text-stone-600" />}
-                      {obs.type === "gate-right" && <ChevronRight className="h-8 w-8 text-stone-600" />}
+                      {obs.type === "gate-down" && (
+                        <ChevronDown className="h-8 w-8 text-stone-600" />
+                      )}
+                      {obs.type === "gate-left" && (
+                        <ChevronLeft className="h-8 w-8 text-stone-600" />
+                      )}
+                      {obs.type === "gate-right" && (
+                        <ChevronRight className="h-8 w-8 text-stone-600" />
+                      )}
                     </div>
                   )}
                 </motion.button>
@@ -820,7 +962,11 @@ export default function ArrowPuzzleGame() {
                 <motion.div
                   key={`col-${collisionAnim.id}`}
                   className="absolute z-30 rounded-xl flex items-center justify-center pointer-events-none"
-                  style={{ gridRow: collisionAnim.row + 1, gridColumn: collisionAnim.col + 1, position: "relative" }}
+                  style={{
+                    gridRow: collisionAnim.row + 1,
+                    gridColumn: collisionAnim.col + 1,
+                    position: "relative",
+                  }}
                   initial={{ scale: 0.5, opacity: 1 }}
                   animate={{ scale: 1.5, opacity: 0 }}
                   exit={{ opacity: 0 }}
@@ -845,7 +991,7 @@ export default function ArrowPuzzleGame() {
 
             {/* Arrow tiles */}
             <AnimatePresence>
-              {arrows.map(arrow => {
+              {arrows.map((arrow) => {
                 const Icon = DIR_ICON[arrow.dir];
                 const isTappable = tappableIds.has(arrow.id);
                 const isShaking = shakeId === arrow.id;
@@ -880,13 +1026,15 @@ export default function ArrowPuzzleGame() {
                     onTouchStart={() => setHoveredArrowId(arrow.id)}
                     onTouchEnd={() => setHoveredArrowId(null)}
                     className={`absolute flex items-center justify-center cursor-pointer ${DIR_COLORS[arrow.dir]} transition-shadow border-2 border-black z-10 ${
-                      isTappable ? "shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:scale-105" : "opacity-70 shadow-none border-2 scale-95"
+                      isTappable
+                        ? "shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:scale-105"
+                        : "opacity-70 shadow-none border-2 scale-95"
                     } ${isHinted ? "ring-4 ring-[#fef08a] !shadow-[0_0_15px_rgba(254,240,138,1)] z-20" : ""} ${isMoving ? "z-30 pointer-events-none" : ""}`}
                     style={{
                       gridRow: arrow.row + 1,
                       gridColumn: arrow.col + 1,
                       position: "relative",
-                      borderRadius: WOBBLY_SM
+                      borderRadius: WOBBLY_SM,
                     }}
                     initial={{ scale: 0, rotate: -90 }}
                     animate={animTarget}
@@ -934,11 +1082,20 @@ export default function ArrowPuzzleGame() {
                   </p>
                   <div className="flex flex-col gap-3 justify-center mt-2">
                     {levelIdx < 99 && (
-                      <Button onClick={nextLevel} className="w-full h-12 bg-[#fef08a] text-black hover:bg-[#fde047] border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all text-lg font-black" style={{ borderRadius: WOBBLY_SM }}>
+                      <Button
+                        onClick={nextLevel}
+                        className="w-full h-12 bg-[#fef08a] text-black hover:bg-[#fde047] border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all text-lg font-black"
+                        style={{ borderRadius: WOBBLY_SM }}
+                      >
                         Next Level <Zap className="h-5 w-5 ml-2 fill-black text-black" />
                       </Button>
                     )}
-                    <Button onClick={resetLevel} variant="outline" className="w-full h-12 bg-white text-black hover:bg-gray-100 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all text-lg font-black" style={{ borderRadius: WOBBLY_SM }}>
+                    <Button
+                      onClick={resetLevel}
+                      variant="outline"
+                      className="w-full h-12 bg-white text-black hover:bg-gray-100 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all text-lg font-black"
+                      style={{ borderRadius: WOBBLY_SM }}
+                    >
                       <RotateCcw className="h-5 w-5 mr-2" strokeWidth={3} /> Retry
                     </Button>
                   </div>
@@ -965,11 +1122,17 @@ export default function ArrowPuzzleGame() {
                   style={{ borderRadius: WOBBLY_MD }}
                 >
                   <div className="text-6xl animate-bounce">💔</div>
-                  <h2 className="font-display text-3xl font-black text-black uppercase">Out of Lives!</h2>
+                  <h2 className="font-display text-3xl font-black text-black uppercase">
+                    Out of Lives!
+                  </h2>
                   <p className="text-black/70 text-lg font-bold">
                     You made <strong className="text-black">{moves}</strong> moves
                   </p>
-                  <Button onClick={resetLevel} className="h-12 w-full mt-2 bg-[#fbcfe8] text-black hover:bg-[#f9a8d4] border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all text-lg font-black" style={{ borderRadius: WOBBLY_SM }}>
+                  <Button
+                    onClick={resetLevel}
+                    className="h-12 w-full mt-2 bg-[#fbcfe8] text-black hover:bg-[#f9a8d4] border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all text-lg font-black"
+                    style={{ borderRadius: WOBBLY_SM }}
+                  >
                     <RotateCcw className="h-5 w-5 mr-2" strokeWidth={3} /> Try Again
                   </Button>
                 </motion.div>
@@ -977,7 +1140,6 @@ export default function ArrowPuzzleGame() {
             )}
           </AnimatePresence>
         </div>
-
 
         {/* How to play button */}
         <button
@@ -987,7 +1149,6 @@ export default function ArrowPuzzleGame() {
         >
           <Lightbulb className="h-6 w-6 text-black" strokeWidth={3} /> How to Play
         </button>
-
       </div>
 
       {/* How to Play Modal Overlay */}
@@ -1004,7 +1165,7 @@ export default function ArrowPuzzleGame() {
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
-              onClick={e => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
               className="w-full max-w-md bg-white border-4 border-black p-6 flex flex-col max-h-[85vh] relative shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden"
               style={{ borderRadius: WOBBLY_MD }}
             >
@@ -1022,11 +1183,12 @@ export default function ArrowPuzzleGame() {
               </h2>
 
               <div className="flex-1 overflow-y-auto pr-1 space-y-4 text-black custom-scrollbar">
-                
                 {/* Objective */}
                 <div className="p-3 bg-[#bfdbfe] border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-xl">
                   <p className="text-xs sm:text-sm font-black leading-snug">
-                    🎯 <strong>Goal:</strong> Tap arrows to send them flying off the board! Clear <span className="underline decoration-2">all arrows</span> to complete the level.
+                    🎯 <strong>Goal:</strong> Tap arrows to send them flying off the board! Clear{" "}
+                    <span className="underline decoration-2">all arrows</span> to complete the
+                    level.
                   </p>
                 </div>
 
@@ -1039,8 +1201,16 @@ export default function ArrowPuzzleGame() {
                     Hover or touch any arrow to preview its exact flight trajectory:
                   </p>
                   <div className="flex items-center gap-3 text-xs font-black pt-1">
-                    <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-amber-400 border border-black" /> Amber Trail</span>
-                    <span className="inline-flex items-center gap-1 text-rose-600"><span className="w-3 h-3 rounded-full bg-rose-500 text-white text-[8px] flex items-center justify-center font-black">✕</span> Red Warning</span>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-400 border border-black" />{" "}
+                      Amber Trail
+                    </span>
+                    <span className="inline-flex items-center gap-1 text-rose-600">
+                      <span className="w-3 h-3 rounded-full bg-rose-500 text-white text-[8px] flex items-center justify-center font-black">
+                        ✕
+                      </span>{" "}
+                      Red Warning
+                    </span>
                   </div>
                 </div>
 
@@ -1054,15 +1224,27 @@ export default function ArrowPuzzleGame() {
                       <div className="w-10 h-10 mb-1">
                         <MirrorSlashIndicator />
                       </div>
-                      <span className="text-[11px] font-black uppercase text-sky-900">Slash ( / )</span>
-                      <span className="text-[10px] font-bold text-black/70">Turns ↑ → Right<br />Turns ↓ → Left</span>
+                      <span className="text-[11px] font-black uppercase text-sky-900">
+                        Slash ( / )
+                      </span>
+                      <span className="text-[10px] font-bold text-black/70">
+                        Turns ↑ → Right
+                        <br />
+                        Turns ↓ → Left
+                      </span>
                     </div>
                     <div className="p-2 bg-white border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-xl flex flex-col items-center text-center">
                       <div className="w-10 h-10 mb-1">
                         <MirrorBackslashIndicator />
                       </div>
-                      <span className="text-[11px] font-black uppercase text-indigo-900">Backslash ( \ )</span>
-                      <span className="text-[10px] font-bold text-black/70">Turns ↑ → Left<br />Turns ↓ → Right</span>
+                      <span className="text-[11px] font-black uppercase text-indigo-900">
+                        Backslash ( \ )
+                      </span>
+                      <span className="text-[10px] font-bold text-black/70">
+                        Turns ↑ → Left
+                        <br />
+                        Turns ↓ → Right
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -1113,10 +1295,11 @@ export default function ArrowPuzzleGame() {
                     <div className="bg-[#bfdbfe] border-2 border-black py-1 rounded-lg">Up ↑</div>
                     <div className="bg-[#fbcfe8] border-2 border-black py-1 rounded-lg">Down ↓</div>
                     <div className="bg-[#bbf7d0] border-2 border-black py-1 rounded-lg">Left ←</div>
-                    <div className="bg-[#fef08a] border-2 border-black py-1 rounded-lg">Right →</div>
+                    <div className="bg-[#fef08a] border-2 border-black py-1 rounded-lg">
+                      Right →
+                    </div>
                   </div>
                 </div>
-
               </div>
             </motion.div>
           </motion.div>
@@ -1137,7 +1320,7 @@ export default function ArrowPuzzleGame() {
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
-              onClick={e => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
               className="w-full max-w-sm bg-white border-4 border-black p-6 flex flex-col max-h-[80vh] relative shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
               style={{ borderRadius: WOBBLY_MD }}
             >
@@ -1150,7 +1333,9 @@ export default function ArrowPuzzleGame() {
                 <X className="h-4 w-4" strokeWidth={3} />
               </Button>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-display text-2xl font-black text-black uppercase">Select Level</h2>
+                <h2 className="font-display text-2xl font-black text-black uppercase">
+                  Select Level
+                </h2>
                 <span className="text-xs font-black bg-[#fef08a] text-black border-2 border-black px-2.5 py-1 rounded-full shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                   {totalLevelsCount} Levels
                 </span>
@@ -1167,15 +1352,17 @@ export default function ArrowPuzzleGame() {
                             setLevelIdx(i);
                             setShowLevels(false);
                           } else {
-                            toast.error(`Level ${i + 1} is locked! Clear Level ${highestUnlocked + 1} first.`);
+                            toast.error(
+                              `Level ${i + 1} is locked! Clear Level ${highestUnlocked + 1} first.`,
+                            );
                           }
                         }}
                         className={`h-14 w-14 shrink-0 border-2 border-black font-display font-black text-xs transition-all outline-none flex flex-col items-center justify-center ${
                           i === levelIdx
                             ? "bg-[#bfdbfe] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] scale-110 z-10"
                             : unlocked
-                            ? "bg-white text-black hover:bg-[#fbcfe8] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 cursor-pointer"
-                            : "bg-gray-100 text-gray-500 opacity-70 cursor-pointer"
+                              ? "bg-white text-black hover:bg-[#fbcfe8] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 cursor-pointer"
+                              : "bg-gray-100 text-gray-500 opacity-70 cursor-pointer"
                         }`}
                         style={{ borderRadius: WOBBLY_SM }}
                       >

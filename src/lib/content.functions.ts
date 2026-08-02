@@ -39,7 +39,6 @@ export const submitFeedback = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
-
 export const submitPost = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z
@@ -103,17 +102,21 @@ export const submitMessage = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     if (await isBanned(data.hashedId)) return { ok: true, shadow: true };
-    const { data: inserted, error } = await supabaseAdmin.from("community_messages" as any).insert({
-      college_id: data.collegeId,
-      anonymous_user_hash: data.hashedId,
-      username: data.username,
-      content: clean(data.content),
-      is_incident_signal: data.isIncidentSignal,
-      reply_to_id: data.replyToId ?? null,
-      reply_to_username: data.replyToUsername ?? null,
-      reply_to_content: data.replyToContent ? clean(data.replyToContent).slice(0, 280) : null,
-      image_url: data.imageUrl ?? null,
-    }).select("id").single();
+    const { data: inserted, error } = await supabaseAdmin
+      .from("community_messages" as any)
+      .insert({
+        college_id: data.collegeId,
+        anonymous_user_hash: data.hashedId,
+        username: data.username,
+        content: clean(data.content),
+        is_incident_signal: data.isIncidentSignal,
+        reply_to_id: data.replyToId ?? null,
+        reply_to_username: data.replyToUsername ?? null,
+        reply_to_content: data.replyToContent ? clean(data.replyToContent).slice(0, 280) : null,
+        image_url: data.imageUrl ?? null,
+      })
+      .select("id")
+      .single();
     if (error) throw new Error(error.message);
     return { ok: true, shadow: false, messageId: (inserted as any)?.id };
   });
@@ -175,8 +178,7 @@ export const submitRating = createServerFn({ method: "POST" })
       .single();
     if (col) {
       const reviews = (col.total_reviews ?? 0) + 1;
-      const newAvg =
-        ((col.total_rating ?? 0) * (col.total_reviews ?? 0) + overall) / reviews;
+      const newAvg = ((col.total_rating ?? 0) * (col.total_reviews ?? 0) + overall) / reviews;
       await supabaseAdmin
         .from("colleges")
         .update({ total_rating: Math.round(newAvg * 10) / 10, total_reviews: reviews })
@@ -185,10 +187,15 @@ export const submitRating = createServerFn({ method: "POST" })
     return { ok: true, shadow: false };
   });
 
-
 export const votePost = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
-    z.object({ postId: z.string().uuid(), dir: z.enum(["up", "down"]), hashedId: z.string().min(8) }).parse(d),
+    z
+      .object({
+        postId: z.string().uuid(),
+        dir: z.enum(["up", "down"]),
+        hashedId: z.string().min(8),
+      })
+      .parse(d),
   )
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -313,15 +320,19 @@ export const submitGlobalMessage = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     if (await isBanned(data.hashedId)) return { ok: true, shadow: true };
-    const { data: inserted, error } = await supabaseAdmin.from("global_messages" as any).insert({
-      anonymous_user_hash: data.hashedId,
-      username: data.username,
-      content: clean(data.content),
-      reply_to_id: data.replyToId ?? null,
-      reply_to_username: data.replyToUsername ?? null,
-      reply_to_content: data.replyToContent ? clean(data.replyToContent).slice(0, 280) : null,
-      image_url: data.imageUrl ?? null,
-    }).select("id").single();
+    const { data: inserted, error } = await supabaseAdmin
+      .from("global_messages" as any)
+      .insert({
+        anonymous_user_hash: data.hashedId,
+        username: data.username,
+        content: clean(data.content),
+        reply_to_id: data.replyToId ?? null,
+        reply_to_username: data.replyToUsername ?? null,
+        reply_to_content: data.replyToContent ? clean(data.replyToContent).slice(0, 280) : null,
+        image_url: data.imageUrl ?? null,
+      })
+      .select("id")
+      .single();
     if (error) throw new Error(error.message);
     return { ok: true, shadow: false, messageId: (inserted as any)?.id };
   });
@@ -333,21 +344,44 @@ async function lookupHashForUsername(username: string): Promise<string | null> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   // Resolve a username to its secret identity hash using existing,
   // identity-bearing records. Never trust a client-supplied recipient hash.
-  
-  const anon = await supabaseAdmin.from("anon_users").select("user_hash").eq("username", username).maybeSingle();
+
+  const anon = await supabaseAdmin
+    .from("anon_users")
+    .select("user_hash")
+    .eq("username", username)
+    .maybeSingle();
   if (anon.data?.user_hash) return anon.data.user_hash;
 
-  const post = await supabaseAdmin.from("posts").select("anonymous_user_hash").eq("username", username).order("created_at", { ascending: false }).limit(1);
+  const post = await supabaseAdmin
+    .from("posts")
+    .select("anonymous_user_hash")
+    .eq("username", username)
+    .order("created_at", { ascending: false })
+    .limit(1);
   if (post.data?.[0]?.anonymous_user_hash) return post.data[0].anonymous_user_hash;
-  const gm = await supabaseAdmin.from("global_messages").select("anonymous_user_hash").eq("username", username).order("created_at", { ascending: false }).limit(1);
+  const gm = await supabaseAdmin
+    .from("global_messages")
+    .select("anonymous_user_hash")
+    .eq("username", username)
+    .order("created_at", { ascending: false })
+    .limit(1);
   if (gm.data?.[0]?.anonymous_user_hash) return gm.data[0].anonymous_user_hash;
-  const cm = await supabaseAdmin.from("community_messages").select("anonymous_user_hash").eq("username", username).order("created_at", { ascending: false }).limit(1);
+  const cm = await supabaseAdmin
+    .from("community_messages")
+    .select("anonymous_user_hash")
+    .eq("username", username)
+    .order("created_at", { ascending: false })
+    .limit(1);
   if (cm.data?.[0]?.anonymous_user_hash) return cm.data[0].anonymous_user_hash;
-  const dm = await supabaseAdmin.from("direct_messages").select("sender_hash").eq("sender_username", username).order("created_at", { ascending: false }).limit(1);
+  const dm = await supabaseAdmin
+    .from("direct_messages")
+    .select("sender_hash")
+    .eq("sender_username", username)
+    .order("created_at", { ascending: false })
+    .limit(1);
   if (dm.data?.[0]?.sender_hash) return dm.data[0].sender_hash;
   return null;
 }
-
 
 export const submitDirectMessage = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
@@ -391,21 +425,21 @@ export const submitDirectMessage = createServerFn({ method: "POST" })
           .from("push_subscriptions")
           .select("id, endpoint, p256dh, auth")
           .eq("user_hash", recipientHash);
-          
+
         if (subs && subs.length > 0) {
           const stale: string[] = [];
           await Promise.all(
             subs.map(async (s) => {
               const success = await sendPushMessage(
                 { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
-                { 
-                  title: `@${data.username}`, 
-                  body: clean(data.content) || (data.imageUrl ? "Sent an image" : "Sent a message"), 
-                  url: `/messages?to=${data.username}` 
-                }
+                {
+                  title: `@${data.username}`,
+                  body: clean(data.content) || (data.imageUrl ? "Sent an image" : "Sent a message"),
+                  url: `/messages?to=${data.username}`,
+                },
               );
               if (!success) stale.push(s.id);
-            })
+            }),
           );
           if (stale.length > 0) {
             await supabaseAdmin.from("push_subscriptions").delete().in("id", stale);
@@ -448,7 +482,6 @@ export const togglePinMessage = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true, pinned: data.pinned };
   });
-
 
 export const fetchDirectMessages = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
@@ -517,10 +550,14 @@ export const deleteDirectConversation = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-
-
-
-const COLLEGE_TYPES = ["Engineering", "Medical", "Arts", "Commerce", "University", "Research"] as const;
+const COLLEGE_TYPES = [
+  "Engineering",
+  "Medical",
+  "Arts",
+  "Commerce",
+  "University",
+  "Research",
+] as const;
 
 export const submitCollegeRequest = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
@@ -631,13 +668,10 @@ export const toggleReaction = createServerFn({ method: "POST" })
       throw new Error(error.message);
     }
     return { ok: true, active: true };
-
   });
 
 export const fetchDirectReactions = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) =>
-    z.object({ hashedId: z.string().min(8) }).parse(d),
-  )
+  .inputValidator((d: unknown) => z.object({ hashedId: z.string().min(8) }).parse(d))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     if (!HASH_RE.test(data.hashedId)) {
@@ -654,7 +688,14 @@ export const fetchDirectReactions = createServerFn({ method: "POST" })
       new Set([...(sent.data ?? []), ...(received.data ?? [])].map((r) => r.id)),
     );
     if (ids.length === 0)
-      return { reactions: [] as Array<{ id: string; message_id: string; emoji: string; anonymous_user_hash: string }> };
+      return {
+        reactions: [] as Array<{
+          id: string;
+          message_id: string;
+          emoji: string;
+          anonymous_user_hash: string;
+        }>,
+      };
     const { data: reactions, error } = await supabaseAdmin
       .from("message_reactions")
       .select("id,message_id,emoji,anonymous_user_hash")
@@ -682,7 +723,10 @@ export const filterTakenUsernames = createServerFn({ method: "POST" })
       supabaseAdmin.from("global_messages").select("username").in("username", names),
       supabaseAdmin.from("community_messages").select("username").in("username", names),
       supabaseAdmin.from("direct_messages").select("sender_username").in("sender_username", names),
-      supabaseAdmin.from("direct_messages").select("recipient_username").in("recipient_username", names),
+      supabaseAdmin
+        .from("direct_messages")
+        .select("recipient_username")
+        .in("recipient_username", names),
     ]);
 
     for (const r of posts.data ?? []) if (r.username) taken.add(r.username);
@@ -698,27 +742,25 @@ export const filterTakenUsernames = createServerFn({ method: "POST" })
   });
 
 /** Public list of usernames that carry a verified tick. */
-export const listVerifiedUsernames = createServerFn({ method: "GET" })
-  .handler(async () => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data } = await supabaseAdmin.from("verified_users" as any).select("username");
-    return { usernames: ((data as any[]) ?? []).map((r) => r.username as string) };
-  });
+export const listVerifiedUsernames = createServerFn({ method: "GET" }).handler(async () => {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data } = await supabaseAdmin.from("verified_users" as any).select("username");
+  return { usernames: ((data as any[]) ?? []).map((r) => r.username as string) };
+});
 
 /** Public list of admin-assigned custom avatars, keyed by username. */
-export const listAvatarOverrides = createServerFn({ method: "GET" })
-  .handler(async () => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data } = await supabaseAdmin
-      .from("anon_users" as any)
-      .select("username, avatar_url")
-      .not("avatar_url", "is", null);
-    const overrides: { username: string; url: string }[] = [];
-    for (const r of (data as any[]) ?? []) {
-      if (r.username && r.avatar_url) overrides.push({ username: r.username, url: r.avatar_url });
-    }
-    return { overrides };
-  });
+export const listAvatarOverrides = createServerFn({ method: "GET" }).handler(async () => {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data } = await supabaseAdmin
+    .from("anon_users" as any)
+    .select("username, avatar_url")
+    .not("avatar_url", "is", null);
+  const overrides: { username: string; url: string }[] = [];
+  for (const r of (data as any[]) ?? []) {
+    if (r.username && r.avatar_url) overrides.push({ username: r.username, url: r.avatar_url });
+  }
+  return { overrides };
+});
 
 /** Register (or refresh) the caller's anonymous identity so admins can see
  * every user — even brand-new ones with no posts or messages yet. */
@@ -747,10 +789,7 @@ export const markForgotten = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin
       .from("anon_users" as any)
-      .upsert(
-        { user_hash: data.hashedId, forgotten: true },
-        { onConflict: "user_hash" },
-      );
+      .upsert({ user_hash: data.hashedId, forgotten: true }, { onConflict: "user_hash" });
     return { ok: true as const };
   });
 
@@ -758,11 +797,13 @@ export const markForgotten = createServerFn({ method: "POST" })
  * Pass url=null to clear it and fall back to the default generated avatar. */
 export const setMyAvatar = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
-    z.object({
-      hashedId: z.string().min(8),
-      username: z.string().min(3).max(40),
-      url: z.string().url().max(500).nullable(),
-    }).parse(d),
+    z
+      .object({
+        hashedId: z.string().min(8),
+        username: z.string().min(3).max(40),
+        url: z.string().url().max(500).nullable(),
+      })
+      .parse(d),
   )
   .handler(async ({ data }) => {
     if (!HASH_RE.test(data.hashedId)) return { ok: false as const };
@@ -780,9 +821,6 @@ export const setMyAvatar = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
-
-
-
 
 /** Wipe every trace of the caller's activity. Used by "Forget Me". */
 export const purgeMyActivity = createServerFn({ method: "POST" })
@@ -814,7 +852,8 @@ export const purgeMyActivity = createServerFn({ method: "POST" })
 export const syncIdentity = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ hashedId: z.string().min(8) }).parse(d))
   .handler(async ({ data }) => {
-    if (!HASH_RE.test(data.hashedId)) return { username: null as string | null, verified: false, avatarUrl: null as string | null };
+    if (!HASH_RE.test(data.hashedId))
+      return { username: null as string | null, verified: false, avatarUrl: null as string | null };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const h = data.hashedId;
 
@@ -831,14 +870,42 @@ export const syncIdentity = createServerFn({ method: "POST" })
     // which reflects an admin rename across their content.
     if (!username) {
       const latest = await Promise.all([
-        supabaseAdmin.from("posts").select("username, created_at").eq("anonymous_user_hash", h).order("created_at", { ascending: false }).limit(1),
-        supabaseAdmin.from("post_comments").select("username, created_at").eq("anonymous_user_hash", h).order("created_at", { ascending: false }).limit(1),
-        supabaseAdmin.from("global_messages").select("username, created_at").eq("anonymous_user_hash", h).order("created_at", { ascending: false }).limit(1),
-        supabaseAdmin.from("community_messages").select("username, created_at").eq("anonymous_user_hash", h).order("created_at", { ascending: false }).limit(1),
-        supabaseAdmin.from("direct_messages").select("sender_username, created_at").eq("sender_hash", h).order("created_at", { ascending: false }).limit(1),
+        supabaseAdmin
+          .from("posts")
+          .select("username, created_at")
+          .eq("anonymous_user_hash", h)
+          .order("created_at", { ascending: false })
+          .limit(1),
+        supabaseAdmin
+          .from("post_comments")
+          .select("username, created_at")
+          .eq("anonymous_user_hash", h)
+          .order("created_at", { ascending: false })
+          .limit(1),
+        supabaseAdmin
+          .from("global_messages")
+          .select("username, created_at")
+          .eq("anonymous_user_hash", h)
+          .order("created_at", { ascending: false })
+          .limit(1),
+        supabaseAdmin
+          .from("community_messages")
+          .select("username, created_at")
+          .eq("anonymous_user_hash", h)
+          .order("created_at", { ascending: false })
+          .limit(1),
+        supabaseAdmin
+          .from("direct_messages")
+          .select("sender_username, created_at")
+          .eq("sender_hash", h)
+          .order("created_at", { ascending: false })
+          .limit(1),
       ]);
       const rows: { name: string; at: string }[] = [];
-      const push = (r: any, key: string) => { const x = r.data?.[0]; if (x?.[key]) rows.push({ name: x[key], at: x.created_at }); };
+      const push = (r: any, key: string) => {
+        const x = r.data?.[0];
+        if (x?.[key]) rows.push({ name: x[key], at: x.created_at });
+      };
       push(latest[0], "username");
       push(latest[1], "username");
       push(latest[2], "username");
@@ -858,7 +925,6 @@ export const syncIdentity = createServerFn({ method: "POST" })
 
     return { username, verified, avatarUrl };
   });
-
 
 /** Create a poll in the global room or a college community. Lives 24h. */
 export const createPoll = createServerFn({ method: "POST" })
@@ -952,8 +1018,14 @@ export const deletePoll = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!poll) return { ok: false as const };
     if ((poll as any).anonymous_user_hash !== data.hashedId) return { ok: false as const };
-    await supabaseAdmin.from("poll_votes" as any).delete().eq("poll_id", data.pollId);
-    const { error } = await supabaseAdmin.from("polls" as any).delete().eq("id", data.pollId);
+    await supabaseAdmin
+      .from("poll_votes" as any)
+      .delete()
+      .eq("poll_id", data.pollId);
+    const { error } = await supabaseAdmin
+      .from("polls" as any)
+      .delete()
+      .eq("id", data.pollId);
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
@@ -1008,9 +1080,7 @@ export const submitProofForPost = createServerFn({ method: "POST" })
 
 /** Fetch posts authored by a specific user (by their anonymous hash). */
 export const fetchMyPosts = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) =>
-    z.object({ hashedId: z.string().min(8) }).parse(d),
-  )
+  .inputValidator((d: unknown) => z.object({ hashedId: z.string().min(8) }).parse(d))
   .handler(async ({ data }) => {
     if (!HASH_RE.test(data.hashedId)) throw new Error("Invalid identity");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -1023,4 +1093,3 @@ export const fetchMyPosts = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { posts: posts ?? [] };
   });
-

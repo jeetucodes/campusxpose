@@ -46,7 +46,9 @@ function CollaborateAdmin() {
   const { token } = useAdmin();
   const queryClient = useQueryClient();
   const [busy, setBusy] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState<"pending" | "accepted" | "rejected" | "all">("pending");
+  const [statusFilter, setStatusFilter] = useState<"pending" | "accepted" | "rejected" | "all">(
+    "pending",
+  );
 
   const listFn = useServerFn(adminListCollabRequests);
   const updateFn = useServerFn(adminUpdateCollabRequest);
@@ -111,7 +113,7 @@ function CollaborateAdmin() {
         </div>
       ) : (
         <div className="space-y-3">
-          {(requests as unknown as CollabRequest[] ?? []).map((req) => (
+          {((requests as unknown as CollabRequest[]) ?? []).map((req) => (
             <div
               key={req.id}
               className={cn(

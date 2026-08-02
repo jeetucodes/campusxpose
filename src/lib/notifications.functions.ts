@@ -7,7 +7,9 @@ function todayStr(): string {
 }
 function assertAdmin(token: string) {
   const pw = process.env.ADMIN_PASSWORD ?? "";
-  const exp = createHash("sha256").update(pw + todayStr()).digest("hex");
+  const exp = createHash("sha256")
+    .update(pw + todayStr())
+    .digest("hex");
   const a = Buffer.from(token);
   const b = Buffer.from(exp);
   if (a.length !== b.length || !timingSafeEqual(a, b)) throw new Error("Unauthorized");
@@ -43,12 +45,14 @@ export const getNotifications = createServerFn({ method: "POST" })
     // Automatically remove older notifications to keep only the latest ones
     if (list.data && list.data.length === data.limit) {
       const oldestKept = list.data[list.data.length - 1];
-      Promise.resolve(supabaseAdmin
-        .from("notifications")
-        .delete()
-        .eq("user_hash", data.hashedId)
-        .not("type", "in", HIDDEN)
-        .lt("created_at", oldestKept.created_at))
+      Promise.resolve(
+        supabaseAdmin
+          .from("notifications")
+          .delete()
+          .eq("user_hash", data.hashedId)
+          .not("type", "in", HIDDEN)
+          .lt("created_at", oldestKept.created_at),
+      )
         .then(() => {})
         .catch(() => {});
     }
@@ -63,7 +67,10 @@ export const markNotificationsRead = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    let q = supabaseAdmin.from("notifications").update({ read: true }).eq("user_hash", data.hashedId);
+    let q = supabaseAdmin
+      .from("notifications")
+      .update({ read: true })
+      .eq("user_hash", data.hashedId);
     if (data.id) q = q.eq("id", data.id);
     await q;
     return { ok: true as const };
@@ -107,25 +114,27 @@ export const adminBroadcast = createServerFn({ method: "POST" })
     // Browser push to all subscribers using the NodeJS backend instead of an edge function
     let pushed = 0;
     const stale: string[] = [];
-    
+
     try {
       const { sendPushMessage } = await import("./push.server");
-      const { data: subs } = await supabaseAdmin.from("push_subscriptions").select("id, endpoint, p256dh, auth");
+      const { data: subs } = await supabaseAdmin
+        .from("push_subscriptions")
+        .select("id, endpoint, p256dh, auth");
       if (subs && subs.length > 0) {
         await Promise.all(
           subs.map(async (s) => {
             const success = await sendPushMessage(
               { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
-              { title: "CampusXpose", body: data.message, url: data.link || "/" }
+              { title: "CampusXpose", body: data.message, url: data.link || "/" },
             );
             if (success) {
               pushed++;
             } else {
               stale.push(s.id);
             }
-          })
+          }),
         );
-        
+
         if (stale.length > 0) {
           await supabaseAdmin.from("push_subscriptions").delete().in("id", stale);
         }

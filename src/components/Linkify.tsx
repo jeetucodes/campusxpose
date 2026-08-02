@@ -11,7 +11,10 @@ export function Linkify({ text }: { text: string }) {
       {parts.map((part, i) => {
         if (part.match(urlRegex)) {
           const href = part.startsWith("www.") ? `https://${part}` : part;
-          const displayUrl = part.length > 35 ? part.substring(0, 25) + "..." + part.substring(part.length - 10) : part;
+          const displayUrl =
+            part.length > 35
+              ? part.substring(0, 25) + "..." + part.substring(part.length - 10)
+              : part;
           return (
             <a
               key={i}

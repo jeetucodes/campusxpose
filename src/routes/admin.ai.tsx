@@ -6,7 +6,11 @@ import { Bot, FileText, Loader2, Download, Printer } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { useAdmin } from "@/stores/admin";
-import { adminAnalyzeBatch, adminGenerateReport, adminGenerateGrokReport } from "@/lib/admin.functions";
+import {
+  adminAnalyzeBatch,
+  adminGenerateReport,
+  adminGenerateGrokReport,
+} from "@/lib/admin.functions";
 import { DEFAULT_KEYWORDS } from "@/lib/categories";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +18,11 @@ import { Slider } from "@/components/ui/slider";
 
 export const Route = createFileRoute("/admin/ai")({
   head: () => ({ meta: [{ title: "Admin · AI Control" }, { name: "robots", content: "noindex" }] }),
-  component: () => <AdminShell><AIControl /></AdminShell>,
+  component: () => (
+    <AdminShell>
+      <AIControl />
+    </AdminShell>
+  ),
 });
 
 const cleanHtml = (raw: string) => {
@@ -33,12 +41,19 @@ function AIControl() {
   const [reportHtml, setReportHtml] = useState<string | null>(null);
   const [keywords, setKeywords] = useState<string[]>(() => {
     if (typeof window === "undefined") return DEFAULT_KEYWORDS;
-    try { return JSON.parse(localStorage.getItem("campusxpose_keywords") || "null") ?? DEFAULT_KEYWORDS; } catch { return DEFAULT_KEYWORDS; }
+    try {
+      return JSON.parse(localStorage.getItem("campusxpose_keywords") || "null") ?? DEFAULT_KEYWORDS;
+    } catch {
+      return DEFAULT_KEYWORDS;
+    }
   });
   const [newKw, setNewKw] = useState("");
   const [sensitivity, setSensitivity] = useState(6);
 
-  const saveKw = (list: string[]) => { setKeywords(list); localStorage.setItem("campusxpose_keywords", JSON.stringify(list)); };
+  const saveKw = (list: string[]) => {
+    setKeywords(list);
+    localStorage.setItem("campusxpose_keywords", JSON.stringify(list));
+  };
 
   const handleGrokReport = async () => {
     setGrokBusy(true);
@@ -55,13 +70,13 @@ function AIControl() {
   };
 
   const handlePrint = () => {
-    const iframe = document.createElement('iframe');
-    iframe.style.position = 'fixed';
-    iframe.style.right = '0';
-    iframe.style.bottom = '0';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
-    iframe.style.border = '0';
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "fixed";
+    iframe.style.right = "0";
+    iframe.style.bottom = "0";
+    iframe.style.width = "0";
+    iframe.style.height = "0";
+    iframe.style.border = "0";
     document.body.appendChild(iframe);
 
     const doc = iframe.contentWindow?.document;
@@ -115,11 +130,13 @@ function AIControl() {
         </html>
       `);
       doc.close();
-      
+
       iframe.contentWindow?.focus();
       setTimeout(() => {
         iframe.contentWindow?.print();
-        setTimeout(() => { document.body.removeChild(iframe); }, 1000);
+        setTimeout(() => {
+          document.body.removeChild(iframe);
+        }, 1000);
       }, 500);
     }
   };
@@ -134,7 +151,7 @@ function AIControl() {
               <Printer className="mr-2 w-4 h-4" /> Print PDF
             </Button>
           </DialogHeader>
-          
+
           <div id="printable-report" className="p-8 bg-white text-black min-h-screen">
             <style>{`
               /* Sketch Theme for AI HTML Output Preview */
@@ -215,7 +232,11 @@ function AIControl() {
               }
             `}</style>
             <div className="flex items-center gap-4 mb-8 pb-6 border-b-4 border-gray-900">
-              <img src="/logo.jpeg" className="w-14 h-14 rounded-lg border-2 border-gray-900" alt="Logo" />
+              <img
+                src="/logo.jpeg"
+                className="w-14 h-14 rounded-lg border-2 border-gray-900"
+                alt="Logo"
+              />
               <h1 className="text-3xl font-black text-gray-900 m-0">CampusXpose Analysis</h1>
             </div>
             <div dangerouslySetInnerHTML={{ __html: cleanHtml(reportHtml || "") }} />
@@ -223,66 +244,139 @@ function AIControl() {
         </DialogContent>
       </Dialog>
       <div className="space-y-8 print:hidden">
-      <h1 className="text-2xl font-bold">AI Control</h1>
+        <h1 className="text-2xl font-bold">AI Control</h1>
 
-      <section className="rounded-xl border border-border bg-surface p-5">
-        <h2 className="mb-3 flex items-center gap-2 font-semibold"><Bot className="h-5 w-5 text-primary" /> OpenRouter Advanced Analysis</h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          Uses OpenRouter API (Nemotron-3) to perform a deep analysis of user behavior, incidents, colleges, and feedback across the entire website (excluding direct messages). Generates a beautifully formatted PDF report with logo.
-        </p>
-        <Button disabled={grokBusy} onClick={handleGrokReport} className="rounded-full bg-[#2d5da1] hover:bg-[#2d5da1]/90 text-white">
-          {grokBusy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />} 
-          {grokBusy ? "Analyzing Data..." : "Generate Advanced PDF Report"}
-        </Button>
-      </section>
+        <section className="rounded-xl border border-border bg-surface p-5">
+          <h2 className="mb-3 flex items-center gap-2 font-semibold">
+            <Bot className="h-5 w-5 text-primary" /> OpenRouter Advanced Analysis
+          </h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            Uses OpenRouter API (Nemotron-3) to perform a deep analysis of user behavior, incidents,
+            colleges, and feedback across the entire website (excluding direct messages). Generates
+            a beautifully formatted PDF report with logo.
+          </p>
+          <Button
+            disabled={grokBusy}
+            onClick={handleGrokReport}
+            className="rounded-full bg-[#2d5da1] hover:bg-[#2d5da1]/90 text-white"
+          >
+            {grokBusy ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="mr-2 h-4 w-4" />
+            )}
+            {grokBusy ? "Analyzing Data..." : "Generate Advanced PDF Report"}
+          </Button>
+        </section>
 
-      <section className="rounded-xl border border-border bg-surface p-5">
-        <h2 className="mb-3 flex items-center gap-2 font-semibold"><Bot className="h-5 w-5 text-primary" /> Pending Analysis</h2>
-        <Button disabled={busy} className="rounded-full" onClick={async () => { setBusy(true); try { const r = await batch({ data: { token: token! } }); toast.success(`${r.processed} analyzed, ${r.failed} failed${r.remaining ? " · more pending, run again" : ""}`); } catch (e) { toast.error((e as Error)?.message ?? "Failed"); } finally { setBusy(false); } }}>
-          {busy ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : null} Analyze All Now
-        </Button>
-      </section>
+        <section className="rounded-xl border border-border bg-surface p-5">
+          <h2 className="mb-3 flex items-center gap-2 font-semibold">
+            <Bot className="h-5 w-5 text-primary" /> Pending Analysis
+          </h2>
+          <Button
+            disabled={busy}
+            className="rounded-full"
+            onClick={async () => {
+              setBusy(true);
+              try {
+                const r = await batch({ data: { token: token! } });
+                toast.success(
+                  `${r.processed} analyzed, ${r.failed} failed${r.remaining ? " · more pending, run again" : ""}`,
+                );
+              } catch (e) {
+                toast.error((e as Error)?.message ?? "Failed");
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            {busy ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : null} Analyze All Now
+          </Button>
+        </section>
 
-      <section className="rounded-xl border border-border bg-surface p-5">
-        <h2 className="mb-3 flex items-center gap-2 font-semibold"><FileText className="h-5 w-5 text-primary" /> Daily Report (Legacy)</h2>
-        <Button disabled={dailyBusy} variant="outline" className="rounded-full" onClick={async () => { 
-          setDailyBusy(true); 
-          toast.info("Generating daily report...");
-          try { 
-            const r = await report({ data: { token: token! } }); 
-            setReportHtml(r.report);
-            toast.success("Report Generated!");
-          } catch (e) { 
-            toast.error((e as Error)?.message ?? "Failed to generate report"); 
-          } finally { 
-            setDailyBusy(false); 
-          } 
-        }}>
-          {dailyBusy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileText className="mr-2 h-4 w-4" />}
-          {dailyBusy ? "Generating..." : "Generate Today's Report"}
-        </Button>
-      </section>
+        <section className="rounded-xl border border-border bg-surface p-5">
+          <h2 className="mb-3 flex items-center gap-2 font-semibold">
+            <FileText className="h-5 w-5 text-primary" /> Daily Report (Legacy)
+          </h2>
+          <Button
+            disabled={dailyBusy}
+            variant="outline"
+            className="rounded-full"
+            onClick={async () => {
+              setDailyBusy(true);
+              toast.info("Generating daily report...");
+              try {
+                const r = await report({ data: { token: token! } });
+                setReportHtml(r.report);
+                toast.success("Report Generated!");
+              } catch (e) {
+                toast.error((e as Error)?.message ?? "Failed to generate report");
+              } finally {
+                setDailyBusy(false);
+              }
+            }}
+          >
+            {dailyBusy ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <FileText className="mr-2 h-4 w-4" />
+            )}
+            {dailyBusy ? "Generating..." : "Generate Today's Report"}
+          </Button>
+        </section>
 
-      <section className="rounded-xl border border-border bg-surface p-5">
-        <h2 className="mb-3 font-semibold">Incident Keywords</h2>
-        <div className="flex flex-wrap gap-2">
-          {keywords.map((k) => (
-            <span key={k} className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-3 py-1 text-sm">
-              {k}<button className="text-destructive" onClick={() => saveKw(keywords.filter((x) => x !== k))}>×</button>
-            </span>
-          ))}
-        </div>
-        <div className="mt-3 flex gap-2">
-          <Input value={newKw} onChange={(e) => setNewKw(e.target.value)} placeholder="Add keyword" className="bg-surface-2" />
-          <Button onClick={() => { if (newKw.trim()) { saveKw([...keywords, newKw.trim()]); setNewKw(""); } }}>Add</Button>
-        </div>
-        <div className="mt-5">
-          <span className="text-sm text-muted-foreground">Sensitivity: {sensitivity}</span>
-          <Slider value={[sensitivity]} min={1} max={10} step={1} onValueChange={(v) => setSensitivity(v[0])} className="mt-1 max-w-sm" />
-          <p className="mt-1 text-xs text-muted-foreground">Higher sensitivity = more false positives.</p>
-        </div>
-      </section>
-    </div>
+        <section className="rounded-xl border border-border bg-surface p-5">
+          <h2 className="mb-3 font-semibold">Incident Keywords</h2>
+          <div className="flex flex-wrap gap-2">
+            {keywords.map((k) => (
+              <span
+                key={k}
+                className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-3 py-1 text-sm"
+              >
+                {k}
+                <button
+                  className="text-destructive"
+                  onClick={() => saveKw(keywords.filter((x) => x !== k))}
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+          <div className="mt-3 flex gap-2">
+            <Input
+              value={newKw}
+              onChange={(e) => setNewKw(e.target.value)}
+              placeholder="Add keyword"
+              className="bg-surface-2"
+            />
+            <Button
+              onClick={() => {
+                if (newKw.trim()) {
+                  saveKw([...keywords, newKw.trim()]);
+                  setNewKw("");
+                }
+              }}
+            >
+              Add
+            </Button>
+          </div>
+          <div className="mt-5">
+            <span className="text-sm text-muted-foreground">Sensitivity: {sensitivity}</span>
+            <Slider
+              value={[sensitivity]}
+              min={1}
+              max={10}
+              step={1}
+              onValueChange={(v) => setSensitivity(v[0])}
+              className="mt-1 max-w-sm"
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              Higher sensitivity = more false positives.
+            </p>
+          </div>
+        </section>
+      </div>
     </>
   );
 }

@@ -1,1075 +1,1050 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
+    PostgrestVersion: "14.5";
+  };
   public: {
     Tables: {
       ads: {
         Row: {
-          active: boolean
-          body: string | null
-          created_at: string
-          cta_label: string | null
-          embed_url: string | null
-          id: string
-          kind: string
-          link_url: string | null
-          media_url: string | null
-          show_college: boolean
-          show_global: boolean
-          show_home: boolean
-          sort_order: number
-          title: string
-          updated_at: string
-        }
+          active: boolean;
+          body: string | null;
+          created_at: string;
+          cta_label: string | null;
+          embed_url: string | null;
+          id: string;
+          kind: string;
+          link_url: string | null;
+          media_url: string | null;
+          show_college: boolean;
+          show_global: boolean;
+          show_home: boolean;
+          sort_order: number;
+          title: string;
+          updated_at: string;
+        };
         Insert: {
-          active?: boolean
-          body?: string | null
-          created_at?: string
-          cta_label?: string | null
-          embed_url?: string | null
-          id?: string
-          kind?: string
-          link_url?: string | null
-          media_url?: string | null
-          show_college?: boolean
-          show_global?: boolean
-          show_home?: boolean
-          sort_order?: number
-          title: string
-          updated_at?: string
-        }
+          active?: boolean;
+          body?: string | null;
+          created_at?: string;
+          cta_label?: string | null;
+          embed_url?: string | null;
+          id?: string;
+          kind?: string;
+          link_url?: string | null;
+          media_url?: string | null;
+          show_college?: boolean;
+          show_global?: boolean;
+          show_home?: boolean;
+          sort_order?: number;
+          title: string;
+          updated_at?: string;
+        };
         Update: {
-          active?: boolean
-          body?: string | null
-          created_at?: string
-          cta_label?: string | null
-          embed_url?: string | null
-          id?: string
-          kind?: string
-          link_url?: string | null
-          media_url?: string | null
-          show_college?: boolean
-          show_global?: boolean
-          show_home?: boolean
-          sort_order?: number
-          title?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
+          active?: boolean;
+          body?: string | null;
+          created_at?: string;
+          cta_label?: string | null;
+          embed_url?: string | null;
+          id?: string;
+          kind?: string;
+          link_url?: string | null;
+          media_url?: string | null;
+          show_college?: boolean;
+          show_global?: boolean;
+          show_home?: boolean;
+          sort_order?: number;
+          title?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       anon_users: {
         Row: {
-          avatar_url: string | null
-          created_at: string
-          forgotten: boolean
-          updated_at: string
-          user_hash: string
-          username: string | null
-        }
+          avatar_url: string | null;
+          created_at: string;
+          forgotten: boolean;
+          updated_at: string;
+          user_hash: string;
+          username: string | null;
+        };
         Insert: {
-          avatar_url?: string | null
-          created_at?: string
-          forgotten?: boolean
-          updated_at?: string
-          user_hash: string
-          username?: string | null
-        }
+          avatar_url?: string | null;
+          created_at?: string;
+          forgotten?: boolean;
+          updated_at?: string;
+          user_hash: string;
+          username?: string | null;
+        };
         Update: {
-          avatar_url?: string | null
-          created_at?: string
-          forgotten?: boolean
-          updated_at?: string
-          user_hash?: string
-          username?: string | null
-        }
-        Relationships: []
-      }
+          avatar_url?: string | null;
+          created_at?: string;
+          forgotten?: boolean;
+          updated_at?: string;
+          user_hash?: string;
+          username?: string | null;
+        };
+        Relationships: [];
+      };
       app_settings: {
         Row: {
-          key: string
-          updated_at: string
-          value: Json
-        }
+          key: string;
+          updated_at: string;
+          value: Json;
+        };
         Insert: {
-          key: string
-          updated_at?: string
-          value?: Json
-        }
+          key: string;
+          updated_at?: string;
+          value?: Json;
+        };
         Update: {
-          key?: string
-          updated_at?: string
-          value?: Json
-        }
-        Relationships: []
-      }
+          key?: string;
+          updated_at?: string;
+          value?: Json;
+        };
+        Relationships: [];
+      };
       banned_users: {
         Row: {
-          banned_at: string
-          id: string
-          reason: string | null
-          user_hash: string
-          username: string | null
-        }
+          banned_at: string;
+          id: string;
+          reason: string | null;
+          user_hash: string;
+          username: string | null;
+        };
         Insert: {
-          banned_at?: string
-          id?: string
-          reason?: string | null
-          user_hash: string
-          username?: string | null
-        }
+          banned_at?: string;
+          id?: string;
+          reason?: string | null;
+          user_hash: string;
+          username?: string | null;
+        };
         Update: {
-          banned_at?: string
-          id?: string
-          reason?: string | null
-          user_hash?: string
-          username?: string | null
-        }
-        Relationships: []
-      }
+          banned_at?: string;
+          id?: string;
+          reason?: string | null;
+          user_hash?: string;
+          username?: string | null;
+        };
+        Relationships: [];
+      };
       college_requests: {
         Row: {
-          city: string
-          created_at: string
-          description: string | null
-          established: number | null
-          id: string
-          name: string
-          requester_hash: string
-          reviewed_at: string | null
-          state: string
-          status: string
-          type: Database["public"]["Enums"]["college_type"]
-          types: Database["public"]["Enums"]["college_type"][]
-        }
+          city: string;
+          created_at: string;
+          description: string | null;
+          established: number | null;
+          id: string;
+          name: string;
+          requester_hash: string;
+          reviewed_at: string | null;
+          state: string;
+          status: string;
+          type: Database["public"]["Enums"]["college_type"];
+          types: Database["public"]["Enums"]["college_type"][];
+        };
         Insert: {
-          city: string
-          created_at?: string
-          description?: string | null
-          established?: number | null
-          id?: string
-          name: string
-          requester_hash: string
-          reviewed_at?: string | null
-          state: string
-          status?: string
-          type: Database["public"]["Enums"]["college_type"]
-          types?: Database["public"]["Enums"]["college_type"][]
-        }
+          city: string;
+          created_at?: string;
+          description?: string | null;
+          established?: number | null;
+          id?: string;
+          name: string;
+          requester_hash: string;
+          reviewed_at?: string | null;
+          state: string;
+          status?: string;
+          type: Database["public"]["Enums"]["college_type"];
+          types?: Database["public"]["Enums"]["college_type"][];
+        };
         Update: {
-          city?: string
-          created_at?: string
-          description?: string | null
-          established?: number | null
-          id?: string
-          name?: string
-          requester_hash?: string
-          reviewed_at?: string | null
-          state?: string
-          status?: string
-          type?: Database["public"]["Enums"]["college_type"]
-          types?: Database["public"]["Enums"]["college_type"][]
-        }
-        Relationships: []
-      }
+          city?: string;
+          created_at?: string;
+          description?: string | null;
+          established?: number | null;
+          id?: string;
+          name?: string;
+          requester_hash?: string;
+          reviewed_at?: string | null;
+          state?: string;
+          status?: string;
+          type?: Database["public"]["Enums"]["college_type"];
+          types?: Database["public"]["Enums"]["college_type"][];
+        };
+        Relationships: [];
+      };
       colleges: {
         Row: {
-          city: string
-          created_at: string
-          description: string | null
-          established: number | null
-          id: string
-          incident_count: number | null
-          latitude: number | null
-          longitude: number | null
-          name: string
-          state: string
-          total_rating: number | null
-          total_reviews: number | null
-          type: Database["public"]["Enums"]["college_type"]
-          types: Database["public"]["Enums"]["college_type"][]
-          website: string | null
-          fee_structure: string | null
-        }
+          city: string;
+          created_at: string;
+          description: string | null;
+          established: number | null;
+          id: string;
+          incident_count: number | null;
+          latitude: number | null;
+          longitude: number | null;
+          name: string;
+          state: string;
+          total_rating: number | null;
+          total_reviews: number | null;
+          type: Database["public"]["Enums"]["college_type"];
+          types: Database["public"]["Enums"]["college_type"][];
+          website: string | null;
+          fee_structure: string | null;
+        };
         Insert: {
-          city: string
-          created_at?: string
-          description?: string | null
-          established?: number | null
-          id?: string
-          incident_count?: number | null
-          latitude?: number | null
-          longitude?: number | null
-          name: string
-          state: string
-          total_rating?: number | null
-          total_reviews?: number | null
-          type: Database["public"]["Enums"]["college_type"]
-          types?: Database["public"]["Enums"]["college_type"][]
-          website?: string | null
-          fee_structure?: string | null
-        }
+          city: string;
+          created_at?: string;
+          description?: string | null;
+          established?: number | null;
+          id?: string;
+          incident_count?: number | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          name: string;
+          state: string;
+          total_rating?: number | null;
+          total_reviews?: number | null;
+          type: Database["public"]["Enums"]["college_type"];
+          types?: Database["public"]["Enums"]["college_type"][];
+          website?: string | null;
+          fee_structure?: string | null;
+        };
         Update: {
-          city?: string
-          created_at?: string
-          description?: string | null
-          established?: number | null
-          id?: string
-          incident_count?: number | null
-          latitude?: number | null
-          longitude?: number | null
-          name?: string
-          state?: string
-          total_rating?: number | null
-          total_reviews?: number | null
-          type?: Database["public"]["Enums"]["college_type"]
-          types?: Database["public"]["Enums"]["college_type"][]
-          website?: string | null
-          fee_structure?: string | null
-        }
-        Relationships: []
-      }
+          city?: string;
+          created_at?: string;
+          description?: string | null;
+          established?: number | null;
+          id?: string;
+          incident_count?: number | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          name?: string;
+          state?: string;
+          total_rating?: number | null;
+          total_reviews?: number | null;
+          type?: Database["public"]["Enums"]["college_type"];
+          types?: Database["public"]["Enums"]["college_type"][];
+          website?: string | null;
+          fee_structure?: string | null;
+        };
+        Relationships: [];
+      };
       community_messages: {
         Row: {
-          anonymous_user_hash: string
-          college_id: string
-          content: string
-          created_at: string
-          id: string
-          incident_id: string | null
-          is_incident_signal: boolean | null
-          pinned: boolean
-          reply_to_content: string | null
-          reply_to_id: string | null
-          reply_to_username: string | null
-          username: string
-        }
+          anonymous_user_hash: string;
+          college_id: string;
+          content: string;
+          created_at: string;
+          id: string;
+          incident_id: string | null;
+          is_incident_signal: boolean | null;
+          pinned: boolean;
+          reply_to_content: string | null;
+          reply_to_id: string | null;
+          reply_to_username: string | null;
+          username: string;
+        };
         Insert: {
-          anonymous_user_hash: string
-          college_id: string
-          content: string
-          created_at?: string
-          id?: string
-          incident_id?: string | null
-          is_incident_signal?: boolean | null
-          pinned?: boolean
-          reply_to_content?: string | null
-          reply_to_id?: string | null
-          reply_to_username?: string | null
-          username: string
-        }
+          anonymous_user_hash: string;
+          college_id: string;
+          content: string;
+          created_at?: string;
+          id?: string;
+          incident_id?: string | null;
+          is_incident_signal?: boolean | null;
+          pinned?: boolean;
+          reply_to_content?: string | null;
+          reply_to_id?: string | null;
+          reply_to_username?: string | null;
+          username: string;
+        };
         Update: {
-          anonymous_user_hash?: string
-          college_id?: string
-          content?: string
-          created_at?: string
-          id?: string
-          incident_id?: string | null
-          is_incident_signal?: boolean | null
-          pinned?: boolean
-          reply_to_content?: string | null
-          reply_to_id?: string | null
-          reply_to_username?: string | null
-          username?: string
-        }
+          anonymous_user_hash?: string;
+          college_id?: string;
+          content?: string;
+          created_at?: string;
+          id?: string;
+          incident_id?: string | null;
+          is_incident_signal?: boolean | null;
+          pinned?: boolean;
+          reply_to_content?: string | null;
+          reply_to_id?: string | null;
+          reply_to_username?: string | null;
+          username?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "community_messages_college_id_fkey"
-            columns: ["college_id"]
-            isOneToOne: false
-            referencedRelation: "colleges"
-            referencedColumns: ["id"]
+            foreignKeyName: "community_messages_college_id_fkey";
+            columns: ["college_id"];
+            isOneToOne: false;
+            referencedRelation: "colleges";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       direct_messages: {
         Row: {
-          content: string
-          created_at: string
-          id: string
-          pinned: boolean
-          recipient_hash: string | null
-          recipient_username: string
-          reply_to_content: string | null
-          reply_to_id: string | null
-          reply_to_username: string | null
-          sender_hash: string
-          sender_username: string
-        }
+          content: string;
+          created_at: string;
+          id: string;
+          pinned: boolean;
+          recipient_hash: string | null;
+          recipient_username: string;
+          reply_to_content: string | null;
+          reply_to_id: string | null;
+          reply_to_username: string | null;
+          sender_hash: string;
+          sender_username: string;
+        };
         Insert: {
-          content: string
-          created_at?: string
-          id?: string
-          pinned?: boolean
-          recipient_hash?: string | null
-          recipient_username: string
-          reply_to_content?: string | null
-          reply_to_id?: string | null
-          reply_to_username?: string | null
-          sender_hash: string
-          sender_username: string
-        }
+          content: string;
+          created_at?: string;
+          id?: string;
+          pinned?: boolean;
+          recipient_hash?: string | null;
+          recipient_username: string;
+          reply_to_content?: string | null;
+          reply_to_id?: string | null;
+          reply_to_username?: string | null;
+          sender_hash: string;
+          sender_username: string;
+        };
         Update: {
-          content?: string
-          created_at?: string
-          id?: string
-          pinned?: boolean
-          recipient_hash?: string | null
-          recipient_username?: string
-          reply_to_content?: string | null
-          reply_to_id?: string | null
-          reply_to_username?: string | null
-          sender_hash?: string
-          sender_username?: string
-        }
-        Relationships: []
-      }
+          content?: string;
+          created_at?: string;
+          id?: string;
+          pinned?: boolean;
+          recipient_hash?: string | null;
+          recipient_username?: string;
+          reply_to_content?: string | null;
+          reply_to_id?: string | null;
+          reply_to_username?: string | null;
+          sender_hash?: string;
+          sender_username?: string;
+        };
+        Relationships: [];
+      };
       evidence: {
         Row: {
-          ai_extracted_data: Json | null
-          created_at: string
-          file_url: string
-          id: string
-          incident_id: string | null
-          is_verified: boolean | null
-          post_id: string | null
-          type: string
-          upvotes: number | null
-        }
+          ai_extracted_data: Json | null;
+          created_at: string;
+          file_url: string;
+          id: string;
+          incident_id: string | null;
+          is_verified: boolean | null;
+          post_id: string | null;
+          type: string;
+          upvotes: number | null;
+        };
         Insert: {
-          ai_extracted_data?: Json | null
-          created_at?: string
-          file_url: string
-          id?: string
-          incident_id?: string | null
-          is_verified?: boolean | null
-          post_id?: string | null
-          type: string
-          upvotes?: number | null
-        }
+          ai_extracted_data?: Json | null;
+          created_at?: string;
+          file_url: string;
+          id?: string;
+          incident_id?: string | null;
+          is_verified?: boolean | null;
+          post_id?: string | null;
+          type: string;
+          upvotes?: number | null;
+        };
         Update: {
-          ai_extracted_data?: Json | null
-          created_at?: string
-          file_url?: string
-          id?: string
-          incident_id?: string | null
-          is_verified?: boolean | null
-          post_id?: string | null
-          type?: string
-          upvotes?: number | null
-        }
+          ai_extracted_data?: Json | null;
+          created_at?: string;
+          file_url?: string;
+          id?: string;
+          incident_id?: string | null;
+          is_verified?: boolean | null;
+          post_id?: string | null;
+          type?: string;
+          upvotes?: number | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "evidence_incident_id_fkey"
-            columns: ["incident_id"]
-            isOneToOne: false
-            referencedRelation: "incidents"
-            referencedColumns: ["id"]
+            foreignKeyName: "evidence_incident_id_fkey";
+            columns: ["incident_id"];
+            isOneToOne: false;
+            referencedRelation: "incidents";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "evidence_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "posts"
-            referencedColumns: ["id"]
+            foreignKeyName: "evidence_post_id_fkey";
+            columns: ["post_id"];
+            isOneToOne: false;
+            referencedRelation: "posts";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       feedback: {
         Row: {
-          admin_reply: string | null
-          created_at: string
-          id: string
-          message: string
-          name: string | null
-          replied_at: string | null
-          status: string
-          user_hash: string | null
-          user_username: string | null
-        }
+          admin_reply: string | null;
+          created_at: string;
+          id: string;
+          message: string;
+          name: string | null;
+          replied_at: string | null;
+          status: string;
+          user_hash: string | null;
+          user_username: string | null;
+        };
         Insert: {
-          admin_reply?: string | null
-          created_at?: string
-          id?: string
-          message: string
-          name?: string | null
-          replied_at?: string | null
-          status?: string
-          user_hash?: string | null
-          user_username?: string | null
-        }
+          admin_reply?: string | null;
+          created_at?: string;
+          id?: string;
+          message: string;
+          name?: string | null;
+          replied_at?: string | null;
+          status?: string;
+          user_hash?: string | null;
+          user_username?: string | null;
+        };
         Update: {
-          admin_reply?: string | null
-          created_at?: string
-          id?: string
-          message?: string
-          name?: string | null
-          replied_at?: string | null
-          status?: string
-          user_hash?: string | null
-          user_username?: string | null
-        }
-        Relationships: []
-      }
+          admin_reply?: string | null;
+          created_at?: string;
+          id?: string;
+          message?: string;
+          name?: string | null;
+          replied_at?: string | null;
+          status?: string;
+          user_hash?: string | null;
+          user_username?: string | null;
+        };
+        Relationships: [];
+      };
       global_messages: {
         Row: {
-          anonymous_user_hash: string
-          content: string
-          created_at: string
-          id: string
-          pinned: boolean
-          reply_to_content: string | null
-          reply_to_id: string | null
-          reply_to_username: string | null
-          username: string
-        }
+          anonymous_user_hash: string;
+          content: string;
+          created_at: string;
+          id: string;
+          pinned: boolean;
+          reply_to_content: string | null;
+          reply_to_id: string | null;
+          reply_to_username: string | null;
+          username: string;
+        };
         Insert: {
-          anonymous_user_hash: string
-          content: string
-          created_at?: string
-          id?: string
-          pinned?: boolean
-          reply_to_content?: string | null
-          reply_to_id?: string | null
-          reply_to_username?: string | null
-          username: string
-        }
+          anonymous_user_hash: string;
+          content: string;
+          created_at?: string;
+          id?: string;
+          pinned?: boolean;
+          reply_to_content?: string | null;
+          reply_to_id?: string | null;
+          reply_to_username?: string | null;
+          username: string;
+        };
         Update: {
-          anonymous_user_hash?: string
-          content?: string
-          created_at?: string
-          id?: string
-          pinned?: boolean
-          reply_to_content?: string | null
-          reply_to_id?: string | null
-          reply_to_username?: string | null
-          username?: string
-        }
-        Relationships: []
-      }
+          anonymous_user_hash?: string;
+          content?: string;
+          created_at?: string;
+          id?: string;
+          pinned?: boolean;
+          reply_to_content?: string | null;
+          reply_to_id?: string | null;
+          reply_to_username?: string | null;
+          username?: string;
+        };
+        Relationships: [];
+      };
       incidents: {
         Row: {
-          admin_notes: string | null
-          affected_count: number | null
-          ai_summary: string | null
-          ai_verdict: string | null
-          category: string
-          college_id: string
-          description: string | null
-          first_seen: string
-          id: string
-          last_updated: string
-          proof_count: number | null
-          severity: number | null
-          status: Database["public"]["Enums"]["incident_status"] | null
-          title: string
-          total_amount: number | null
-          trend: Database["public"]["Enums"]["incident_trend"] | null
-        }
+          admin_notes: string | null;
+          affected_count: number | null;
+          ai_summary: string | null;
+          ai_verdict: string | null;
+          category: string;
+          college_id: string;
+          description: string | null;
+          first_seen: string;
+          id: string;
+          last_updated: string;
+          proof_count: number | null;
+          severity: number | null;
+          status: Database["public"]["Enums"]["incident_status"] | null;
+          title: string;
+          total_amount: number | null;
+          trend: Database["public"]["Enums"]["incident_trend"] | null;
+        };
         Insert: {
-          admin_notes?: string | null
-          affected_count?: number | null
-          ai_summary?: string | null
-          ai_verdict?: string | null
-          category: string
-          college_id: string
-          description?: string | null
-          first_seen?: string
-          id?: string
-          last_updated?: string
-          proof_count?: number | null
-          severity?: number | null
-          status?: Database["public"]["Enums"]["incident_status"] | null
-          title: string
-          total_amount?: number | null
-          trend?: Database["public"]["Enums"]["incident_trend"] | null
-        }
+          admin_notes?: string | null;
+          affected_count?: number | null;
+          ai_summary?: string | null;
+          ai_verdict?: string | null;
+          category: string;
+          college_id: string;
+          description?: string | null;
+          first_seen?: string;
+          id?: string;
+          last_updated?: string;
+          proof_count?: number | null;
+          severity?: number | null;
+          status?: Database["public"]["Enums"]["incident_status"] | null;
+          title: string;
+          total_amount?: number | null;
+          trend?: Database["public"]["Enums"]["incident_trend"] | null;
+        };
         Update: {
-          admin_notes?: string | null
-          affected_count?: number | null
-          ai_summary?: string | null
-          ai_verdict?: string | null
-          category?: string
-          college_id?: string
-          description?: string | null
-          first_seen?: string
-          id?: string
-          last_updated?: string
-          proof_count?: number | null
-          severity?: number | null
-          status?: Database["public"]["Enums"]["incident_status"] | null
-          title?: string
-          total_amount?: number | null
-          trend?: Database["public"]["Enums"]["incident_trend"] | null
-        }
+          admin_notes?: string | null;
+          affected_count?: number | null;
+          ai_summary?: string | null;
+          ai_verdict?: string | null;
+          category?: string;
+          college_id?: string;
+          description?: string | null;
+          first_seen?: string;
+          id?: string;
+          last_updated?: string;
+          proof_count?: number | null;
+          severity?: number | null;
+          status?: Database["public"]["Enums"]["incident_status"] | null;
+          title?: string;
+          total_amount?: number | null;
+          trend?: Database["public"]["Enums"]["incident_trend"] | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "incidents_college_id_fkey"
-            columns: ["college_id"]
-            isOneToOne: false
-            referencedRelation: "colleges"
-            referencedColumns: ["id"]
+            foreignKeyName: "incidents_college_id_fkey";
+            columns: ["college_id"];
+            isOneToOne: false;
+            referencedRelation: "colleges";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       message_reactions: {
         Row: {
-          anonymous_user_hash: string
-          created_at: string
-          emoji: string
-          id: string
-          message_id: string
-          message_type: string
-        }
+          anonymous_user_hash: string;
+          created_at: string;
+          emoji: string;
+          id: string;
+          message_id: string;
+          message_type: string;
+        };
         Insert: {
-          anonymous_user_hash: string
-          created_at?: string
-          emoji: string
-          id?: string
-          message_id: string
-          message_type: string
-        }
+          anonymous_user_hash: string;
+          created_at?: string;
+          emoji: string;
+          id?: string;
+          message_id: string;
+          message_type: string;
+        };
         Update: {
-          anonymous_user_hash?: string
-          created_at?: string
-          emoji?: string
-          id?: string
-          message_id?: string
-          message_type?: string
-        }
-        Relationships: []
-      }
+          anonymous_user_hash?: string;
+          created_at?: string;
+          emoji?: string;
+          id?: string;
+          message_id?: string;
+          message_type?: string;
+        };
+        Relationships: [];
+      };
       notifications: {
         Row: {
-          created_at: string
-          id: string
-          link: string | null
-          message: string
-          read: boolean
-          type: string
-          user_hash: string
-        }
+          created_at: string;
+          id: string;
+          link: string | null;
+          message: string;
+          read: boolean;
+          type: string;
+          user_hash: string;
+        };
         Insert: {
-          created_at?: string
-          id?: string
-          link?: string | null
-          message: string
-          read?: boolean
-          type: string
-          user_hash: string
-        }
+          created_at?: string;
+          id?: string;
+          link?: string | null;
+          message: string;
+          read?: boolean;
+          type: string;
+          user_hash: string;
+        };
         Update: {
-          created_at?: string
-          id?: string
-          link?: string | null
-          message?: string
-          read?: boolean
-          type?: string
-          user_hash?: string
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          id?: string;
+          link?: string | null;
+          message?: string;
+          read?: boolean;
+          type?: string;
+          user_hash?: string;
+        };
+        Relationships: [];
+      };
       poll_votes: {
         Row: {
-          anonymous_user_hash: string
-          created_at: string
-          id: string
-          option_index: number
-          poll_id: string
-        }
+          anonymous_user_hash: string;
+          created_at: string;
+          id: string;
+          option_index: number;
+          poll_id: string;
+        };
         Insert: {
-          anonymous_user_hash: string
-          created_at?: string
-          id?: string
-          option_index: number
-          poll_id: string
-        }
+          anonymous_user_hash: string;
+          created_at?: string;
+          id?: string;
+          option_index: number;
+          poll_id: string;
+        };
         Update: {
-          anonymous_user_hash?: string
-          created_at?: string
-          id?: string
-          option_index?: number
-          poll_id?: string
-        }
+          anonymous_user_hash?: string;
+          created_at?: string;
+          id?: string;
+          option_index?: number;
+          poll_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "poll_votes_poll_id_fkey"
-            columns: ["poll_id"]
-            isOneToOne: false
-            referencedRelation: "polls"
-            referencedColumns: ["id"]
+            foreignKeyName: "poll_votes_poll_id_fkey";
+            columns: ["poll_id"];
+            isOneToOne: false;
+            referencedRelation: "polls";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       polls: {
         Row: {
-          anonymous_user_hash: string
-          college_id: string | null
-          created_at: string
-          expires_at: string
-          id: string
-          options: string[]
-          question: string
-          scope: string
-          username: string
-        }
+          anonymous_user_hash: string;
+          college_id: string | null;
+          created_at: string;
+          expires_at: string;
+          id: string;
+          options: string[];
+          question: string;
+          scope: string;
+          username: string;
+        };
         Insert: {
-          anonymous_user_hash: string
-          college_id?: string | null
-          created_at?: string
-          expires_at?: string
-          id?: string
-          options: string[]
-          question: string
-          scope?: string
-          username: string
-        }
+          anonymous_user_hash: string;
+          college_id?: string | null;
+          created_at?: string;
+          expires_at?: string;
+          id?: string;
+          options: string[];
+          question: string;
+          scope?: string;
+          username: string;
+        };
         Update: {
-          anonymous_user_hash?: string
-          college_id?: string | null
-          created_at?: string
-          expires_at?: string
-          id?: string
-          options?: string[]
-          question?: string
-          scope?: string
-          username?: string
-        }
+          anonymous_user_hash?: string;
+          college_id?: string | null;
+          created_at?: string;
+          expires_at?: string;
+          id?: string;
+          options?: string[];
+          question?: string;
+          scope?: string;
+          username?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "polls_college_id_fkey"
-            columns: ["college_id"]
-            isOneToOne: false
-            referencedRelation: "colleges"
-            referencedColumns: ["id"]
+            foreignKeyName: "polls_college_id_fkey";
+            columns: ["college_id"];
+            isOneToOne: false;
+            referencedRelation: "colleges";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       post_comments: {
         Row: {
-          anonymous_user_hash: string
-          content: string
-          created_at: string
-          id: string
-          parent_id: string | null
-          post_id: string
-          username: string
-        }
+          anonymous_user_hash: string;
+          content: string;
+          created_at: string;
+          id: string;
+          parent_id: string | null;
+          post_id: string;
+          username: string;
+        };
         Insert: {
-          anonymous_user_hash: string
-          content: string
-          created_at?: string
-          id?: string
-          parent_id?: string | null
-          post_id: string
-          username: string
-        }
+          anonymous_user_hash: string;
+          content: string;
+          created_at?: string;
+          id?: string;
+          parent_id?: string | null;
+          post_id: string;
+          username: string;
+        };
         Update: {
-          anonymous_user_hash?: string
-          content?: string
-          created_at?: string
-          id?: string
-          parent_id?: string | null
-          post_id?: string
-          username?: string
-        }
+          anonymous_user_hash?: string;
+          content?: string;
+          created_at?: string;
+          id?: string;
+          parent_id?: string | null;
+          post_id?: string;
+          username?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "post_comments_parent_id_fkey"
-            columns: ["parent_id"]
-            isOneToOne: false
-            referencedRelation: "post_comments"
-            referencedColumns: ["id"]
+            foreignKeyName: "post_comments_parent_id_fkey";
+            columns: ["parent_id"];
+            isOneToOne: false;
+            referencedRelation: "post_comments";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "post_comments_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "posts"
-            referencedColumns: ["id"]
+            foreignKeyName: "post_comments_post_id_fkey";
+            columns: ["post_id"];
+            isOneToOne: false;
+            referencedRelation: "posts";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       post_votes: {
         Row: {
-          anonymous_user_hash: string
-          created_at: string
-          dir: string
-          id: string
-          post_id: string
-        }
+          anonymous_user_hash: string;
+          created_at: string;
+          dir: string;
+          id: string;
+          post_id: string;
+        };
         Insert: {
-          anonymous_user_hash: string
-          created_at?: string
-          dir: string
-          id?: string
-          post_id: string
-        }
+          anonymous_user_hash: string;
+          created_at?: string;
+          dir: string;
+          id?: string;
+          post_id: string;
+        };
         Update: {
-          anonymous_user_hash?: string
-          created_at?: string
-          dir?: string
-          id?: string
-          post_id?: string
-        }
+          anonymous_user_hash?: string;
+          created_at?: string;
+          dir?: string;
+          id?: string;
+          post_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "post_votes_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "posts"
-            referencedColumns: ["id"]
+            foreignKeyName: "post_votes_post_id_fkey";
+            columns: ["post_id"];
+            isOneToOne: false;
+            referencedRelation: "posts";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       posts: {
         Row: {
-          ai_analyzed: boolean | null
-          anonymous_user_hash: string
-          category: string | null
-          college_id: string
-          content: string
-          created_at: string
-          downvotes: number | null
-          id: string
-          incident_id: string | null
-          is_incident: boolean | null
-          status: string | null
-          upvotes: number | null
-          username: string
-        }
+          ai_analyzed: boolean | null;
+          anonymous_user_hash: string;
+          category: string | null;
+          college_id: string;
+          content: string;
+          created_at: string;
+          downvotes: number | null;
+          id: string;
+          incident_id: string | null;
+          is_incident: boolean | null;
+          status: string | null;
+          upvotes: number | null;
+          username: string;
+        };
         Insert: {
-          ai_analyzed?: boolean | null
-          anonymous_user_hash: string
-          category?: string | null
-          college_id: string
-          content: string
-          created_at?: string
-          downvotes?: number | null
-          id?: string
-          incident_id?: string | null
-          is_incident?: boolean | null
-          status?: string | null
-          upvotes?: number | null
-          username: string
-        }
+          ai_analyzed?: boolean | null;
+          anonymous_user_hash: string;
+          category?: string | null;
+          college_id: string;
+          content: string;
+          created_at?: string;
+          downvotes?: number | null;
+          id?: string;
+          incident_id?: string | null;
+          is_incident?: boolean | null;
+          status?: string | null;
+          upvotes?: number | null;
+          username: string;
+        };
         Update: {
-          ai_analyzed?: boolean | null
-          anonymous_user_hash?: string
-          category?: string | null
-          college_id?: string
-          content?: string
-          created_at?: string
-          downvotes?: number | null
-          id?: string
-          incident_id?: string | null
-          is_incident?: boolean | null
-          status?: string | null
-          upvotes?: number | null
-          username?: string
-        }
+          ai_analyzed?: boolean | null;
+          anonymous_user_hash?: string;
+          category?: string | null;
+          college_id?: string;
+          content?: string;
+          created_at?: string;
+          downvotes?: number | null;
+          id?: string;
+          incident_id?: string | null;
+          is_incident?: boolean | null;
+          status?: string | null;
+          upvotes?: number | null;
+          username?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "posts_college_id_fkey"
-            columns: ["college_id"]
-            isOneToOne: false
-            referencedRelation: "colleges"
-            referencedColumns: ["id"]
+            foreignKeyName: "posts_college_id_fkey";
+            columns: ["college_id"];
+            isOneToOne: false;
+            referencedRelation: "colleges";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "posts_incident_id_fkey"
-            columns: ["incident_id"]
-            isOneToOne: false
-            referencedRelation: "incidents"
-            referencedColumns: ["id"]
+            foreignKeyName: "posts_incident_id_fkey";
+            columns: ["incident_id"];
+            isOneToOne: false;
+            referencedRelation: "incidents";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       push_config: {
         Row: {
-          dispatch_token: string
-          dispatch_url: string
-          id: number
-        }
+          dispatch_token: string;
+          dispatch_url: string;
+          id: number;
+        };
         Insert: {
-          dispatch_token: string
-          dispatch_url: string
-          id?: number
-        }
+          dispatch_token: string;
+          dispatch_url: string;
+          id?: number;
+        };
         Update: {
-          dispatch_token?: string
-          dispatch_url?: string
-          id?: number
-        }
-        Relationships: []
-      }
+          dispatch_token?: string;
+          dispatch_url?: string;
+          id?: number;
+        };
+        Relationships: [];
+      };
       push_subscriptions: {
         Row: {
-          auth: string
-          created_at: string
-          endpoint: string
-          id: string
-          p256dh: string
-          user_hash: string
-        }
+          auth: string;
+          created_at: string;
+          endpoint: string;
+          id: string;
+          p256dh: string;
+          user_hash: string;
+        };
         Insert: {
-          auth: string
-          created_at?: string
-          endpoint: string
-          id?: string
-          p256dh: string
-          user_hash: string
-        }
+          auth: string;
+          created_at?: string;
+          endpoint: string;
+          id?: string;
+          p256dh: string;
+          user_hash: string;
+        };
         Update: {
-          auth?: string
-          created_at?: string
-          endpoint?: string
-          id?: string
-          p256dh?: string
-          user_hash?: string
-        }
-        Relationships: []
-      }
+          auth?: string;
+          created_at?: string;
+          endpoint?: string;
+          id?: string;
+          p256dh?: string;
+          user_hash?: string;
+        };
+        Relationships: [];
+      };
       ratings: {
         Row: {
-          anonymous_user_hash: string
-          campus_life_rating: number | null
-          college_id: string
-          created_at: string
-          faculty_rating: number | null
-          id: string
-          infrastructure_rating: number | null
-          overall: number | null
-          placement_rating: number | null
-          value_rating: number | null
-        }
+          anonymous_user_hash: string;
+          campus_life_rating: number | null;
+          college_id: string;
+          created_at: string;
+          faculty_rating: number | null;
+          id: string;
+          infrastructure_rating: number | null;
+          overall: number | null;
+          placement_rating: number | null;
+          value_rating: number | null;
+        };
         Insert: {
-          anonymous_user_hash: string
-          campus_life_rating?: number | null
-          college_id: string
-          created_at?: string
-          faculty_rating?: number | null
-          id?: string
-          infrastructure_rating?: number | null
-          overall?: number | null
-          placement_rating?: number | null
-          value_rating?: number | null
-        }
+          anonymous_user_hash: string;
+          campus_life_rating?: number | null;
+          college_id: string;
+          created_at?: string;
+          faculty_rating?: number | null;
+          id?: string;
+          infrastructure_rating?: number | null;
+          overall?: number | null;
+          placement_rating?: number | null;
+          value_rating?: number | null;
+        };
         Update: {
-          anonymous_user_hash?: string
-          campus_life_rating?: number | null
-          college_id?: string
-          created_at?: string
-          faculty_rating?: number | null
-          id?: string
-          infrastructure_rating?: number | null
-          overall?: number | null
-          placement_rating?: number | null
-          value_rating?: number | null
-        }
+          anonymous_user_hash?: string;
+          campus_life_rating?: number | null;
+          college_id?: string;
+          created_at?: string;
+          faculty_rating?: number | null;
+          id?: string;
+          infrastructure_rating?: number | null;
+          overall?: number | null;
+          placement_rating?: number | null;
+          value_rating?: number | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "ratings_college_id_fkey"
-            columns: ["college_id"]
-            isOneToOne: false
-            referencedRelation: "colleges"
-            referencedColumns: ["id"]
+            foreignKeyName: "ratings_college_id_fkey";
+            columns: ["college_id"];
+            isOneToOne: false;
+            referencedRelation: "colleges";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       verified_users: {
         Row: {
-          created_at: string
-          user_hash: string
-          username: string
-        }
+          created_at: string;
+          user_hash: string;
+          username: string;
+        };
         Insert: {
-          created_at?: string
-          user_hash: string
-          username: string
-        }
+          created_at?: string;
+          user_hash: string;
+          username: string;
+        };
         Update: {
-          created_at?: string
-          user_hash?: string
-          username?: string
-        }
-        Relationships: []
-      }
-    }
+          created_at?: string;
+          user_hash?: string;
+          username?: string;
+        };
+        Relationships: [];
+      };
+    };
     Views: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Functions: {
-      delete_expired_polls: { Args: never; Returns: undefined }
+      delete_expired_polls: { Args: never; Returns: undefined };
       enqueue_notifications: {
         Args: {
-          _hashes: string[]
-          _link: string
-          _message: string
-          _title: string
-          _type: string
-        }
-        Returns: undefined
-      }
-      refresh_clustered_incidents: { Args: never; Returns: undefined }
-    }
+          _hashes: string[];
+          _link: string;
+          _message: string;
+          _title: string;
+          _type: string;
+        };
+        Returns: undefined;
+      };
+      refresh_clustered_incidents: { Args: never; Returns: undefined };
+    };
     Enums: {
-      college_type:
-        | "Engineering"
-        | "Medical"
-        | "Arts"
-        | "Commerce"
-        | "University"
-        | "Research"
-      incident_status: "active" | "investigating" | "resolved" | "dismissed"
-      incident_trend: "rising" | "stable" | "declining"
-    }
+      college_type: "Engineering" | "Medical" | "Arts" | "Commerce" | "University" | "Research";
+      incident_status: "active" | "investigating" | "resolved" | "dismissed";
+      incident_trend: "rising" | "stable" | "declining";
+    };
     CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-}
+      [_ in never]: never;
+    };
+  };
+};
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">;
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">];
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
       DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
+      Row: infer R;
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R;
       }
       ? R
       : never
-    : never
+    : never;
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
+      Insert: infer I;
     }
     ? I
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
     ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
+        Insert: infer I;
       }
       ? I
       : never
-    : never
+    : never;
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
+      Update: infer U;
     }
     ? U
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
     ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
+        Update: infer U;
       }
       ? U
       : never
-    : never
+    : never;
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    keyof DefaultSchema["Enums"] | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+    : never;
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    keyof DefaultSchema["CompositeTypes"] | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+    : never;
 
 export const Constants = {
   public: {
     Enums: {
-      college_type: [
-        "Engineering",
-        "Medical",
-        "Arts",
-        "Commerce",
-        "University",
-        "Research",
-      ],
+      college_type: ["Engineering", "Medical", "Arts", "Commerce", "University", "Research"],
       incident_status: ["active", "investigating", "resolved", "dismissed"],
       incident_trend: ["rising", "stable", "declining"],
     },
   },
-} as const
+} as const;

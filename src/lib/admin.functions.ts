@@ -8,7 +8,9 @@ function todayStr(): string {
 
 function expectedToken(): string {
   const pw = process.env.ADMIN_PASSWORD ?? "";
-  return createHash("sha256").update(pw + todayStr()).digest("hex");
+  return createHash("sha256")
+    .update(pw + todayStr())
+    .digest("hex");
 }
 
 function assertToken(token: string) {
@@ -20,30 +22,41 @@ function assertToken(token: string) {
   }
 }
 
-
 export const getSiteSettings = createServerFn({ method: "GET" })
   .validator((d: unknown) => {
-    return (d as { token: string }).token ? { token: (d as { token: string }).token } : { token: "" };
+    return (d as { token: string }).token
+      ? { token: (d as { token: string }).token }
+      : { token: "" };
   })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     assertToken(data.token);
-    
-    const { data: settings } = await supabaseAdmin.from("site_settings" as any).select("*").eq("id", 1).single();
+
+    const { data: settings } = await supabaseAdmin
+      .from("site_settings" as any)
+      .select("*")
+      .eq("id", 1)
+      .single();
     return settings || { news_enabled: true };
   });
 
 export const toggleNewsEnabled = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => {
-    return (d as { token: string; enabled: boolean }).token 
-      ? { token: (d as { token: string; enabled: boolean }).token, enabled: (d as { enabled: boolean }).enabled } 
+    return (d as { token: string; enabled: boolean }).token
+      ? {
+          token: (d as { token: string; enabled: boolean }).token,
+          enabled: (d as { enabled: boolean }).enabled,
+        }
       : { token: "", enabled: true };
   })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     assertToken(data.token);
-    
-    await supabaseAdmin.from("site_settings" as any).update({ news_enabled: data.enabled }).eq("id", 1);
+
+    await supabaseAdmin
+      .from("site_settings" as any)
+      .update({ news_enabled: data.enabled })
+      .eq("id", 1);
     return { ok: true };
   });
 
@@ -86,7 +99,9 @@ export const adminStats = createServerFn({ method: "POST" })
       count("banned_users"),
     ]);
 
-    const { data: cat } = await supabaseAdmin.from("incidents").select("category, severity, status, college_id, total_amount, first_seen");
+    const { data: cat } = await supabaseAdmin
+      .from("incidents")
+      .select("category, severity, status, college_id, total_amount, first_seen");
     return { colleges, incidents, posts, evidence, messages, banned, incidentRows: cat ?? [] };
   });
 
@@ -96,33 +111,53 @@ export const adminRecentActivity = createServerFn({ method: "POST" })
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const [posts, incidents, evidence] = await Promise.all([
-      supabaseAdmin.from("posts").select("id, username, content, college_id, created_at, ai_analyzed").order("created_at", { ascending: false }).limit(10),
-      supabaseAdmin.from("incidents").select("id, title, category, severity, college_id, first_seen").order("first_seen", { ascending: false }).limit(5),
-      supabaseAdmin.from("evidence").select("id, file_url, type, created_at").order("created_at", { ascending: false }).limit(5),
+      supabaseAdmin
+        .from("posts")
+        .select("id, username, content, college_id, created_at, ai_analyzed")
+        .order("created_at", { ascending: false })
+        .limit(10),
+      supabaseAdmin
+        .from("incidents")
+        .select("id, title, category, severity, college_id, first_seen")
+        .order("first_seen", { ascending: false })
+        .limit(5),
+      supabaseAdmin
+        .from("evidence")
+        .select("id, file_url, type, created_at")
+        .order("created_at", { ascending: false })
+        .limit(5),
     ]);
-    return { posts: posts.data ?? [], incidents: incidents.data ?? [], evidence: evidence.data ?? [] };
+    return {
+      posts: posts.data ?? [],
+      incidents: incidents.data ?? [],
+      evidence: evidence.data ?? [],
+    };
   });
 
 export const adminAddCollege = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
-    z.object({
-      token: z.string(),
-      name: z.string().min(2),
-      city: z.string().min(2),
-      state: z.string().min(2),
-      type: z.string(),
-      types: z.array(z.string()).min(1).optional(),
-      established: z.number().nullable().optional(),
-      description: z.string().optional(),
-      latitude: z.number().nullable().optional(),
-      longitude: z.number().nullable().optional(),
-    }).parse(d),
+    z
+      .object({
+        token: z.string(),
+        name: z.string().min(2),
+        city: z.string().min(2),
+        state: z.string().min(2),
+        type: z.string(),
+        types: z.array(z.string()).min(1).optional(),
+        established: z.number().nullable().optional(),
+        description: z.string().optional(),
+        latitude: z.number().nullable().optional(),
+        longitude: z.number().nullable().optional(),
+      })
+      .parse(d),
   )
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { token, ...fields } = data;
-    const types = Array.from(new Set(fields.types && fields.types.length ? fields.types : [fields.type]));
+    const types = Array.from(
+      new Set(fields.types && fields.types.length ? fields.types : [fields.type]),
+    );
     const { data: col, error } = await supabaseAdmin
       .from("colleges")
       .insert({ ...fields, type: types[0], types } as any)
@@ -134,7 +169,9 @@ export const adminAddCollege = createServerFn({ method: "POST" })
 
 export const adminUpdateCollege = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
-    z.object({ token: z.string(), id: z.string().uuid(), patch: z.record(z.string(), z.any()) }).parse(d),
+    z
+      .object({ token: z.string(), id: z.string().uuid(), patch: z.record(z.string(), z.any()) })
+      .parse(d),
   )
   .handler(async ({ data }) => {
     assertToken(data.token);
@@ -143,21 +180,29 @@ export const adminUpdateCollege = createServerFn({ method: "POST" })
     // Keep the primary `type` in sync with the multi-select `types`.
     if (Array.isArray(patch.types)) {
       const types = Array.from(new Set(patch.types));
-      if (types.length) { patch.types = types; patch.type = types[0]; }
+      if (types.length) {
+        patch.types = types;
+        patch.type = types[0];
+      }
     }
-    const { error } = await supabaseAdmin.from("colleges").update(patch as any).eq("id", data.id);
+    const { error } = await supabaseAdmin
+      .from("colleges")
+      .update(patch as any)
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
 
 export const adminResearchCollegeAI = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) =>
-    z.object({ token: z.string(), id: z.string().uuid() }).parse(d),
-  )
+  .inputValidator((d: unknown) => z.object({ token: z.string(), id: z.string().uuid() }).parse(d))
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: col, error: colError } = await supabaseAdmin.from("colleges").select("name, city, state").eq("id", data.id).single();
+    const { data: col, error: colError } = await supabaseAdmin
+      .from("colleges")
+      .select("name, city, state")
+      .eq("id", data.id)
+      .single();
     if (colError || !col) throw new Error("College not found");
 
     const apiKey = process.env.OPENROUTER_API_KEY;
@@ -179,7 +224,7 @@ Return ONLY a JSON object (no markdown, no backticks, no other text) with these 
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
         "HTTP-Referer": "https://campusxpose.online",
         "X-Title": "CampusXpose",
       },
@@ -195,13 +240,16 @@ Return ONLY a JSON object (no markdown, no backticks, no other text) with these 
 
     const j = await res.json();
     let content = j.choices?.[0]?.message?.content ?? "{}";
-    
+
     // Strip markdown formatting if the model accidentally included it
-    content = content.replace(/^```json\s*/i, "").replace(/```\s*$/i, "").trim();
+    content = content
+      .replace(/^```json\s*/i, "")
+      .replace(/```\s*$/i, "")
+      .trim();
 
     try {
       const parsed = JSON.parse(content);
-      
+
       const patch: any = {};
       if (parsed.website) patch.website = String(parsed.website);
       if (parsed.fee_structure) patch.fee_structure = String(parsed.fee_structure);
@@ -233,7 +281,9 @@ export const adminDeleteColleges = createServerFn({ method: "POST" })
   });
 
 export const adminDeleteIncidents = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ token: z.string(), ids: z.array(z.string().uuid()).min(1) }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ token: z.string(), ids: z.array(z.string().uuid()).min(1) }).parse(d),
+  )
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -242,16 +292,25 @@ export const adminDeleteIncidents = createServerFn({ method: "POST" })
   });
 
 export const adminUpdateIncident = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ token: z.string(), id: z.string().uuid(), patch: z.record(z.string(), z.any()) }).parse(d))
+  .inputValidator((d: unknown) =>
+    z
+      .object({ token: z.string(), id: z.string().uuid(), patch: z.record(z.string(), z.any()) })
+      .parse(d),
+  )
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await supabaseAdmin.from("incidents").update(data.patch as any).eq("id", data.id);
+    await supabaseAdmin
+      .from("incidents")
+      .update(data.patch as any)
+      .eq("id", data.id);
     return { ok: true };
   });
 
 export const adminDeletePosts = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ token: z.string(), ids: z.array(z.string().uuid()).min(1) }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ token: z.string(), ids: z.array(z.string().uuid()).min(1) }).parse(d),
+  )
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -261,7 +320,9 @@ export const adminDeletePosts = createServerFn({ method: "POST" })
 
 /** Admin: delete any comment plus all of its nested replies. */
 export const adminDeleteComment = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ token: z.string(), commentId: z.string().uuid() }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ token: z.string(), commentId: z.string().uuid() }).parse(d),
+  )
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -284,7 +345,9 @@ export const adminDeleteComment = createServerFn({ method: "POST" })
 
 /** Admin: list recent comments with their post context. */
 export const adminListComments = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ token: z.string(), search: z.string().optional() }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ token: z.string(), search: z.string().optional() }).parse(d),
+  )
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -302,23 +365,37 @@ export const adminListComments = createServerFn({ method: "POST" })
     return rows ?? [];
   });
 
-
-
 export const adminMarkPostIncident = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ token: z.string(), id: z.string().uuid(), incidentId: z.string().uuid().nullable() }).parse(d))
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        token: z.string(),
+        id: z.string().uuid(),
+        incidentId: z.string().uuid().nullable(),
+      })
+      .parse(d),
+  )
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await supabaseAdmin.from("posts").update({ is_incident: true, incident_id: data.incidentId }).eq("id", data.id);
+    await supabaseAdmin
+      .from("posts")
+      .update({ is_incident: true, incident_id: data.incidentId })
+      .eq("id", data.id);
     return { ok: true };
   });
 
 export const adminClearChat = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ token: z.string(), collegeId: z.string().uuid() }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ token: z.string(), collegeId: z.string().uuid() }).parse(d),
+  )
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const before = await supabaseAdmin.from("community_messages").select("*", { count: "exact", head: true }).eq("college_id", data.collegeId);
+    const before = await supabaseAdmin
+      .from("community_messages")
+      .select("*", { count: "exact", head: true })
+      .eq("college_id", data.collegeId);
     await supabaseAdmin.from("community_messages").delete().eq("college_id", data.collegeId);
     return { ok: true, deleted: before.count ?? 0 };
   });
@@ -333,22 +410,43 @@ export const adminDeleteMessage = createServerFn({ method: "POST" })
   });
 
 export const adminDeleteUserMessages = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ token: z.string(), userHash: z.string(), collegeId: z.string().uuid().optional() }).parse(d))
+  .inputValidator((d: unknown) =>
+    z
+      .object({ token: z.string(), userHash: z.string(), collegeId: z.string().uuid().optional() })
+      .parse(d),
+  )
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    let q = supabaseAdmin.from("community_messages").delete().eq("anonymous_user_hash", data.userHash);
+    let q = supabaseAdmin
+      .from("community_messages")
+      .delete()
+      .eq("anonymous_user_hash", data.userHash);
     if (data.collegeId) q = q.eq("college_id", data.collegeId);
     await q;
     return { ok: true };
   });
 
 export const adminBanUser = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ token: z.string(), userHash: z.string(), username: z.string().optional(), reason: z.string().optional() }).parse(d))
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        token: z.string(),
+        userHash: z.string(),
+        username: z.string().optional(),
+        reason: z.string().optional(),
+      })
+      .parse(d),
+  )
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await supabaseAdmin.from("banned_users").upsert({ user_hash: data.userHash, username: data.username, reason: data.reason }, { onConflict: "user_hash" });
+    await supabaseAdmin
+      .from("banned_users")
+      .upsert(
+        { user_hash: data.userHash, username: data.username, reason: data.reason },
+        { onConflict: "user_hash" },
+      );
     return { ok: true };
   });
 
@@ -367,7 +465,10 @@ export const adminDeleteUserActivity = createServerFn({ method: "POST" })
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin.from("posts").delete().eq("anonymous_user_hash", data.userHash);
-    await supabaseAdmin.from("community_messages").delete().eq("anonymous_user_hash", data.userHash);
+    await supabaseAdmin
+      .from("community_messages")
+      .delete()
+      .eq("anonymous_user_hash", data.userHash);
     await supabaseAdmin.from("ratings").delete().eq("anonymous_user_hash", data.userHash);
     return { ok: true };
   });
@@ -383,7 +484,9 @@ export const adminListUsers = createServerFn({ method: "POST" })
       supabaseAdmin.from("global_messages").select("anonymous_user_hash, username, created_at"),
       supabaseAdmin.from("banned_users").select("user_hash"),
       supabaseAdmin.from("verified_users" as any).select("username, user_hash"),
-      supabaseAdmin.from("anon_users" as any).select("user_hash, username, avatar_url, forgotten, created_at"),
+      supabaseAdmin
+        .from("anon_users" as any)
+        .select("user_hash, username, avatar_url, forgotten, created_at"),
     ]);
     // Surface real failures instead of silently returning an empty list
     // (which renders a misleading "No users yet").
@@ -394,10 +497,29 @@ export const adminListUsers = createServerFn({ method: "POST" })
     const verifiedSet = new Set(((verified.data as any[]) ?? []).map((v) => v.username));
     const anonRows = (anon.data as any[]) ?? [];
     const forgottenSet = new Set(anonRows.filter((a) => a.forgotten).map((a) => a.user_hash));
-    const avatarMap = new Map<string, string>(anonRows.filter((a) => a.avatar_url).map((a) => [a.user_hash, a.avatar_url]));
-    const map = new Map<string, { hash: string; username: string; posts: number; messages: number; incidents: number; lastActive: string }>();
+    const avatarMap = new Map<string, string>(
+      anonRows.filter((a) => a.avatar_url).map((a) => [a.user_hash, a.avatar_url]),
+    );
+    const map = new Map<
+      string,
+      {
+        hash: string;
+        username: string;
+        posts: number;
+        messages: number;
+        incidents: number;
+        lastActive: string;
+      }
+    >();
     const touch = (hash: string, username: string, createdAt: string) => {
-      const e = map.get(hash) ?? { hash, username, posts: 0, messages: 0, incidents: 0, lastActive: createdAt };
+      const e = map.get(hash) ?? {
+        hash,
+        username,
+        posts: 0,
+        messages: 0,
+        incidents: 0,
+        lastActive: createdAt,
+      };
       if (createdAt > e.lastActive) e.lastActive = createdAt;
       if (!e.username && username) e.username = username;
       map.set(hash, e);
@@ -405,7 +527,8 @@ export const adminListUsers = createServerFn({ method: "POST" })
     };
     for (const p of posts.data ?? []) {
       const e = touch(p.anonymous_user_hash, p.username, p.created_at);
-      e.posts++; if (p.is_incident) e.incidents++;
+      e.posts++;
+      if (p.is_incident) e.incidents++;
     }
     for (const m of msgs.data ?? []) {
       touch(m.anonymous_user_hash, m.username, m.created_at).messages++;
@@ -421,7 +544,8 @@ export const adminListUsers = createServerFn({ method: "POST" })
     // Surface every registered identity, including brand-new and "forgotten"
     // ones that have not posted or messaged yet.
     for (const a of anonRows) {
-      if (a.user_hash) touch(a.user_hash, a.username ?? "", a.created_at ?? new Date(0).toISOString());
+      if (a.user_hash)
+        touch(a.user_hash, a.username ?? "", a.created_at ?? new Date(0).toISOString());
     }
     return Array.from(map.values())
       .map((u) => {
@@ -439,12 +563,20 @@ export const adminListUsers = createServerFn({ method: "POST" })
       .sort((a, b) => (a.lastActive < b.lastActive ? 1 : -1));
   });
 
-
 const RENAME_RE = /^[a-zA-Z0-9_]+$/;
 
 /** Grant or revoke a verified tick for a user (keyed by their current username). */
 export const adminSetVerified = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ token: z.string(), userHash: z.string().min(1), username: z.string().min(1), verified: z.boolean() }).parse(d))
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        token: z.string(),
+        userHash: z.string().min(1),
+        username: z.string().min(1),
+        verified: z.boolean(),
+      })
+      .parse(d),
+  )
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -454,7 +586,10 @@ export const adminSetVerified = createServerFn({ method: "POST" })
         .upsert({ username: data.username, user_hash: data.userHash }, { onConflict: "user_hash" });
       if (error) throw new Error(error.message);
     } else {
-      const { error } = await supabaseAdmin.from("verified_users" as any).delete().eq("user_hash", data.userHash);
+      const { error } = await supabaseAdmin
+        .from("verified_users" as any)
+        .delete()
+        .eq("user_hash", data.userHash);
       if (error) throw new Error(error.message);
     }
     return { ok: true };
@@ -464,12 +599,14 @@ export const adminSetVerified = createServerFn({ method: "POST" })
  * default generated avatar. The user sees it on their own device via syncIdentity. */
 export const adminSetAvatar = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
-    z.object({
-      token: z.string(),
-      userHash: z.string().min(1),
-      username: z.string().optional(),
-      url: z.string().url().nullable(),
-    }).parse(d),
+    z
+      .object({
+        token: z.string(),
+        userHash: z.string().min(1),
+        username: z.string().optional(),
+        url: z.string().url().nullable(),
+      })
+      .parse(d),
   )
   .handler(async ({ data }) => {
     assertToken(data.token);
@@ -519,13 +656,17 @@ export const adminSetOwnAvatar = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-
-
-
 /** Assign a brand-new unique username to a user across all their content. */
 export const adminRenameUser = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
-    z.object({ token: z.string(), userHash: z.string().min(1), oldUsername: z.string().min(1), newUsername: z.string().min(3).max(40).regex(RENAME_RE) }).parse(d),
+    z
+      .object({
+        token: z.string(),
+        userHash: z.string().min(1),
+        oldUsername: z.string().min(1),
+        newUsername: z.string().min(3).max(40).regex(RENAME_RE),
+      })
+      .parse(d),
   )
   .handler(async ({ data }) => {
     assertToken(data.token);
@@ -535,10 +676,26 @@ export const adminRenameUser = createServerFn({ method: "POST" })
     // Ensure the new username is not already taken by anyone else.
     const [p, g, c, ds, dr] = await Promise.all([
       supabaseAdmin.from("posts").select("anonymous_user_hash").eq("username", next).limit(1),
-      supabaseAdmin.from("global_messages").select("anonymous_user_hash").eq("username", next).limit(1),
-      supabaseAdmin.from("community_messages").select("anonymous_user_hash").eq("username", next).limit(1),
-      supabaseAdmin.from("direct_messages").select("sender_hash").eq("sender_username", next).limit(1),
-      supabaseAdmin.from("direct_messages").select("recipient_hash").eq("recipient_username", next).limit(1),
+      supabaseAdmin
+        .from("global_messages")
+        .select("anonymous_user_hash")
+        .eq("username", next)
+        .limit(1),
+      supabaseAdmin
+        .from("community_messages")
+        .select("anonymous_user_hash")
+        .eq("username", next)
+        .limit(1),
+      supabaseAdmin
+        .from("direct_messages")
+        .select("sender_hash")
+        .eq("sender_username", next)
+        .limit(1),
+      supabaseAdmin
+        .from("direct_messages")
+        .select("recipient_hash")
+        .eq("recipient_username", next)
+        .limit(1),
     ]);
     const clash =
       (p.data ?? []).some((r) => r.anonymous_user_hash !== data.userHash) ||
@@ -550,12 +707,30 @@ export const adminRenameUser = createServerFn({ method: "POST" })
 
     // Rewrite the username everywhere this user appears.
     await Promise.all([
-      supabaseAdmin.from("posts").update({ username: next }).eq("anonymous_user_hash", data.userHash),
-      supabaseAdmin.from("post_comments").update({ username: next }).eq("anonymous_user_hash", data.userHash),
-      supabaseAdmin.from("community_messages").update({ username: next }).eq("anonymous_user_hash", data.userHash),
-      supabaseAdmin.from("global_messages").update({ username: next }).eq("anonymous_user_hash", data.userHash),
-      supabaseAdmin.from("direct_messages").update({ sender_username: next }).eq("sender_hash", data.userHash),
-      supabaseAdmin.from("direct_messages").update({ recipient_username: next }).eq("recipient_hash", data.userHash),
+      supabaseAdmin
+        .from("posts")
+        .update({ username: next })
+        .eq("anonymous_user_hash", data.userHash),
+      supabaseAdmin
+        .from("post_comments")
+        .update({ username: next })
+        .eq("anonymous_user_hash", data.userHash),
+      supabaseAdmin
+        .from("community_messages")
+        .update({ username: next })
+        .eq("anonymous_user_hash", data.userHash),
+      supabaseAdmin
+        .from("global_messages")
+        .update({ username: next })
+        .eq("anonymous_user_hash", data.userHash),
+      supabaseAdmin
+        .from("direct_messages")
+        .update({ sender_username: next })
+        .eq("sender_hash", data.userHash),
+      supabaseAdmin
+        .from("direct_messages")
+        .update({ recipient_username: next })
+        .eq("recipient_hash", data.userHash),
     ]);
 
     // Keep verification row in sync with the new username (matched by person, not name).
@@ -567,18 +742,22 @@ export const adminRenameUser = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
-
 export const adminListEvidence = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ token: z.string() }).parse(d))
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: rows } = await supabaseAdmin.from("evidence").select("*").order("created_at", { ascending: false });
+    const { data: rows } = await supabaseAdmin
+      .from("evidence")
+      .select("*")
+      .order("created_at", { ascending: false });
     return rows ?? [];
   });
 
 export const adminVerifyEvidence = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ token: z.string(), id: z.string().uuid(), verified: z.boolean() }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ token: z.string(), id: z.string().uuid(), verified: z.boolean() }).parse(d),
+  )
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -616,10 +795,9 @@ export const adminAnalyzeBatch = createServerFn({ method: "POST" })
     );
     const processed = results.filter((r) => r.status === "fulfilled").length;
     const failed = results.length - processed;
-    const remaining = Math.max((ids.length === 5 ? 1 : 0), 0); // hint there may be more
+    const remaining = Math.max(ids.length === 5 ? 1 : 0, 0); // hint there may be more
     return { processed, failed, remaining };
   });
-
 
 export const adminGenerateReport = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ token: z.string() }).parse(d))
@@ -631,29 +809,36 @@ export const adminGenerateReport = createServerFn({ method: "POST" })
       supabaseAdmin.from("posts").select("content, category").gte("created_at", since),
       supabaseAdmin.from("incidents").select("title, category, severity").gte("first_seen", since),
     ]);
-    
+
     const key = process.env.OPENROUTER_API_KEY;
     if (!key) throw new Error("AI not configured in environment");
-    
+
     const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
-      headers: { 
-        "Content-Type": "application/json", 
-        "Authorization": `Bearer ${key}`,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${key}`,
         "HTTP-Referer": "https://campusxpose.com",
-        "X-Title": "CampusXpose"
+        "X-Title": "CampusXpose",
       },
       body: JSON.stringify({
         model: "openrouter/free",
         max_tokens: 2000,
         temperature: 0.6,
         messages: [
-          { role: "system", content: "You are an expert AI Analyst. Generate a concise, highly visual daily moderation report for an anonymous college accountability platform.\nSTRICT RULE 1: YOU MUST RESPOND IN 100% ENGLISH ONLY.\nSTRICT RULE 2: OUTPUT ONLY PURE HTML. DO NOT WRITE ANY CONVERSATIONAL TEXT LIKE 'Here is the report'. START IMMEDIATELY WITH <div> or <table>.\n\nMUST INCLUDE:\n1. HTML Tables to present data.\n2. HTML Bar Graphs inside tables! Use: <div style='background-color:#0f172a; height:16px; border-radius:4px; width:[PERCENTAGE]%;'></div>\n\nSections: Quick Summary, Top Issues, Spike Alerts, Recommended Actions." },
-          { role: "user", content: `Today's Date is: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}\nNew posts: ${JSON.stringify(posts.data ?? [])}\nNew incidents: ${JSON.stringify(incidents.data ?? [])}` },
+          {
+            role: "system",
+            content:
+              "You are an expert AI Analyst. Generate a concise, highly visual daily moderation report for an anonymous college accountability platform.\nSTRICT RULE 1: YOU MUST RESPOND IN 100% ENGLISH ONLY.\nSTRICT RULE 2: OUTPUT ONLY PURE HTML. DO NOT WRITE ANY CONVERSATIONAL TEXT LIKE 'Here is the report'. START IMMEDIATELY WITH <div> or <table>.\n\nMUST INCLUDE:\n1. HTML Tables to present data.\n2. HTML Bar Graphs inside tables! Use: <div style='background-color:#0f172a; height:16px; border-radius:4px; width:[PERCENTAGE]%;'></div>\n\nSections: Quick Summary, Top Issues, Spike Alerts, Recommended Actions.",
+          },
+          {
+            role: "user",
+            content: `Today's Date is: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}\nNew posts: ${JSON.stringify(posts.data ?? [])}\nNew incidents: ${JSON.stringify(incidents.data ?? [])}`,
+          },
         ],
       }),
     });
-    
+
     if (!res.ok) {
       const errText = await res.text();
       throw new Error(`Grok API error ${res.status}: ${errText}`);
@@ -668,25 +853,47 @@ export const adminGenerateGrokReport = createServerFn({ method: "POST" })
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const since = new Date(Date.now() - 30 * 864e5).toISOString(); // Last 30 days
-    
+
     // Fetch comprehensive data (excluding DMs)
     const [posts, incidents, users, colleges, feedback] = await Promise.all([
-      supabaseAdmin.from("posts").select("content, category, is_incident, upvotes").gte("created_at", since).order("created_at", { ascending: false }).limit(50),
-      supabaseAdmin.from("incidents").select("title, category, severity, status").gte("first_seen", since).order("first_seen", { ascending: false }).limit(30),
-      supabaseAdmin.from("anon_users" as any).select("id", { count: 'exact', head: true }).gte("created_at", since),
-      supabaseAdmin.from("colleges").select("name, incident_count").order("incident_count", { ascending: false }).limit(10),
-      supabaseAdmin.from("feedback" as any).select("message").gte("created_at", since).order("created_at", { ascending: false }).limit(20),
+      supabaseAdmin
+        .from("posts")
+        .select("content, category, is_incident, upvotes")
+        .gte("created_at", since)
+        .order("created_at", { ascending: false })
+        .limit(50),
+      supabaseAdmin
+        .from("incidents")
+        .select("title, category, severity, status")
+        .gte("first_seen", since)
+        .order("first_seen", { ascending: false })
+        .limit(30),
+      supabaseAdmin
+        .from("anon_users" as any)
+        .select("id", { count: "exact", head: true })
+        .gte("created_at", since),
+      supabaseAdmin
+        .from("colleges")
+        .select("name, incident_count")
+        .order("incident_count", { ascending: false })
+        .limit(10),
+      supabaseAdmin
+        .from("feedback" as any)
+        .select("message")
+        .gte("created_at", since)
+        .order("created_at", { ascending: false })
+        .limit(20),
     ]);
 
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) throw new Error("AI not configured in environment");
-    
+
     const prompt = `You are an expert AI Data Analyst for CampusXpose, an anonymous college accountability platform.
 Your task is to generate a concise, highly visual, and easy-to-understand report based on the following data from the last 30 days.
 
 Data:
 - New Users (last 30 days): ${users.count}
-- Posts/Reports: ${JSON.stringify(posts.data?.map(p => ({ category: p.category, incident: p.is_incident, upvotes: p.upvotes })))}
+- Posts/Reports: ${JSON.stringify(posts.data?.map((p) => ({ category: p.category, incident: p.is_incident, upvotes: p.upvotes })))}
 - Incidents: ${JSON.stringify(incidents.data)}
 - Top Problematic Colleges: ${JSON.stringify(colleges.data)}
 
@@ -710,11 +917,11 @@ DO NOT wrap the response in markdown blocks. Output pure HTML.`;
 
     const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
-      headers: { 
-        "Content-Type": "application/json", 
-        "Authorization": `Bearer ${apiKey}`,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
         "HTTP-Referer": "https://campusxpose.com",
-        "X-Title": "CampusXpose"
+        "X-Title": "CampusXpose",
       },
       body: JSON.stringify({
         model: "openrouter/free",
@@ -760,7 +967,9 @@ export const adminApproveCollegeRequest = createServerFn({ method: "POST" })
     if (reqErr || !req) throw new Error("Request not found");
     if (req.status === "approved") return { ok: true, alreadyDone: true };
 
-    const reqTypes = ((req as any).types && (req as any).types.length ? (req as any).types : [req.type]) as string[];
+    const reqTypes = (
+      (req as any).types && (req as any).types.length ? (req as any).types : [req.type]
+    ) as string[];
     const { data: col, error } = await supabaseAdmin
       .from("colleges")
       .insert({
@@ -801,7 +1010,7 @@ Return ONLY a JSON object (no markdown, no backticks, no other text) with these 
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${apiKey}`,
+            Authorization: `Bearer ${apiKey}`,
             "HTTP-Referer": "https://campusxpose.online",
             "X-Title": "CampusXpose",
           },
@@ -814,7 +1023,10 @@ Return ONLY a JSON object (no markdown, no backticks, no other text) with these 
         if (res.ok) {
           const j = await res.json();
           let content = j.choices?.[0]?.message?.content ?? "{}";
-          content = content.replace(/^```json\s*/i, "").replace(/```\s*$/i, "").trim();
+          content = content
+            .replace(/^```json\s*/i, "")
+            .replace(/```\s*$/i, "")
+            .trim();
           try {
             const parsed = JSON.parse(content);
             const patch: any = {};
@@ -839,7 +1051,6 @@ Return ONLY a JSON object (no markdown, no backticks, no other text) with these 
 
     return { ok: true, collegeId: col.id as string };
   });
-
 
 export const adminRejectCollegeRequest = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ token: z.string(), id: z.string().uuid() }).parse(d))
@@ -885,10 +1096,26 @@ export const adminListAds = createServerFn({ method: "POST" })
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     const [settingRes, gamesMapRes, globalTimerRes, timersMapRes] = await Promise.all([
-      supabaseAdmin.from("app_settings" as any).select("value").eq("key", "ads_enabled").maybeSingle(),
-      supabaseAdmin.from("app_settings" as any).select("value").eq("key", "cx_games_ad_map").maybeSingle(),
-      supabaseAdmin.from("app_settings" as any).select("value").eq("key", "ad_timer_seconds").maybeSingle(),
-      supabaseAdmin.from("app_settings" as any).select("value").eq("key", "cx_ad_timers_map").maybeSingle(),
+      supabaseAdmin
+        .from("app_settings" as any)
+        .select("value")
+        .eq("key", "ads_enabled")
+        .maybeSingle(),
+      supabaseAdmin
+        .from("app_settings" as any)
+        .select("value")
+        .eq("key", "cx_games_ad_map")
+        .maybeSingle(),
+      supabaseAdmin
+        .from("app_settings" as any)
+        .select("value")
+        .eq("key", "ad_timer_seconds")
+        .maybeSingle(),
+      supabaseAdmin
+        .from("app_settings" as any)
+        .select("value")
+        .eq("key", "cx_ad_timers_map")
+        .maybeSingle(),
     ]);
 
     const gamesMap: Record<string, boolean> = (gamesMapRes as any)?.data?.value || {};
@@ -944,7 +1171,7 @@ export const adminSaveAd = createServerFn({ method: "POST" })
           value: gamesMap,
           updated_at: new Date().toISOString(),
         },
-        { onConflict: "key" }
+        { onConflict: "key" },
       );
 
       const { data: existingTimers } = await supabaseAdmin
@@ -966,7 +1193,7 @@ export const adminSaveAd = createServerFn({ method: "POST" })
           value: timersMap,
           updated_at: new Date().toISOString(),
         },
-        { onConflict: "key" }
+        { onConflict: "key" },
       );
     } catch (e) {
       console.warn("Failed to update cx_games_ad_map / ad timers", e);
@@ -980,19 +1207,27 @@ export const adminDeleteAd = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("ads" as any).delete().eq("id", data.id);
+    const { error } = await supabaseAdmin
+      .from("ads" as any)
+      .delete()
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
 
 export const adminSetGlobalAdTimer = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ token: z.string(), timerSeconds: z.number().int().min(1).max(300) }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ token: z.string(), timerSeconds: z.number().int().min(1).max(300) }).parse(d),
+  )
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("app_settings" as any)
-      .upsert({ key: "ad_timer_seconds", value: data.timerSeconds, updated_at: new Date().toISOString() }, { onConflict: "key" });
+      .upsert(
+        { key: "ad_timer_seconds", value: data.timerSeconds, updated_at: new Date().toISOString() },
+        { onConflict: "key" },
+      );
     if (error) throw new Error(error.message);
     return { ok: true, timerSeconds: data.timerSeconds };
   });
@@ -1011,13 +1246,22 @@ export const adminGetFeatures = createServerFn({ method: "POST" })
   });
 
 export const adminSetFeature = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ token: z.string(), feature: z.string(), enabled: z.boolean() }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ token: z.string(), feature: z.string(), enabled: z.boolean() }).parse(d),
+  )
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("app_settings" as any)
-      .upsert({ key: `${data.feature}_enabled`, value: data.enabled, updated_at: new Date().toISOString() }, { onConflict: "key" });
+      .upsert(
+        {
+          key: `${data.feature}_enabled`,
+          value: data.enabled,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "key" },
+      );
     if (error) throw new Error(error.message);
     return { ok: true, enabled: data.enabled };
   });
@@ -1029,14 +1273,19 @@ export const adminSetAdsEnabled = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("app_settings" as any)
-      .upsert({ key: "ads_enabled", value: data.enabled, updated_at: new Date().toISOString() }, { onConflict: "key" });
+      .upsert(
+        { key: "ads_enabled", value: data.enabled, updated_at: new Date().toISOString() },
+        { onConflict: "key" },
+      );
     if (error) throw new Error(error.message);
     return { ok: true, enabled: data.enabled };
   });
 
 /** Admin: list recent polls (global + college) with vote counts. */
 export const adminListPolls = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ token: z.string(), search: z.string().optional() }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ token: z.string(), search: z.string().optional() }).parse(d),
+  )
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -1068,11 +1317,16 @@ export const adminListPolls = createServerFn({ method: "POST" })
 
 /** Admin: delete a poll and all its votes. */
 export const adminDeletePoll = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ token: z.string(), pollId: z.string().uuid() }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ token: z.string(), pollId: z.string().uuid() }).parse(d),
+  )
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("polls" as any).delete().eq("id", data.pollId);
+    const { error } = await supabaseAdmin
+      .from("polls" as any)
+      .delete()
+      .eq("id", data.pollId);
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
@@ -1085,7 +1339,9 @@ export const adminListFeedback = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows, error } = await supabaseAdmin
       .from("feedback" as any)
-      .select("id, name, message, user_username, user_hash, status, admin_reply, replied_at, created_at")
+      .select(
+        "id, name, message, user_username, user_hash, status, admin_reply, replied_at, created_at",
+      )
       .order("created_at", { ascending: false })
       .limit(300);
     if (error) throw new Error(error.message);
@@ -1095,7 +1351,9 @@ export const adminListFeedback = createServerFn({ method: "POST" })
 /** Admin: reply to a feedback item by sending the user a direct message as "admin". */
 export const adminReplyFeedback = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
-    z.object({ token: z.string(), id: z.string().uuid(), reply: z.string().min(1).max(1000) }).parse(d),
+    z
+      .object({ token: z.string(), id: z.string().uuid(), reply: z.string().min(1).max(1000) })
+      .parse(d),
   )
   .handler(async ({ data }) => {
     assertToken(data.token);
@@ -1133,25 +1391,32 @@ export const adminReplyFeedback = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
-
 /** Admin: delete a feedback item. */
 export const adminDeleteFeedback = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ token: z.string(), id: z.string().uuid() }).parse(d))
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("feedback" as any).delete().eq("id", data.id);
+    const { error } = await supabaseAdmin
+      .from("feedback" as any)
+      .delete()
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
 
 /** Admin: delete projects. */
 export const adminDeleteProjects = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ token: z.string(), ids: z.array(z.string().uuid()).min(1) }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ token: z.string(), ids: z.array(z.string().uuid()).min(1) }).parse(d),
+  )
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("projects" as any).delete().in("id", data.ids);
+    const { error } = await supabaseAdmin
+      .from("projects" as any)
+      .delete()
+      .in("id", data.ids);
     if (error) throw new Error(error.message);
     return { ok: true as const, deleted: data.ids.length };
   });
@@ -1172,7 +1437,9 @@ export const adminListProjects = createServerFn({ method: "POST" })
   });
 
 export const adminUpdatePushConfig = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ token: z.string(), origin: z.string().url() }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ token: z.string(), origin: z.string().url() }).parse(d),
+  )
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -1186,13 +1453,25 @@ export const adminGetNews = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: news, error } = await supabaseAdmin.from("news" as any).select("*").order("created_at", { ascending: false });
+    const { data: news, error } = await supabaseAdmin
+      .from("news" as any)
+      .select("*")
+      .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     return news || [];
   });
 
 export const adminCreateNews = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ token: z.string(), text: z.string(), link_url: z.string().optional(), image_url: z.string().optional() }).parse(d))
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        token: z.string(),
+        text: z.string(),
+        link_url: z.string().optional(),
+        image_url: z.string().optional(),
+      })
+      .parse(d),
+  )
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -1200,18 +1479,23 @@ export const adminCreateNews = createServerFn({ method: "POST" })
       text: data.text,
       link_url: data.link_url || null,
       image_url: data.image_url || null,
-      is_active: true
+      is_active: true,
     });
     if (error) throw new Error(error.message);
     return { success: true };
   });
 
 export const adminToggleNewsStatus = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ token: z.string(), id: z.string(), is_active: z.boolean() }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ token: z.string(), id: z.string(), is_active: z.boolean() }).parse(d),
+  )
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("news" as any).update({ is_active: data.is_active }).eq("id", data.id);
+    const { error } = await supabaseAdmin
+      .from("news" as any)
+      .update({ is_active: data.is_active })
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { success: true };
   });
@@ -1221,20 +1505,27 @@ export const adminDeleteNews = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("news" as any).delete().eq("id", data.id);
+    const { error } = await supabaseAdmin
+      .from("news" as any)
+      .delete()
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { success: true };
   });
 
 export const adminUpdateGameSetting = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ token: z.string(), key: z.string(), value: z.any() }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ token: z.string(), key: z.string(), value: z.any() }).parse(d),
+  )
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("app_settings" as any).upsert(
-      { key: data.key, value: data.value, updated_at: new Date().toISOString() },
-      { onConflict: "key" }
-    );
+    const { error } = await supabaseAdmin
+      .from("app_settings" as any)
+      .upsert(
+        { key: data.key, value: data.value, updated_at: new Date().toISOString() },
+        { onConflict: "key" },
+      );
     if (error) throw new Error(error.message);
     return { success: true };
   });

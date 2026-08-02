@@ -11,7 +11,10 @@ export const Route = createFileRoute("/games/memory-match")({
   head: () => ({
     meta: [
       { title: "Memory Match — CampusXpose Games" },
-      { name: "description", content: "Test your memory with this campus-themed card matching game!" },
+      {
+        name: "description",
+        content: "Test your memory with this campus-themed card matching game!",
+      },
     ],
   }),
   component: MemoryMatchGame,
@@ -24,9 +27,24 @@ const DEFAULT_EMOJIS = ["🚀", "💻", "🤖", "⚡", "🎮", "🧠", "🔥", "
 
 const STATIC_MEMORY_LEVELS = [
   { title: "Easy Emoji Match", pairsCount: 4, timeLimit: 60, emojis: ["🚀", "💻", "🤖", "⚡"] },
-  { title: "Medium Campus Match", pairsCount: 6, timeLimit: 50, emojis: ["🚀", "💻", "🤖", "⚡", "🎮", "🧠"] },
-  { title: "Hard Speed Match", pairsCount: 8, timeLimit: 40, emojis: ["🚀", "💻", "🤖", "⚡", "🎮", "🧠", "🔥", "👑"] },
-  { title: "Expert Cyber Match", pairsCount: 10, timeLimit: 30, emojis: ["🚀", "💻", "🤖", "⚡", "🎮", "🧠", "🔥", "👑", "🎯", "🏆"] },
+  {
+    title: "Medium Campus Match",
+    pairsCount: 6,
+    timeLimit: 50,
+    emojis: ["🚀", "💻", "🤖", "⚡", "🎮", "🧠"],
+  },
+  {
+    title: "Hard Speed Match",
+    pairsCount: 8,
+    timeLimit: 40,
+    emojis: ["🚀", "💻", "🤖", "⚡", "🎮", "🧠", "🔥", "👑"],
+  },
+  {
+    title: "Expert Cyber Match",
+    pairsCount: 10,
+    timeLimit: 30,
+    emojis: ["🚀", "💻", "🤖", "⚡", "🎮", "🧠", "🔥", "👑", "🎯", "🏆"],
+  },
 ];
 
 type Card = {
@@ -132,7 +150,7 @@ export default function MemoryMatchGame() {
   useEffect(() => {
     if (won || gameOver) return;
     const timer = setInterval(() => {
-      setTimeLeft(t => {
+      setTimeLeft((t) => {
         if (t <= 1) {
           setGameOver(true);
           return 0;
@@ -154,7 +172,7 @@ export default function MemoryMatchGame() {
     setFlippedIndices(newFlipped);
 
     if (newFlipped.length === 2) {
-      setMoves(m => m + 1);
+      setMoves((m) => m + 1);
       setIsProcessing(true);
 
       const [firstIndex, secondIndex] = newFlipped;
@@ -197,16 +215,20 @@ export default function MemoryMatchGame() {
       {/* Header */}
       <div className="sticky top-0 z-40 border-b-4 border-black bg-white">
         <div className="mx-auto flex max-w-lg items-center justify-between px-4 py-3">
-          <Link to="/games" className="flex items-center gap-2 text-sm font-black text-black hover:scale-105 transition-transform">
+          <Link
+            to="/games"
+            className="flex items-center gap-2 text-sm font-black text-black hover:scale-105 transition-transform"
+          >
             <ArrowLeft className="h-5 w-5" strokeWidth={3} /> Back
           </Link>
-          <h1 className="font-display text-2xl font-black tracking-tight uppercase">Memory Match</h1>
+          <h1 className="font-display text-2xl font-black tracking-tight uppercase">
+            Memory Match
+          </h1>
           <div className="w-10" />
         </div>
       </div>
 
       <div className="mx-auto max-w-lg px-4 py-6 space-y-6">
-
         {/* Dashboard Bar */}
         <div className="space-y-4">
           <div className="flex items-center justify-between gap-3">
@@ -216,7 +238,9 @@ export default function MemoryMatchGame() {
               className="flex items-center gap-2 bg-[#bbf7d0] px-4 py-2.5 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0.5 hover:shadow-none transition-all outline-none cursor-pointer"
               style={{ borderRadius: WOBBLY_SM }}
             >
-              <span className="font-display text-lg font-black text-black uppercase">Lvl {levelIdx + 1}</span>
+              <span className="font-display text-lg font-black text-black uppercase">
+                Lvl {levelIdx + 1}
+              </span>
               <span className="text-[11px] font-black text-black/80 flex items-center bg-white px-2 py-0.5 rounded-full border-2 border-black">
                 / {totalLevelsCount} <ChevronDown className="h-3 w-3 ml-1" strokeWidth={4} />
               </span>
@@ -230,7 +254,9 @@ export default function MemoryMatchGame() {
               </div>
               <div className="bg-[#bfdbfe] border-3 border-black px-3.5 py-1.5 rounded-2xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] text-center">
                 <div className="text-[9px] font-black uppercase text-black/70">PAIRS</div>
-                <div className="font-display text-lg font-black leading-none">{matches}/{targetPairs}</div>
+                <div className="font-display text-lg font-black leading-none">
+                  {matches}/{targetPairs}
+                </div>
               </div>
             </div>
           </div>
@@ -248,8 +274,13 @@ export default function MemoryMatchGame() {
         </div>
 
         {/* Cards Grid */}
-        <div className="relative border-4 border-black bg-[#18181b] p-4 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]" style={{ borderRadius: WOBBLY_MD }}>
-          <div className={`grid gap-3 ${cards.length <= 8 ? "grid-cols-4" : cards.length <= 12 ? "grid-cols-4" : "grid-cols-4 sm:grid-cols-5"}`}>
+        <div
+          className="relative border-4 border-black bg-[#18181b] p-4 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
+          style={{ borderRadius: WOBBLY_MD }}
+        >
+          <div
+            className={`grid gap-3 ${cards.length <= 8 ? "grid-cols-4" : cards.length <= 12 ? "grid-cols-4" : "grid-cols-4 sm:grid-cols-5"}`}
+          >
             {cards.map((card, index) => (
               <motion.div
                 key={card.id}
@@ -282,8 +313,12 @@ export default function MemoryMatchGame() {
                 className="absolute inset-0 bg-[#bbf7d0]/95 backdrop-blur-xs flex flex-col items-center justify-center p-6 text-center text-black space-y-4 rounded-3xl border-4 border-black"
               >
                 <div className="text-5xl">🎉</div>
-                <h2 className="font-display text-3xl font-black uppercase text-black">Level Cleared!</h2>
-                <p className="text-xs font-black text-black/80">Matched all {targetPairs} pairs in {timeLimit - timeLeft} seconds!</p>
+                <h2 className="font-display text-3xl font-black uppercase text-black">
+                  Level Cleared!
+                </h2>
+                <p className="text-xs font-black text-black/80">
+                  Matched all {targetPairs} pairs in {timeLimit - timeLeft} seconds!
+                </p>
                 <div className="flex items-center gap-3">
                   <button
                     onClick={initGame}
@@ -293,7 +328,7 @@ export default function MemoryMatchGame() {
                   </button>
                   <button
                     onClick={() => {
-                      if (levelIdx + 1 < totalLevelsCount) setLevelIdx(l => l + 1);
+                      if (levelIdx + 1 < totalLevelsCount) setLevelIdx((l) => l + 1);
                       else initGame();
                     }}
                     className="bg-black text-white border-2 border-black px-5 py-2.5 rounded-xl font-display font-black text-xs uppercase shadow-[2px_2px_0px_0px_rgba(254,240,138,1)] cursor-pointer"
@@ -315,8 +350,12 @@ export default function MemoryMatchGame() {
                 className="absolute inset-0 bg-black/85 backdrop-blur-xs flex flex-col items-center justify-center p-6 text-center text-white space-y-4 rounded-3xl"
               >
                 <div className="text-5xl">⏰</div>
-                <h2 className="font-display text-3xl font-black uppercase text-[#fca5a5]">Time's Up!</h2>
-                <p className="text-xs font-bold text-gray-300">You ran out of time before matching all card pairs.</p>
+                <h2 className="font-display text-3xl font-black uppercase text-[#fca5a5]">
+                  Time's Up!
+                </h2>
+                <p className="text-xs font-bold text-gray-300">
+                  You ran out of time before matching all card pairs.
+                </p>
                 <button
                   onClick={initGame}
                   className="bg-[#fef08a] hover:bg-yellow-200 text-black border-2 border-black px-6 py-2.5 rounded-2xl font-display font-black text-sm uppercase shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] cursor-pointer"
@@ -327,7 +366,6 @@ export default function MemoryMatchGame() {
             )}
           </AnimatePresence>
         </div>
-
       </div>
 
       {/* ─── LEVEL SELECTOR MODAL ────────────────────────────────────── */}
@@ -344,7 +382,7 @@ export default function MemoryMatchGame() {
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
-              onClick={e => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
               className="w-full max-w-sm bg-white border-4 border-black p-6 flex flex-col max-h-[80vh] relative shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-black"
               style={{ borderRadius: WOBBLY_MD }}
             >
@@ -356,7 +394,9 @@ export default function MemoryMatchGame() {
               </button>
 
               <div className="flex items-center justify-between mb-4 border-b-2 border-black pb-3">
-                <h2 className="font-display text-2xl font-black uppercase text-black">Select Memory Level</h2>
+                <h2 className="font-display text-2xl font-black uppercase text-black">
+                  Select Memory Level
+                </h2>
                 <span className="text-xs font-black bg-[#bbf7d0] text-black border-2 border-black px-2.5 py-1 rounded-full shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                   {totalLevelsCount} Levels
                 </span>
@@ -367,10 +407,12 @@ export default function MemoryMatchGame() {
                   let lvlData = STATIC_MEMORY_LEVELS[i];
                   try {
                     const overridesRaw = localStorage.getItem("cx_memory_level_overrides");
-                    if (overridesRaw && JSON.parse(overridesRaw)[i]) lvlData = JSON.parse(overridesRaw)[i];
+                    if (overridesRaw && JSON.parse(overridesRaw)[i])
+                      lvlData = JSON.parse(overridesRaw)[i];
                     else if (i >= 4) {
                       const customRaw = localStorage.getItem("cx_memory_custom_levels");
-                      if (customRaw && JSON.parse(customRaw)[i - 4]) lvlData = JSON.parse(customRaw)[i - 4];
+                      if (customRaw && JSON.parse(customRaw)[i - 4])
+                        lvlData = JSON.parse(customRaw)[i - 4];
                     }
                   } catch (e) {}
 
@@ -396,13 +438,19 @@ export default function MemoryMatchGame() {
                           #{i + 1}
                         </div>
                         <div>
-                          <div className="font-display font-black text-xs uppercase text-black leading-snug">{title}</div>
-                          <div className="text-[10px] font-bold text-black/70">{pairs} Pairs • {time}s Limit</div>
+                          <div className="font-display font-black text-xs uppercase text-black leading-snug">
+                            {title}
+                          </div>
+                          <div className="text-[10px] font-bold text-black/70">
+                            {pairs} Pairs • {time}s Limit
+                          </div>
                         </div>
                       </div>
 
                       {i === levelIdx && (
-                        <span className="text-[10px] font-black bg-black text-white px-2 py-0.5 rounded-full">ACTIVE</span>
+                        <span className="text-[10px] font-black bg-black text-white px-2 py-0.5 rounded-full">
+                          ACTIVE
+                        </span>
                       )}
                     </button>
                   );
@@ -412,7 +460,6 @@ export default function MemoryMatchGame() {
           </motion.div>
         )}
       </AnimatePresence>
-
     </div>
   );
 }

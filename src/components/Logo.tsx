@@ -2,13 +2,16 @@ import { Link } from "@tanstack/react-router";
 
 export function Logo({ className = "" }: { className?: string }) {
   return (
-    <Link to="/" className={`flex items-center gap-2.5 font-display font-bold tracking-tight ${className}`}>
-      <img 
-        src="/logo.jpeg" 
-        alt="CampusXpose" 
+    <Link
+      to="/"
+      className={`flex items-center gap-2.5 font-display font-bold tracking-tight ${className}`}
+    >
+      <img
+        src="/logo.jpeg"
+        alt="CampusXpose"
         className="h-10 w-10 shrink-0 rounded-xl object-cover border-2 border-ink shadow-sm"
       />
-      
+
       <span className="hidden sm:inline whitespace-nowrap text-xl sm:text-2xl">
         Campus
         <span className="relative inline-block text-accent">

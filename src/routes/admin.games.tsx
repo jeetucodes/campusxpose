@@ -1,11 +1,45 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { Gamepad2, Info, Copy, Check, Plus, Trash2, Power, Sparkles, Code, Layers, X, ExternalLink, Activity, ShieldCheck, Edit, Eye, Search, Save, RotateCcw, ArrowLeft, Radio, BarChart3, Users, Flame, TrendingDown, Clock, Award, Play } from "lucide-react";
+import {
+  Gamepad2,
+  Info,
+  Copy,
+  Check,
+  Plus,
+  Trash2,
+  Power,
+  Sparkles,
+  Code,
+  Layers,
+  X,
+  ExternalLink,
+  Activity,
+  ShieldCheck,
+  Edit,
+  Eye,
+  Search,
+  Save,
+  RotateCcw,
+  ArrowLeft,
+  Radio,
+  BarChart3,
+  Users,
+  Flame,
+  TrendingDown,
+  Clock,
+  Award,
+  Play,
+} from "lucide-react";
 import { toast } from "sonner";
 import { getStaticLevel } from "../data/arrow-puzzle-levels";
 import { getPipeLevel } from "../data/pipe-puzzle-levels";
-import { getGameAnalytics, subscribeGlobalAnalytics, GameAnalytics, RealPlayerRecord } from "../lib/gameAnalytics";
+import {
+  getGameAnalytics,
+  subscribeGlobalAnalytics,
+  GameAnalytics,
+  RealPlayerRecord,
+} from "../lib/gameAnalytics";
 import { useServerFn } from "@tanstack/react-start";
 import { useAdmin } from "@/stores/admin";
 import { adminUpdateGameSetting } from "@/lib/admin.functions";
@@ -14,7 +48,11 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/admin/games")({
   head: () => ({ meta: [{ title: "Admin · Games" }, { name: "robots", content: "noindex" }] }),
-  component: () => <AdminShell><AdminGamesManagement /></AdminShell>,
+  component: () => (
+    <AdminShell>
+      <AdminGamesManagement />
+    </AdminShell>
+  ),
 });
 
 const WOBBLY_MD = "25px 8px 22px 8px / 8px 22px 8px 25px";
@@ -26,7 +64,7 @@ interface GameStatusMap {
   [gameId: string]: boolean;
 }
 
-type GameId = "arrow-puzzle" | "pipe-connect" | "archery" | "2048" | "memory-match";
+type GameId = "arrow-puzzle" | "pipe-connect" | "2048" | "memory-match" | "knife-thrower";
 
 interface GameMeta {
   id: GameId;
@@ -46,17 +84,48 @@ interface GameMeta {
 }
 
 const STATIC_2048_LEVELS = [
-  { title: "Classic 2048 Grid", targetTile: 2048, gridSize: 4, desc: "Reach 2048 tile by merging identical numbers" },
-  { title: "4096 Master Challenge", targetTile: 4096, gridSize: 4, desc: "Pro mode: reach tile 4096" },
+  {
+    title: "Classic 2048 Grid",
+    targetTile: 2048,
+    gridSize: 4,
+    desc: "Reach 2048 tile by merging identical numbers",
+  },
+  {
+    title: "4096 Master Challenge",
+    targetTile: 4096,
+    gridSize: 4,
+    desc: "Pro mode: reach tile 4096",
+  },
   { title: "8192 Speed Rush", targetTile: 8192, gridSize: 4, desc: "Expert mode: reach tile 8192" },
-  { title: "Super Obstacle Grid", targetTile: 2048, gridSize: 4, obstacles: [[1, 1]], desc: "2048 grid with 1 blocked obstacle tile" },
+  {
+    title: "Super Obstacle Grid",
+    targetTile: 2048,
+    gridSize: 4,
+    obstacles: [[1, 1]],
+    desc: "2048 grid with 1 blocked obstacle tile",
+  },
 ];
 
 const STATIC_MEMORY_LEVELS = [
   { title: "Easy Emoji Match", pairsCount: 4, timeLimit: 60, emojis: ["🚀", "💻", "🤖", "⚡"] },
-  { title: "Medium Campus Match", pairsCount: 6, timeLimit: 50, emojis: ["🚀", "💻", "🤖", "⚡", "🎮", "🧠"] },
-  { title: "Hard Speed Match", pairsCount: 8, timeLimit: 40, emojis: ["🚀", "💻", "🤖", "⚡", "🎮", "🧠", "🔥", "👑"] },
-  { title: "Expert Cyber Match", pairsCount: 10, timeLimit: 30, emojis: ["🚀", "💻", "🤖", "⚡", "🎮", "🧠", "🔥", "👑", "🎯", "🏆"] },
+  {
+    title: "Medium Campus Match",
+    pairsCount: 6,
+    timeLimit: 50,
+    emojis: ["🚀", "💻", "🤖", "⚡", "🎮", "🧠"],
+  },
+  {
+    title: "Hard Speed Match",
+    pairsCount: 8,
+    timeLimit: 40,
+    emojis: ["🚀", "💻", "🤖", "⚡", "🎮", "🧠", "🔥", "👑"],
+  },
+  {
+    title: "Expert Cyber Match",
+    pairsCount: 10,
+    timeLimit: 30,
+    emojis: ["🚀", "💻", "🤖", "⚡", "🎮", "🧠", "🔥", "👑", "🎯", "🏆"],
+  },
 ];
 
 const ALL_GAMES: GameMeta[] = [
@@ -203,51 +272,6 @@ Single Level Format:
 ]`,
   },
   {
-    id: "archery",
-    name: "Archery Master",
-    emoji: "🎯",
-    link: "/games/archery",
-    category: "Physics Arcade",
-    desc: "50 Physics-based Archery Levels",
-    color: "bg-[#fbbf24]",
-    badgeBg: "bg-[#f59e0b] text-white",
-    storageKey: "cx_archery_custom_levels",
-    overridesKey: "cx_archery_level_overrides",
-    totalBuiltIn: 50,
-    prompt: `Act as a Level Designer for Archery Master Game.
-Generate a valid JSON for Archery Master levels.`,
-    sampleSingleJson: `{
-  "id": 51,
-  "targetDistance": 85,
-  "targetY": 50,
-  "targetSize": 0.8,
-  "arrowsGiven": 3,
-  "wind": { "enabled": true, "strength": 5 },
-  "gustZones": [],
-  "targetMovement": "slide-v",
-  "movementSpeed": 1.5,
-  "obstacles": [],
-  "requiredRing": "bullseye",
-  "trajectoryPreview": "none"
-}`,
-    sampleMultipleJson: `[
-  {
-    "id": 51,
-    "targetDistance": 85,
-    "targetY": 50,
-    "targetSize": 0.8,
-    "arrowsGiven": 3,
-    "wind": { "enabled": true, "strength": 5 },
-    "gustZones": [],
-    "targetMovement": "slide-v",
-    "movementSpeed": 1.5,
-    "obstacles": [],
-    "requiredRing": "bullseye",
-    "trajectoryPreview": "none"
-  }
-]`,
-  },
-  {
     id: "2048",
     name: "2048 Classic",
     emoji: "🧩",
@@ -317,6 +341,24 @@ Generate a level JSON with pairs, time limit, and emojis.`,
   }
 ]`,
   },
+  {
+    id: "knife-thrower",
+    name: "Knife Thrower",
+    emoji: "🗡️",
+    link: "/games/knife-thrower",
+    category: "Physics Arcade",
+    desc: "100 Levels of Knife Throwing Action",
+    color: "bg-[#94a3b8]",
+    badgeBg: "bg-[#64748b] text-white",
+    storageKey: "cx_knife_custom_levels",
+    overridesKey: "cx_knife_level_overrides",
+    totalBuiltIn: 100,
+    prompt: `Act as a Level Designer for Knife Thrower Game. Generate a level JSON.`,
+    sampleSingleJson: `{ "id": 51, "knivesToThrow": 10, "rotationSpeed": 0.05, "preStuckKnives": [0, 3.14] }`,
+    sampleMultipleJson: `[
+  { "id": 51, "knivesToThrow": 10, "rotationSpeed": 0.05, "preStuckKnives": [0, 3.14] }
+]`,
+  }
 ];
 
 export default function AdminGamesManagement() {
@@ -326,14 +368,14 @@ export default function AdminGamesManagement() {
   const [gameStatus, setGameStatus] = useState<GameStatusMap>({
     "arrow-puzzle": true,
     "pipe-connect": true,
-    "archery": true,
     "2048": true,
     "memory-match": true,
+    "knife-thrower": true,
   });
 
   const [analytics, setAnalytics] = useState<GameAnalytics>({
     totalPlays: 0,
-    gamePlayCounts: { "arrow-puzzle": 0, "pipe-connect": 0, "archery": 0, "2048": 0, "memory-match": 0 },
+    gamePlayCounts: { "arrow-puzzle": 0, "pipe-connect": 0, "2048": 0, "memory-match": 0, "knife-thrower": 0 },
     players: {},
   });
 
@@ -342,7 +384,7 @@ export default function AdminGamesManagement() {
 
   const [showAiPromptModal, setShowAiPromptModal] = useState(false);
   const [copiedPrompt, setCopiedPrompt] = useState(false);
-  
+
   // Single Level Add Modal
   const [showAddSingleModal, setShowAddSingleModal] = useState(false);
   const [singleLevelJson, setSingleLevelJson] = useState("");
@@ -355,12 +397,17 @@ export default function AdminGamesManagement() {
   const [levelOverrides, setLevelOverrides] = useState<Record<number, any>>({});
 
   // Level Inspect/Edit Modal State
-  const [selectedLevelBox, setSelectedLevelBox] = useState<{ index: number; isBuiltIn: boolean; isOverridden: boolean; data: any } | null>(null);
+  const [selectedLevelBox, setSelectedLevelBox] = useState<{
+    index: number;
+    isBuiltIn: boolean;
+    isOverridden: boolean;
+    data: any;
+  } | null>(null);
   const [editingLevelJson, setEditingLevelJson] = useState<string>("");
 
   const [searchLevelQuery, setSearchLevelQuery] = useState<string>("");
 
-  const selectedGameMeta = ALL_GAMES.find(g => g.id === activeDetailGameId) || ALL_GAMES[0];
+  const selectedGameMeta = ALL_GAMES.find((g) => g.id === activeDetailGameId) || ALL_GAMES[0];
 
   const loadData = async () => {
     try {
@@ -371,7 +418,11 @@ export default function AdminGamesManagement() {
       setAnalytics(data);
 
       // Fetch global status from Supabase
-      const { data: serverData } = await (supabase as any).from("app_settings").select("value").eq("key", GAMES_STATUS_KEY).maybeSingle();
+      const { data: serverData } = await (supabase as any)
+        .from("app_settings")
+        .select("value")
+        .eq("key", GAMES_STATUS_KEY)
+        .maybeSingle();
       if (serverData && serverData.value) {
         setGameStatus(serverData.value as any);
         localStorage.setItem(GAMES_STATUS_KEY, JSON.stringify(serverData.value));
@@ -398,21 +449,24 @@ export default function AdminGamesManagement() {
   // Reload custom levels & level overrides when active detail game changes
   useEffect(() => {
     if (!activeDetailGameId) return;
-    const meta = ALL_GAMES.find(g => g.id === activeDetailGameId);
+    const meta = ALL_GAMES.find((g) => g.id === activeDetailGameId);
     if (!meta) return;
 
     const fetchGameData = async () => {
       try {
         const savedCustom = localStorage.getItem(meta.storageKey);
         setCustomLevels(savedCustom ? JSON.parse(savedCustom) : []);
-  
+
         const savedOverrides = localStorage.getItem(meta.overridesKey);
         setLevelOverrides(savedOverrides ? JSON.parse(savedOverrides) : {});
-        
+
         // Fetch from Supabase
-        const { data: serverData } = await (supabase as any).from("app_settings").select("key, value").in("key", [meta.storageKey, meta.overridesKey]);
+        const { data: serverData } = await (supabase as any)
+          .from("app_settings")
+          .select("key, value")
+          .in("key", [meta.storageKey, meta.overridesKey]);
         const map = new Map((serverData || []).map((row: any) => [row.key, row.value]));
-        
+
         if (map.has(meta.storageKey)) {
           const val = map.get(meta.storageKey) as any[];
           setCustomLevels(val || []);
@@ -428,7 +482,7 @@ export default function AdminGamesManagement() {
         setLevelOverrides({});
       }
     };
-    
+
     fetchGameData();
   }, [activeDetailGameId]);
 
@@ -437,11 +491,13 @@ export default function AdminGamesManagement() {
     setGameStatus(updated);
     localStorage.setItem(GAMES_STATUS_KEY, JSON.stringify(updated));
     window.dispatchEvent(new Event("cx_games_status_change"));
-    
+
     if (token) {
-      await updateSetting({ data: { token, key: GAMES_STATUS_KEY, value: updated } }).catch(console.error);
+      await updateSetting({ data: { token, key: GAMES_STATUS_KEY, value: updated } }).catch(
+        console.error,
+      );
     }
-    
+
     toast.success(`${gameId} is now ${status ? "ONLINE" : "OFFLINE"}`);
   };
 
@@ -462,7 +518,9 @@ export default function AdminGamesManagement() {
     try {
       const parsed = JSON.parse(singleLevelJson);
       if (Array.isArray(parsed)) {
-        toast.error("You pasted multiple levels! Use the Bulk Import box below for multiple levels.");
+        toast.error(
+          "You pasted multiple levels! Use the Bulk Import box below for multiple levels.",
+        );
         return;
       }
 
@@ -470,9 +528,11 @@ export default function AdminGamesManagement() {
       setCustomLevels(updatedList);
       localStorage.setItem(selectedGameMeta.storageKey, JSON.stringify(updatedList));
       window.dispatchEvent(new Event("cx_custom_levels_change"));
-      
+
       if (token) {
-        await updateSetting({ data: { token, key: selectedGameMeta.storageKey, value: updatedList } }).catch(console.error);
+        await updateSetting({
+          data: { token, key: selectedGameMeta.storageKey, value: updatedList },
+        }).catch(console.error);
       }
 
       toast.success(`Added 1 Single Level to ${selectedGameMeta.name}! 🎉`);
@@ -506,10 +566,14 @@ export default function AdminGamesManagement() {
       window.dispatchEvent(new Event("cx_custom_levels_change"));
 
       if (token) {
-        await updateSetting({ data: { token, key: selectedGameMeta.storageKey, value: updatedList } }).catch(console.error);
+        await updateSetting({
+          data: { token, key: selectedGameMeta.storageKey, value: updatedList },
+        }).catch(console.error);
       }
 
-      toast.success(`Successfully imported ${newLevels.length} levels to ${selectedGameMeta.name}! 🚀`);
+      toast.success(
+        `Successfully imported ${newLevels.length} levels to ${selectedGameMeta.name}! 🚀`,
+      );
       setBulkCodeToImport("");
     } catch (e) {
       toast.error("Invalid JSON format! Must be a JSON array of levels.");
@@ -517,7 +581,12 @@ export default function AdminGamesManagement() {
   };
 
   // Open Level Box Inspect/Edit Modal
-  const handleOpenLevelBox = (item: { index: number; isBuiltIn: boolean; isOverridden: boolean; data: any }) => {
+  const handleOpenLevelBox = (item: {
+    index: number;
+    isBuiltIn: boolean;
+    isOverridden: boolean;
+    data: any;
+  }) => {
     setSelectedLevelBox(item);
     setEditingLevelJson(JSON.stringify(item.data, null, 2));
   };
@@ -533,7 +602,10 @@ export default function AdminGamesManagement() {
         const updatedOverrides = { ...levelOverrides, [selectedLevelBox.index]: parsed };
         setLevelOverrides(updatedOverrides);
         localStorage.setItem(selectedGameMeta.overridesKey, JSON.stringify(updatedOverrides));
-        if (token) await updateSetting({ data: { token, key: selectedGameMeta.overridesKey, value: updatedOverrides } }).catch(console.error);
+        if (token)
+          await updateSetting({
+            data: { token, key: selectedGameMeta.overridesKey, value: updatedOverrides },
+          }).catch(console.error);
         toast.success(`Level #${selectedLevelBox.index + 1} updated! ✏️`);
       } else {
         const customIdx = selectedLevelBox.index - selectedGameMeta.totalBuiltIn;
@@ -541,7 +613,10 @@ export default function AdminGamesManagement() {
         updatedCustom[customIdx] = parsed;
         setCustomLevels(updatedCustom);
         localStorage.setItem(selectedGameMeta.storageKey, JSON.stringify(updatedCustom));
-        if (token) await updateSetting({ data: { token, key: selectedGameMeta.storageKey, value: updatedCustom } }).catch(console.error);
+        if (token)
+          await updateSetting({
+            data: { token, key: selectedGameMeta.storageKey, value: updatedCustom },
+          }).catch(console.error);
         toast.success(`Custom Level #${customIdx + 1} updated! ✏️`);
       }
 
@@ -562,7 +637,10 @@ export default function AdminGamesManagement() {
         delete updated[selectedLevelBox.index];
         setLevelOverrides(updated);
         localStorage.setItem(selectedGameMeta.overridesKey, JSON.stringify(updated));
-        if (token) await updateSetting({ data: { token, key: selectedGameMeta.overridesKey, value: updated } }).catch(console.error);
+        if (token)
+          await updateSetting({
+            data: { token, key: selectedGameMeta.overridesKey, value: updated },
+          }).catch(console.error);
         toast.success(`Level #${selectedLevelBox.index + 1} reset to default! 🔄`);
       } else {
         toast.info("Built-in levels cannot be deleted, but you can edit them!");
@@ -572,7 +650,10 @@ export default function AdminGamesManagement() {
       const updatedList = customLevels.filter((_, i) => i !== targetIdx);
       setCustomLevels(updatedList);
       localStorage.setItem(selectedGameMeta.storageKey, JSON.stringify(updatedList));
-      if (token) await updateSetting({ data: { token, key: selectedGameMeta.storageKey, value: updatedList } }).catch(console.error);
+      if (token)
+        await updateSetting({
+          data: { token, key: selectedGameMeta.storageKey, value: updatedList },
+        }).catch(console.error);
       toast.success("Level deleted!");
     }
 
@@ -582,14 +663,20 @@ export default function AdminGamesManagement() {
 
   // Compute game popularity metrics
   const gamePopularityStats = useMemo(() => {
-    const counts = analytics.gamePlayCounts || { "arrow-puzzle": 0, "pipe-connect": 0, "2048": 0, "memory-match": 0 };
+    const counts = analytics.gamePlayCounts || {
+      "arrow-puzzle": 0,
+      "pipe-connect": 0,
+      "2048": 0,
+      "memory-match": 0,
+    };
     const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
 
     const mostPlayedId = sorted[0]?.[0] || "arrow-puzzle";
     const leastPlayedId = sorted[sorted.length - 1]?.[0] || "memory-match";
 
-    const mostMeta = ALL_GAMES.find(g => g.id === mostPlayedId) || ALL_GAMES[0];
-    const leastMeta = ALL_GAMES.find(g => g.id === leastPlayedId) || ALL_GAMES[ALL_GAMES.length - 1];
+    const mostMeta = ALL_GAMES.find((g) => g.id === mostPlayedId) || ALL_GAMES[0];
+    const leastMeta =
+      ALL_GAMES.find((g) => g.id === leastPlayedId) || ALL_GAMES[ALL_GAMES.length - 1];
 
     const realPlayersList = Object.values(analytics.players || {});
 
@@ -619,7 +706,8 @@ export default function AdminGamesManagement() {
         if (meta.id === "arrow-puzzle") data = getStaticLevel(i);
         else if (meta.id === "pipe-connect") data = getPipeLevel(i);
         else if (meta.id === "2048") data = STATIC_2048_LEVELS[i] || STATIC_2048_LEVELS[0];
-        else if (meta.id === "memory-match") data = STATIC_MEMORY_LEVELS[i] || STATIC_MEMORY_LEVELS[0];
+        else if (meta.id === "memory-match")
+          data = STATIC_MEMORY_LEVELS[i] || STATIC_MEMORY_LEVELS[0];
       }
 
       list.push({ index: i, isBuiltIn: true, isOverridden, data });
@@ -633,7 +721,7 @@ export default function AdminGamesManagement() {
     if (!searchLevelQuery.trim()) return list;
 
     const q = searchLevelQuery.toLowerCase();
-    return list.filter(item => {
+    return list.filter((item) => {
       const lvlNum = item.index + 1;
       return (
         lvlNum.toString().includes(q) ||
@@ -644,11 +732,9 @@ export default function AdminGamesManagement() {
 
   return (
     <div className="min-h-screen bg-[#f4f4f5] p-4 md:p-8 max-w-5xl mx-auto w-full space-y-6 text-black font-sans select-none pb-28">
-
       {/* ─── VIEW 1: CLEAN MAIN GAMES LIST & ANALYTICS (when activeDetailGameId === null) ─── */}
       {activeDetailGameId === null && (
         <div className="space-y-6">
-          
           {/* Neo-Brutalist Sticky Header Banner */}
           <div className="p-6 bg-[#fef08a] border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-3xl space-y-2">
             <div className="flex items-center gap-3">
@@ -666,11 +752,9 @@ export default function AdminGamesManagement() {
             </div>
           </div>
 
-
-
           {/* Clean Games List Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {ALL_GAMES.map(game => {
+            {ALL_GAMES.map((game) => {
               const isOnline = gameStatus[game.id] !== false;
               let customCount = 0;
               try {
@@ -695,10 +779,14 @@ export default function AdminGamesManagement() {
                         <div className="font-display text-xl font-black text-black uppercase tracking-tight flex items-center gap-2">
                           {game.name}
                         </div>
-                        <span className={`text-[10px] font-black px-2 py-0.5 border-2 border-black rounded-full shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] ${game.badgeBg}`}>
+                        <span
+                          className={`text-[10px] font-black px-2 py-0.5 border-2 border-black rounded-full shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] ${game.badgeBg}`}
+                        >
                           {game.category}
                         </span>
-                        <p className="text-xs font-bold text-black/80 mt-1 line-clamp-1">{game.desc}</p>
+                        <p className="text-xs font-bold text-black/80 mt-1 line-clamp-1">
+                          {game.desc}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -706,36 +794,41 @@ export default function AdminGamesManagement() {
                   {/* Neo-Brutalist Radio Button Toggle Row */}
                   <div className="p-3 bg-white border-3 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-2xl flex items-center justify-between">
                     <span className="text-xs font-black text-black flex items-center gap-1.5 uppercase tracking-wide">
-                      <Radio className={`h-4 w-4 ${isOnline ? "text-emerald-600" : "text-rose-600"}`} /> Status:
+                      <Radio
+                        className={`h-4 w-4 ${isOnline ? "text-emerald-600" : "text-rose-600"}`}
+                      />{" "}
+                      Status:
                     </span>
 
-                    {/* Radio Options */}
+                    {/* Custom Toggle Buttons */}
                     <div className="flex items-center gap-2 bg-gray-100 border-2 border-black p-1 rounded-xl">
-                      <label className={`flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-black cursor-pointer border-2 transition-all ${
-                        isOnline ? "bg-[#bbf7d0] border-black text-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]" : "border-transparent text-black/60 hover:bg-gray-200"
-                      }`}>
-                        <input
-                          type="radio"
-                          name={`status-${game.id}`}
-                          checked={isOnline}
-                          onChange={() => toggleGame(game.id, true)}
-                          className="sr-only"
-                        />
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          toggleGame(game.id, true);
+                        }}
+                        className={`flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-black cursor-pointer border-2 transition-all outline-none ${
+                          isOnline
+                            ? "bg-[#bbf7d0] border-black text-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
+                            : "border-transparent text-black/60 hover:bg-gray-200"
+                        }`}
+                      >
                         <span>● ON</span>
-                      </label>
+                      </button>
 
-                      <label className={`flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-black cursor-pointer border-2 transition-all ${
-                        !isOnline ? "bg-[#fca5a5] border-black text-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]" : "border-transparent text-black/60 hover:bg-gray-200"
-                      }`}>
-                        <input
-                          type="radio"
-                          name={`status-${game.id}`}
-                          checked={!isOnline}
-                          onChange={() => toggleGame(game.id, false)}
-                          className="sr-only"
-                        />
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          toggleGame(game.id, false);
+                        }}
+                        className={`flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-black cursor-pointer border-2 transition-all outline-none ${
+                          !isOnline
+                            ? "bg-[#fca5a5] border-black text-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
+                            : "border-transparent text-black/60 hover:bg-gray-200"
+                        }`}
+                      >
                         <span>○ OFF</span>
-                      </label>
+                      </button>
                     </div>
                   </div>
 
@@ -752,14 +845,12 @@ export default function AdminGamesManagement() {
               );
             })}
           </div>
-
         </div>
       )}
 
       {/* ─── VIEW 2: INSIDE GAME LEVEL DETAIL MANAGER (when activeDetailGameId !== null) ─── */}
       {activeDetailGameId !== null && (
         <div className="space-y-6">
-          
           {/* Top Bar with Back Button */}
           <div className="p-4 bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-3xl flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
@@ -788,7 +879,9 @@ export default function AdminGamesManagement() {
               <button
                 onClick={() => toggleGame(selectedGameMeta.id, true)}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-black border-2 transition-all cursor-pointer ${
-                  gameStatus[selectedGameMeta.id] !== false ? "bg-[#bbf7d0] border-black text-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]" : "border-transparent text-black/60 hover:bg-gray-200"
+                  gameStatus[selectedGameMeta.id] !== false
+                    ? "bg-[#bbf7d0] border-black text-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
+                    : "border-transparent text-black/60 hover:bg-gray-200"
                 }`}
               >
                 ● ON
@@ -796,7 +889,9 @@ export default function AdminGamesManagement() {
               <button
                 onClick={() => toggleGame(selectedGameMeta.id, false)}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-black border-2 transition-all cursor-pointer ${
-                  gameStatus[selectedGameMeta.id] === false ? "bg-[#fca5a5] border-black text-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]" : "border-transparent text-black/60 hover:bg-gray-200"
+                  gameStatus[selectedGameMeta.id] === false
+                    ? "bg-[#fca5a5] border-black text-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
+                    : "border-transparent text-black/60 hover:bg-gray-200"
                 }`}
               >
                 ○ OFF
@@ -812,7 +907,7 @@ export default function AdminGamesManagement() {
                 type="text"
                 placeholder="Search Level #..."
                 value={searchLevelQuery}
-                onChange={e => setSearchLevelQuery(e.target.value)}
+                onChange={(e) => setSearchLevelQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 rounded-2xl border-2 border-black bg-white text-xs font-bold text-black focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
@@ -859,11 +954,13 @@ export default function AdminGamesManagement() {
                       item.isOverridden
                         ? "bg-[#fef08a] text-black font-black"
                         : !item.isBuiltIn
-                        ? "bg-[#fbcfe8] text-black font-black"
-                        : "bg-white text-black hover:bg-[#bfdbfe]"
+                          ? "bg-[#fbcfe8] text-black font-black"
+                          : "bg-white text-black hover:bg-[#bfdbfe]"
                     }`}
                   >
-                    <span className="font-display font-black text-base leading-none">Lvl {levelNum}</span>
+                    <span className="font-display font-black text-base leading-none">
+                      Lvl {levelNum}
+                    </span>
                     <span className="text-[9px] font-black uppercase tracking-wider mt-1 px-1.5 py-0.2 bg-white/80 border border-black rounded-full">
                       {item.isOverridden ? "EDITED" : !item.isBuiltIn ? "CUSTOM" : "DEFAULT"}
                     </span>
@@ -873,7 +970,8 @@ export default function AdminGamesManagement() {
 
               {levelBoxes.length === 0 && (
                 <div className="col-span-full p-8 border-4 border-dashed border-gray-400 bg-white rounded-3xl text-center text-xs font-bold text-black">
-                  No levels found matching "{searchLevelQuery}". Click "➕ Add Single Level" or paste multiple levels below!
+                  No levels found matching "{searchLevelQuery}". Click "➕ Add Single Level" or
+                  paste multiple levels below!
                 </div>
               )}
             </div>
@@ -883,7 +981,8 @@ export default function AdminGamesManagement() {
           <div className="p-6 bg-white border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-3xl space-y-3">
             <div className="flex items-center justify-between">
               <label className="text-xs font-black uppercase tracking-wider text-black flex items-center gap-2">
-                <Code className="h-4 w-4 text-blue-600" /> 📥 Bulk AI Level Importer (Import Multiple Levels at Once)
+                <Code className="h-4 w-4 text-blue-600" /> 📥 Bulk AI Level Importer (Import
+                Multiple Levels at Once)
               </label>
 
               <button
@@ -897,7 +996,7 @@ export default function AdminGamesManagement() {
             <div className="relative rounded-2xl overflow-hidden border-3 border-black bg-slate-900 p-1 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
               <textarea
                 value={bulkCodeToImport}
-                onChange={e => setBulkCodeToImport(e.target.value)}
+                onChange={(e) => setBulkCodeToImport(e.target.value)}
                 placeholder={`Paste JSON array of multiple levels here...\nExample:\n[\n  { "gridSize": 5, "arrows": [...] },\n  { "gridSize": 5, "arrows": [...] }\n]`}
                 rows={5}
                 className="w-full p-4 font-mono text-xs text-[#fef08a] bg-transparent focus:outline-none resize-y leading-relaxed"
@@ -914,7 +1013,6 @@ export default function AdminGamesManagement() {
               </button>
             </div>
           </div>
-
         </div>
       )}
 
@@ -932,7 +1030,7 @@ export default function AdminGamesManagement() {
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
-              onClick={e => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
               className="w-full max-w-lg bg-white border-4 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative space-y-4 text-black"
               style={{ borderRadius: WOBBLY_MD }}
             >
@@ -948,15 +1046,19 @@ export default function AdminGamesManagement() {
                   <Plus className="h-6 w-6 text-black" strokeWidth={3} />
                 </div>
                 <div>
-                  <h3 className="font-display text-xl font-black uppercase text-black">Add 1 Single Level</h3>
-                  <p className="text-xs font-bold text-black/70">Paste JSON object for exactly 1 level below.</p>
+                  <h3 className="font-display text-xl font-black uppercase text-black">
+                    Add 1 Single Level
+                  </h3>
+                  <p className="text-xs font-bold text-black/70">
+                    Paste JSON object for exactly 1 level below.
+                  </p>
                 </div>
               </div>
 
               <div className="relative rounded-2xl overflow-hidden border-3 border-black bg-slate-900 p-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                 <textarea
                   value={singleLevelJson}
-                  onChange={e => setSingleLevelJson(e.target.value)}
+                  onChange={(e) => setSingleLevelJson(e.target.value)}
                   rows={8}
                   className="w-full p-4 font-mono text-xs text-[#fef08a] bg-transparent focus:outline-none resize-y leading-relaxed"
                 />
@@ -996,7 +1098,7 @@ export default function AdminGamesManagement() {
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
-              onClick={e => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
               className="w-full max-w-xl bg-white border-4 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative space-y-4 text-black"
               style={{ borderRadius: WOBBLY_MD }}
             >
@@ -1024,9 +1126,7 @@ export default function AdminGamesManagement() {
 
                 <div className="flex items-center gap-2">
                   {/* ▶️ Play Level Directly Button */}
-                  <a
-                    href={`${selectedGameMeta.link}?level=${selectedLevelBox.index + 1}`}
-                  >
+                  <a href={`${selectedGameMeta.link}?level=${selectedLevelBox.index + 1}`}>
                     <button className="px-3.5 py-1.5 rounded-xl bg-[#bbf7d0] hover:bg-emerald-200 border-2 border-black text-black text-xs font-black flex items-center gap-1.5 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer">
                       <Play className="h-4 w-4 fill-black text-black" />
                       <span>Play Level #{selectedLevelBox.index + 1}</span>
@@ -1046,11 +1146,13 @@ export default function AdminGamesManagement() {
 
               {/* JSON Editor Box */}
               <div className="space-y-1">
-                <label className="text-xs font-black uppercase tracking-wider text-black">Edit Level JSON Config:</label>
+                <label className="text-xs font-black uppercase tracking-wider text-black">
+                  Edit Level JSON Config:
+                </label>
                 <div className="relative rounded-2xl overflow-hidden border-3 border-black bg-slate-900 p-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                   <textarea
                     value={editingLevelJson}
-                    onChange={e => setEditingLevelJson(e.target.value)}
+                    onChange={(e) => setEditingLevelJson(e.target.value)}
                     rows={9}
                     className="w-full p-4 font-mono text-xs text-[#fef08a] bg-transparent focus:outline-none resize-y leading-relaxed"
                   />
@@ -1059,9 +1161,7 @@ export default function AdminGamesManagement() {
 
               <div className="flex items-center justify-between pt-2">
                 {/* ▶️ Big Play Button in Footer */}
-                <a
-                  href={`${selectedGameMeta.link}?level=${selectedLevelBox.index + 1}`}
-                >
+                <a href={`${selectedGameMeta.link}?level=${selectedLevelBox.index + 1}`}>
                   <button
                     className="bg-[#fef08a] hover:bg-yellow-200 text-black px-4 py-2.5 border-2 border-black font-display font-black text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] cursor-pointer"
                     style={{ borderRadius: WOBBLY_SM }}
@@ -1106,7 +1206,7 @@ export default function AdminGamesManagement() {
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
-              onClick={e => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
               className="w-full max-w-xl bg-white border-4 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative space-y-4 text-black"
               style={{ borderRadius: WOBBLY_MD }}
             >
@@ -1122,9 +1222,13 @@ export default function AdminGamesManagement() {
                   <Sparkles className="h-7 w-7 text-black" />
                 </div>
                 <div>
-                  <h3 className="font-display text-xl font-black uppercase text-black">AI Level Designer Prompt</h3>
+                  <h3 className="font-display text-xl font-black uppercase text-black">
+                    AI Level Designer Prompt
+                  </h3>
                   <p className="text-xs font-bold text-black/70">
-                    Copy prompt for <span className="underline font-black">{selectedGameMeta.name}</span> and send to ChatGPT/Gemini!
+                    Copy prompt for{" "}
+                    <span className="underline font-black">{selectedGameMeta.name}</span> and send
+                    to ChatGPT/Gemini!
                   </p>
                 </div>
               </div>
@@ -1152,7 +1256,6 @@ export default function AdminGamesManagement() {
           </motion.div>
         )}
       </AnimatePresence>
-
     </div>
   );
 }

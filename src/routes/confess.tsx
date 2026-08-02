@@ -5,19 +5,27 @@ import { addConfession } from "@/lib/confessions.functions";
 import { toast } from "sonner";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from "@/components/ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 const WOBBLY = "25px 8px 22px 8px / 8px 22px 8px 25px";
 const WOBBLY_SM = "16px 5px 14px 5px / 5px 14px 5px 16px";
 const MAX = 1000;
 
 const MOOD_OPTIONS = [
-  { label: "😅 Awkward",    value: "awkward" },
+  { label: "😅 Awkward", value: "awkward" },
   { label: "💔 Heartbreak", value: "heartbreak" },
-  { label: "😂 Funny",      value: "funny" },
+  { label: "😂 Funny", value: "funny" },
   { label: "😤 Frustrated", value: "frustrated" },
   { label: "🥺 Vulnerable", value: "vulnerable" },
-  { label: "🔥 Spicy",      value: "spicy" },
+  { label: "🔥 Spicy", value: "spicy" },
 ];
 
 /** Encode mood as a hidden prefix so no DB column is needed */
@@ -46,7 +54,9 @@ function ProgressRing({ value, max }: { value: number; max: number }) {
     <svg width={28} height={28} className="rotate-[-90deg]">
       <circle cx={14} cy={14} r={r} fill="none" stroke="#e5e7eb" strokeWidth={2.5} />
       <circle
-        cx={14} cy={14} r={r}
+        cx={14}
+        cy={14}
+        r={r}
         fill="none"
         stroke={stroke}
         strokeWidth={2.5}
@@ -60,10 +70,10 @@ function ProgressRing({ value, max }: { value: number; max: number }) {
 }
 
 function ConfessFormPage() {
-  const [content, setContent]       = useState("");
+  const [content, setContent] = useState("");
   const [customName, setCustomName] = useState("");
-  const [mood, setMood]             = useState<string | null>(null);
-  const [submitted, setSubmitted]   = useState(false);
+  const [mood, setMood] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
   const [limitErrorOpen, setLimitErrorOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -79,12 +89,12 @@ function ConfessFormPage() {
     mutationFn: () =>
       addConfession({
         data: {
-          content:  encodeContent(content.trim(), mood),
+          content: encodeContent(content.trim(), mood),
           username: customName.trim() || "Anonymous",
         },
       }),
     onSuccess: () => setSubmitted(true),
-    onError:   (error) => toast.error("Failed to post: " + (error as any).message),
+    onError: (error) => toast.error("Failed to post: " + (error as any).message),
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -98,11 +108,10 @@ function ConfessFormPage() {
   };
 
   const remaining = MAX - content.length;
-  const activeMoodObj = MOOD_OPTIONS.find(m => m.value === mood);
+  const activeMoodObj = MOOD_OPTIONS.find((m) => m.value === mood);
 
   return (
     <div className="min-h-screen bg-paper flex flex-col items-center justify-center px-4 py-10">
-
       {/* ── Brand header ─────────────────────────────────────────────────── */}
       <motion.div
         initial={{ opacity: 0, y: -12 }}
@@ -126,7 +135,6 @@ function ConfessFormPage() {
       {/* ── Main card ────────────────────────────────────────────────────── */}
       <AnimatePresence mode="wait">
         {!submitted ? (
-
           /* ── FORM ─────────────────────────────────────────────────────── */
           <motion.div
             key="form"
@@ -142,20 +150,20 @@ function ConfessFormPage() {
             >
               {/* Card headline */}
               <div>
-                <h2 className="font-display text-xl font-bold leading-snug">
-                  Apni baat kaho 🤫
-                </h2>
+                <h2 className="font-display text-xl font-bold leading-snug">Apni baat kaho 🤫</h2>
                 <p className="text-sm text-muted-foreground mt-0.5">
                   Koi judge nahi karega. Sab anonymous hai.
                 </p>
               </div>
 
               <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-
                 {/* ── Mood picker ────────────────────────────────────────── */}
                 <div>
                   <label className="block text-xs font-bold text-muted-foreground mb-2 uppercase tracking-wide">
-                    Mood <span className="font-normal normal-case text-muted-foreground/60">(optional)</span>
+                    Mood{" "}
+                    <span className="font-normal normal-case text-muted-foreground/60">
+                      (optional)
+                    </span>
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {MOOD_OPTIONS.map((m) => (
@@ -179,7 +187,10 @@ function ConfessFormPage() {
                 {/* ── Name ───────────────────────────────────────────────── */}
                 <div>
                   <label className="block text-xs font-bold text-muted-foreground mb-1.5 uppercase tracking-wide">
-                    Naam <span className="font-normal normal-case text-muted-foreground/60">(optional)</span>
+                    Naam{" "}
+                    <span className="font-normal normal-case text-muted-foreground/60">
+                      (optional)
+                    </span>
                   </label>
                   <input
                     type="text"
@@ -211,7 +222,9 @@ function ConfessFormPage() {
                     />
                     {/* Character counter floated inside textarea */}
                     <div className="absolute bottom-2.5 right-2.5 flex items-center gap-1.5 pointer-events-none">
-                      <span className={`text-[11px] font-bold tabular-nums ${remaining < 100 ? "text-orange-500" : remaining < 50 ? "text-red-500" : "text-muted-foreground/50"}`}>
+                      <span
+                        className={`text-[11px] font-bold tabular-nums ${remaining < 100 ? "text-orange-500" : remaining < 50 ? "text-red-500" : "text-muted-foreground/50"}`}
+                      >
                         {remaining}
                       </span>
                       <ProgressRing value={content.length} max={MAX} />
@@ -227,11 +240,15 @@ function ConfessFormPage() {
                 >
                   <Ghost className="w-4 h-4 text-muted-foreground shrink-0" />
                   <span className="text-muted-foreground">Posting as</span>
-                  <span className="font-bold text-foreground">{customName.trim() || "Anonymous"}</span>
+                  <span className="font-bold text-foreground">
+                    {customName.trim() || "Anonymous"}
+                  </span>
                   {activeMoodObj && (
                     <>
                       <span className="text-muted-foreground/40 mx-0.5">·</span>
-                      <span className="font-medium text-muted-foreground">{activeMoodObj.label}</span>
+                      <span className="font-medium text-muted-foreground">
+                        {activeMoodObj.label}
+                      </span>
                     </>
                   )}
                 </motion.div>
@@ -265,14 +282,12 @@ function ConfessFormPage() {
               </Link>
             </p>
           </motion.div>
-
         ) : (
-
           /* ── SUCCESS ──────────────────────────────────────────────────── */
           <motion.div
             key="success"
             initial={{ opacity: 0, scale: 0.88, y: 16 }}
-            animate={{ opacity: 1, scale: 1,    y: 0 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ type: "spring", damping: 18, stiffness: 280 }}
             className="w-full max-w-md"
           >
@@ -298,7 +313,8 @@ function ConfessFormPage() {
               >
                 <h2 className="font-display text-2xl font-bold mb-1">Confession Posted! 👻</h2>
                 <p className="text-muted-foreground text-sm leading-relaxed">
-                  Teri confession submit ho gayi.<br />
+                  Teri confession submit ho gayi.
+                  <br />
                   Ab tu isse Confession Box mein dekh sakta hai!
                 </p>
               </motion.div>
@@ -345,17 +361,24 @@ function ConfessFormPage() {
       </AnimatePresence>
 
       <AlertDialog open={limitErrorOpen} onOpenChange={setLimitErrorOpen}>
-        <AlertDialogContent className="border-2 border-border shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-white max-w-sm" style={{ borderRadius: WOBBLY_SM }}>
+        <AlertDialogContent
+          className="border-2 border-border shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-white max-w-sm"
+          style={{ borderRadius: WOBBLY_SM }}
+        >
           <AlertDialogHeader>
             <AlertDialogTitle className="font-display font-bold text-xl flex items-center gap-2 text-destructive">
               <span className="text-2xl">⚠️</span> Limit Exceeded
             </AlertDialogTitle>
             <AlertDialogDescription className="text-foreground/80 font-medium">
-              Your confession is too long! Keep it under 1000 characters. You are currently at {content.length} characters.
+              Your confession is too long! Keep it under 1000 characters. You are currently at{" "}
+              {content.length} characters.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction className="bg-accent text-white font-bold hover:bg-accent/90 border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-none transition-all w-full" style={{ borderRadius: "10px" }}>
+            <AlertDialogAction
+              className="bg-accent text-white font-bold hover:bg-accent/90 border-2 border-border shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-none transition-all w-full"
+              style={{ borderRadius: "10px" }}
+            >
               Got it
             </AlertDialogAction>
           </AlertDialogFooter>

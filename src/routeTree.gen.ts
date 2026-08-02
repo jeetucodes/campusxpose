@@ -31,9 +31,9 @@ import { Route as ProjectsNewRouteImport } from './routes/projects.new'
 import { Route as ProjectsIdRouteImport } from './routes/projects.$id'
 import { Route as GamesPipeConnectRouteImport } from './routes/games.pipe-connect'
 import { Route as GamesMemoryMatchRouteImport } from './routes/games.memory-match'
+import { Route as GamesKnifeThrowerRouteImport } from './routes/games.knife-thrower'
 import { Route as GamesCandyCrushRouteImport } from './routes/games.candy-crush'
 import { Route as GamesArrowPuzzleRouteImport } from './routes/games.arrow-puzzle'
-import { Route as GamesArcheryRouteImport } from './routes/games.archery'
 import { Route as Games2048RouteImport } from './routes/games.2048'
 import { Route as CommunityCollegeIdRouteImport } from './routes/community.$collegeId'
 import { Route as CollegesIdRouteImport } from './routes/colleges.$id'
@@ -169,6 +169,11 @@ const GamesMemoryMatchRoute = GamesMemoryMatchRouteImport.update({
   path: '/games/memory-match',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GamesKnifeThrowerRoute = GamesKnifeThrowerRouteImport.update({
+  id: '/games/knife-thrower',
+  path: '/games/knife-thrower',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GamesCandyCrushRoute = GamesCandyCrushRouteImport.update({
   id: '/games/candy-crush',
   path: '/games/candy-crush',
@@ -177,11 +182,6 @@ const GamesCandyCrushRoute = GamesCandyCrushRouteImport.update({
 const GamesArrowPuzzleRoute = GamesArrowPuzzleRouteImport.update({
   id: '/games/arrow-puzzle',
   path: '/games/arrow-puzzle',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GamesArcheryRoute = GamesArcheryRouteImport.update({
-  id: '/games/archery',
-  path: '/games/archery',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Games2048Route = Games2048RouteImport.update({
@@ -344,9 +344,9 @@ export interface FileRoutesByFullPath {
   '/colleges/$id': typeof CollegesIdRoute
   '/community/$collegeId': typeof CommunityCollegeIdRoute
   '/games/2048': typeof Games2048Route
-  '/games/archery': typeof GamesArcheryRoute
   '/games/arrow-puzzle': typeof GamesArrowPuzzleRoute
   '/games/candy-crush': typeof GamesCandyCrushRoute
+  '/games/knife-thrower': typeof GamesKnifeThrowerRoute
   '/games/memory-match': typeof GamesMemoryMatchRoute
   '/games/pipe-connect': typeof GamesPipeConnectRoute
   '/projects/$id': typeof ProjectsIdRoute
@@ -395,9 +395,9 @@ export interface FileRoutesByTo {
   '/colleges/$id': typeof CollegesIdRoute
   '/community/$collegeId': typeof CommunityCollegeIdRoute
   '/games/2048': typeof Games2048Route
-  '/games/archery': typeof GamesArcheryRoute
   '/games/arrow-puzzle': typeof GamesArrowPuzzleRoute
   '/games/candy-crush': typeof GamesCandyCrushRoute
+  '/games/knife-thrower': typeof GamesKnifeThrowerRoute
   '/games/memory-match': typeof GamesMemoryMatchRoute
   '/games/pipe-connect': typeof GamesPipeConnectRoute
   '/projects/$id': typeof ProjectsIdRoute
@@ -447,9 +447,9 @@ export interface FileRoutesById {
   '/colleges/$id': typeof CollegesIdRoute
   '/community/$collegeId': typeof CommunityCollegeIdRoute
   '/games/2048': typeof Games2048Route
-  '/games/archery': typeof GamesArcheryRoute
   '/games/arrow-puzzle': typeof GamesArrowPuzzleRoute
   '/games/candy-crush': typeof GamesCandyCrushRoute
+  '/games/knife-thrower': typeof GamesKnifeThrowerRoute
   '/games/memory-match': typeof GamesMemoryMatchRoute
   '/games/pipe-connect': typeof GamesPipeConnectRoute
   '/projects/$id': typeof ProjectsIdRoute
@@ -500,9 +500,9 @@ export interface FileRouteTypes {
     | '/colleges/$id'
     | '/community/$collegeId'
     | '/games/2048'
-    | '/games/archery'
     | '/games/arrow-puzzle'
     | '/games/candy-crush'
+    | '/games/knife-thrower'
     | '/games/memory-match'
     | '/games/pipe-connect'
     | '/projects/$id'
@@ -551,9 +551,9 @@ export interface FileRouteTypes {
     | '/colleges/$id'
     | '/community/$collegeId'
     | '/games/2048'
-    | '/games/archery'
     | '/games/arrow-puzzle'
     | '/games/candy-crush'
+    | '/games/knife-thrower'
     | '/games/memory-match'
     | '/games/pipe-connect'
     | '/projects/$id'
@@ -602,9 +602,9 @@ export interface FileRouteTypes {
     | '/colleges/$id'
     | '/community/$collegeId'
     | '/games/2048'
-    | '/games/archery'
     | '/games/arrow-puzzle'
     | '/games/candy-crush'
+    | '/games/knife-thrower'
     | '/games/memory-match'
     | '/games/pipe-connect'
     | '/projects/$id'
@@ -654,9 +654,9 @@ export interface RootRouteChildren {
   CollegesIdRoute: typeof CollegesIdRoute
   CommunityCollegeIdRoute: typeof CommunityCollegeIdRoute
   Games2048Route: typeof Games2048Route
-  GamesArcheryRoute: typeof GamesArcheryRoute
   GamesArrowPuzzleRoute: typeof GamesArrowPuzzleRoute
   GamesCandyCrushRoute: typeof GamesCandyCrushRoute
+  GamesKnifeThrowerRoute: typeof GamesKnifeThrowerRoute
   GamesMemoryMatchRoute: typeof GamesMemoryMatchRoute
   GamesPipeConnectRoute: typeof GamesPipeConnectRoute
   ProjectsIdRoute: typeof ProjectsIdRoute
@@ -823,6 +823,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GamesMemoryMatchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/games/knife-thrower': {
+      id: '/games/knife-thrower'
+      path: '/games/knife-thrower'
+      fullPath: '/games/knife-thrower'
+      preLoaderRoute: typeof GamesKnifeThrowerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/games/candy-crush': {
       id: '/games/candy-crush'
       path: '/games/candy-crush'
@@ -835,13 +842,6 @@ declare module '@tanstack/react-router' {
       path: '/games/arrow-puzzle'
       fullPath: '/games/arrow-puzzle'
       preLoaderRoute: typeof GamesArrowPuzzleRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/games/archery': {
-      id: '/games/archery'
-      path: '/games/archery'
-      fullPath: '/games/archery'
-      preLoaderRoute: typeof GamesArcheryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/games/2048': {
@@ -1054,9 +1054,9 @@ const rootRouteChildren: RootRouteChildren = {
   CollegesIdRoute: CollegesIdRoute,
   CommunityCollegeIdRoute: CommunityCollegeIdRoute,
   Games2048Route: Games2048Route,
-  GamesArcheryRoute: GamesArcheryRoute,
   GamesArrowPuzzleRoute: GamesArrowPuzzleRoute,
   GamesCandyCrushRoute: GamesCandyCrushRoute,
+  GamesKnifeThrowerRoute: GamesKnifeThrowerRoute,
   GamesMemoryMatchRoute: GamesMemoryMatchRoute,
   GamesPipeConnectRoute: GamesPipeConnectRoute,
   ProjectsIdRoute: ProjectsIdRoute,

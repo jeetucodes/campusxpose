@@ -11,7 +11,6 @@ const items = [
 ] as const;
 
 export function MobileBottomNav() {
-
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t-2 border-dashed border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
       <ul className="mx-auto flex max-w-5xl items-stretch justify-around">
@@ -24,17 +23,21 @@ export function MobileBottomNav() {
             >
               {({ isActive }) => (
                 <>
-                  <span className={cn(
-                    "relative flex items-center justify-center",
-                    isActive ? "text-accent" : "text-muted-foreground"
-                  )}>
+                  <span
+                    className={cn(
+                      "relative flex items-center justify-center",
+                      isActive ? "text-accent" : "text-muted-foreground",
+                    )}
+                  >
                     <Icon className="h-5 w-5" strokeWidth={2.5} />
 
                     {isActive && (
                       <span className="absolute -bottom-1.5 h-1 w-1 rounded-full bg-accent" />
                     )}
                   </span>
-                  <span className={cn(isActive ? "text-accent" : "text-muted-foreground")}>{label}</span>
+                  <span className={cn(isActive ? "text-accent" : "text-muted-foreground")}>
+                    {label}
+                  </span>
                 </>
               )}
             </Link>

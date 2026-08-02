@@ -42,28 +42,85 @@ export function categoryEmoji(key: string): string {
 
 export const CITIES = ["Bhopal", "Indore", "Jabalpur", "Delhi", "Mumbai"];
 
-export const COLLEGE_TYPES = ["Engineering", "Medical", "Arts", "Commerce", "University", "Research"];
+export const COLLEGE_TYPES = [
+  "Engineering",
+  "Medical",
+  "Arts",
+  "Commerce",
+  "University",
+  "Research",
+];
 
 export const INDIAN_STATES = [
-  "Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat",
-  "Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra",
-  "Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab","Rajasthan","Sikkim",
-  "Tamil Nadu","Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal","Delhi",
+  "Andhra Pradesh",
+  "Arunachal Pradesh",
+  "Assam",
+  "Bihar",
+  "Chhattisgarh",
+  "Goa",
+  "Gujarat",
+  "Haryana",
+  "Himachal Pradesh",
+  "Jharkhand",
+  "Karnataka",
+  "Kerala",
+  "Madhya Pradesh",
+  "Maharashtra",
+  "Manipur",
+  "Meghalaya",
+  "Mizoram",
+  "Nagaland",
+  "Odisha",
+  "Punjab",
+  "Rajasthan",
+  "Sikkim",
+  "Tamil Nadu",
+  "Telangana",
+  "Tripura",
+  "Uttar Pradesh",
+  "Uttarakhand",
+  "West Bengal",
+  "Delhi",
 ];
 
 export const DEFAULT_KEYWORDS = [
-  "fine","penalty","charge","harassment","ragging","fraud",
-  "fake","bribe","corrupt","problem","issue","complaint",
-  "rape","sexual","assault","molestation","exploitation",
+  "fine",
+  "penalty",
+  "charge",
+  "harassment",
+  "ragging",
+  "fraud",
+  "fake",
+  "bribe",
+  "corrupt",
+  "problem",
+  "issue",
+  "complaint",
+  "rape",
+  "sexual",
+  "assault",
+  "molestation",
+  "exploitation",
 ];
 
 /** Client-side keyword check for instant sexual-violence detection (no AI call needed) */
 export function isSexualViolenceContent(text: string): boolean {
   const lower = text.toLowerCase();
   return [
-    "rape", "raping", "raped", "rapist",
-    "sexual assault", "sexual harass", "sexually harass", "sexually assault",
-    "molestation", "molest", "sexually abuse", "sexual abuse",
-    "youn shatana", "balatkar", "balatkaari",
+    "rape",
+    "raping",
+    "raped",
+    "rapist",
+    "sexual assault",
+    "sexual harass",
+    "sexually harass",
+    "sexually assault",
+    "molestation",
+    "molest",
+    "sexually abuse",
+    "sexual abuse",
+    "youn shatana",
+    "balatkar",
+    "balatkaari",
   ].some((kw) => lower.includes(kw));
 }
