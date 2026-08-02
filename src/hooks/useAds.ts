@@ -46,6 +46,8 @@ export function useAds(placement: Placement): Ad[] {
             .eq("active", true)
             .order("sort_order", { ascending: true });
 
+          const activeAds = ((rawAds as any[]) ?? []) as Ad[];
+
           const { data: gamesMapSetting } = await supabase
             .from("app_settings" as any)
             .select("value")
@@ -53,10 +55,10 @@ export function useAds(placement: Placement): Ad[] {
             .maybeSingle();
 
           const gamesMap: Record<string, boolean> = (gamesMapSetting as any)?.value || {};
-          const gamesAds = ((rawAds as any[]) ?? []).filter(ad => !!gamesMap[ad.id]);
-          const finalAds = gamesAds.length > 0 ? gamesAds : ((rawAds as any[]) ?? []);
+          const taggedGamesAds = activeAds.filter(ad => !!gamesMap[ad.id]);
+          const resultAds = taggedGamesAds.length > 0 ? taggedGamesAds : activeAds;
 
-          if (alive) setAds((finalAds ?? []) as Ad[]);
+          if (alive) setAds(resultAds);
         } catch (e) {
           console.warn("Error fetching game ads", e);
           if (alive) setAds([]);
