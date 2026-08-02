@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { Gamepad2, Info, Copy, Check, Plus, Trash2, Power, Sparkles, Code, Layers, X, ExternalLink, Activity, ShieldCheck, Edit, Eye, Search, Save, RotateCcw, ArrowLeft, Radio, BarChart3, Users, Flame, TrendingDown, Clock, Award } from "lucide-react";
+import { Gamepad2, Info, Copy, Check, Plus, Trash2, Power, Sparkles, Code, Layers, X, ExternalLink, Activity, ShieldCheck, Edit, Eye, Search, Save, RotateCcw, ArrowLeft, Radio, BarChart3, Users, Flame, TrendingDown, Clock, Award, Play } from "lucide-react";
 import { toast } from "sonner";
 import { getStaticLevel } from "../data/arrow-puzzle-levels";
 import { getPipeLevel } from "../data/pipe-puzzle-levels";
@@ -881,14 +881,14 @@ export default function AdminGamesManagement() {
 
                 <div className="flex items-center gap-2">
                   {/* ▶️ Play Level Directly Button */}
-                  <Link
-                    to={`${selectedGameMeta.link}?level=${selectedLevelBox.index + 1}`}
+                  <a
+                    href={`${selectedGameMeta.link}?level=${selectedLevelBox.index + 1}`}
                   >
                     <button className="px-3.5 py-1.5 rounded-xl bg-[#bbf7d0] hover:bg-emerald-200 border-2 border-black text-black text-xs font-black flex items-center gap-1.5 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer">
                       <Play className="h-4 w-4 fill-black text-black" />
                       <span>Play Level #{selectedLevelBox.index + 1}</span>
                     </button>
-                  </Link>
+                  </a>
 
                   {/* Delete / Reset Button */}
                   <button
@@ -916,8 +916,8 @@ export default function AdminGamesManagement() {
 
               <div className="flex items-center justify-between pt-2">
                 {/* ▶️ Big Play Button in Footer */}
-                <Link
-                  to={`${selectedGameMeta.link}?level=${selectedLevelBox.index + 1}`}
+                <a
+                  href={`${selectedGameMeta.link}?level=${selectedLevelBox.index + 1}`}
                 >
                   <button
                     className="bg-[#fef08a] hover:bg-yellow-200 text-black px-4 py-2.5 border-2 border-black font-display font-black text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] cursor-pointer"
@@ -926,7 +926,7 @@ export default function AdminGamesManagement() {
                     <Play className="h-4 w-4 fill-black text-black" />
                     <span>Test Play Level #{selectedLevelBox.index + 1}</span>
                   </button>
-                </Link>
+                </a>
 
                 <div className="flex items-center gap-2">
                   <button
