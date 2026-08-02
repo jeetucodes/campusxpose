@@ -587,7 +587,7 @@ export default function ArrowPuzzleGame() {
             >
               <span className="font-display text-xl font-black text-black tracking-tight uppercase">Level {levelIdx + 1}</span>
               <span className="text-[12px] font-black text-black/70 flex items-center bg-white px-2 py-0.5 rounded-full border-2 border-black">
-                / 100 <ChevronDown className="h-3 w-3 ml-1" strokeWidth={4} />
+                / {totalLevelsCount} <ChevronDown className="h-3 w-3 ml-1" strokeWidth={4} />
               </span>
             </button>
             <div className="flex items-center gap-1.5 bg-white px-4 py-2.5 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" style={{ borderRadius: WOBBLY_SM }}>

@@ -240,6 +240,27 @@ export default function PipeConnectGame() {
     setRotatingTile(null);
   }, []);
 
+  const [customPipeCount, setCustomPipeCount] = useState(0);
+
+  useEffect(() => {
+    const syncCustomPipe = () => {
+      try {
+        const raw = localStorage.getItem("cx_pipe_custom_levels");
+        if (raw) setCustomPipeCount(JSON.parse(raw).length);
+        else setCustomPipeCount(0);
+      } catch (e) {}
+    };
+    syncCustomPipe();
+    window.addEventListener("storage", syncCustomPipe);
+    window.addEventListener("cx_custom_levels_change", syncCustomPipe);
+    return () => {
+      window.removeEventListener("storage", syncCustomPipe);
+      window.removeEventListener("cx_custom_levels_change", syncCustomPipe);
+    };
+  }, []);
+
+  const totalPipeLevels = TOTAL_PIPE_LEVELS + customPipeCount;
+
   useEffect(() => { initLevel(levelIdx); }, [levelIdx, initLevel]);
 
   const { powered, hitOverload } = useMemo(() => {
@@ -385,7 +406,7 @@ export default function PipeConnectGame() {
             >
               <span className="font-display text-xl font-black text-black tracking-tight uppercase">Level {levelIdx + 1}</span>
               <span className="text-[12px] font-black text-black/70 flex items-center bg-white px-2 py-0.5 rounded-full border-2 border-black">
-                / {TOTAL_PIPE_LEVELS} <ChevronDown className="h-3 w-3 ml-1" strokeWidth={4} />
+                / {totalPipeLevels} <ChevronDown className="h-3 w-3 ml-1" strokeWidth={4} />
               </span>
             </button>
             <div className="flex items-center gap-1.5 bg-white px-4 py-2.5 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" style={{ borderRadius: WOBBLY_SM }}>
@@ -706,12 +727,15 @@ export default function PipeConnectGame() {
               >
                 <X className="h-4 w-4" strokeWidth={3} />
               </button>
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-4">
                 <h2 className="font-display text-2xl font-black text-black uppercase">Select Level</h2>
+                <span className="text-xs font-black bg-[#bfdbfe] text-black border-2 border-black px-2.5 py-1 rounded-full shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
+                  {totalPipeLevels} Levels
+                </span>
               </div>
               <div className="flex-1 overflow-y-auto pr-2 pb-2 custom-scrollbar">
-                <div className="flex flex-wrap gap-3 justify-center">
-                  {Array.from({ length: TOTAL_PIPE_LEVELS }).map((_, i) => {
+                <div className="flex flex-wrap gap-2.5 justify-center">
+                  {Array.from({ length: totalPipeLevels }).map((_, i) => {
                     const unlocked = i <= highestUnlocked;
                     return (
                       <button
@@ -722,17 +746,17 @@ export default function PipeConnectGame() {
                             setShowLevels(false);
                           }
                         }}
-                        disabled={!unlocked}
-                        className={`h-12 w-12 shrink-0 border-2 border-black font-display font-black text-sm transition-all outline-none flex items-center justify-center ${
+                        className={`h-14 w-14 shrink-0 border-2 border-black font-display font-black text-xs transition-all outline-none flex flex-col items-center justify-center ${
                           i === levelIdx
                             ? "bg-[#bfdbfe] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] scale-110 z-10"
                             : unlocked
-                            ? "bg-white text-black hover:bg-[#fbcfe8] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 active:scale-95"
-                            : "bg-gray-100 text-gray-400 cursor-not-allowed opacity-60"
+                            ? "bg-white text-black hover:bg-[#fbcfe8] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 cursor-pointer"
+                            : "bg-gray-100 text-gray-500 opacity-70 cursor-pointer"
                         }`}
                         style={{ borderRadius: WOBBLY_SM }}
                       >
-                        {unlocked ? i + 1 : "🔒"}
+                        <span>Lvl {i + 1}</span>
+                        <span className="text-[10px]">{unlocked ? "✓" : "🔒"}</span>
                       </button>
                     );
                   })}
