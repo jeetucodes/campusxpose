@@ -600,16 +600,18 @@ export default function ArrowPuzzleGame() {
   if (!isMounted || !levelData) return <div className="min-h-screen bg-background" />;
 
   const handleHint = () => {
-    if (hintsLeft > 0 && !won && !gameOver && tappableIds.size > 0) {
+    if (hintsLeft > 0 && !won && !gameOver) {
       setShowHintAd(true);
     }
   };
 
   const claimHintAfterAd = () => {
     setHintsLeft(h => h - 1);
-    const ids = Array.from(tappableIds);
-    const randomId = ids[Math.floor(Math.random() * ids.length)];
-    setHintedArrowId(randomId);
+    const ids = tappableIds.size > 0 ? Array.from(tappableIds) : arrows.map(a => a.id);
+    if (ids.length > 0) {
+      const randomId = ids[Math.floor(Math.random() * ids.length)];
+      setHintedArrowId(randomId);
+    }
     setShowHintAd(false);
   };
 

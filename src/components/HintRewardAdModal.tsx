@@ -47,9 +47,26 @@ export default function HintRewardAdModal({
     return () => clearInterval(timer);
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  const FALLBACK_AD: Ad = {
+    id: "campusxpose_reward_ad",
+    title: "CampusXpose Student Perks 🚀",
+    kind: "banner",
+    body: "Explore verified campus chats, live student events, and arcade leaderboards across your university!",
+    link_url: "/",
+    media_url: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=600&auto=format&fit=crop&q=80",
+    embed_url: null,
+    cta_label: "Explore CampusXpose",
+    show_home: false,
+    show_global: false,
+    show_college: false,
+    show_games: true,
+    active: true,
+    sort_order: 0,
+  };
 
-  const currentAd: Ad | null = gameAds.length > 0 ? gameAds[activeAdIndex % gameAds.length] : null;
+  const currentAd: Ad = gameAds.length > 0 ? gameAds[activeAdIndex % gameAds.length] : FALLBACK_AD;
+
+  if (!isOpen) return null;
 
   const handleClaim = () => {
     onRewardGranted();

@@ -38,6 +38,32 @@ export function useAds(placement: Placement): Ad[] {
     let alive = true;
 
     const load = async () => {
+      if (placement === "games") {
+        try {
+          const { data: rawAds } = await supabase
+            .from("ads" as any)
+            .select("*")
+            .eq("active", true)
+            .order("sort_order", { ascending: true });
+
+          const { data: gamesMapSetting } = await supabase
+            .from("app_settings" as any)
+            .select("value")
+            .eq("key", "cx_games_ad_map")
+            .maybeSingle();
+
+          const gamesMap: Record<string, boolean> = (gamesMapSetting as any)?.value || {};
+          const gamesAds = ((rawAds as any[]) ?? []).filter(ad => !!gamesMap[ad.id]);
+          const finalAds = gamesAds.length > 0 ? gamesAds : ((rawAds as any[]) ?? []);
+
+          if (alive) setAds((finalAds ?? []) as Ad[]);
+        } catch (e) {
+          console.warn("Error fetching game ads", e);
+          if (alive) setAds([]);
+        }
+        return;
+      }
+
       const { data: setting } = await supabase
         .from("app_settings" as any)
         .select("value")
@@ -46,27 +72,6 @@ export function useAds(placement: Placement): Ad[] {
       const enabled = (setting as any)?.value === true;
       if (!enabled) {
         if (alive) setAds([]);
-        return;
-      }
-      if (placement === "games") {
-        const { data: rawAds } = await supabase
-          .from("ads" as any)
-          .select("*")
-          .eq("active", true)
-          .order("sort_order", { ascending: true });
-
-        const { data: gamesMapSetting } = await supabase
-          .from("app_settings" as any)
-          .select("value")
-          .eq("key", "cx_games_ad_map")
-          .maybeSingle();
-
-        const gamesMap: Record<string, boolean> = (gamesMapSetting as any)?.value || {};
-        const filtered = ((rawAds as any[]) ?? [])
-          .filter(ad => !!gamesMap[ad.id])
-          .map(ad => ({ ...ad, show_games: true }));
-
-        if (alive) setAds(filtered as Ad[]);
         return;
       }
 
