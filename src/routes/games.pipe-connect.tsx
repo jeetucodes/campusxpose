@@ -273,7 +273,19 @@ export default function PipeConnectGame() {
 
   const totalPipeLevels = TOTAL_PIPE_LEVELS + customPipeCount;
 
-  useEffect(() => { initLevel(levelIdx); }, [levelIdx, initLevel]);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const lvlParam = params.get("level");
+    if (lvlParam) {
+      const parsed = parseInt(lvlParam, 10);
+      if (!isNaN(parsed) && parsed >= 1) {
+        setLevelIdx(parsed - 1);
+        initLevel(parsed - 1);
+        return;
+      }
+    }
+    initLevel(levelIdx);
+  }, [levelIdx, initLevel]);
 
   const { powered, hitOverload } = useMemo(() => {
     if (!levelData) return { powered: new Set<string>(), hitOverload: null };

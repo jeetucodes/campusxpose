@@ -417,7 +417,19 @@ export default function ArrowPuzzleGame() {
     setShakeId(null);
   }, []);
 
-  useEffect(() => { initLevel(levelIdx); }, [levelIdx, initLevel]);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const lvlParam = params.get("level");
+    if (lvlParam) {
+      const parsed = parseInt(lvlParam, 10);
+      if (!isNaN(parsed) && parsed >= 1) {
+        setLevelIdx(parsed - 1);
+        initLevel(parsed - 1);
+        return;
+      }
+    }
+    initLevel(levelIdx);
+  }, [levelIdx, initLevel]);
 
   const handleTap = useCallback((arrow: Arrow) => {
     if (won || gameOver || movingArrow || !levelData) return;

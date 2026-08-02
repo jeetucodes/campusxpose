@@ -879,14 +879,26 @@ export default function AdminGamesManagement() {
                   </div>
                 </div>
 
-                {/* Delete / Reset Button */}
-                <button
-                  onClick={handleDeleteSelectedLevelBox}
-                  className="px-3.5 py-1.5 rounded-xl bg-rose-100 hover:bg-rose-200 border-2 border-black text-rose-900 text-xs font-black flex items-center gap-1.5 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer"
-                >
-                  <Trash2 className="h-4 w-4 text-rose-600" />
-                  <span>{selectedLevelBox.isOverridden ? "Reset Level" : "Delete Level"}</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  {/* ▶️ Play Level Directly Button */}
+                  <Link
+                    to={`${selectedGameMeta.link}?level=${selectedLevelBox.index + 1}`}
+                  >
+                    <button className="px-3.5 py-1.5 rounded-xl bg-[#bbf7d0] hover:bg-emerald-200 border-2 border-black text-black text-xs font-black flex items-center gap-1.5 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer">
+                      <Play className="h-4 w-4 fill-black text-black" />
+                      <span>Play Level #{selectedLevelBox.index + 1}</span>
+                    </button>
+                  </Link>
+
+                  {/* Delete / Reset Button */}
+                  <button
+                    onClick={handleDeleteSelectedLevelBox}
+                    className="px-3.5 py-1.5 rounded-xl bg-rose-100 hover:bg-rose-200 border-2 border-black text-rose-900 text-xs font-black flex items-center gap-1.5 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer"
+                  >
+                    <Trash2 className="h-4 w-4 text-rose-600" />
+                    <span>{selectedLevelBox.isOverridden ? "Reset Level" : "Delete Level"}</span>
+                  </button>
+                </div>
               </div>
 
               {/* JSON Editor Box */}
@@ -902,20 +914,35 @@ export default function AdminGamesManagement() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-2">
-                <button
-                  onClick={() => setSelectedLevelBox(null)}
-                  className="px-4 py-2 text-xs font-black text-black/70 hover:text-black cursor-pointer"
+              <div className="flex items-center justify-between pt-2">
+                {/* ▶️ Big Play Button in Footer */}
+                <Link
+                  to={`${selectedGameMeta.link}?level=${selectedLevelBox.index + 1}`}
                 >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSaveSelectedLevelBox}
-                  className="bg-[#bbf7d0] text-black px-6 py-2.5 border-2 border-black font-display font-black text-xs uppercase tracking-wider shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] cursor-pointer"
-                  style={{ borderRadius: WOBBLY_SM }}
-                >
-                  Save Level Edits
-                </button>
+                  <button
+                    className="bg-[#fef08a] hover:bg-yellow-200 text-black px-4 py-2.5 border-2 border-black font-display font-black text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] cursor-pointer"
+                    style={{ borderRadius: WOBBLY_SM }}
+                  >
+                    <Play className="h-4 w-4 fill-black text-black" />
+                    <span>Test Play Level #{selectedLevelBox.index + 1}</span>
+                  </button>
+                </Link>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setSelectedLevelBox(null)}
+                    className="px-4 py-2 text-xs font-black text-black/70 hover:text-black cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveSelectedLevelBox}
+                    className="bg-[#bbf7d0] text-black px-6 py-2.5 border-2 border-black font-display font-black text-xs uppercase tracking-wider shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] cursor-pointer"
+                    style={{ borderRadius: WOBBLY_SM }}
+                  >
+                    Save Level Edits
+                  </button>
+                </div>
               </div>
             </motion.div>
           </motion.div>
