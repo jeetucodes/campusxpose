@@ -377,14 +377,33 @@ function AdsAdmin() {
               </div>
 
               {/* Placements */}
-              <div className="space-y-2 rounded-xl border border-border p-3">
-                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Show on</div>
-                {([["show_home", "Home page"], ["show_global", "Global chat"], ["show_college", "College chats"], ["show_games", "Games & Hint Rewards 🕹️"]] as const).map(([key, label]) => (
-                  <div key={key} className="flex items-center justify-between">
-                    <span className="text-sm">{label}</span>
+              <div className="space-y-2.5 rounded-xl border border-border p-3.5 bg-accent/20">
+                <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Select Placement Displays</div>
+                {([["show_home", "Home Page Banner"], ["show_global", "Global Chat Banner"], ["show_college", "College Chats Banner"]] as const).map(([key, label]) => (
+                  <div key={key} className="flex items-center justify-between py-1 border-b border-border/40 last:border-0">
+                    <span className="text-sm font-medium">{label}</span>
                     <Switch checked={editing[key]} onCheckedChange={(v) => setEditing({ ...editing, [key]: v })} />
                   </div>
                 ))}
+
+                {/* Highlighted Games & Hint Rewards Toggle */}
+                <div className="mt-2 flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-amber-500/10 border-2 border-emerald-500/30 shadow-sm">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-xl">🕹️</span>
+                    <div>
+                      <div className="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">
+                        Games & Hint Rewards
+                      </div>
+                      <div className="text-[11px] font-medium text-muted-foreground">
+                        Show on Hint click & Extra Lives revival
+                      </div>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={editing.show_games}
+                    onCheckedChange={(v) => setEditing({ ...editing, show_games: v })}
+                  />
+                </div>
               </div>
 
               {/* Active */}
