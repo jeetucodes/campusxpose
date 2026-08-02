@@ -417,10 +417,16 @@ export default function ArrowPuzzleGame() {
                      <Bomb className="h-6 w-6 text-rose-500 animate-pulse" strokeWidth={2.5} />
                   )}
                   {obs.type === "mirror-slash" && (
-                     <div className="absolute w-[120%] h-[4px] bg-sky-400 rounded-full shadow-[0_0_10px_2px_rgba(56,189,248,0.5)]" style={{ transform: "rotate(-45deg)" }} />
+                     <>
+                       <div className="absolute w-[120%] h-[4px] bg-sky-400 rounded-full shadow-[0_0_10px_2px_rgba(56,189,248,0.5)]" style={{ transform: "rotate(-45deg)" }} />
+                       <span className="absolute text-lg leading-none select-none" style={{ textShadow: "0 1px 2px rgba(0,0,0,0.5)" }}>↗️</span>
+                     </>
                   )}
                   {obs.type === "mirror-backslash" && (
-                     <div className="absolute w-[120%] h-[4px] bg-sky-400 rounded-full shadow-[0_0_10px_2px_rgba(56,189,248,0.5)]" style={{ transform: "rotate(45deg)" }} />
+                     <>
+                       <div className="absolute w-[120%] h-[4px] bg-sky-400 rounded-full shadow-[0_0_10px_2px_rgba(56,189,248,0.5)]" style={{ transform: "rotate(45deg)" }} />
+                       <span className="absolute text-lg leading-none select-none" style={{ textShadow: "0 1px 2px rgba(0,0,0,0.5)" }}>↖️</span>
+                     </>
                   )}
                   {obs.type === "ice" && (
                      <div className="absolute inset-0 bg-white/60 rounded-[18px] border-2 border-white/60" />
@@ -661,6 +667,13 @@ export default function ArrowPuzzleGame() {
                   <p className="text-sm text-black font-bold">
                     <strong>💣 Bombs:</strong> Explode and cost you 1 life if tapped! Don't touch them!
                   </p>
+                  <p className="text-sm text-black font-bold">
+                    <strong>🔷 Mirrors:</strong> The diagonal tiles bounce an arrow 90°.
+                    The little symbol on the tile (↗️ or ↖️) shows the two directions it connects —
+                    e.g. a ↗️ mirror turns an <span className="underline decoration-2">↑</span> arrow
+                    so it exits to the right.
+                  </p>
+                </div>
                 </div>
                 <div className="pt-2 flex flex-wrap items-center gap-3 text-sm font-black text-black">
                   <span className="inline-flex items-center gap-1.5"><span className="h-5 w-5 border-2 border-black bg-[#bfdbfe] shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] inline-block rounded" /> Up</span>
