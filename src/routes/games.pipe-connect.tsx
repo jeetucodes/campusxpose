@@ -840,6 +840,7 @@ export default function PipeConnectGame() {
         }}
         onRewardGranted={() => {
           setLives(3);
+          setGameOver(false);
           setShowLivesAd(false);
         }}
         onGameOverConfirm={() => {

@@ -1205,6 +1205,7 @@ export default function ArrowPuzzleGame() {
         }}
         onRewardGranted={() => {
           setLives(3);
+          setGameOver(false);
           setShowLivesAd(false);
         }}
         onGameOverConfirm={() => {

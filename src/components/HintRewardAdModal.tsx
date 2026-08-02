@@ -70,7 +70,6 @@ export default function HintRewardAdModal({
 
   const handleClaim = () => {
     onRewardGranted();
-    onClose();
   };
 
   return (
