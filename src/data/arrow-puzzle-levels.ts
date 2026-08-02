@@ -102,7 +102,7 @@ const RAW_LEVELS: string[][] = [
   [
     "W./.",
     "v.W.",
-    "//..<",
+    "/..<",
     ".v.."
   ],
   // Level 14: 5x5
@@ -179,7 +179,7 @@ const RAW_LEVELS: string[][] = [
   ],
   // Level 23: 5x5
   [
-    "W.W..",
+    "W....",
     "...B.",
     "W.^..",
     ".W.\\.",
@@ -300,7 +300,7 @@ const RAW_LEVELS: string[][] = [
     ".WWWW.",
     ".Wv.W.",
     "B...B.",
-    ".//..",
+    ".//...",
     "B....B"
   ],
   // Level 38: 6x6
@@ -316,7 +316,7 @@ const RAW_LEVELS: string[][] = [
   [
     "B....B",
     ".WWWW.",
-    "B.\\...B",
+    "B.\\...",
     ".WvW..",
     "B....B",
     "......"
@@ -343,7 +343,7 @@ const RAW_LEVELS: string[][] = [
   [
     "B....B",
     ".WWWW.",
-    "B...B",
+    "B...B.",
     "../...",
     "B.^..B",
     "......"
@@ -361,7 +361,7 @@ const RAW_LEVELS: string[][] = [
   [
     "......",
     ".B..B.",
-    "W.O..",
+    "W.O...",
     "..^...",
     "W...W.",
     "B....B"
@@ -421,7 +421,8 @@ const RAW_LEVELS: string[][] = [
     "......"
   ],
 
-  // ═══════════════════════════════════════════════════════════════════
+
+     // ═══════════════════════════════════════════════════════════════════
   // HARD LEVELS 51–100  (verified solvable, very challenging)
   // ═══════════════════════════════════════════════════════════════════
   ...(() => {
@@ -965,7 +966,8 @@ const RAW_LEVELS: string[][] = [
     ">...^.."
   ],
 
-  // Level 91: 7x7 — The Spiral (mirrors forming a spiral path)
+
+      // Level 91: 7x7 — The Spiral (mirrors forming a spiral path)
   // ^ at (6,1) → / at (5,2) → right → \ at (5,5) → down → exits bottom
   // > at (4,0) → right → / at (4,3) → up → exits top
   // v at (1,5) → down → exits bottom
@@ -1222,3 +1224,5 @@ export function getStaticLevel(levelIdx: number): LevelData {
 
   return { gridSize, arrows: filledArrows, obstacles };
 }
+      
+    
