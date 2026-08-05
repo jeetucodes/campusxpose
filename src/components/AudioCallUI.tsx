@@ -56,6 +56,8 @@ export function AudioCallUI({ roomID, isCaller, remoteUsername, onLeaveRoom }: A
           if (remoteAudioRef.current && event.streams[0]) {
             remoteAudioRef.current.srcObject = event.streams[0];
             remoteAudioRef.current.play().catch(e => console.error("Audio play failed:", e));
+            setCallStatus("Connected");
+            if (!connectedAtRef.current) connectedAtRef.current = Date.now();
           }
         };
 

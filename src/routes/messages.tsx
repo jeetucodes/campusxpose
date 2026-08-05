@@ -17,6 +17,9 @@ import {
   Phone,
   PhoneMissed,
   PhoneCall,
+  MoreVertical,
+  Ban,
+  Edit2,
 } from "lucide-react";
 import { toast } from "sonner";
 import QRCode from "react-qr-code";
@@ -28,6 +31,12 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { AutoResizeTextarea } from "@/components/AutoResizeTextarea";
@@ -825,15 +834,24 @@ function Messages() {
               >
                 <Phone className="h-5 w-5" />
               </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-muted-foreground hover:text-destructive"
-                aria-label={`Delete conversation with ${active}`}
-                onClick={() => deleteConversation(active)}
-              >
-                <Trash2 className="h-5 w-5" />
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:bg-muted">
+                    <MoreVertical className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48 bg-paper border-2 border-ink shadow-ink-md">
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => toast.info("Change Name feature coming soon!")}>
+                    <Edit2 className="mr-2 h-4 w-4" /> Change Name
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer text-destructive focus:bg-destructive/10" onClick={() => deleteConversation(active)}>
+                    <Trash2 className="mr-2 h-4 w-4 text-destructive" /> Delete Chat
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer text-destructive focus:bg-destructive/10" onClick={() => toast.info("Block user feature coming soon!")}>
+                    <Ban className="mr-2 h-4 w-4 text-destructive" /> Block User
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </header>
 
             {thread.some((m) => m.pinned) && (

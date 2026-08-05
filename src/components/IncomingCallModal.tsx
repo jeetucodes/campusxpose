@@ -29,7 +29,7 @@ export function IncomingCallModal({ callerUsername, onAccept, onReject }: Incomi
 
   return (
     <Dialog open={true} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-md text-center p-6 bg-white border-2 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" style={{ borderRadius: "25px 8px 22px 8px / 8px 22px 8px 25px" }} hideClose>
+      <DialogContent className="sm:max-w-md text-center p-6 bg-white border-2 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] [&>button]:hidden" style={{ borderRadius: "25px 8px 22px 8px / 8px 22px 8px 25px" }}>
         <DialogHeader>
           <DialogTitle className="text-2xl font-display font-bold">Incoming Audio Call</DialogTitle>
           <DialogDescription className="text-base">
