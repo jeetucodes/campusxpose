@@ -39,10 +39,37 @@ interface ThemeConfig {
 
 const getThemeForLevel = (levelId: number): ThemeConfig => {
   const mod = (levelId - 1) % 4;
-  if (mod === 1) return { bgStyle: "linear-gradient(to bottom, #4c1d95, #2e1065, #000000)", targetType: "orange", knifePrimary: "#fde047", knifeSecondary: "#eab308", knifeHandle: "#1e3a8a" }; // desert
-  if (mod === 2) return { bgStyle: "linear-gradient(to bottom, #14b8a6, #0f766e, #042f2e)", targetType: "peppermint", knifePrimary: "#a5f3fc", knifeSecondary: "#06b6d4", knifeHandle: "#0f172a" }; // candy
-  if (mod === 3) return { bgStyle: "linear-gradient(to bottom, #166534, #14532d, #064e3b)", targetType: "kiwi", knifePrimary: "#86efac", knifeSecondary: "#22c55e", knifeHandle: "#064e3b" }; // jungle
-  return { bgStyle: "linear-gradient(to bottom, #1e3a8a, #312e81, #0f172a)", targetType: "wood", knifePrimary: "#cbd5e1", knifeSecondary: "#94a3b8", knifeHandle: "#78350f" }; // forest
+  if (mod === 1)
+    return {
+      bgStyle: "linear-gradient(to bottom, #4c1d95, #2e1065, #000000)",
+      targetType: "orange",
+      knifePrimary: "#fde047",
+      knifeSecondary: "#eab308",
+      knifeHandle: "#1e3a8a",
+    }; // desert
+  if (mod === 2)
+    return {
+      bgStyle: "linear-gradient(to bottom, #14b8a6, #0f766e, #042f2e)",
+      targetType: "peppermint",
+      knifePrimary: "#a5f3fc",
+      knifeSecondary: "#06b6d4",
+      knifeHandle: "#0f172a",
+    }; // candy
+  if (mod === 3)
+    return {
+      bgStyle: "linear-gradient(to bottom, #166534, #14532d, #064e3b)",
+      targetType: "kiwi",
+      knifePrimary: "#86efac",
+      knifeSecondary: "#22c55e",
+      knifeHandle: "#064e3b",
+    }; // jungle
+  return {
+    bgStyle: "linear-gradient(to bottom, #1e3a8a, #312e81, #0f172a)",
+    targetType: "wood",
+    knifePrimary: "#cbd5e1",
+    knifeSecondary: "#94a3b8",
+    knifeHandle: "#78350f",
+  }; // forest
 };
 const KNIFE_SPEED = 60;
 
@@ -77,7 +104,16 @@ export interface KnifeItem {
   id: string;
   name: string;
   price: number;
-  type: "classic" | "cleaver" | "scimitar" | "crystal" | "pencil" | "pen" | "fork" | "screwdriver" | "kunai";
+  type:
+    | "classic"
+    | "cleaver"
+    | "scimitar"
+    | "crystal"
+    | "pencil"
+    | "pen"
+    | "fork"
+    | "screwdriver"
+    | "kunai";
 }
 
 export const drawKnifeStyle = (ctx: CanvasRenderingContext2D, theme: ThemeConfig, type: string) => {
@@ -291,7 +327,7 @@ export const drawKnifeStyle = (ctx: CanvasRenderingContext2D, theme: ThemeConfig
 
     // 4 Prongs
     for (let i = 0; i < 4; i++) {
-      const px = -KNIFE_WIDTH / 2 - 2 + (i * ((KNIFE_WIDTH + 4) / 3));
+      const px = -KNIFE_WIDTH / 2 - 2 + i * ((KNIFE_WIDTH + 4) / 3);
       ctx.beginPath();
       ctx.moveTo(px, -KNIFE_HEIGHT / 2 + 10);
       ctx.lineTo(px, -KNIFE_HEIGHT / 2 - 5);
@@ -350,7 +386,7 @@ export const drawKnifeStyle = (ctx: CanvasRenderingContext2D, theme: ThemeConfig
   }
 };
 
-const KnifePreview = ({ type, theme }: { type: string, theme: ThemeConfig }) => {
+const KnifePreview = ({ type, theme }: { type: string; theme: ThemeConfig }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -366,7 +402,14 @@ const KnifePreview = ({ type, theme }: { type: string, theme: ThemeConfig }) => 
     ctx.restore();
   }, [type, theme]);
 
-  return <canvas ref={canvasRef} width={60} height={100} className="pointer-events-none w-16 h-24 drop-shadow-md" />;
+  return (
+    <canvas
+      ref={canvasRef}
+      width={60}
+      height={100}
+      className="pointer-events-none w-16 h-24 drop-shadow-md"
+    />
+  );
 };
 
 let globalAudioCtx: AudioContext | null = null;
@@ -381,7 +424,10 @@ const getAudioCtx = () => {
 };
 
 // Simple Web Audio API Synth
-const playSynth = (type: "wood" | "metal" | "throw" | "win" | "coin" | "slice", isMuted: boolean) => {
+const playSynth = (
+  type: "wood" | "metal" | "throw" | "win" | "coin" | "slice",
+  isMuted: boolean,
+) => {
   if (isMuted) return;
   try {
     const audioCtx = getAudioCtx();
@@ -459,7 +505,7 @@ const triggerVibration = (pattern: number | number[]) => {
   if (navigator.vibrate) {
     try {
       navigator.vibrate(pattern);
-    } catch (e) { }
+    } catch (e) {}
   }
 };
 
@@ -513,10 +559,10 @@ export default function KnifeThrowerGame() {
 
   const stateRef = useRef({
     logAngle: 0,
-    stuckKnives: [] as { angle: number, type: string }[],
+    stuckKnives: [] as { angle: number; type: string }[],
     logCoins: [] as LogCoin[],
     logFruits: [] as LogFruit[],
-    flyingKnife: null as { y: number, type: string } | null,
+    flyingKnife: null as { y: number; type: string } | null,
     particles: [] as Particle[],
     targetShattered: false,
     targetPieces: [] as any[],
@@ -547,14 +593,15 @@ export default function KnifeThrowerGame() {
       for (const stuck of lvl.preStuckKnives) {
         const diff = Math.abs(stuck - candidateAngle);
         const wrapDiff = Math.min(diff, Math.PI * 2 - diff);
-        if (wrapDiff < 0.4) { // keep distance from knives
+        if (wrapDiff < 0.4) {
+          // keep distance from knives
           safe = false;
           break;
         }
       }
       // Check against other coins/apples
       if (safe) {
-        const allItems = [...newLogCoins.map(c => c.angle), ...newLogFruits.map(a => a.angle)];
+        const allItems = [...newLogCoins.map((c) => c.angle), ...newLogFruits.map((a) => a.angle)];
         for (const itemAngle of allItems) {
           const diff = Math.abs(itemAngle - candidateAngle);
           const wrapDiff = Math.min(diff, Math.PI * 2 - diff);
@@ -580,7 +627,10 @@ export default function KnifeThrowerGame() {
 
     stateRef.current = {
       logAngle: 0,
-      stuckKnives: lvl.preStuckKnives.map(angle => ({ angle, type: equippedKnife.replace("k_", "") })),
+      stuckKnives: lvl.preStuckKnives.map((angle) => ({
+        angle,
+        type: equippedKnife.replace("k_", ""),
+      })),
       logCoins: newLogCoins,
       logFruits: newLogFruits,
       flyingKnife: null,
@@ -660,12 +710,40 @@ export default function KnifeThrowerGame() {
     else if (type === "watermelon") color = "#ef4444";
 
     stateRef.current.particles.push(
-      { x, y, vx: -5, vy: -5, life: 0, maxLife: 60, color, isAppleHalf: "left", rotation: 0, rotSpeed: -0.1 },
-      { x, y, vx: 5, vy: -5, life: 0, maxLife: 60, color, isAppleHalf: "right", rotation: 0, rotSpeed: 0.1 },
+      {
+        x,
+        y,
+        vx: -5,
+        vy: -5,
+        life: 0,
+        maxLife: 60,
+        color,
+        isAppleHalf: "left",
+        rotation: 0,
+        rotSpeed: -0.1,
+      },
+      {
+        x,
+        y,
+        vx: 5,
+        vy: -5,
+        life: 0,
+        maxLife: 60,
+        color,
+        isAppleHalf: "right",
+        rotation: 0,
+        rotSpeed: 0.1,
+      },
       // Add some juice particles
       ...Array.from({ length: 10 }).map(() => ({
-        x, y, vx: (Math.random() - 0.5) * 10, vy: (Math.random() - 0.5) * 10, life: 0, maxLife: 30, color: "#fef08a"
-      }))
+        x,
+        y,
+        vx: (Math.random() - 0.5) * 10,
+        vy: (Math.random() - 0.5) * 10,
+        life: 0,
+        maxLife: 30,
+        color: "#fef08a",
+      })),
     );
   };
 
@@ -707,7 +785,7 @@ export default function KnifeThrowerGame() {
             recordGameSession("knife-thrower", 1, levelIdx + 1);
 
             const nextLvl = levelIdx + 1;
-            setHighestUnlocked(prev => {
+            setHighestUnlocked((prev) => {
               const newMax = Math.max(prev, nextLvl);
               localStorage.setItem("cx_knife_max_level", newMax.toString());
               return newMax;
@@ -745,7 +823,8 @@ export default function KnifeThrowerGame() {
             for (const stuck of state.stuckKnives) {
               const diff = Math.abs(stuck.angle - finalHit);
               const wrapDiff = Math.min(diff, Math.PI * 2 - diff);
-              if (wrapDiff < 0.25) { // Collision threshold
+              if (wrapDiff < 0.25) {
+                // Collision threshold
                 hitMetal = true;
                 break;
               }
@@ -758,7 +837,7 @@ export default function KnifeThrowerGame() {
                 const wrapDiff = Math.min(diff, Math.PI * 2 - diff);
                 if (wrapDiff < 0.3) {
                   coin.collected = true;
-                  setCoins(prev => {
+                  setCoins((prev) => {
                     const newCoins = prev + 1;
                     localStorage.setItem("cx_knife_coins", String(newCoins));
                     return newCoins;
@@ -776,7 +855,7 @@ export default function KnifeThrowerGame() {
                 const wrapDiff = Math.min(diff, Math.PI * 2 - diff);
                 if (wrapDiff < 0.2) {
                   fruit.sliced = true;
-                  setScore(prev => prev + 20); // extra points for fruit
+                  setScore((prev) => prev + 20); // extra points for fruit
                   playSynth("slice", isMuted);
                   createAppleHalves(LOG_X, LOG_Y + LOG_RADIUS + 15, fruit.type);
                 }
@@ -825,23 +904,25 @@ export default function KnifeThrowerGame() {
                   // Shatter the log into pieces
                   for (let i = 0; i < 4; i++) {
                     stateRef.current.targetPieces.push({
-                      x: LOG_X, y: LOG_Y,
+                      x: LOG_X,
+                      y: LOG_Y,
                       vx: (Math.random() - 0.5) * 15,
                       vy: -5 - Math.random() * 10,
                       rotation: 0,
                       rotSpeed: (Math.random() - 0.5) * 0.4,
-                      quadrant: i
+                      quadrant: i,
                     });
                   }
 
                   // Center logo piece
                   stateRef.current.targetPieces.push({
-                    x: LOG_X, y: LOG_Y,
+                    x: LOG_X,
+                    y: LOG_Y,
                     vx: (Math.random() - 0.5) * 6,
                     vy: -8 - Math.random() * 5,
                     rotation: 0,
                     rotSpeed: (Math.random() - 0.5) * 0.6,
-                    isLogo: true
+                    isLogo: true,
                   });
 
                   // Throw all stuck knives outwards
@@ -892,7 +973,14 @@ export default function KnifeThrowerGame() {
       ctx.clearRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
 
       // Helper for sketchy circles
-      const drawSketchyCircle = (x: number, y: number, r: number, strokeColor: string, fillColor?: string, lineWidth: number = 3) => {
+      const drawSketchyCircle = (
+        x: number,
+        y: number,
+        r: number,
+        strokeColor: string,
+        fillColor?: string,
+        lineWidth: number = 3,
+      ) => {
         if (fillColor) {
           ctx.fillStyle = fillColor;
           ctx.beginPath();
@@ -985,7 +1073,7 @@ export default function KnifeThrowerGame() {
             const path = [];
             for (let s = 1; s <= steps; s++) {
               cy -= (LOG_RADIUS / steps) * (0.8 + (seed % 3) * 0.1);
-              cx += (seed % 10 - 5) * 1.5; // zig-zag
+              cx += ((seed % 10) - 5) * 1.5; // zig-zag
               path.push({ x: cx, y: cy });
             }
 
@@ -996,7 +1084,7 @@ export default function KnifeThrowerGame() {
               ctx.beginPath();
               ctx.moveTo(currentX, currentY);
               ctx.lineTo(path[s].x, path[s].y);
-              ctx.lineWidth = Math.max(0.5, 3 - (s * 0.5));
+              ctx.lineWidth = Math.max(0.5, 3 - s * 0.5);
               ctx.stroke();
               currentX = path[s].x;
               currentY = path[s].y;
@@ -1067,8 +1155,17 @@ export default function KnifeThrowerGame() {
             if (fruit.type === "orange") {
               drawSketchyCircle(0, 0, 14, "#2d2d2d", "#f97316", 2);
               // stem & leaf
-              ctx.beginPath(); ctx.moveTo(0, -14); ctx.lineTo(4, -20); ctx.strokeStyle = "#2d2d2d"; ctx.lineWidth = 2; ctx.stroke();
-              ctx.beginPath(); ctx.ellipse(8, -14, 6, 3, -Math.PI / 4, 0, Math.PI * 2); ctx.fillStyle = "#3a8a4f"; ctx.fill(); ctx.stroke();
+              ctx.beginPath();
+              ctx.moveTo(0, -14);
+              ctx.lineTo(4, -20);
+              ctx.strokeStyle = "#2d2d2d";
+              ctx.lineWidth = 2;
+              ctx.stroke();
+              ctx.beginPath();
+              ctx.ellipse(8, -14, 6, 3, -Math.PI / 4, 0, Math.PI * 2);
+              ctx.fillStyle = "#3a8a4f";
+              ctx.fill();
+              ctx.stroke();
             } else if (fruit.type === "lemon") {
               // Draw an ellipse
               ctx.beginPath();
@@ -1082,14 +1179,33 @@ export default function KnifeThrowerGame() {
               // Draw a melon
               drawSketchyCircle(0, 0, 15, "#2d2d2d", "#15803d", 2);
               // Stripes
-              ctx.beginPath(); ctx.moveTo(-5, -15); ctx.lineTo(-5, 15); ctx.strokeStyle = "#166534"; ctx.lineWidth = 3; ctx.stroke();
-              ctx.beginPath(); ctx.moveTo(5, -15); ctx.lineTo(5, 15); ctx.strokeStyle = "#166534"; ctx.lineWidth = 3; ctx.stroke();
+              ctx.beginPath();
+              ctx.moveTo(-5, -15);
+              ctx.lineTo(-5, 15);
+              ctx.strokeStyle = "#166534";
+              ctx.lineWidth = 3;
+              ctx.stroke();
+              ctx.beginPath();
+              ctx.moveTo(5, -15);
+              ctx.lineTo(5, 15);
+              ctx.strokeStyle = "#166534";
+              ctx.lineWidth = 3;
+              ctx.stroke();
             } else {
               // Apple
               drawSketchyCircle(0, 0, 14, "#2d2d2d", "#ff4d4d", 2);
               // stem & leaf
-              ctx.beginPath(); ctx.moveTo(0, -14); ctx.lineTo(4, -20); ctx.strokeStyle = "#2d2d2d"; ctx.lineWidth = 2; ctx.stroke();
-              ctx.beginPath(); ctx.ellipse(8, -14, 6, 3, -Math.PI / 4, 0, Math.PI * 2); ctx.fillStyle = "#3a8a4f"; ctx.fill(); ctx.stroke();
+              ctx.beginPath();
+              ctx.moveTo(0, -14);
+              ctx.lineTo(4, -20);
+              ctx.strokeStyle = "#2d2d2d";
+              ctx.lineWidth = 2;
+              ctx.stroke();
+              ctx.beginPath();
+              ctx.ellipse(8, -14, 6, 3, -Math.PI / 4, 0, Math.PI * 2);
+              ctx.fillStyle = "#3a8a4f";
+              ctx.fill();
+              ctx.stroke();
             }
 
             ctx.restore();
@@ -1153,11 +1269,18 @@ export default function KnifeThrowerGame() {
           } else {
             ctx.beginPath();
             const startAngle = (p.quadrant || 0) * (Math.PI / 2);
-            const endAngle = startAngle + (Math.PI / 2);
+            const endAngle = startAngle + Math.PI / 2;
             ctx.arc(0, 0, LOG_RADIUS, startAngle, endAngle);
             ctx.lineTo(0, 0);
             ctx.closePath();
-            ctx.fillStyle = theme.targetType === "orange" ? "#fff7ed" : (theme.targetType === "peppermint" ? "#fdf2f8" : (theme.targetType === "kiwi" ? "#ecfccb" : "#ffffff"));
+            ctx.fillStyle =
+              theme.targetType === "orange"
+                ? "#fff7ed"
+                : theme.targetType === "peppermint"
+                  ? "#fdf2f8"
+                  : theme.targetType === "kiwi"
+                    ? "#ecfccb"
+                    : "#ffffff";
             ctx.fill();
             ctx.strokeStyle = "#2d2d2d";
             ctx.lineWidth = 2;
@@ -1167,7 +1290,14 @@ export default function KnifeThrowerGame() {
             ctx.arc(0, 0, LOG_RADIUS - 5, startAngle, endAngle);
             ctx.lineTo(0, 0);
             ctx.closePath();
-            ctx.fillStyle = theme.targetType === "orange" ? "#ea580c" : (theme.targetType === "peppermint" ? "#ec4899" : (theme.targetType === "kiwi" ? "#84cc16" : "#2d2d2d"));
+            ctx.fillStyle =
+              theme.targetType === "orange"
+                ? "#ea580c"
+                : theme.targetType === "peppermint"
+                  ? "#ec4899"
+                  : theme.targetType === "kiwi"
+                    ? "#84cc16"
+                    : "#2d2d2d";
             ctx.fill();
           }
           ctx.restore();
@@ -1270,30 +1400,30 @@ export default function KnifeThrowerGame() {
 
   return (
     <div className="flex flex-col items-center justify-center h-[100dvh] w-full overflow-hidden select-none touch-none bg-background relative">
-
       {/* Background full screen - Clean Sketch Paper (No notebook lines, no text) */}
       <div
         className="absolute inset-0 pointer-events-none overflow-hidden"
         style={{
           backgroundColor: "#f4f1ea", // Light cream/ivory sketch paper color
           backgroundImage: `url('https://www.transparenttextures.com/patterns/handmade-paper.png')`,
-          boxShadow: "inset 0 0 120px rgba(0, 0, 0, 0.08)" // Very subtle vignette
+          boxShadow: "inset 0 0 120px rgba(0, 0, 0, 0.08)", // Very subtle vignette
         }}
       />
 
       {/* Game Container Wrapper */}
       <div className="w-full max-w-[500px] h-full sm:h-[95%] sm:max-h-[900px] relative sm:rounded-wobbly overflow-hidden flex flex-col items-center justify-center shadow-ink-lg sm:border-4 border-ink z-10">
-
         {/* HUD Layer */}
         <div className="absolute inset-0 pointer-events-none z-10 flex flex-col justify-between w-full">
-
           {/* Top Bar */}
           <div className="flex items-start justify-between p-4 sm:p-6 w-full pointer-events-none">
             {/* Left: Stage & Hearts */}
             <div className="flex flex-col items-start gap-3 pointer-events-auto">
               <div
                 className="text-2xl sm:text-3xl font-black text-ink font-display cursor-pointer hover:scale-105 transition-transform shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-[#fef08a] border-4 border-ink px-4 py-1 rounded-sm -rotate-3 relative"
-                onClick={(e) => { e.stopPropagation(); setShowLevels(true); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowLevels(true);
+                }}
               >
                 {/* Pin graphic */}
                 <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-red-500 border-2 border-ink shadow-sm" />
@@ -1317,7 +1447,9 @@ export default function KnifeThrowerGame() {
                   BEST: {Math.max(score, bestScore)}
                 </div>
                 <div className="bg-white border-4 border-ink rounded-xl pl-4 pr-1 py-1.5 flex items-center gap-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rotate-1 relative z-0">
-                  <span className="text-2xl sm:text-3xl font-black text-ink font-display leading-none mt-1">{score}</span>
+                  <span className="text-2xl sm:text-3xl font-black text-ink font-display leading-none mt-1">
+                    {score}
+                  </span>
                   <div className="bg-yellow-300 rounded-full p-1.5 border-2 border-ink">
                     <Coins className="w-5 h-5 text-ink" />
                   </div>
@@ -1325,11 +1457,23 @@ export default function KnifeThrowerGame() {
               </div>
 
               <div className="flex gap-2">
-                <Button variant="ghost" size="icon" className="text-ink border-2 border-ink bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-full hover:bg-gray-100 w-10 h-10 sm:w-12 sm:h-12 hover:-translate-y-0.5 transition-all" onClick={(e) => { e.stopPropagation(); toggleMute(); }}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-ink border-2 border-ink bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-full hover:bg-gray-100 w-10 h-10 sm:w-12 sm:h-12 hover:-translate-y-0.5 transition-all"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleMute();
+                  }}
+                >
                   {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
                 </Button>
                 <Link to="/games">
-                  <Button variant="ghost" size="icon" className="text-ink border-2 border-ink bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-full hover:bg-gray-100 w-10 h-10 sm:w-12 sm:h-12 hover:-translate-y-0.5 transition-all">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-ink border-2 border-ink bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-full hover:bg-gray-100 w-10 h-10 sm:w-12 sm:h-12 hover:-translate-y-0.5 transition-all"
+                  >
                     <ArrowLeft className="w-5 h-5" />
                   </Button>
                 </Link>
@@ -1345,11 +1489,11 @@ export default function KnifeThrowerGame() {
                 <div key={i} className="flex justify-center items-center">
                   <svg
                     viewBox="0 0 24 64"
-                    className={`w-3 h-8 sm:w-4 sm:h-10 transition-all duration-300 ${isThrown ? 'opacity-30 scale-90' : 'opacity-100 drop-shadow-ink-soft'}`}
+                    className={`w-3 h-8 sm:w-4 sm:h-10 transition-all duration-300 ${isThrown ? "opacity-30 scale-90" : "opacity-100 drop-shadow-ink-soft"}`}
                   >
                     <path
                       d="M12 2 L14 15 L14 45 L16 45 L16 60 L8 60 L8 45 L10 45 L10 15 Z"
-                      fill={isThrown ? "#94a3b8" : (theme.knifePrimary || "#cbd5e1")}
+                      fill={isThrown ? "#94a3b8" : theme.knifePrimary || "#cbd5e1"}
                       stroke="#2d2d2d"
                       strokeWidth="2"
                     />
@@ -1358,9 +1502,8 @@ export default function KnifeThrowerGame() {
               );
             })}
           </div>
-
-        </div> {/* End of HUD Layer */}
-
+        </div>{" "}
+        {/* End of HUD Layer */}
         {/* Game Canvas */}
         <div
           className="absolute inset-0 w-full h-full pointer-events-auto z-0"
@@ -1373,22 +1516,39 @@ export default function KnifeThrowerGame() {
             className="w-full h-full object-cover touch-none"
           />
         </div>
-
         {gameState === "won" && (
           <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center z-50 pointer-events-auto animate-in fade-in duration-300">
             <div className="bg-paper border-4 border-ink p-8 text-center max-w-sm w-[90%] flex flex-col items-center shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] -rotate-2 relative overflow-visible mt-12 animate-in zoom-in-95 duration-500 spring">
               <div className="absolute -top-16 left-1/2 -translate-x-1/2 animate-bounce drop-shadow-xl z-20">
-                <img src="/logo.jpeg" className="w-24 h-24 object-contain rounded-full border-4 border-ink bg-white shadow-ink-soft" alt="CX Logo" />
+                <img
+                  src="/logo.jpeg"
+                  className="w-24 h-24 object-contain rounded-full border-4 border-ink bg-white shadow-ink-soft"
+                  alt="CX Logo"
+                />
               </div>
 
-              <div className="mt-8 mb-1 font-display text-ink text-xl font-bold tracking-widest bg-yellow-200 px-3 py-1 -rotate-3 border-2 border-ink">CX GAMES</div>
-              <h2 className="text-4xl font-black text-success mb-2 font-display uppercase italic drop-shadow-sm">Stage Cleared!</h2>
+              <div className="mt-8 mb-1 font-display text-ink text-xl font-bold tracking-widest bg-yellow-200 px-3 py-1 -rotate-3 border-2 border-ink">
+                CX GAMES
+              </div>
+              <h2 className="text-4xl font-black text-success mb-2 font-display uppercase italic drop-shadow-sm">
+                Stage Cleared!
+              </h2>
 
               <div className="bg-postit w-full p-4 rounded-sm border-2 border-ink shadow-ink-soft rotate-2 my-4 flex flex-col gap-2">
-                <div className="text-ink text-xl font-black font-display flex items-center justify-between gap-4"><span>SCORE</span> <span>{score}</span></div>
-                <div className="text-ink/60 text-sm font-black font-display flex items-center justify-between gap-4"><span>BEST SCORE</span> <span>{Math.max(score, bestScore)}</span></div>
+                <div className="text-ink text-xl font-black font-display flex items-center justify-between gap-4">
+                  <span>SCORE</span> <span>{score}</span>
+                </div>
+                <div className="text-ink/60 text-sm font-black font-display flex items-center justify-between gap-4">
+                  <span>BEST SCORE</span> <span>{Math.max(score, bestScore)}</span>
+                </div>
                 <div className="w-full h-0.5 bg-ink/20 rounded-full" />
-                <div className="text-warning text-xl font-black font-display flex items-center justify-between gap-4"><span>COINS</span> <span className="flex items-center gap-1"><Coins className="w-5 h-5" />{coins}</span></div>
+                <div className="text-warning text-xl font-black font-display flex items-center justify-between gap-4">
+                  <span>COINS</span>{" "}
+                  <span className="flex items-center gap-1">
+                    <Coins className="w-5 h-5" />
+                    {coins}
+                  </span>
+                </div>
               </div>
 
               <Button
@@ -1403,20 +1563,45 @@ export default function KnifeThrowerGame() {
             </div>
           </div>
         )}
-
         {gameState === "lost" && (
           <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-50 pointer-events-auto animate-in fade-in duration-300">
             <div className="bg-paper border-4 border-ink p-8 text-center max-w-sm w-[90%] flex flex-col items-center shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] rotate-1 relative overflow-hidden animate-in zoom-in-95 duration-300">
               <div className="absolute top-0 left-0 w-full h-3 bg-destructive border-b-4 border-ink" />
-              <div className="mt-4 mb-2 opacity-50"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ink"><path d="m15 9-6 6" /><path d="m9 9 6 6" /><circle cx="12" cy="12" r="10" /></svg></div>
-              <h2 className="text-6xl font-black text-destructive mb-2 font-display uppercase tracking-tighter drop-shadow-sm">GAME OVER</h2>
-              <div className="text-ink font-bold font-sans opacity-70 mb-4 bg-gray-200 px-3 py-1 rounded-sm border-2 border-dashed border-gray-400">STAGE {levelIdx + 1} FAILED</div>
+              <div className="mt-4 mb-2 opacity-50">
+                <svg
+                  width="40"
+                  height="40"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-ink"
+                >
+                  <path d="m15 9-6 6" />
+                  <path d="m9 9 6 6" />
+                  <circle cx="12" cy="12" r="10" />
+                </svg>
+              </div>
+              <h2 className="text-6xl font-black text-destructive mb-2 font-display uppercase tracking-tighter drop-shadow-sm">
+                GAME OVER
+              </h2>
+              <div className="text-ink font-bold font-sans opacity-70 mb-4 bg-gray-200 px-3 py-1 rounded-sm border-2 border-dashed border-gray-400">
+                STAGE {levelIdx + 1} FAILED
+              </div>
 
               <div className="bg-white p-4 rounded-sm border-4 border-ink mb-6 w-full relative shadow-ink-soft flex flex-col gap-2">
-                <div className="absolute -top-4 -right-4 bg-destructive text-white font-black px-3 py-1 rotate-12 text-sm border-2 border-ink shadow-ink-soft">FINAL</div>
-                <div className="text-ink text-3xl font-black font-display flex items-center justify-between"><span>SCORE</span> <span>{score}</span></div>
+                <div className="absolute -top-4 -right-4 bg-destructive text-white font-black px-3 py-1 rotate-12 text-sm border-2 border-ink shadow-ink-soft">
+                  FINAL
+                </div>
+                <div className="text-ink text-3xl font-black font-display flex items-center justify-between">
+                  <span>SCORE</span> <span>{score}</span>
+                </div>
                 <div className="w-full h-0.5 bg-ink/20 rounded-full" />
-                <div className="text-ink text-lg font-black font-display flex items-center justify-between opacity-60"><span>BEST SCORE</span> <span>{Math.max(score, bestScore)}</span></div>
+                <div className="text-ink text-lg font-black font-display flex items-center justify-between opacity-60">
+                  <span>BEST SCORE</span> <span>{Math.max(score, bestScore)}</span>
+                </div>
               </div>
 
               <Button
@@ -1432,8 +1617,6 @@ export default function KnifeThrowerGame() {
             </div>
           </div>
         )}
-
-
       </div>
 
       {/* Overlays */}
@@ -1493,15 +1676,18 @@ export default function KnifeThrowerGame() {
                             setLevelIdx(i);
                             setShowLevels(false);
                           } else {
-                            toast.error(`Level ${i + 1} is locked! Clear Level ${highestUnlocked + 1} first.`);
+                            toast.error(
+                              `Level ${i + 1} is locked! Clear Level ${highestUnlocked + 1} first.`,
+                            );
                           }
                         }}
-                        className={`h-14 w-14 shrink-0 border-2 border-black font-display font-black text-xs transition-all outline-none flex flex-col items-center justify-center rounded-xl ${i === levelIdx
-                          ? "bg-[#bfdbfe] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] scale-110 z-10"
-                          : unlocked
-                            ? "bg-white text-black hover:bg-[#fbcfe8] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 cursor-pointer"
-                            : "bg-gray-100 text-gray-500 opacity-70 cursor-pointer"
-                          }`}
+                        className={`h-14 w-14 shrink-0 border-2 border-black font-display font-black text-xs transition-all outline-none flex flex-col items-center justify-center rounded-xl ${
+                          i === levelIdx
+                            ? "bg-[#bfdbfe] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] scale-110 z-10"
+                            : unlocked
+                              ? "bg-white text-black hover:bg-[#fbcfe8] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 cursor-pointer"
+                              : "bg-gray-100 text-gray-500 opacity-70 cursor-pointer"
+                        }`}
                       >
                         <span>Lvl {i + 1}</span>
                         <span className="text-[10px]">{unlocked ? "✓" : "🔒"}</span>
@@ -1514,7 +1700,6 @@ export default function KnifeThrowerGame() {
           </motion.div>
         )}
       </AnimatePresence>
-
     </div>
   );
 }

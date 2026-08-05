@@ -251,7 +251,9 @@ export default function PipeConnectGame() {
         const map = JSON.parse(raw);
         return map["pipe-connect"] === false;
       }
-    } catch (e) { }
+    } catch (e) {
+      /* ignore */
+    }
     return false;
   }, []);
 
@@ -277,7 +279,9 @@ export default function PipeConnectGame() {
           }
         }
       }
-    } catch (e) { }
+    } catch (e) {
+      /* ignore */
+    }
 
     if (!data) {
       data = getPipeLevel(idx);
@@ -317,7 +321,9 @@ export default function PipeConnectGame() {
         const raw = localStorage.getItem("cx_pipe_custom_levels");
         if (raw) setCustomPipeCount(JSON.parse(raw).length);
         else setCustomPipeCount(0);
-      } catch (e) { }
+      } catch (e) {
+        /* ignore */
+      }
     };
     syncCustomPipe();
     window.addEventListener("storage", syncCustomPipe);
@@ -341,13 +347,15 @@ export default function PipeConnectGame() {
         setHighestUnlocked((prev) => Math.max(prev, targetIdx));
         try {
           localStorage.setItem("cx_pipe_level", String(Math.max(highestUnlocked, targetIdx)));
-        } catch (e) { }
+        } catch (e) {
+          /* ignore */
+        }
         initLevel(targetIdx);
         return;
       }
     }
     initLevel(levelIdx);
-  }, [levelIdx, initLevel]);
+  }, [levelIdx, initLevel, highestUnlocked]);
 
   const { powered, hitOverload } = useMemo(() => {
     if (!levelData) return { powered: new Set<string>(), hitOverload: null };
@@ -487,7 +495,7 @@ export default function PipeConnectGame() {
       className="min-h-[100dvh] pb-16 text-ink font-sans select-none overflow-x-hidden relative"
       style={{
         backgroundColor: "#f4f1ea",
-        backgroundImage: `url('https://www.transparenttextures.com/patterns/handmade-paper.png')`
+        backgroundImage: `url('https://www.transparenttextures.com/patterns/handmade-paper.png')`,
       }}
     >
       {/* Header */}
@@ -533,7 +541,9 @@ export default function PipeConnectGame() {
               className="flex-1 bg-white border-4 border-ink p-3 flex flex-col items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rotate-1 relative"
               style={{ borderRadius: WOBBLY_SM }}
             >
-              <div className="absolute -top-3 text-[10px] font-black uppercase text-ink/70 bg-blue-100 px-2 rounded-full border-2 border-ink">MOVES</div>
+              <div className="absolute -top-3 text-[10px] font-black uppercase text-ink/70 bg-blue-100 px-2 rounded-full border-2 border-ink">
+                MOVES
+              </div>
               <div className="font-display text-3xl font-black text-ink leading-none mt-2">
                 {moves}
               </div>
@@ -542,7 +552,9 @@ export default function PipeConnectGame() {
               className="flex-1 bg-postit border-4 border-ink p-3 flex flex-col items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] -rotate-1 relative"
               style={{ borderRadius: WOBBLY_SM }}
             >
-              <div className="absolute -top-3 text-[10px] font-black uppercase text-ink/70 bg-white px-2 rounded-full border-2 border-ink">LEFT</div>
+              <div className="absolute -top-3 text-[10px] font-black uppercase text-ink/70 bg-white px-2 rounded-full border-2 border-ink">
+                LEFT
+              </div>
               <div className="font-display text-3xl font-black text-ink leading-none mt-2">
                 {movesLeft}
               </div>
@@ -627,10 +639,11 @@ export default function PipeConnectGame() {
                   key={key}
                   onClick={() => handleTap(tile)}
                   disabled={tile.fixed || won || gameOver}
-                  className={`flex items-center justify-center relative overflow-hidden transition-shadow border-4 border-ink z-10 ${tile.fixed
+                  className={`flex items-center justify-center relative overflow-hidden transition-shadow border-4 border-ink z-10 ${
+                    tile.fixed
                       ? "opacity-70 shadow-none scale-95 cursor-default"
                       : "cursor-pointer hover:scale-105 active:scale-95 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-                    } ${isHinted ? "ring-4 ring-yellow-400 !shadow-[0_0_20px_rgba(250,204,21,1)] z-20" : ""}`}
+                  } ${isHinted ? "ring-4 ring-yellow-400 !shadow-[0_0_20px_rgba(250,204,21,1)] z-20" : ""}`}
                   style={{
                     gridRow: tile.row + 1,
                     gridColumn: tile.col + 1,
@@ -684,7 +697,9 @@ export default function PipeConnectGame() {
                   className="bg-paper border-4 border-ink p-8 text-center space-y-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] max-w-[85%] relative flex flex-col items-center"
                   style={{ borderRadius: WOBBLY_MD }}
                 >
-                  <div className="absolute -top-4 -left-4 bg-green-400 text-ink font-black px-4 py-1 -rotate-6 border-2 border-ink shadow-sm">AWESOME!</div>
+                  <div className="absolute -top-4 -left-4 bg-green-400 text-ink font-black px-4 py-1 -rotate-6 border-2 border-ink shadow-sm">
+                    AWESOME!
+                  </div>
                   <motion.div
                     animate={{ rotate: [0, -10, 10, -5, 5, 0] }}
                     transition={{ duration: 0.6, delay: 0.3 }}
@@ -871,12 +886,13 @@ export default function PipeConnectGame() {
                             setShowLevels(false);
                           }
                         }}
-                        className={`h-14 w-14 shrink-0 border-2 border-black font-display font-black text-xs transition-all outline-none flex flex-col items-center justify-center ${i === levelIdx
+                        className={`h-14 w-14 shrink-0 border-2 border-black font-display font-black text-xs transition-all outline-none flex flex-col items-center justify-center ${
+                          i === levelIdx
                             ? "bg-[#bfdbfe] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] scale-110 z-10"
                             : unlocked
                               ? "bg-white text-black hover:bg-[#fbcfe8] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 cursor-pointer"
                               : "bg-gray-100 text-gray-500 opacity-70 cursor-pointer"
-                          }`}
+                        }`}
                         style={{ borderRadius: WOBBLY_SM }}
                       >
                         <span>Lvl {i + 1}</span>

@@ -358,7 +358,7 @@ Generate a level JSON with pairs, time limit, and emojis.`,
     sampleMultipleJson: `[
   { "id": 51, "knivesToThrow": 10, "rotationSpeed": 0.05, "preStuckKnives": [0, 3.14] }
 ]`,
-  }
+  },
 ];
 
 export default function AdminGamesManagement() {
@@ -375,7 +375,13 @@ export default function AdminGamesManagement() {
 
   const [analytics, setAnalytics] = useState<GameAnalytics>({
     totalPlays: 0,
-    gamePlayCounts: { "arrow-puzzle": 0, "pipe-connect": 0, "2048": 0, "memory-match": 0, "knife-thrower": 0 },
+    gamePlayCounts: {
+      "arrow-puzzle": 0,
+      "pipe-connect": 0,
+      "2048": 0,
+      "memory-match": 0,
+      "knife-thrower": 0,
+    },
     players: {},
   });
 

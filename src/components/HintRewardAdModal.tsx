@@ -24,7 +24,9 @@ export default function HintRewardAdModal({
   const gameAds = useAds("games");
   const [activeAdIndex, setActiveAdIndex] = useState(0);
   const [adKey, setAdKey] = useState(0);
-  const [askingConfirmation, setAskingConfirmation] = useState(mode === "extra-lives" || mode === "extra-moves");
+  const [askingConfirmation, setAskingConfirmation] = useState(
+    mode === "extra-lives" || mode === "extra-moves",
+  );
   const [countdown, setCountdown] = useState(3);
   const [canClose, setCanClose] = useState(false);
   const prevIsOpen = useRef(false);
@@ -162,10 +164,13 @@ export default function HintRewardAdModal({
                     <span className="inline-flex items-center gap-1.5 text-[11px] font-display font-bold uppercase tracking-wider bg-[#fff9c4] text-[#2d2d2d] px-3 py-1 rounded-full border border-[#2d2d2d]">
                       <Zap className="h-3 w-3 fill-[#ff4d4d] text-[#ff4d4d]" /> Out of Lives
                     </span>
-                    <h2 className="font-display text-2xl font-bold text-[#2d2d2d]">Out of Lives! 💔</h2>
+                    <h2 className="font-display text-2xl font-bold text-[#2d2d2d]">
+                      Out of Lives! 💔
+                    </h2>
                     <p className="text-sm text-[#6b6660] font-sans leading-relaxed max-w-xs mx-auto">
                       Kya aap ek chhota sa ad dekh kar{" "}
-                      <span className="text-[#ff4d4d] font-bold">+3 Extra Lives</span> lena chahte hain?
+                      <span className="text-[#ff4d4d] font-bold">+3 Extra Lives</span> lena chahte
+                      hain?
                     </p>
                   </div>
 
@@ -204,10 +209,13 @@ export default function HintRewardAdModal({
                     <span className="inline-flex items-center gap-1.5 text-[11px] font-display font-bold uppercase tracking-wider bg-[#bfdbfe] text-[#2d2d2d] px-3 py-1 rounded-full border border-[#2d2d2d]">
                       <Lightbulb className="h-3 w-3 fill-[#2d2d2d] text-[#2d2d2d]" /> Out of Moves
                     </span>
-                    <h2 className="font-display text-2xl font-bold text-[#2d2d2d]">Out of Moves! 🚫</h2>
+                    <h2 className="font-display text-2xl font-bold text-[#2d2d2d]">
+                      Out of Moves! 🚫
+                    </h2>
                     <p className="text-sm text-[#6b6660] font-sans leading-relaxed max-w-xs mx-auto">
                       Kya aap ek chhota sa ad dekh kar{" "}
-                      <span className="text-[#3b82f6] font-bold">+10 Extra Moves</span> lena chahte hain?
+                      <span className="text-[#3b82f6] font-bold">+10 Extra Moves</span> lena chahte
+                      hain?
                     </p>
                   </div>
 
@@ -368,8 +376,9 @@ export default function HintRewardAdModal({
               {/* Mode label */}
               <div className="px-5 pt-3 flex items-center gap-2">
                 <div
-                  className={`p-2 rounded-xl border-2 border-[#2d2d2d] shadow-[2px_2px_0px_0px_#2d2d2d] ${mode === "extra-lives" ? "bg-[#ff4d4d]" : "bg-[#fff9c4]"
-                    }`}
+                  className={`p-2 rounded-xl border-2 border-[#2d2d2d] shadow-[2px_2px_0px_0px_#2d2d2d] ${
+                    mode === "extra-lives" ? "bg-[#ff4d4d]" : "bg-[#fff9c4]"
+                  }`}
                 >
                   {mode === "extra-lives" ? (
                     <Heart className="h-4 w-4 text-white fill-white" />
@@ -412,10 +421,11 @@ export default function HintRewardAdModal({
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                     onClick={onRewardGranted}
-                    className={`w-full py-4 rounded-2xl font-display font-bold text-base border-2 border-[#2d2d2d] shadow-[4px_4px_0px_0px_#2d2d2d] flex items-center justify-center gap-2 cursor-pointer text-white transition-colors ${mode === "extra-lives"
+                    className={`w-full py-4 rounded-2xl font-display font-bold text-base border-2 border-[#2d2d2d] shadow-[4px_4px_0px_0px_#2d2d2d] flex items-center justify-center gap-2 cursor-pointer text-white transition-colors ${
+                      mode === "extra-lives"
                         ? "bg-[#ff4d4d] hover:bg-[#e63939]"
                         : "bg-[#3a8a4f] hover:bg-[#2e6f3e]"
-                      }`}
+                    }`}
                   >
                     <Gift className="h-5 w-5 fill-white animate-bounce" />
                     {mode === "extra-lives"

@@ -1252,16 +1252,14 @@ export const adminSetFeature = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
-      .from("app_settings" as any)
-      .upsert(
-        {
-          key: `${data.feature}_enabled`,
-          value: data.enabled,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "key" },
-      );
+    const { error } = await supabaseAdmin.from("app_settings" as any).upsert(
+      {
+        key: `${data.feature}_enabled`,
+        value: data.enabled,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "key" },
+    );
     if (error) throw new Error(error.message);
     return { ok: true, enabled: data.enabled };
   });

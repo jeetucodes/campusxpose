@@ -234,7 +234,8 @@ export default function GamesHub() {
 
   const currentUser = leaderboardList.find((p) => p.isCurrentUser);
   const totalUserPoints =
-    currentUser?.score || stats.arrowLevel * 150 + stats.pipeLevel * 100 + stats.knifeLevel * 120 + stats.best2048;
+    currentUser?.score ||
+    stats.arrowLevel * 150 + stats.pipeLevel * 100 + stats.knifeLevel * 120 + stats.best2048;
   const userRank =
     leaderboardList.findIndex((p) => p.isCurrentUser) >= 0
       ? leaderboardList.findIndex((p) => p.isCurrentUser) + 1

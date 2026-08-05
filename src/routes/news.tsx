@@ -65,7 +65,9 @@ function NewsPage() {
         else next.delete(id);
         try {
           localStorage.setItem("liked_news", JSON.stringify(Array.from(next)));
-        } catch {}
+        } catch {
+          /* ignore */
+        }
         return next;
       });
       queryClient.setQueryData(["home"], (old: any) => {

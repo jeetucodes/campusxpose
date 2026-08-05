@@ -278,19 +278,6 @@ function Home() {
           </motion.div>
         )}
 
-        {/* Stats Row */}
-        <div className="grid grid-cols-4 gap-2 pt-2 pb-4">
-          {[
-            { n: data?.collegeCount ?? 0, l: "Colleges", color: "text-accent" },
-            { n: data?.postCount ?? 0, l: "Reports", color: "text-yellow-500" },
-            { n: data?.incidentCount ?? 0, l: "Incidents", color: "text-accent" },
-            { n: data?.userCount ?? 0, l: "Anon Users", color: "text-yellow-500" },
-          ].map((s, i) => (
-            <motion.div key={i} whileHover={{ scale: 1.06, rotate: i % 2 === 0 ? 1.5 : -1.5 }}>
-              <AnimatedStat {...s} />
-            </motion.div>
-          ))}
-        </div>
 
         {/* Confessions Banner */}
         <motion.div whileHover={{ scale: 1.01 }}>

@@ -188,7 +188,7 @@ function Game2048() {
         const raw = localStorage.getItem("cx_2048_custom_levels");
         if (raw) setCustomCount(JSON.parse(raw).length);
         else setCustomCount(0);
-      } catch (e) { }
+      } catch (e) {}
     };
     syncLevels();
     window.addEventListener("storage", syncLevels);
@@ -217,7 +217,7 @@ function Game2048() {
           if (list[levelIdx - 4]) return list[levelIdx - 4];
         }
       }
-    } catch (e) { }
+    } catch (e) {}
 
     return STATIC_2048_LEVELS[levelIdx] || STATIC_2048_LEVELS[0];
   }, [levelIdx]);
@@ -325,7 +325,7 @@ function Game2048() {
       className="min-h-[100dvh] pb-16 text-ink font-sans select-none overflow-x-hidden relative"
       style={{
         backgroundColor: "#f4f1ea",
-        backgroundImage: `url('https://www.transparenttextures.com/patterns/handmade-paper.png')`
+        backgroundImage: `url('https://www.transparenttextures.com/patterns/handmade-paper.png')`,
       }}
     >
       {/* Header */}
@@ -365,7 +365,9 @@ function Game2048() {
             {/* Score & Best */}
             <div className="flex items-center gap-3 rotate-1">
               <div className="bg-white border-4 border-ink px-4 py-1.5 rounded-wobbly-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-center relative mt-2">
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-black uppercase text-ink/70 bg-blue-100 px-2 rounded-full border-2 border-ink">SCORE</div>
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-black uppercase text-ink/70 bg-blue-100 px-2 rounded-full border-2 border-ink">
+                  SCORE
+                </div>
                 <div className="font-display text-2xl font-black leading-none mt-1">{score}</div>
               </div>
               <div className="bg-postit border-4 border-ink px-4 py-1.5 rounded-wobbly-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-center relative mt-2">
@@ -405,7 +407,9 @@ function Game2048() {
             {grid.map((row, r) =>
               row.map((val, c) => {
                 const style = val ? TILE_STYLES[val] || { bg: "#fbbf24", text: "#2d2d2d" } : null;
-                const isObstacle = currentLevelData.obstacles?.some((obs: [number, number]) => obs[0] === r && obs[1] === c);
+                const isObstacle = currentLevelData.obstacles?.some(
+                  (obs: [number, number]) => obs[0] === r && obs[1] === c,
+                );
 
                 if (isObstacle) {
                   return (
@@ -421,7 +425,7 @@ function Game2048() {
                 return (
                   <div
                     key={`${r}-${c}`}
-                    className={`relative flex items-center justify-center rounded-xl sm:rounded-2xl border-4 font-display font-black text-2xl sm:text-4xl transition-all ${val ? 'border-ink shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]' : 'border-ink/20'}`}
+                    className={`relative flex items-center justify-center rounded-xl sm:rounded-2xl border-4 font-display font-black text-2xl sm:text-4xl transition-all ${val ? "border-ink shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]" : "border-ink/20"}`}
                     style={{
                       backgroundColor: style ? style.bg : "rgba(255, 255, 255, 0.1)",
                       color: style ? style.text : "transparent",
@@ -483,13 +487,16 @@ function Game2048() {
                 style={{ borderRadius: WOBBLY_SM }}
               >
                 <div className="bg-paper text-ink p-8 border-4 border-ink shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rotate-2 flex flex-col items-center gap-4 relative">
-                  <div className="absolute -top-4 -right-4 bg-green-400 text-ink font-black px-4 py-1 rotate-12 border-2 border-ink shadow-sm">SUCCESS!</div>
+                  <div className="absolute -top-4 -right-4 bg-green-400 text-ink font-black px-4 py-1 rotate-12 border-2 border-ink shadow-sm">
+                    SUCCESS!
+                  </div>
                   <div className="text-6xl animate-bounce">👑</div>
                   <h2 className="font-display text-3xl sm:text-4xl font-black uppercase text-ink text-center">
                     Target Reached!
                   </h2>
                   <p className="text-sm font-black text-ink/80 bg-green-100 px-4 py-2 border-2 border-ink rounded-full">
-                    You created the <span className="text-green-600 text-lg">{targetTile}</span> tile!
+                    You created the <span className="text-green-600 text-lg">{targetTile}</span>{" "}
+                    tile!
                   </p>
 
                   <div className="flex items-center gap-3 mt-4 w-full">
@@ -562,7 +569,7 @@ function Game2048() {
                       if (customRaw && JSON.parse(customRaw)[i - 4])
                         lvlData = JSON.parse(customRaw)[i - 4];
                     }
-                  } catch (e) { }
+                  } catch (e) {}
 
                   const title = lvlData?.title || `Challenge Level #${i + 1}`;
                   const target = lvlData?.targetTile || 2048;
@@ -574,10 +581,11 @@ function Game2048() {
                         setLevelIdx(i);
                         setShowLevels(false);
                       }}
-                      className={`w-full p-3 border-2 border-black rounded-2xl flex items-center justify-between text-left transition-all cursor-pointer ${i === levelIdx
+                      className={`w-full p-3 border-2 border-black rounded-2xl flex items-center justify-between text-left transition-all cursor-pointer ${
+                        i === levelIdx
                           ? "bg-[#fef08a] border-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] scale-[1.02]"
                           : "bg-white hover:bg-slate-100 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-                        }`}
+                      }`}
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-xl bg-black text-white border border-black flex items-center justify-center font-display font-black text-xs">

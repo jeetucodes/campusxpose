@@ -110,7 +110,7 @@ function playGameSound(type: "launch" | "deflect" | "clear" | "hit" | "win", isM
         osc.stop(ctx.currentTime + i * 0.1 + 0.4);
       });
     }
-  } catch (e) { }
+  } catch (e) {}
 }
 
 // ─── Web Haptics Vibration Helper ─────────────────────────────────────────────
@@ -122,7 +122,7 @@ function triggerVibration(pattern: number | number[]) {
   ) {
     try {
       (navigator as any).vibrate(pattern);
-    } catch (e) { }
+    } catch (e) {}
   }
 }
 
@@ -416,7 +416,7 @@ export default function ArrowPuzzleGame() {
         } else {
           setCustomLevelsCount(0);
         }
-      } catch (e) { }
+      } catch (e) {}
     };
     syncCustom();
     window.addEventListener("storage", syncCustom);
@@ -472,7 +472,7 @@ export default function ArrowPuzzleGame() {
         const map = JSON.parse(raw);
         return map["arrow-puzzle"] === false;
       }
-    } catch (e) { }
+    } catch (e) {}
     return false;
   }, []);
 
@@ -489,7 +489,7 @@ export default function ArrowPuzzleGame() {
           data = overrides[idx];
         }
       }
-    } catch (e) { }
+    } catch (e) {}
 
     // 2. Read Custom AI imported levels (for idx >= 100)
     if (!data && idx >= 100) {
@@ -503,7 +503,7 @@ export default function ArrowPuzzleGame() {
             }
           }
         }
-      } catch (e) { }
+      } catch (e) {}
     }
 
     // 3. Fallback to static built-in level
@@ -555,7 +555,7 @@ export default function ArrowPuzzleGame() {
         setHighestUnlocked((prev) => Math.max(prev, targetIdx));
         try {
           localStorage.setItem("cx_arrow_level", String(Math.max(highestUnlocked, targetIdx)));
-        } catch (e) { }
+        } catch (e) {}
         initLevel(targetIdx);
         return;
       }
@@ -878,12 +878,13 @@ export default function ArrowPuzzleGame() {
               return (
                 <div
                   key={`cell-${i}`}
-                  className={`border-2 border-dashed transition-all flex items-center justify-center ${isBlockerPoint
+                  className={`border-2 border-dashed transition-all flex items-center justify-center ${
+                    isBlockerPoint
                       ? "bg-rose-100 border-rose-500 shadow-[inset_0_0_8px_rgba(244,63,94,0.4)]"
                       : isPathCell
                         ? "bg-amber-100/70 border-amber-400/80 shadow-[inset_0_0_8px_rgba(251,191,36,0.3)]"
                         : "bg-black/5 border-black/20"
-                    }`}
+                  }`}
                   style={{
                     gridRow: r + 1,
                     gridColumn: c + 1,
@@ -909,14 +910,15 @@ export default function ArrowPuzzleGame() {
                 <motion.button
                   key={`obs-${obs.id}`}
                   onClick={() => handleObstacleTap(obs)}
-                  className={`absolute flex items-center justify-center border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${obs.type === "wall"
+                  className={`absolute flex items-center justify-center border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${
+                    obs.type === "wall"
                       ? "bg-[#d6d3d1] overflow-hidden"
                       : obs.type === "bomb"
                         ? "bg-[#f87171]"
                         : isMirror
                           ? "bg-[#e0f2fe]"
                           : "bg-[#bfdbfe]"
-                    }`}
+                  }`}
                   style={{
                     gridRow: obs.row + 1,
                     gridColumn: obs.col + 1,
@@ -1035,10 +1037,11 @@ export default function ArrowPuzzleGame() {
                     onMouseLeave={() => setHoveredArrowId(null)}
                     onTouchStart={() => setHoveredArrowId(arrow.id)}
                     onTouchEnd={() => setHoveredArrowId(null)}
-                    className={`absolute flex items-center justify-center cursor-pointer ${DIR_COLORS[arrow.dir]} transition-shadow border-2 border-black z-10 ${isTappable
+                    className={`absolute flex items-center justify-center cursor-pointer ${DIR_COLORS[arrow.dir]} transition-shadow border-2 border-black z-10 ${
+                      isTappable
                         ? "shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:scale-105"
                         : "opacity-70 shadow-none border-2 scale-95"
-                      } ${isHinted ? "ring-4 ring-[#fef08a] !shadow-[0_0_15px_rgba(254,240,138,1)] z-20" : ""} ${isMoving ? "z-30 pointer-events-none" : ""}`}
+                    } ${isHinted ? "ring-4 ring-[#fef08a] !shadow-[0_0_15px_rgba(254,240,138,1)] z-20" : ""} ${isMoving ? "z-30 pointer-events-none" : ""}`}
                     style={{
                       gridRow: arrow.row + 1,
                       gridColumn: arrow.col + 1,
@@ -1366,12 +1369,13 @@ export default function ArrowPuzzleGame() {
                             );
                           }
                         }}
-                        className={`h-14 w-14 shrink-0 border-2 border-black font-display font-black text-xs transition-all outline-none flex flex-col items-center justify-center ${i === levelIdx
+                        className={`h-14 w-14 shrink-0 border-2 border-black font-display font-black text-xs transition-all outline-none flex flex-col items-center justify-center ${
+                          i === levelIdx
                             ? "bg-[#bfdbfe] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] scale-110 z-10"
                             : unlocked
                               ? "bg-white text-black hover:bg-[#fbcfe8] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 cursor-pointer"
                               : "bg-gray-100 text-gray-500 opacity-70 cursor-pointer"
-                          }`}
+                        }`}
                         style={{ borderRadius: WOBBLY_SM }}
                       >
                         <span>Lvl {i + 1}</span>
