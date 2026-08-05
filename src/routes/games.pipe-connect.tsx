@@ -234,7 +234,6 @@ export default function PipeConnectGame() {
   const [levelData, setLevelData] = useState<PipeLevelData | null>(null);
   const [tiles, setTiles] = useState<PipeTile[]>([]);
   const [moves, setMoves] = useState(0);
-  const [lives, setLives] = useState(5);
   const [hintsLeft, setHintsLeft] = useState(3);
   const [hintedTileKey, setHintedTileKey] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
@@ -301,7 +300,6 @@ export default function PipeConnectGame() {
       setLevelData(normalizedData);
       setTiles(normalizedData.tiles);
       setMoves(0);
-      setLives(5);
       setHintsLeft(3);
       setHintedTileKey(null);
       setWon(false);
@@ -362,13 +360,6 @@ export default function PipeConnectGame() {
       setOverloadAnim({ row: r, col: c });
       setTimeout(() => {
         setOverloadAnim(null);
-        setLives((prev) => {
-          const next = prev - 1;
-          if (next <= 0) {
-            setShowLivesAd(true);
-          }
-          return next;
-        });
         if (levelData) {
           const data = getPipeLevel(levelIdx);
           setTiles(data.tiles);
@@ -402,7 +393,7 @@ export default function PipeConnectGame() {
       if (!levelData) return;
       const movesLeft = levelData.maxMoves - moves;
       if (movesLeft <= 0) {
-        setShowLivesAd(true);
+        setShowMovesAd(true);
         return;
       }
       if (hintedTileKey === `${tile.row},${tile.col}`) setHintedTileKey(null);
@@ -415,12 +406,17 @@ export default function PipeConnectGame() {
         ),
       );
       setMoves((m) => m + 1);
+      
+      // If after this move, there are no moves left (movesLeft - 1 <= 0), show ad modal
+      if (movesLeft - 1 <= 0) {
+        setTimeout(() => setShowMovesAd(true), 600);
+      }
     },
     [won, gameOver, moves, levelData, overloadAnim, hintedTileKey],
   );
 
   const [showHintAd, setShowHintAd] = useState(false);
-  const [showLivesAd, setShowLivesAd] = useState(false);
+  const [showMovesAd, setShowMovesAd] = useState(false);
 
   const handleHint = () => {
     if (hintsLeft > 0 && !won && !gameOver) {
@@ -487,18 +483,24 @@ export default function PipeConnectGame() {
   const progressPct = Math.round((levelIdx / TOTAL_PIPE_LEVELS) * 100);
 
   return (
-    <div className="min-h-screen bg-[#f4f4f5]">
+    <div 
+      className="min-h-[100dvh] pb-16 text-ink font-sans select-none overflow-x-hidden relative"
+      style={{
+        backgroundColor: "#f4f1ea",
+        backgroundImage: `url('https://www.transparenttextures.com/patterns/handmade-paper.png')`
+      }}
+    >
       {/* Header */}
-      <div className="sticky top-0 z-40 border-b-4 border-black bg-white">
+      <div className="sticky top-0 z-40 border-b-4 border-ink bg-paper shadow-ink-soft">
         <div className="mx-auto flex max-w-lg items-center justify-between px-4 py-3">
           <Link
-            to="/"
-            className="flex items-center gap-2 text-sm font-black text-black hover:scale-105 transition-transform"
+            to="/games"
+            className="flex items-center gap-2 text-sm font-black text-ink hover:scale-105 transition-transform"
           >
             <ArrowLeft className="h-5 w-5" strokeWidth={3} /> Back
           </Link>
           <div className="flex flex-col items-center">
-            <h1 className="font-display text-2xl font-black tracking-tight uppercase text-black">
+            <h1 className="font-display text-2xl font-black tracking-tight uppercase text-ink rotate-1">
               Pipe Connect
             </h1>
           </div>
@@ -509,82 +511,58 @@ export default function PipeConnectGame() {
       <div className="mx-auto max-w-lg px-4 py-8 space-y-8">
         {/* Stats Dashboard */}
         <div className="space-y-6">
-          {/* Top Row: Level & Lives */}
+          {/* Top Row: Level Select */}
           <div className="flex items-center justify-between">
             <button
               onClick={() => setShowLevels(true)}
-              className="flex items-center gap-2 bg-[#fbcfe8] px-5 py-2.5 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all outline-none"
+              className="flex items-center gap-2 bg-yellow-200 px-5 py-2.5 border-4 border-ink shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all outline-none -rotate-2 w-full justify-center"
               style={{ borderRadius: WOBBLY_SM }}
             >
-              <span className="font-display text-xl font-black text-black tracking-tight uppercase">
-                Level {levelIdx + 1}
+              <span className="font-display text-xl font-black text-ink tracking-tight uppercase">
+                Stage <span className="text-red-500">{levelIdx + 1}</span>
               </span>
-              <span className="text-[12px] font-black text-black/70 flex items-center bg-white px-2 py-0.5 rounded-full border-2 border-black">
+              <span className="text-[12px] font-black text-ink/70 flex items-center bg-white px-2 py-0.5 rounded-full border-2 border-ink">
                 / {totalPipeLevels} <ChevronDown className="h-3 w-3 ml-1" strokeWidth={4} />
               </span>
             </button>
-            <div
-              className="flex items-center gap-1.5 bg-white px-4 py-2.5 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-              style={{ borderRadius: WOBBLY_SM }}
-            >
-              {Array.from({ length: 5 }).map((_, i) => (
-                <motion.div
-                  key={i}
-                  animate={i < lives ? { scale: 1, opacity: 1 } : { scale: 0.6, opacity: 0.3 }}
-                  transition={{ duration: 0.2 }}
-                  className="relative"
-                >
-                  <Heart
-                    className={`h-5 w-5 ${i < lives ? "text-black fill-black" : "text-black/30"}`}
-                  />
-                  {i < lives && (
-                    <div className="absolute top-[3px] left-[3px] w-[5px] h-[5px] bg-white rounded-full blur-[0.5px]" />
-                  )}
-                </motion.div>
-              ))}
-            </div>
           </div>
 
           {/* Bottom Row: Moves, Left, Reset */}
           <div className="flex items-stretch gap-4">
             <div
-              className="flex-1 bg-[#bfdbfe] border-4 border-black p-3 flex flex-col items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+              className="flex-1 bg-white border-4 border-ink p-3 flex flex-col items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rotate-1 relative"
               style={{ borderRadius: WOBBLY_SM }}
             >
-              <div className="text-[12px] font-black text-black/70 uppercase tracking-widest mb-1">
-                Moves
-              </div>
-              <div className="font-display text-3xl font-black text-black leading-none">
+              <div className="absolute -top-3 text-[10px] font-black uppercase text-ink/70 bg-blue-100 px-2 rounded-full border-2 border-ink">MOVES</div>
+              <div className="font-display text-3xl font-black text-ink leading-none mt-2">
                 {moves}
               </div>
             </div>
             <div
-              className="flex-1 bg-[#bbf7d0] border-4 border-black p-3 flex flex-col items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+              className="flex-1 bg-postit border-4 border-ink p-3 flex flex-col items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] -rotate-1 relative"
               style={{ borderRadius: WOBBLY_SM }}
             >
-              <div className="text-[12px] font-black text-black/70 uppercase tracking-widest mb-1">
-                Left
-              </div>
-              <div className="font-display text-3xl font-black text-black leading-none">
+              <div className="absolute -top-3 text-[10px] font-black uppercase text-ink/70 bg-white px-2 rounded-full border-2 border-ink">LEFT</div>
+              <div className="font-display text-3xl font-black text-ink leading-none mt-2">
                 {movesLeft}
               </div>
             </div>
             <button
               onClick={handleHint}
               disabled={hintsLeft === 0 || won || gameOver}
-              className={`w-[60px] sm:w-[70px] h-auto flex-shrink-0 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center p-0 transition-all hover:translate-y-1 hover:shadow-none ${hintsLeft > 0 ? "bg-[#fef08a] text-black" : "bg-gray-200 text-gray-400 opacity-60 hover:translate-y-0"}`}
+              className={`w-[60px] sm:w-[70px] h-auto flex-shrink-0 border-4 border-ink shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center p-0 transition-all hover:translate-y-1 hover:shadow-none ${hintsLeft > 0 ? "bg-yellow-300 text-ink" : "bg-gray-200 text-ink/40 opacity-60 hover:translate-y-0"}`}
               style={{ borderRadius: WOBBLY_SM }}
             >
               <div className="flex flex-col items-center justify-center py-2">
                 <Lightbulb className="h-6 w-6 sm:h-7 sm:w-7 mb-1" strokeWidth={3} />
-                <span className="text-[11px] font-black leading-none bg-white border-2 border-black text-black px-2 py-0.5 rounded-full">
+                <span className="text-[11px] font-black leading-none bg-white border-2 border-ink text-ink px-2 py-0.5 rounded-full">
                   {hintsLeft}
                 </span>
               </div>
             </button>
             <button
               onClick={resetLevel}
-              className="w-[60px] sm:w-[70px] h-auto flex-shrink-0 border-4 border-black bg-white text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-gray-100 transition-all hover:translate-y-1 hover:shadow-none p-0 flex items-center justify-center"
+              className="w-[60px] sm:w-[70px] h-auto flex-shrink-0 border-4 border-ink bg-white text-ink shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-gray-100 transition-all hover:-translate-y-0.5 active:translate-y-1 active:shadow-none p-0 flex items-center justify-center"
               style={{ borderRadius: WOBBLY_SM }}
             >
               <RotateCcw className="h-6 w-6 sm:h-7 sm:w-7" strokeWidth={3} />
@@ -594,11 +572,11 @@ export default function PipeConnectGame() {
 
         {/* Game Board */}
         <div
-          className="relative w-full border-4 border-black bg-white p-3 sm:p-4 select-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
+          className="relative w-full border-[6px] border-ink bg-ink p-3 sm:p-4 select-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rotate-1 mt-4"
           style={{ borderRadius: WOBBLY_MD }}
         >
           <div
-            className="grid gap-2 relative z-10"
+            className="grid gap-2 sm:gap-3 relative z-10"
             style={{
               gridTemplateColumns: `repeat(${levelData.gridSize}, 1fr)`,
               gridTemplateRows: `repeat(${levelData.gridSize}, 1fr)`,
@@ -617,7 +595,7 @@ export default function PipeConnectGame() {
                 return (
                   <div
                     key={key}
-                    className="bg-black/5 border-2 border-dashed border-black/20"
+                    className="bg-black/5 border-2 border-dashed border-ink/30"
                     style={{
                       gridRow: tile.row + 1,
                       gridColumn: tile.col + 1,
@@ -633,19 +611,15 @@ export default function PipeConnectGame() {
               if (tile.type === "blocked") {
                 tileBg = "#d6d3d1";
               } else if (tile.type === "overload") {
-                if (isOverloading) {
-                  tileBg = "#f87171";
-                } else if (isPowered) {
-                  tileBg = "#fca5a5";
-                } else {
-                  tileBg = "#fecaca";
-                }
+                if (isOverloading) tileBg = "#ef4444";
+                else if (isPowered) tileBg = "#fca5a5";
+                else tileBg = "#fecaca";
               } else if (tile.type === "source") {
-                tileBg = isPowered ? "#bbf7d0" : "#d1d5db";
+                tileBg = isPowered ? "#4ade80" : "#d1d5db";
               } else if (tile.type === "device") {
-                tileBg = isPowered ? "#fef08a" : "#d1d5db";
+                tileBg = isPowered ? "#fde047" : "#d1d5db";
               } else {
-                tileBg = isPowered ? "#bfdbfe" : "#ffffff";
+                tileBg = isPowered ? "#60a5fa" : "#ffffff";
               }
 
               return (
@@ -653,11 +627,11 @@ export default function PipeConnectGame() {
                   key={key}
                   onClick={() => handleTap(tile)}
                   disabled={tile.fixed || won || gameOver}
-                  className={`flex items-center justify-center relative overflow-hidden transition-shadow border-2 border-black z-10 ${
+                  className={`flex items-center justify-center relative overflow-hidden transition-shadow border-4 border-ink z-10 ${
                     tile.fixed
                       ? "opacity-70 shadow-none scale-95 cursor-default"
-                      : "cursor-pointer hover:scale-105 active:scale-95 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-                  } ${isHinted ? "ring-4 ring-[#fef08a] !shadow-[0_0_15px_rgba(254,240,138,1)] z-20" : ""}`}
+                      : "cursor-pointer hover:scale-105 active:scale-95 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                  } ${isHinted ? "ring-4 ring-yellow-400 !shadow-[0_0_20px_rgba(250,204,21,1)] z-20" : ""}`}
                   style={{
                     gridRow: tile.row + 1,
                     gridColumn: tile.col + 1,
@@ -701,45 +675,46 @@ export default function PipeConnectGame() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 flex flex-col items-center justify-center bg-[#bbf7d0]/80 backdrop-blur-sm z-30"
+                className="absolute inset-0 flex flex-col items-center justify-center bg-ink/90 backdrop-blur-sm z-30"
                 style={{ borderRadius: WOBBLY_MD }}
               >
                 <motion.div
                   initial={{ scale: 0.5, y: 50, rotate: 5 }}
-                  animate={{ scale: 1, y: 0, rotate: 0 }}
+                  animate={{ scale: 1, y: 0, rotate: -2 }}
                   transition={{ type: "spring", bounce: 0.6 }}
-                  className="bg-white border-4 border-black p-8 text-center space-y-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] max-w-[80%]"
+                  className="bg-paper border-4 border-ink p-8 text-center space-y-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] max-w-[85%] relative flex flex-col items-center"
                   style={{ borderRadius: WOBBLY_MD }}
                 >
+                  <div className="absolute -top-4 -left-4 bg-green-400 text-ink font-black px-4 py-1 -rotate-6 border-2 border-ink shadow-sm">AWESOME!</div>
                   <motion.div
                     animate={{ rotate: [0, -10, 10, -5, 5, 0] }}
                     transition={{ duration: 0.6, delay: 0.3 }}
-                    className="text-6xl"
+                    className="text-6xl animate-bounce"
                   >
-                    🎉
+                    💡
                   </motion.div>
-                  <h2 className="font-display text-3xl font-black text-black uppercase">
+                  <h2 className="font-display text-3xl font-black text-ink uppercase">
                     Circuit Complete!
                   </h2>
-                  <p className="text-black/70 text-lg font-bold">
-                    Solved in <strong className="text-black">{moves}</strong> moves
+                  <p className="text-ink/80 text-lg font-bold bg-green-100 px-4 py-2 rounded-full border-2 border-ink">
+                    Solved in <strong className="text-ink">{moves}</strong> moves
                   </p>
-                  <div className="flex flex-col gap-3 justify-center mt-2">
+                  <div className="flex flex-col gap-3 justify-center mt-2 w-full">
                     {levelIdx < TOTAL_PIPE_LEVELS - 1 && (
                       <button
                         onClick={nextLevel}
-                        className="w-full h-12 bg-[#fef08a] text-black hover:bg-[#fde047] border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all text-lg font-black"
+                        className="w-full h-12 bg-green-400 text-ink hover:bg-green-500 border-4 border-ink shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 active:translate-y-1 active:shadow-none transition-all text-lg font-black"
                         style={{ borderRadius: WOBBLY_SM }}
                       >
-                        Next Level <Zap className="h-5 w-5 ml-2 fill-black text-black inline" />
+                        Next Stage <Zap className="h-5 w-5 ml-2 fill-ink text-ink inline" />
                       </button>
                     )}
                     <button
                       onClick={resetLevel}
-                      className="w-full h-12 bg-white text-black hover:bg-gray-100 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all text-lg font-black"
+                      className="w-full h-12 bg-white text-ink hover:bg-gray-100 border-4 border-ink shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 active:translate-y-1 active:shadow-none transition-all text-lg font-black"
                       style={{ borderRadius: WOBBLY_SM }}
                     >
-                      <RotateCcw className="h-5 w-5 mr-2 inline" strokeWidth={3} /> Retry
+                      <RotateCcw className="h-5 w-5 mr-2 inline" strokeWidth={3} /> Play Again
                     </button>
                   </div>
                 </motion.div>
@@ -749,34 +724,32 @@ export default function PipeConnectGame() {
 
           {/* Game Over overlay */}
           <AnimatePresence>
-            {gameOver && (
+            {gameOver && !won && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 flex flex-col items-center justify-center bg-[#fbcfe8]/80 backdrop-blur-sm z-30"
+                className="absolute inset-0 flex flex-col items-center justify-center bg-ink/90 backdrop-blur-sm z-30"
                 style={{ borderRadius: WOBBLY_MD }}
               >
                 <motion.div
-                  initial={{ scale: 0.5, y: 50, rotate: -5 }}
-                  animate={{ scale: 1, y: 0, rotate: 0 }}
-                  transition={{ type: "spring", bounce: 0.5 }}
-                  className="bg-white border-4 border-black p-8 text-center space-y-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] max-w-[80%]"
+                  initial={{ scale: 0.8, y: 20 }}
+                  animate={{ scale: 1, y: 0, rotate: 2 }}
+                  className="bg-paper border-4 border-ink p-8 text-center space-y-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] max-w-[85%] relative flex flex-col items-center"
                   style={{ borderRadius: WOBBLY_MD }}
                 >
-                  <div className="text-6xl animate-bounce">💔</div>
-                  <h2 className="font-display text-3xl font-black text-black uppercase">
-                    {lives <= 0 ? "Out of Lives!" : "Out of Moves!"}
+                  <div className="text-6xl animate-bounce">⚡</div>
+                  <h2 className="font-display text-3xl font-black text-red-500 uppercase tracking-wider">
+                    Game Over
                   </h2>
-                  <p className="text-black/70 text-lg font-bold">
-                    You made <strong className="text-black">{moves}</strong> moves
+                  <p className="text-ink/80 text-sm font-bold bg-gray-200 px-4 py-2 border-2 border-ink border-dashed">
+                    {movesLeft <= 0 ? "Out of moves!" : "Short circuit! Overload reached."}
                   </p>
                   <button
                     onClick={resetLevel}
-                    className="h-12 w-full mt-2 bg-[#fbcfe8] text-black hover:bg-[#f9a8d4] border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all text-lg font-black"
-                    style={{ borderRadius: WOBBLY_SM }}
+                    className="mt-4 bg-yellow-300 text-ink hover:bg-yellow-400 border-4 border-ink px-8 py-3 rounded-wobbly-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:-translate-y-1 active:translate-y-1 active:shadow-none text-lg font-black w-full"
                   >
-                    <RotateCcw className="h-5 w-5 mr-2 inline" strokeWidth={3} /> Try Again
+                    <RotateCcw className="h-5 w-5 mr-2 inline" strokeWidth={3} /> Retry Stage
                   </button>
                 </motion.div>
               </motion.div>
@@ -928,21 +901,21 @@ export default function PipeConnectGame() {
         onRewardGranted={claimHintAfterAd}
       />
 
-      {/* Extra Lives Revival Reward Ad Modal */}
+      {/* Extra Moves Reward Ad Modal */}
       <HintRewardAdModal
-        isOpen={showLivesAd}
-        mode="extra-lives"
+        isOpen={showMovesAd}
+        mode="extra-moves"
         onClose={() => {
-          setShowLivesAd(false);
+          setShowMovesAd(false);
           setGameOver(true);
         }}
         onRewardGranted={() => {
-          setLives(3);
+          setMoves((prev) => Math.max(0, prev - 10)); // Gives +10 moves
           setGameOver(false);
-          setShowLivesAd(false);
+          setShowMovesAd(false);
         }}
         onGameOverConfirm={() => {
-          setShowLivesAd(false);
+          setShowMovesAd(false);
           setGameOver(true);
         }}
       />

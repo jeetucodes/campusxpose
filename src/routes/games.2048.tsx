@@ -27,19 +27,19 @@ type Grid = (number | null)[][];
 type Direction = "up" | "down" | "left" | "right";
 
 const TILE_STYLES: Record<number, { bg: string; text: string; scale?: number }> = {
-  2: { bg: "#ffffff", text: "#000000" },
-  4: { bg: "#fef08a", text: "#000000" },
-  8: { bg: "#fbcfe8", text: "#000000" },
-  16: { bg: "#bfdbfe", text: "#000000" },
-  32: { bg: "#bbf7d0", text: "#000000" },
-  64: { bg: "#fcd68a", text: "#000000" },
-  128: { bg: "#e9d5ff", text: "#000000", scale: 0.85 },
-  256: { bg: "#f87171", text: "#ffffff", scale: 0.85 },
-  512: { bg: "#60a5fa", text: "#ffffff", scale: 0.8 },
-  1024: { bg: "#34d399", text: "#ffffff", scale: 0.7 },
-  2048: { bg: "#fbbf24", text: "#000000", scale: 0.7 },
-  4096: { bg: "#a855f7", text: "#ffffff", scale: 0.7 },
-  8192: { bg: "#ec4899", text: "#ffffff", scale: 0.7 },
+  2: { bg: "#ffffff", text: "#2d2d2d" },
+  4: { bg: "#fef08a", text: "#2d2d2d" },
+  8: { bg: "#fed7aa", text: "#2d2d2d" },
+  16: { bg: "#fbcfe8", text: "#2d2d2d" },
+  32: { bg: "#bfdbfe", text: "#2d2d2d" },
+  64: { bg: "#a7f3d0", text: "#2d2d2d" },
+  128: { bg: "#fca5a5", text: "#ffffff", scale: 0.9 },
+  256: { bg: "#60a5fa", text: "#ffffff", scale: 0.9 },
+  512: { bg: "#34d399", text: "#ffffff", scale: 0.8 },
+  1024: { bg: "#c084fc", text: "#ffffff", scale: 0.75 },
+  2048: { bg: "#fbbf24", text: "#2d2d2d", scale: 0.75 },
+  4096: { bg: "#f43f5e", text: "#ffffff", scale: 0.7 },
+  8192: { bg: "#1e293b", text: "#ffffff", scale: 0.7 },
 };
 
 const GRID_SIZE = 4;
@@ -321,17 +321,23 @@ function Game2048() {
   }, [handleMove]);
 
   return (
-    <div className="min-h-screen bg-[#f4f4f5] pb-16 text-black font-sans select-none">
+    <div 
+      className="min-h-[100dvh] pb-16 text-ink font-sans select-none overflow-x-hidden relative"
+      style={{
+        backgroundColor: "#f4f1ea",
+        backgroundImage: `url('https://www.transparenttextures.com/patterns/handmade-paper.png')`
+      }}
+    >
       {/* Header */}
-      <div className="sticky top-0 z-40 border-b-4 border-black bg-white">
+      <div className="sticky top-0 z-40 border-b-4 border-ink bg-paper shadow-ink-soft">
         <div className="mx-auto flex max-w-lg items-center justify-between px-4 py-3">
           <Link
             to="/games"
-            className="flex items-center gap-2 text-sm font-black text-black hover:scale-105 transition-transform"
+            className="flex items-center gap-2 text-sm font-black text-ink hover:scale-105 transition-transform"
           >
             <ArrowLeft className="h-5 w-5" strokeWidth={3} /> Back
           </Link>
-          <h1 className="font-display text-2xl font-black tracking-tight uppercase">
+          <h1 className="font-display text-2xl font-black tracking-tight uppercase rotate-1">
             2048 Classic
           </h1>
           <div className="w-10" />
@@ -345,65 +351,79 @@ function Game2048() {
             {/* Level Selector Button */}
             <button
               onClick={() => setShowLevels(true)}
-              className="flex items-center gap-2 bg-[#fbcfe8] px-4 py-2.5 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0.5 hover:shadow-none transition-all outline-none cursor-pointer"
+              className="flex items-center gap-2 bg-yellow-200 px-4 py-2 border-4 border-ink shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all outline-none cursor-pointer -rotate-2"
               style={{ borderRadius: WOBBLY_SM }}
             >
-              <span className="font-display text-lg font-black text-black uppercase">
-                Lvl {levelIdx + 1}
+              <span className="font-display text-xl font-black text-ink uppercase">
+                STAGE <span className="text-red-500">{levelIdx + 1}</span>
               </span>
-              <span className="text-[11px] font-black text-black/80 flex items-center bg-white px-2 py-0.5 rounded-full border-2 border-black">
+              <span className="text-[11px] font-black text-ink/80 flex items-center bg-white px-2 py-0.5 rounded-full border-2 border-ink">
                 / {totalLevelsCount} <ChevronDown className="h-3 w-3 ml-1" strokeWidth={4} />
               </span>
             </button>
 
             {/* Score & Best */}
-            <div className="flex items-center gap-2">
-              <div className="bg-[#bfdbfe] border-3 border-black px-3.5 py-1.5 rounded-2xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] text-center">
-                <div className="text-[9px] font-black uppercase text-black/70">SCORE</div>
-                <div className="font-display text-lg font-black leading-none">{score}</div>
+            <div className="flex items-center gap-3 rotate-1">
+              <div className="bg-white border-4 border-ink px-4 py-1.5 rounded-wobbly-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-center relative mt-2">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-black uppercase text-ink/70 bg-blue-100 px-2 rounded-full border-2 border-ink">SCORE</div>
+                <div className="font-display text-2xl font-black leading-none mt-1">{score}</div>
               </div>
-              <div className="bg-[#bbf7d0] border-3 border-black px-3.5 py-1.5 rounded-2xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] text-center">
-                <div className="text-[9px] font-black uppercase text-black/70 flex items-center gap-0.5">
-                  <Trophy className="h-3 w-3 text-amber-600" /> BEST
+              <div className="bg-postit border-4 border-ink px-4 py-1.5 rounded-wobbly-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-center relative mt-2">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-black uppercase text-ink/70 bg-white px-2 rounded-full border-2 border-ink flex items-center gap-0.5">
+                  <Trophy className="h-2.5 w-2.5 text-amber-600" /> BEST
                 </div>
-                <div className="font-display text-lg font-black leading-none">{best}</div>
+                <div className="font-display text-2xl font-black leading-none mt-1">{best}</div>
               </div>
             </div>
           </div>
 
           {/* Target Goal Banner */}
-          <div className="p-3 bg-[#fef08a] border-3 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] rounded-2xl flex items-center justify-between text-xs font-black">
-            <span>
+          <div className="p-3 bg-white border-4 border-ink shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-sm flex items-center justify-between text-sm font-black -rotate-1 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-2 h-full bg-blue-400" />
+            <span className="pl-3 text-ink">
               Goal: Reach{" "}
-              <span className="bg-black text-white px-2 py-0.5 rounded-md font-display">
+              <span className="bg-ink text-white px-2 py-0.5 rounded-sm font-display text-base border-2 border-ink shadow-sm">
                 {targetTile}
               </span>{" "}
               Tile
             </span>
             <button
               onClick={restart}
-              className="flex items-center gap-1 bg-white hover:bg-gray-100 border-2 border-black px-3 py-1 rounded-xl text-xs font-black cursor-pointer shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
+              className="flex items-center gap-1 bg-white hover:bg-gray-100 border-2 border-ink px-3 py-1.5 rounded-xl text-xs font-black cursor-pointer shadow-ink-soft transition-transform hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none"
             >
-              <RotateCcw className="h-3.5 w-3.5" /> Restart
+              <RotateCcw className="h-4 w-4" /> Restart
             </button>
           </div>
         </div>
 
         {/* Board */}
         <div
-          className="relative border-4 border-black bg-[#18181b] p-3 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
+          className="relative border-[6px] border-ink bg-ink p-3 sm:p-4 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] mt-8"
           style={{ borderRadius: WOBBLY_MD }}
         >
-          <div ref={boardRef} className="grid grid-cols-4 gap-2 aspect-square">
+          <div ref={boardRef} className="grid grid-cols-4 gap-2 sm:gap-3 aspect-square">
             {grid.map((row, r) =>
               row.map((val, c) => {
-                const style = val ? TILE_STYLES[val] || { bg: "#fbbf24", text: "#000000" } : null;
+                const style = val ? TILE_STYLES[val] || { bg: "#fbbf24", text: "#2d2d2d" } : null;
+                const isObstacle = currentLevelData.obstacles?.some((obs: [number, number]) => obs[0] === r && obs[1] === c);
+                
+                if (isObstacle) {
+                  return (
+                    <div
+                      key={`${r}-${c}`}
+                      className="relative flex items-center justify-center rounded-xl sm:rounded-2xl border-4 border-ink bg-ink/50"
+                    >
+                      <X className="w-8 h-8 text-ink/80 opacity-50" strokeWidth={3} />
+                    </div>
+                  );
+                }
+
                 return (
                   <div
                     key={`${r}-${c}`}
-                    className="relative flex items-center justify-center rounded-xl border-2 border-black font-display font-black text-2xl transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                    className={`relative flex items-center justify-center rounded-xl sm:rounded-2xl border-4 font-display font-black text-2xl sm:text-4xl transition-all ${val ? 'border-ink shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]' : 'border-ink/20'}`}
                     style={{
-                      backgroundColor: style ? style.bg : "#27272a",
+                      backgroundColor: style ? style.bg : "rgba(255, 255, 255, 0.1)",
                       color: style ? style.text : "transparent",
                     }}
                   >
@@ -411,7 +431,8 @@ function Game2048() {
                       <motion.span
                         initial={{ scale: 0.5 }}
                         animate={{ scale: style?.scale || 1 }}
-                        key={val}
+                        key={`${r}-${c}-${val}`}
+                        className="drop-shadow-sm"
                       >
                         {val}
                       </motion.span>
@@ -429,21 +450,24 @@ function Game2048() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-black/80 backdrop-blur-xs flex flex-col items-center justify-center p-6 text-center text-white space-y-4 rounded-3xl"
+                className="absolute inset-0 bg-ink/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center text-paper space-y-6 z-20"
+                style={{ borderRadius: WOBBLY_SM }}
               >
-                <div className="text-5xl">💥</div>
-                <h2 className="font-display text-3xl font-black uppercase text-[#fca5a5]">
-                  Game Over!
-                </h2>
-                <p className="text-xs font-bold text-gray-300">
-                  No more moves possible on this board.
-                </p>
-                <button
-                  onClick={restart}
-                  className="bg-[#fef08a] hover:bg-yellow-200 text-black border-2 border-black px-6 py-2.5 rounded-2xl font-display font-black text-sm uppercase shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] cursor-pointer"
-                >
-                  Try Again
-                </button>
+                <div className="bg-paper text-ink p-8 border-4 border-ink shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] -rotate-3 flex flex-col items-center gap-4">
+                  <div className="text-5xl animate-bounce">💥</div>
+                  <h2 className="font-display text-4xl font-black uppercase text-red-500 tracking-wider">
+                    GAME OVER
+                  </h2>
+                  <p className="text-sm font-bold text-ink/70 bg-gray-200 px-4 py-2 border-2 border-ink border-dashed">
+                    No more moves possible
+                  </p>
+                  <button
+                    onClick={restart}
+                    className="mt-4 bg-yellow-300 hover:bg-yellow-400 text-ink border-4 border-ink px-8 py-3 rounded-wobbly-sm font-display font-black text-xl uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] cursor-pointer transition-transform hover:-translate-y-1 active:translate-y-1 active:shadow-none"
+                  >
+                    Try Again
+                  </button>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -455,31 +479,36 @@ function Game2048() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-[#bbf7d0]/90 backdrop-blur-xs flex flex-col items-center justify-center p-6 text-center text-black space-y-4 rounded-3xl border-4 border-black"
+                className="absolute inset-0 bg-ink/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center space-y-4 z-20"
+                style={{ borderRadius: WOBBLY_SM }}
               >
-                <div className="text-5xl">👑</div>
-                <h2 className="font-display text-3xl font-black uppercase text-black">
-                  Target Reached!
-                </h2>
-                <p className="text-xs font-black text-black/80">
-                  You created the {targetTile} tile!
-                </p>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setKeepPlaying(true)}
-                    className="bg-white hover:bg-gray-100 border-2 border-black px-4 py-2 rounded-xl text-xs font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer"
-                  >
-                    Keep Going
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (levelIdx + 1 < totalLevelsCount) setLevelIdx((l) => l + 1);
-                      else restart();
-                    }}
-                    className="bg-black text-white border-2 border-black px-5 py-2.5 rounded-xl font-display font-black text-xs uppercase shadow-[2px_2px_0px_0px_rgba(254,240,138,1)] cursor-pointer"
-                  >
-                    Next Level →
-                  </button>
+                <div className="bg-paper text-ink p-8 border-4 border-ink shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rotate-2 flex flex-col items-center gap-4 relative">
+                  <div className="absolute -top-4 -right-4 bg-green-400 text-ink font-black px-4 py-1 rotate-12 border-2 border-ink shadow-sm">SUCCESS!</div>
+                  <div className="text-6xl animate-bounce">👑</div>
+                  <h2 className="font-display text-3xl sm:text-4xl font-black uppercase text-ink text-center">
+                    Target Reached!
+                  </h2>
+                  <p className="text-sm font-black text-ink/80 bg-green-100 px-4 py-2 border-2 border-ink rounded-full">
+                    You created the <span className="text-green-600 text-lg">{targetTile}</span> tile!
+                  </p>
+                  
+                  <div className="flex items-center gap-3 mt-4 w-full">
+                    <button
+                      onClick={() => setKeepPlaying(true)}
+                      className="flex-1 bg-white hover:bg-gray-100 border-4 border-ink py-3 rounded-xl text-sm font-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] cursor-pointer transition-transform hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none"
+                    >
+                      Keep Going
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (levelIdx + 1 < totalLevelsCount) setLevelIdx((l) => l + 1);
+                        else restart();
+                      }}
+                      className="flex-1 bg-green-400 hover:bg-green-500 text-ink border-4 border-ink py-3 rounded-xl font-display font-black text-sm uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] cursor-pointer transition-transform hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none"
+                    >
+                      {levelIdx + 1 < totalLevelsCount ? "Next Stage" : "Play Again"}
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             )}

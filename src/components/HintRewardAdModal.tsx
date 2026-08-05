@@ -5,7 +5,7 @@ import { useAds, type Ad } from "@/hooks/useAds";
 
 interface HintRewardAdModalProps {
   isOpen: boolean;
-  mode?: "hint" | "extra-lives";
+  mode?: "hint" | "extra-lives" | "extra-moves";
   onClose: () => void;
   onRewardGranted: () => void;
   onGameOverConfirm?: () => void;
@@ -24,7 +24,7 @@ export default function HintRewardAdModal({
   const gameAds = useAds("games");
   const [activeAdIndex, setActiveAdIndex] = useState(0);
   const [adKey, setAdKey] = useState(0);
-  const [askingConfirmation, setAskingConfirmation] = useState(mode === "extra-lives");
+  const [askingConfirmation, setAskingConfirmation] = useState(mode === "extra-lives" || mode === "extra-moves");
   const [countdown, setCountdown] = useState(3);
   const [canClose, setCanClose] = useState(false);
   const prevIsOpen = useRef(false);
@@ -56,7 +56,7 @@ export default function HintRewardAdModal({
   useEffect(() => {
     if (isOpen && !prevIsOpen.current) {
       globalAdOpenCount += 1;
-      setAskingConfirmation(mode === "extra-lives");
+      setAskingConfirmation(mode === "extra-lives" || mode === "extra-moves");
       if (gameAds.length > 0) {
         setActiveAdIndex(Math.max(0, globalAdOpenCount - 1) % gameAds.length);
       }
@@ -65,7 +65,7 @@ export default function HintRewardAdModal({
     }
     if (!isOpen) {
       setCanClose(false);
-      setAskingConfirmation(mode === "extra-lives");
+      setAskingConfirmation(mode === "extra-lives" || mode === "extra-moves");
     }
     prevIsOpen.current = isOpen;
   }, [isOpen, mode, gameAds.length]);
@@ -148,45 +148,91 @@ export default function HintRewardAdModal({
                 <X className="h-4 w-4 text-[#6b6660]" />
               </button>
 
-              <motion.div
-                animate={{ scale: [1, 1.12, 1] }}
-                transition={{ repeat: Infinity, duration: 1.4 }}
-                className="w-16 h-16 bg-[#ff4d4d] border-2 border-[#2d2d2d] rounded-2xl flex items-center justify-center shadow-[4px_4px_0px_0px_#2d2d2d]"
-              >
-                <Heart className="h-8 w-8 text-white fill-white" />
-              </motion.div>
+              {mode === "extra-lives" ? (
+                <>
+                  <motion.div
+                    animate={{ scale: [1, 1.12, 1] }}
+                    transition={{ repeat: Infinity, duration: 1.4 }}
+                    className="w-16 h-16 bg-[#ff4d4d] border-2 border-[#2d2d2d] rounded-2xl flex items-center justify-center shadow-[4px_4px_0px_0px_#2d2d2d]"
+                  >
+                    <Heart className="h-8 w-8 text-white fill-white" />
+                  </motion.div>
 
-              <div className="space-y-1.5">
-                <span className="inline-flex items-center gap-1.5 text-[11px] font-display font-bold uppercase tracking-wider bg-[#fff9c4] text-[#2d2d2d] px-3 py-1 rounded-full border border-[#2d2d2d]">
-                  <Zap className="h-3 w-3 fill-[#ff4d4d] text-[#ff4d4d]" /> Out of Lives
-                </span>
-                <h2 className="font-display text-2xl font-bold text-[#2d2d2d]">Out of Lives! 💔</h2>
-                <p className="text-sm text-[#6b6660] font-sans leading-relaxed max-w-xs mx-auto">
-                  Kya aap ek chhota sa ad dekh kar{" "}
-                  <span className="text-[#ff4d4d] font-bold">+3 Extra Lives</span> lena chahte hain?
-                </p>
-              </div>
+                  <div className="space-y-1.5">
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-display font-bold uppercase tracking-wider bg-[#fff9c4] text-[#2d2d2d] px-3 py-1 rounded-full border border-[#2d2d2d]">
+                      <Zap className="h-3 w-3 fill-[#ff4d4d] text-[#ff4d4d]" /> Out of Lives
+                    </span>
+                    <h2 className="font-display text-2xl font-bold text-[#2d2d2d]">Out of Lives! 💔</h2>
+                    <p className="text-sm text-[#6b6660] font-sans leading-relaxed max-w-xs mx-auto">
+                      Kya aap ek chhota sa ad dekh kar{" "}
+                      <span className="text-[#ff4d4d] font-bold">+3 Extra Lives</span> lena chahte hain?
+                    </p>
+                  </div>
 
-              <div className="w-full space-y-2.5 pt-1">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => setAskingConfirmation(false)}
-                  className="w-full bg-[#3a8a4f] hover:bg-[#2e6f3e] text-white font-display font-bold py-3.5 rounded-2xl text-base border-2 border-[#2d2d2d] shadow-[4px_4px_0px_0px_#2d2d2d] flex items-center justify-center gap-2 cursor-pointer transition-colors"
-                >
-                  <Video className="h-5 w-5 text-white" />
-                  Watch Ad for +3 Lives 🎬
-                </motion.button>
-                <button
-                  onClick={() => {
-                    if (onGameOverConfirm) onGameOverConfirm();
-                    onClose();
-                  }}
-                  className="w-full bg-[#f5f1e8] hover:bg-[#e5e0d8] text-[#6b6660] hover:text-[#2d2d2d] font-display font-bold py-2.5 rounded-2xl border border-[#2d2d2d]/40 text-sm transition-colors cursor-pointer"
-                >
-                  Game Over — End Game 💀
-                </button>
-              </div>
+                  <div className="w-full space-y-2.5 pt-1">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => setAskingConfirmation(false)}
+                      className="w-full bg-[#3a8a4f] hover:bg-[#2e6f3e] text-white font-display font-bold py-3.5 rounded-2xl text-base border-2 border-[#2d2d2d] shadow-[4px_4px_0px_0px_#2d2d2d] flex items-center justify-center gap-2 cursor-pointer transition-colors"
+                    >
+                      <Video className="h-5 w-5 text-white" />
+                      Watch Ad for +3 Lives 🎬
+                    </motion.button>
+                    <button
+                      onClick={() => {
+                        if (onGameOverConfirm) onGameOverConfirm();
+                        onClose();
+                      }}
+                      className="w-full bg-[#f5f1e8] hover:bg-[#e5e0d8] text-[#6b6660] hover:text-[#2d2d2d] font-display font-bold py-2.5 rounded-2xl border border-[#2d2d2d]/40 text-sm transition-colors cursor-pointer"
+                    >
+                      Game Over — End Game 💀
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <motion.div
+                    animate={{ scale: [1, 1.12, 1] }}
+                    transition={{ repeat: Infinity, duration: 1.4 }}
+                    className="w-16 h-16 bg-[#fde047] border-2 border-[#2d2d2d] rounded-2xl flex items-center justify-center shadow-[4px_4px_0px_0px_#2d2d2d]"
+                  >
+                    <Zap className="h-8 w-8 text-[#2d2d2d] fill-[#2d2d2d]" />
+                  </motion.div>
+
+                  <div className="space-y-1.5">
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-display font-bold uppercase tracking-wider bg-[#bfdbfe] text-[#2d2d2d] px-3 py-1 rounded-full border border-[#2d2d2d]">
+                      <Lightbulb className="h-3 w-3 fill-[#2d2d2d] text-[#2d2d2d]" /> Out of Moves
+                    </span>
+                    <h2 className="font-display text-2xl font-bold text-[#2d2d2d]">Out of Moves! 🚫</h2>
+                    <p className="text-sm text-[#6b6660] font-sans leading-relaxed max-w-xs mx-auto">
+                      Kya aap ek chhota sa ad dekh kar{" "}
+                      <span className="text-[#3b82f6] font-bold">+10 Extra Moves</span> lena chahte hain?
+                    </p>
+                  </div>
+
+                  <div className="w-full space-y-2.5 pt-1">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => setAskingConfirmation(false)}
+                      className="w-full bg-[#3a8a4f] hover:bg-[#2e6f3e] text-white font-display font-bold py-3.5 rounded-2xl text-base border-2 border-[#2d2d2d] shadow-[4px_4px_0px_0px_#2d2d2d] flex items-center justify-center gap-2 cursor-pointer transition-colors"
+                    >
+                      <Video className="h-5 w-5 text-white" />
+                      Watch Ad for +10 Moves 🎬
+                    </motion.button>
+                    <button
+                      onClick={() => {
+                        if (onGameOverConfirm) onGameOverConfirm();
+                        onClose();
+                      }}
+                      className="w-full bg-[#f5f1e8] hover:bg-[#e5e0d8] text-[#6b6660] hover:text-[#2d2d2d] font-display font-bold py-2.5 rounded-2xl border border-[#2d2d2d]/40 text-sm transition-colors cursor-pointer"
+                    >
+                      Game Over — End Game 💀
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           ) : (
             <>
