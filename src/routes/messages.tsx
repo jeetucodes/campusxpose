@@ -128,6 +128,45 @@ function Messages() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { byMessage, toggle } = useReactions("direct", hashedId);
 
+  // Nicknames & Blocked Users from LocalStorage
+  const [nicknames, setNicknames] = useState<Record<string, string>>(() => {
+    try {
+      const stored = localStorage.getItem("chat_nicknames");
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const [blockedUsers, setBlockedUsers] = useState<string[]>(() => {
+    try {
+      const stored = localStorage.getItem("chat_blocked_users");
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const updateNickname = (user: string, newName: string | null) => {
+    const updated = { ...nicknames };
+    if (newName) {
+      updated[user] = newName;
+    } else {
+      delete updated[user];
+    }
+    setNicknames(updated);
+    localStorage.setItem("chat_nicknames", JSON.stringify(updated));
+  };
+
+  const toggleBlockUser = (user: string) => {
+    const isBlocked = blockedUsers.includes(user);
+    const updated = isBlocked ? blockedUsers.filter((u) => u !== user) : [...blockedUsers, user];
+    setBlockedUsers(updated);
+    localStorage.setItem("chat_blocked_users", JSON.stringify(updated));
+  };
+
+  const getDisplayName = (user: string) => nicknames[user] || user;
+
   // Calling states
   const [incomingCall, setIncomingCall] = useState<{ roomID: string; callerUsername: string } | null>(null);
   const [activeCall, setActiveCall] = useState<{ roomID: string; isCaller: boolean; remoteUsername: string } | null>(null);
@@ -248,9 +287,10 @@ function Messages() {
       if (!existing || existing.created_at < m.created_at) map.set(other, m);
     }
     return Array.from(map.entries())
-      .map(([name, last]) => ({ name, last }))
-      .sort((a, b) => (a.last.created_at < b.last.created_at ? 1 : -1));
-  }, [all, username]);
+      .map(([user, msg]) => ({ user, msg }))
+      .filter((c) => !blockedUsers.includes(c.user))
+      .sort((a, b) => (a.msg.created_at < b.msg.created_at ? 1 : -1));
+  }, [all, username, blockedUsers]);
 
   const active = to;
   const dmRoom = active && username ? `dm-${[username, active].sort().join("|")}` : "";
@@ -740,41 +780,41 @@ function Messages() {
                   </div>
                 </div>
               ))
-            : conversations.map((c) => {
-                const unread = unreadBy[c.name] ?? 0;
+            : conversations.map((item) => {
+                const unread = unreadBy[item.user] ?? 0;
                 return (
                   <div
-                    key={c.name}
+                    key={item.user}
                     className={cn(
                       "group flex items-center gap-3 border-b-2 border-ink px-4 py-3 transition-all hover:bg-muted cursor-pointer relative",
-                      active === c.name && "bg-postit",
+                      active === item.user && "bg-postit",
                     )}
                   >
                     <Link
                       to="/messages"
-                      search={{ to: c.name }}
+                      search={{ to: item.user }}
                       className="flex min-w-0 flex-1 items-center gap-3"
                     >
-                      <UserSymbol username={c.name} size="sm" />
+                      <UserSymbol username={item.user} size="sm" />
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 truncate font-medium">
-                          {c.name}
-                          {c.name && verified.has(c.name) && (
+                          {getDisplayName(item.user)}
+                          {item.user && verified.has(item.user) && (
                             <VerifiedBadge className="h-3.5 w-3.5" />
                           )}
-                          {unread > 0 && active !== c.name && (
+                          {unread > 0 && active !== item.user && (
                             <span className="grid h-5 min-w-5 place-items-center bg-marker px-1 text-[10px] font-bold leading-none text-white wobbly-sm shadow-ink-soft">
                               {unread > 9 ? "9+" : unread}
                             </span>
                           )}
                         </div>
                         <div className="truncate text-xs text-muted-foreground">
-                          {c.last.sender_username === username ? "You: " : ""}
-                          {c.last.content}
+                          {item.msg.sender_username === username ? "You: " : ""}
+                          {item.msg.content}
                         </div>
                       </div>
                       <div className="shrink-0 text-[10px] text-muted-foreground">
-                        {timeAgo(c.last.created_at)}
+                        {timeAgo(item.msg.created_at)}
                       </div>
                     </Link>
                   </div>
@@ -810,7 +850,7 @@ function Messages() {
               <UserSymbol username={active} size="md" />
               <div>
                 <div className="inline-flex items-center gap-1 font-display font-bold">
-                  {active}
+                  {getDisplayName(active)}
                   {active && verified.has(active) && <VerifiedBadge />}
                 </div>
                 {online >= 2 ? (
@@ -841,14 +881,17 @@ function Messages() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48 bg-paper border-2 border-ink shadow-ink-md">
-                  <DropdownMenuItem className="cursor-pointer" onClick={() => toast.info("Change Name feature coming soon!")}>
-                    <Edit2 className="mr-2 h-4 w-4" /> Change Name
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => {
+                    const newName = prompt(`Enter a nickname for ${active}:\n(Leave blank to remove nickname)`, nicknames[active] || "");
+                    if (newName !== null) updateNickname(active, newName.trim());
+                  }}>
+                    <Edit2 className="mr-2 h-4 w-4" /> {nicknames[active] ? "Change Nickname" : "Add Nickname"}
                   </DropdownMenuItem>
                   <DropdownMenuItem className="cursor-pointer text-destructive focus:bg-destructive/10" onClick={() => deleteConversation(active)}>
                     <Trash2 className="mr-2 h-4 w-4 text-destructive" /> Delete Chat
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer text-destructive focus:bg-destructive/10" onClick={() => toast.info("Block user feature coming soon!")}>
-                    <Ban className="mr-2 h-4 w-4 text-destructive" /> Block User
+                  <DropdownMenuItem className="cursor-pointer text-destructive focus:bg-destructive/10" onClick={() => toggleBlockUser(active)}>
+                    <Ban className="mr-2 h-4 w-4 text-destructive" /> {blockedUsers.includes(active) ? "Unblock User" : "Block User"}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -1025,6 +1068,11 @@ function Messages() {
                   </span>
                 </div>
               </div>
+            ) : blockedUsers.includes(active) ? (
+              <div className="border-t-2 border-ink p-6 text-center bg-muted/20 text-muted-foreground font-medium flex items-center justify-center gap-2">
+                <Ban className="h-5 w-5" />
+                You have blocked this user. Unblock them from the top menu to send messages.
+              </div>
             ) : (
               <div className="shrink-0 border-t-2 border-ink bg-paper px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-4px_0_rgba(45,45,45,1)]">
                 <div className="mx-auto w-full max-w-2xl">
@@ -1097,7 +1145,7 @@ function Messages() {
                             send();
                           }
                         }}
-                        placeholder={`Message ${active}...`}
+                        placeholder={`Message ${getDisplayName(active)}...`}
                         maxLength={1000}
                         maxHeight={150}
                         className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 max-h-32 pt-2.5 text-ink placeholder:text-muted-foreground font-sans"
