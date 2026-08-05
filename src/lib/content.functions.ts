@@ -405,6 +405,25 @@ export const submitDirectMessage = createServerFn({ method: "POST" })
       throw new Error("You cannot message yourself");
     }
     const recipientHash = await lookupHashForUsername(data.recipientUsername);
+    
+    // Check if the recipient has ever replied
+    const { count: replyCount } = await supabaseAdmin.from("direct_messages" as any)
+      .select("id", { count: "exact", head: true })
+      .eq("sender_username", data.recipientUsername)
+      .eq("recipient_username", data.username);
+      
+    if (replyCount === 0) {
+      // Recipient has not replied. Check how many messages sender has sent.
+      const { count: sentCount } = await supabaseAdmin.from("direct_messages" as any)
+        .select("id", { count: "exact", head: true })
+        .eq("sender_username", data.username)
+        .eq("recipient_username", data.recipientUsername);
+        
+      if (sentCount !== null && sentCount >= 1) {
+        throw new Error("You can only send one message request. Wait for them to accept and reply.");
+      }
+    }
+
     const { error } = await supabaseAdmin.from("direct_messages" as any).insert({
       sender_hash: data.hashedId,
       sender_username: data.username,

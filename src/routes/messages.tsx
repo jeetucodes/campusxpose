@@ -179,6 +179,9 @@ function Messages() {
     localStorage.setItem("chat_accepted_users", JSON.stringify(updated));
   };
 
+  const [nicknameDialogOpen, setNicknameDialogOpen] = useState(false);
+  const [nicknameInput, setNicknameInput] = useState("");
+
   const getDisplayName = (user: string) => nicknames[user] || user;
 
   // Calling states
@@ -332,18 +335,36 @@ function Messages() {
   }, [hashedId, load]);
 
   // Build conversation list: the "other party" for every message I'm part of.
-  const conversations = useMemo(() => {
+  const { regularConversations, requests } = useMemo(() => {
     const map = new Map<string, DM>();
+    const messagesByUser = new Map<string, DM[]>();
     for (const m of all) {
       const other = m.sender_username === username ? m.recipient_username : m.sender_username;
+      if (!messagesByUser.has(other)) messagesByUser.set(other, []);
+      messagesByUser.get(other)!.push(m);
       const existing = map.get(other);
       if (!existing || existing.created_at < m.created_at) map.set(other, m);
     }
-    return Array.from(map.entries())
-      .map(([user, msg]) => ({ user, msg }))
-      .filter((c) => !blockedUsers.includes(c.user))
-      .sort((a, b) => (a.msg.created_at < b.msg.created_at ? 1 : -1));
-  }, [all, username, blockedUsers]);
+
+    const regular: Array<{ user: string; msg: DM }> = [];
+    const reqs: Array<{ user: string; msg: DM }> = [];
+
+    for (const [other, msg] of map.entries()) {
+      if (blockedUsers.includes(other)) continue;
+      const userMsgs = messagesByUser.get(other) || [];
+      const isReq = userMsgs.every((x) => x.sender_username !== username) && !acceptedUsers.includes(other);
+      if (isReq) reqs.push({ user: other, msg });
+      else regular.push({ user: other, msg });
+    }
+
+    const sortFn = (a: { msg: DM }, b: { msg: DM }) => (a.msg.created_at < b.msg.created_at ? 1 : -1);
+    return {
+      regularConversations: regular.sort(sortFn),
+      requests: reqs.sort(sortFn)
+    };
+  }, [all, username, blockedUsers, acceptedUsers]);
+
+  const [activeTab, setActiveTab] = useState<"messages" | "requests">("messages");
 
   const active = to;
   const dmRoom = active && username ? `dm-${[username, active].sort().join("|")}` : "";
@@ -793,41 +814,56 @@ function Messages() {
           </Dialog>
         </header>
 
-        {isPushSupportedFlag && pushStatus === "default" && (
-          <div className="bg-postit p-3 border-b-2 border-ink shadow-ink-soft">
-            <p className="text-sm font-sans font-medium text-ink mb-2">
-              Enable Push Notifications to get alerted for new messages.
-            </p>
-            <Button
-              onClick={handleEnablePush}
-              size="sm"
-              className="w-full bg-marker text-white hover:bg-marker/90 wobbly-sm shadow-none border-none"
-            >
-              <BellRing className="w-4 h-4 mr-2" /> Enable Notifications
-            </Button>
-          </div>
-        )}
-
-        <div className="border-b-2 border-ink bg-surface-2 p-3">
-          <div className="flex items-center gap-2 bg-white wobbly-sm border-2 border-ink shadow-ink-soft pr-1">
-            <Input
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && startNew()}
-              placeholder="Username to message..."
-              className="bg-transparent border-none focus-visible:ring-0 shadow-none text-ink placeholder:text-muted-foreground flex-1"
-            />
-            <Button
-              onClick={startNew}
-              size="icon"
-              className="shrink-0 bg-marker text-white hover:bg-marker/90 wobbly-sm h-8 w-8 transition-transform hover:-translate-y-0.5 shadow-none border-none"
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
+        <div className="flex border-b-2 border-ink">
+          <button 
+            className={cn("flex-1 py-2 font-display font-bold border-r-2 border-ink transition-colors", activeTab === "messages" ? "bg-accent text-white" : "bg-paper text-ink hover:bg-muted")}
+            onClick={() => setActiveTab("messages")}
+          >
+            Messages
+          </button>
+          <button 
+            className={cn("flex-1 py-2 font-display font-bold transition-colors", activeTab === "requests" ? "bg-accent text-white" : "bg-paper text-ink hover:bg-muted")}
+            onClick={() => setActiveTab("requests")}
+          >
+            Requests {requests.length > 0 && `(${requests.length})`}
+          </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto wobbly-scroll">
+          {isPushSupportedFlag && pushStatus === "default" && (
+            <div className="bg-postit p-3 border-b-2 border-ink shadow-ink-soft">
+              <p className="text-sm font-sans font-medium text-ink mb-2">
+                Enable Push Notifications to get alerted for new messages.
+              </p>
+              <Button
+                onClick={handleEnablePush}
+                size="sm"
+                className="w-full bg-marker text-white hover:bg-marker/90 wobbly-sm shadow-none border-none"
+              >
+                <BellRing className="w-4 h-4 mr-2" /> Enable Notifications
+              </Button>
+            </div>
+          )}
+
+          <div className="border-b-2 border-ink bg-surface-2 p-3">
+            <div className="flex items-center gap-2 bg-white wobbly-sm border-2 border-ink shadow-ink-soft pr-1">
+              <Input
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && startNew()}
+                placeholder="Username to message..."
+                className="bg-transparent border-none focus-visible:ring-0 shadow-none text-ink placeholder:text-muted-foreground flex-1"
+              />
+              <Button
+                onClick={startNew}
+                size="icon"
+                className="shrink-0 bg-marker text-white hover:bg-marker/90 wobbly-sm h-8 w-8 transition-transform hover:-translate-y-0.5 shadow-none border-none"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
           {loading
             ? Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className="flex items-center gap-3 px-4 py-3">
@@ -838,7 +874,7 @@ function Messages() {
                   </div>
                 </div>
               ))
-            : conversations.map((item) => {
+            : (activeTab === "requests" ? requests : regularConversations).map((item) => {
                 const unread = unreadBy[item.user] ?? 0;
                 return (
                   <div
@@ -878,7 +914,7 @@ function Messages() {
                   </div>
                 );
               })}
-          {!loading && conversations.length === 0 && (
+          {!loading && regularConversations.length === 0 && activeTab === "messages" && (
             <div className="flex flex-col items-center justify-center gap-3 px-4 py-16 text-center text-muted-foreground">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted/30">
                 <MessageCircle className="h-6 w-6 opacity-50" />
@@ -887,6 +923,16 @@ function Messages() {
                 No messages have arrived yet.
                 <br />
                 Start a conversation above or tap a username in Global Chat.
+              </p>
+            </div>
+          )}
+          {!loading && requests.length === 0 && activeTab === "requests" && (
+            <div className="flex flex-col items-center justify-center gap-3 px-4 py-16 text-center text-muted-foreground">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted/30">
+                <ShieldCheck className="h-6 w-6 opacity-50" />
+              </div>
+              <p className="text-sm">
+                No new message requests.
               </p>
             </div>
           )}
@@ -923,24 +969,25 @@ function Messages() {
                   <div className="text-xs text-muted-foreground">Anonymous direct message</div>
                 )}
               </div>
-              {active && !blockedUsers.includes(active) && !isUnknown && (
-                <button
-                  onClick={startCall}
-                  className="ml-auto rounded-full bg-accent/10 p-2 text-accent hover:bg-accent/20 transition-colors mr-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] border-2 border-ink"
-                >
-                  <Phone className="h-5 w-5" />
-                </button>
-              )}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:bg-muted">
-                    <MoreVertical className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
+              <div className="ml-auto flex items-center gap-2">
+                {active && !blockedUsers.includes(active) && !isUnknown && (
+                  <button
+                    onClick={startCall}
+                    className="rounded-full bg-accent/10 p-2 text-accent hover:bg-accent/20 transition-colors shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] border-2 border-ink"
+                  >
+                    <Phone className="h-5 w-5" />
+                  </button>
+                )}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:bg-muted">
+                      <MoreVertical className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48 bg-paper border-2 border-ink shadow-ink-md">
                   <DropdownMenuItem className="cursor-pointer" onClick={() => {
-                    const newName = prompt(`Enter a nickname for ${active}:\n(Leave blank to remove nickname)`, nicknames[active] || "");
-                    if (newName !== null) updateNickname(active, newName.trim());
+                    setNicknameInput(nicknames[active] || "");
+                    setNicknameDialogOpen(true);
                   }}>
                     <Edit2 className="mr-2 h-4 w-4" /> {nicknames[active] ? "Change Nickname" : "Add Nickname"}
                   </DropdownMenuItem>
@@ -952,6 +999,7 @@ function Messages() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+              </div>
             </header>
 
             {thread.some((m) => m.pinned) && (
@@ -1282,6 +1330,46 @@ function Messages() {
           onReject={rejectCall}
         />
       )}
+
+      {/* Nickname Dialog */}
+      <Dialog open={nicknameDialogOpen} onOpenChange={setNicknameDialogOpen}>
+        <DialogContent className="sm:max-w-md bg-paper border-2 border-ink shadow-[4px_4px_0px_rgba(0,0,0,1)] wobbly-sm">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-display font-bold">Nickname for {active}</DialogTitle>
+            <DialogDescription className="text-sm font-medium text-ink/70">
+              Only you can see this nickname. Leave blank to remove it.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <input
+              type="text"
+              placeholder="Enter a nickname"
+              value={nicknameInput}
+              onChange={(e) => setNicknameInput(e.target.value)}
+              className="w-full wobbly-sm border-2 border-ink bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-accent/50 shadow-ink-sm transition-all"
+              autoFocus
+            />
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="outline"
+              className="border-2 border-ink hover:bg-muted"
+              onClick={() => setNicknameDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="bg-accent text-white hover:bg-accent/90 border-2 border-ink shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 transition-transform"
+              onClick={() => {
+                updateNickname(active || "", nicknameInput.trim());
+                setNicknameDialogOpen(false);
+              }}
+            >
+              Save Nickname
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
