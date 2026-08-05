@@ -834,8 +834,9 @@ function seedRandom(seed: number) {
 }
 
 export function getStaticLevel(levelIdx: number): LevelData {
-  const idx = levelIdx < RAW_LEVELS.length ? levelIdx : levelIdx % RAW_LEVELS.length;
-  const layout = RAW_LEVELS[idx] || RAW_LEVELS[0];
+  const allowedLevels = RAW_LEVELS.filter(l => l.length <= 6);
+  const idx = levelIdx < allowedLevels.length ? levelIdx : levelIdx % allowedLevels.length;
+  const layout = allowedLevels[idx] || allowedLevels[0];
 
   const gridSize = layout.length;
   const arrows: ArrowData[] = [];

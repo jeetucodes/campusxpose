@@ -41,12 +41,20 @@ export const Route = createFileRoute("/games/arrow-puzzle")({
 });
 
 // ─── Web Audio Sound Effects Synthesizer ──────────────────────────────────────
+let globalAudioCtx: AudioContext | null = null;
+
 function playGameSound(type: "launch" | "deflect" | "clear" | "hit" | "win", isMuted: boolean) {
   if (isMuted || typeof window === "undefined") return;
   try {
-    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AudioCtx) return;
-    const ctx = new AudioCtx();
+    if (!globalAudioCtx) {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (AudioCtx) globalAudioCtx = new AudioCtx();
+    }
+    if (!globalAudioCtx) return;
+    if (globalAudioCtx.state === "suspended") {
+      globalAudioCtx.resume();
+    }
+    const ctx = globalAudioCtx;
 
     if (type === "launch") {
       const osc = ctx.createOscillator();
