@@ -368,9 +368,8 @@ export default function HintRewardAdModal({
               {/* Mode label */}
               <div className="px-5 pt-3 flex items-center gap-2">
                 <div
-                  className={`p-2 rounded-xl border-2 border-[#2d2d2d] shadow-[2px_2px_0px_0px_#2d2d2d] ${
-                    mode === "extra-lives" ? "bg-[#ff4d4d]" : "bg-[#fff9c4]"
-                  }`}
+                  className={`p-2 rounded-xl border-2 border-[#2d2d2d] shadow-[2px_2px_0px_0px_#2d2d2d] ${mode === "extra-lives" ? "bg-[#ff4d4d]" : "bg-[#fff9c4]"
+                    }`}
                 >
                   {mode === "extra-lives" ? (
                     <Heart className="h-4 w-4 text-white fill-white" />
@@ -413,11 +412,10 @@ export default function HintRewardAdModal({
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                     onClick={onRewardGranted}
-                    className={`w-full py-4 rounded-2xl font-display font-bold text-base border-2 border-[#2d2d2d] shadow-[4px_4px_0px_0px_#2d2d2d] flex items-center justify-center gap-2 cursor-pointer text-white transition-colors ${
-                      mode === "extra-lives"
+                    className={`w-full py-4 rounded-2xl font-display font-bold text-base border-2 border-[#2d2d2d] shadow-[4px_4px_0px_0px_#2d2d2d] flex items-center justify-center gap-2 cursor-pointer text-white transition-colors ${mode === "extra-lives"
                         ? "bg-[#ff4d4d] hover:bg-[#e63939]"
                         : "bg-[#3a8a4f] hover:bg-[#2e6f3e]"
-                    }`}
+                      }`}
                   >
                     <Gift className="h-5 w-5 fill-white animate-bounce" />
                     {mode === "extra-lives"

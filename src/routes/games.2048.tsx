@@ -188,7 +188,7 @@ function Game2048() {
         const raw = localStorage.getItem("cx_2048_custom_levels");
         if (raw) setCustomCount(JSON.parse(raw).length);
         else setCustomCount(0);
-      } catch (e) {}
+      } catch (e) { }
     };
     syncLevels();
     window.addEventListener("storage", syncLevels);
@@ -217,7 +217,7 @@ function Game2048() {
           if (list[levelIdx - 4]) return list[levelIdx - 4];
         }
       }
-    } catch (e) {}
+    } catch (e) { }
 
     return STATIC_2048_LEVELS[levelIdx] || STATIC_2048_LEVELS[0];
   }, [levelIdx]);
@@ -321,7 +321,7 @@ function Game2048() {
   }, [handleMove]);
 
   return (
-    <div 
+    <div
       className="min-h-[100dvh] pb-16 text-ink font-sans select-none overflow-x-hidden relative"
       style={{
         backgroundColor: "#f4f1ea",
@@ -406,7 +406,7 @@ function Game2048() {
               row.map((val, c) => {
                 const style = val ? TILE_STYLES[val] || { bg: "#fbbf24", text: "#2d2d2d" } : null;
                 const isObstacle = currentLevelData.obstacles?.some((obs: [number, number]) => obs[0] === r && obs[1] === c);
-                
+
                 if (isObstacle) {
                   return (
                     <div
@@ -491,7 +491,7 @@ function Game2048() {
                   <p className="text-sm font-black text-ink/80 bg-green-100 px-4 py-2 border-2 border-ink rounded-full">
                     You created the <span className="text-green-600 text-lg">{targetTile}</span> tile!
                   </p>
-                  
+
                   <div className="flex items-center gap-3 mt-4 w-full">
                     <button
                       onClick={() => setKeepPlaying(true)}
@@ -562,7 +562,7 @@ function Game2048() {
                       if (customRaw && JSON.parse(customRaw)[i - 4])
                         lvlData = JSON.parse(customRaw)[i - 4];
                     }
-                  } catch (e) {}
+                  } catch (e) { }
 
                   const title = lvlData?.title || `Challenge Level #${i + 1}`;
                   const target = lvlData?.targetTile || 2048;
@@ -574,11 +574,10 @@ function Game2048() {
                         setLevelIdx(i);
                         setShowLevels(false);
                       }}
-                      className={`w-full p-3 border-2 border-black rounded-2xl flex items-center justify-between text-left transition-all cursor-pointer ${
-                        i === levelIdx
+                      className={`w-full p-3 border-2 border-black rounded-2xl flex items-center justify-between text-left transition-all cursor-pointer ${i === levelIdx
                           ? "bg-[#fef08a] border-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] scale-[1.02]"
                           : "bg-white hover:bg-slate-100 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-xl bg-black text-white border border-black flex items-center justify-center font-display font-black text-xs">

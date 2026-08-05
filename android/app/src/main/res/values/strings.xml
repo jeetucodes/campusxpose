@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">CampusXpose</string>
+    <string name="title_activity_main">CampusXpose</string>
+    <string name="package_name">co.median.android.abxkxke</string>
+    <string name="custom_url_scheme">co.median.android.abxkxke</string>
+</resources>

@@ -195,7 +195,7 @@ export const drawKnifeStyle = (ctx: CanvasRenderingContext2D, theme: ThemeConfig
     ctx.fillStyle = "#fde047"; // Wood color base? No, wood color
     ctx.fill();
     ctx.stroke();
-    
+
     // Wood inner fill
     ctx.beginPath();
     ctx.moveTo(0, -KNIFE_HEIGHT / 2 + 4);
@@ -245,7 +245,7 @@ export const drawKnifeStyle = (ctx: CanvasRenderingContext2D, theme: ThemeConfig
     ctx.fillStyle = "#94a3b8"; // Silver nib
     ctx.fill();
     ctx.stroke();
-    
+
     // Nib slit
     ctx.beginPath();
     ctx.moveTo(0, -KNIFE_HEIGHT / 2 + 2);
@@ -272,31 +272,31 @@ export const drawKnifeStyle = (ctx: CanvasRenderingContext2D, theme: ThemeConfig
   } else if (type === "fork") {
     // Steel Fork
     ctx.fillStyle = "#cbd5e1"; // silver
-    
+
     // Handle
     ctx.beginPath();
-    ctx.rect(-KNIFE_WIDTH/2 + 2, -KNIFE_HEIGHT/2 + 25, KNIFE_WIDTH - 4, 30);
+    ctx.rect(-KNIFE_WIDTH / 2 + 2, -KNIFE_HEIGHT / 2 + 25, KNIFE_WIDTH - 4, 30);
     ctx.fill();
     ctx.stroke();
 
     // Base of prongs
     ctx.beginPath();
-    ctx.moveTo(-KNIFE_WIDTH/2 - 2, -KNIFE_HEIGHT/2 + 10);
-    ctx.lineTo(KNIFE_WIDTH/2 + 2, -KNIFE_HEIGHT/2 + 10);
-    ctx.lineTo(KNIFE_WIDTH/2 - 2, -KNIFE_HEIGHT/2 + 25);
-    ctx.lineTo(-KNIFE_WIDTH/2 + 2, -KNIFE_HEIGHT/2 + 25);
+    ctx.moveTo(-KNIFE_WIDTH / 2 - 2, -KNIFE_HEIGHT / 2 + 10);
+    ctx.lineTo(KNIFE_WIDTH / 2 + 2, -KNIFE_HEIGHT / 2 + 10);
+    ctx.lineTo(KNIFE_WIDTH / 2 - 2, -KNIFE_HEIGHT / 2 + 25);
+    ctx.lineTo(-KNIFE_WIDTH / 2 + 2, -KNIFE_HEIGHT / 2 + 25);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
 
     // 4 Prongs
-    for(let i=0; i<4; i++) {
-       const px = -KNIFE_WIDTH/2 - 2 + (i * ((KNIFE_WIDTH + 4)/3));
-       ctx.beginPath();
-       ctx.moveTo(px, -KNIFE_HEIGHT/2 + 10);
-       ctx.lineTo(px, -KNIFE_HEIGHT/2 - 5);
-       ctx.lineWidth = 2;
-       ctx.stroke();
+    for (let i = 0; i < 4; i++) {
+      const px = -KNIFE_WIDTH / 2 - 2 + (i * ((KNIFE_WIDTH + 4) / 3));
+      ctx.beginPath();
+      ctx.moveTo(px, -KNIFE_HEIGHT / 2 + 10);
+      ctx.lineTo(px, -KNIFE_HEIGHT / 2 - 5);
+      ctx.lineWidth = 2;
+      ctx.stroke();
     }
     ctx.lineWidth = 3; // reset
   } else if (type === "screwdriver") {
@@ -304,45 +304,45 @@ export const drawKnifeStyle = (ctx: CanvasRenderingContext2D, theme: ThemeConfig
     // Metal rod
     ctx.fillStyle = "#cbd5e1";
     ctx.beginPath();
-    ctx.rect(-2, -KNIFE_HEIGHT/2, 4, 30);
+    ctx.rect(-2, -KNIFE_HEIGHT / 2, 4, 30);
     ctx.fill();
     ctx.stroke();
 
     // Handle
     ctx.fillStyle = "#eab308"; // yellow handle
     ctx.beginPath();
-    ctx.rect(-KNIFE_WIDTH/2 + 1, -KNIFE_HEIGHT/2 + 30, KNIFE_WIDTH - 2, 25);
+    ctx.rect(-KNIFE_WIDTH / 2 + 1, -KNIFE_HEIGHT / 2 + 30, KNIFE_WIDTH - 2, 25);
     ctx.fill();
     ctx.stroke();
-    
+
     // Handle grips
     ctx.fillStyle = "#2d2d2d";
     ctx.beginPath();
-    ctx.rect(-KNIFE_WIDTH/2 + 1, -KNIFE_HEIGHT/2 + 35, KNIFE_WIDTH - 2, 4);
-    ctx.rect(-KNIFE_WIDTH/2 + 1, -KNIFE_HEIGHT/2 + 45, KNIFE_WIDTH - 2, 4);
+    ctx.rect(-KNIFE_WIDTH / 2 + 1, -KNIFE_HEIGHT / 2 + 35, KNIFE_WIDTH - 2, 4);
+    ctx.rect(-KNIFE_WIDTH / 2 + 1, -KNIFE_HEIGHT / 2 + 45, KNIFE_WIDTH - 2, 4);
     ctx.fill();
   } else if (type === "kunai") {
     // Ninja Kunai
     // Ring
     ctx.beginPath();
-    ctx.arc(0, KNIFE_HEIGHT/2, 6, 0, Math.PI * 2);
+    ctx.arc(0, KNIFE_HEIGHT / 2, 6, 0, Math.PI * 2);
     ctx.fillStyle = theme.knifePrimary || "#ffffff";
     ctx.fill();
     ctx.stroke();
 
     // Handle wrap
     ctx.beginPath();
-    ctx.rect(-3, -KNIFE_HEIGHT/2 + 30, 6, 25);
+    ctx.rect(-3, -KNIFE_HEIGHT / 2 + 30, 6, 25);
     ctx.fillStyle = "#ef4444"; // red wrap
     ctx.fill();
     ctx.stroke();
 
     // Blade
     ctx.beginPath();
-    ctx.moveTo(0, -KNIFE_HEIGHT/2 - 10);
-    ctx.lineTo(KNIFE_WIDTH/2 + 2, -KNIFE_HEIGHT/2 + 15);
-    ctx.lineTo(0, -KNIFE_HEIGHT/2 + 30);
-    ctx.lineTo(-KNIFE_WIDTH/2 - 2, -KNIFE_HEIGHT/2 + 15);
+    ctx.moveTo(0, -KNIFE_HEIGHT / 2 - 10);
+    ctx.lineTo(KNIFE_WIDTH / 2 + 2, -KNIFE_HEIGHT / 2 + 15);
+    ctx.lineTo(0, -KNIFE_HEIGHT / 2 + 30);
+    ctx.lineTo(-KNIFE_WIDTH / 2 - 2, -KNIFE_HEIGHT / 2 + 15);
     ctx.closePath();
     ctx.fillStyle = "#94a3b8"; // dark silver
     ctx.fill();
@@ -358,7 +358,7 @@ const KnifePreview = ({ type, theme }: { type: string, theme: ThemeConfig }) => 
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
     ctx.translate(canvas.width / 2, canvas.height / 2 + 10); // Center knife vertically
@@ -618,7 +618,7 @@ export default function KnifeThrowerGame() {
     if (gameState !== "playing") return;
     if (stateRef.current.flyingKnife !== null) return; // already throwing
     if (knivesLeft <= 0) return; // Check if we have knives left
-    
+
     playSynth("throw", isMuted);
 
     stateRef.current.flyingKnife = { y: KNIFE_START_Y, type: equippedKnife.replace("k_", "") };
@@ -1063,7 +1063,7 @@ export default function KnifeThrowerGame() {
             ctx.save();
             ctx.rotate(fruit.angle);
             ctx.translate(0, LOG_RADIUS + 15);
-            
+
             if (fruit.type === "orange") {
               drawSketchyCircle(0, 0, 14, "#2d2d2d", "#f97316", 2);
               // stem & leaf
@@ -1091,7 +1091,7 @@ export default function KnifeThrowerGame() {
               ctx.beginPath(); ctx.moveTo(0, -14); ctx.lineTo(4, -20); ctx.strokeStyle = "#2d2d2d"; ctx.lineWidth = 2; ctx.stroke();
               ctx.beginPath(); ctx.ellipse(8, -14, 6, 3, -Math.PI / 4, 0, Math.PI * 2); ctx.fillStyle = "#3a8a4f"; ctx.fill(); ctx.stroke();
             }
-            
+
             ctx.restore();
           }
         }
@@ -1299,7 +1299,7 @@ export default function KnifeThrowerGame() {
                 <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-red-500 border-2 border-ink shadow-sm" />
                 STAGE <span className="text-red-600">{levelIdx + 1}</span>
               </div>
-              
+
               <div className="flex gap-1.5 ml-1 bg-white/80 p-1.5 rounded-full border-2 border-ink shadow-ink-soft backdrop-blur-sm">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <Heart
@@ -1323,7 +1323,7 @@ export default function KnifeThrowerGame() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex gap-2">
                 <Button variant="ghost" size="icon" className="text-ink border-2 border-ink bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-full hover:bg-gray-100 w-10 h-10 sm:w-12 sm:h-12 hover:-translate-y-0.5 transition-all" onClick={(e) => { e.stopPropagation(); toggleMute(); }}>
                   {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
@@ -1380,15 +1380,15 @@ export default function KnifeThrowerGame() {
               <div className="absolute -top-16 left-1/2 -translate-x-1/2 animate-bounce drop-shadow-xl z-20">
                 <img src="/logo.jpeg" className="w-24 h-24 object-contain rounded-full border-4 border-ink bg-white shadow-ink-soft" alt="CX Logo" />
               </div>
-              
+
               <div className="mt-8 mb-1 font-display text-ink text-xl font-bold tracking-widest bg-yellow-200 px-3 py-1 -rotate-3 border-2 border-ink">CX GAMES</div>
               <h2 className="text-4xl font-black text-success mb-2 font-display uppercase italic drop-shadow-sm">Stage Cleared!</h2>
-              
+
               <div className="bg-postit w-full p-4 rounded-sm border-2 border-ink shadow-ink-soft rotate-2 my-4 flex flex-col gap-2">
-                 <div className="text-ink text-xl font-black font-display flex items-center justify-between gap-4"><span>SCORE</span> <span>{score}</span></div>
-                 <div className="text-ink/60 text-sm font-black font-display flex items-center justify-between gap-4"><span>BEST SCORE</span> <span>{Math.max(score, bestScore)}</span></div>
-                 <div className="w-full h-0.5 bg-ink/20 rounded-full" />
-                 <div className="text-warning text-xl font-black font-display flex items-center justify-between gap-4"><span>COINS</span> <span className="flex items-center gap-1"><Coins className="w-5 h-5"/>{coins}</span></div>
+                <div className="text-ink text-xl font-black font-display flex items-center justify-between gap-4"><span>SCORE</span> <span>{score}</span></div>
+                <div className="text-ink/60 text-sm font-black font-display flex items-center justify-between gap-4"><span>BEST SCORE</span> <span>{Math.max(score, bestScore)}</span></div>
+                <div className="w-full h-0.5 bg-ink/20 rounded-full" />
+                <div className="text-warning text-xl font-black font-display flex items-center justify-between gap-4"><span>COINS</span> <span className="flex items-center gap-1"><Coins className="w-5 h-5" />{coins}</span></div>
               </div>
 
               <Button
@@ -1408,15 +1408,15 @@ export default function KnifeThrowerGame() {
           <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-50 pointer-events-auto animate-in fade-in duration-300">
             <div className="bg-paper border-4 border-ink p-8 text-center max-w-sm w-[90%] flex flex-col items-center shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] rotate-1 relative overflow-hidden animate-in zoom-in-95 duration-300">
               <div className="absolute top-0 left-0 w-full h-3 bg-destructive border-b-4 border-ink" />
-              <div className="mt-4 mb-2 opacity-50"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ink"><path d="m15 9-6 6"/><path d="m9 9 6 6"/><circle cx="12" cy="12" r="10"/></svg></div>
+              <div className="mt-4 mb-2 opacity-50"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ink"><path d="m15 9-6 6" /><path d="m9 9 6 6" /><circle cx="12" cy="12" r="10" /></svg></div>
               <h2 className="text-6xl font-black text-destructive mb-2 font-display uppercase tracking-tighter drop-shadow-sm">GAME OVER</h2>
               <div className="text-ink font-bold font-sans opacity-70 mb-4 bg-gray-200 px-3 py-1 rounded-sm border-2 border-dashed border-gray-400">STAGE {levelIdx + 1} FAILED</div>
-              
+
               <div className="bg-white p-4 rounded-sm border-4 border-ink mb-6 w-full relative shadow-ink-soft flex flex-col gap-2">
-                 <div className="absolute -top-4 -right-4 bg-destructive text-white font-black px-3 py-1 rotate-12 text-sm border-2 border-ink shadow-ink-soft">FINAL</div>
-                 <div className="text-ink text-3xl font-black font-display flex items-center justify-between"><span>SCORE</span> <span>{score}</span></div>
-                 <div className="w-full h-0.5 bg-ink/20 rounded-full" />
-                 <div className="text-ink text-lg font-black font-display flex items-center justify-between opacity-60"><span>BEST SCORE</span> <span>{Math.max(score, bestScore)}</span></div>
+                <div className="absolute -top-4 -right-4 bg-destructive text-white font-black px-3 py-1 rotate-12 text-sm border-2 border-ink shadow-ink-soft">FINAL</div>
+                <div className="text-ink text-3xl font-black font-display flex items-center justify-between"><span>SCORE</span> <span>{score}</span></div>
+                <div className="w-full h-0.5 bg-ink/20 rounded-full" />
+                <div className="text-ink text-lg font-black font-display flex items-center justify-between opacity-60"><span>BEST SCORE</span> <span>{Math.max(score, bestScore)}</span></div>
               </div>
 
               <Button

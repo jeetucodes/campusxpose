@@ -11,6 +11,7 @@ import {
   Crown,
   Users,
   Activity,
+  ArrowLeft,
 } from "lucide-react";
 import { loadOrCreateIdentity } from "../lib/identity";
 import {
@@ -350,6 +351,12 @@ export default function GamesHub() {
       <div className="sticky top-0 z-40 border-b-4 border-black bg-[#fef08a] py-3 shadow-sm">
         <div className="mx-auto max-w-2xl px-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
+            <Link
+              to="/"
+              className="flex items-center justify-center h-10 w-10 bg-white border-2 border-black rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all mr-2"
+            >
+              <ArrowLeft className="h-5 w-5 text-black" strokeWidth={3} />
+            </Link>
             <div className="rounded-xl border-2 border-black bg-white p-2 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
               <Gamepad2 className="h-6 w-6" strokeWidth={3} />
             </div>
