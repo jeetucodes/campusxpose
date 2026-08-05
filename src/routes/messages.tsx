@@ -166,6 +166,19 @@ function Messages() {
     localStorage.setItem("chat_blocked_users", JSON.stringify(updated));
   };
 
+  const [acceptedUsers, setAcceptedUsers] = useState<string[]>([]);
+  
+  useEffect(() => {
+    const stored = localStorage.getItem("chat_accepted_users");
+    if (stored) setAcceptedUsers(JSON.parse(stored));
+  }, []);
+
+  const acceptUser = (user: string) => {
+    const updated = [...acceptedUsers, user];
+    setAcceptedUsers(updated);
+    localStorage.setItem("chat_accepted_users", JSON.stringify(updated));
+  };
+
   const getDisplayName = (user: string) => nicknames[user] || user;
 
   // Calling states
@@ -237,12 +250,38 @@ function Messages() {
     return () => clearInterval(interval);
   }, [username, load]);
 
+  const allRef = useRef(all);
+  const acceptedUsersRef = useRef(acceptedUsers);
+  useEffect(() => {
+    allRef.current = all;
+    acceptedUsersRef.current = acceptedUsers;
+  }, [all, acceptedUsers]);
+
   // Realtime: Listen for incoming calls
   useEffect(() => {
     if (!username) return;
     const callCh = supabase
       .channel(`calls-${username}`)
       .on("broadcast", { event: "incoming_call" }, async (payload) => {
+        const caller = payload.payload.caller;
+        const isAccepted = acceptedUsersRef.current.includes(caller) || allRef.current.some((m) => m.sender_username === username && m.recipient_username === caller);
+
+        if (!isAccepted) {
+          // Reject silently if they are unknown
+          const callerCh = supabase.channel(`calls-${caller}`);
+          callerCh.subscribe(async (status) => {
+            if (status === "SUBSCRIBED") {
+              await callerCh.send({
+                type: "broadcast",
+                event: "call_rejected",
+                payload: { roomID: payload.payload.roomID, reason: "declined" },
+              });
+              supabase.removeChannel(callerCh);
+            }
+          });
+          return;
+        }
+
         if (!activeCall && !incomingCall) { 
           setIncomingCall({
             roomID: payload.payload.roomID,
@@ -492,6 +531,8 @@ function Messages() {
       await load();
     }
   };
+
+  const isUnknown = thread.length > 0 && thread.every((m) => m.sender_username !== username) && !acceptedUsers.includes(active || "");
 
   return (
     <div className="flex h-[100dvh] bg-background md:h-[calc(100vh-4rem)]">
@@ -882,15 +923,14 @@ function Messages() {
                   <div className="text-xs text-muted-foreground">Anonymous direct message</div>
                 )}
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="ml-auto text-accent hover:bg-accent/10 hover:text-accent"
-                aria-label={`Call ${active}`}
-                onClick={startCall}
-              >
-                <Phone className="h-5 w-5" />
-              </Button>
+              {active && !blockedUsers.includes(active) && !isUnknown && (
+                <button
+                  onClick={startCall}
+                  className="ml-auto rounded-full bg-accent/10 p-2 text-accent hover:bg-accent/20 transition-colors mr-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] border-2 border-ink"
+                >
+                  <Phone className="h-5 w-5" />
+                </button>
+              )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="text-muted-foreground hover:bg-muted">
@@ -1089,6 +1129,36 @@ function Messages() {
               <div className="border-t-2 border-ink p-6 text-center bg-muted/20 text-muted-foreground font-medium flex items-center justify-center gap-2">
                 <Ban className="h-5 w-5" />
                 You have blocked this user. Unblock them from the top menu to send messages.
+              </div>
+            ) : thread.length > 0 && thread.every((m) => m.sender_username !== username) && !acceptedUsers.includes(active) ? (
+              <div className="shrink-0 border-t-2 border-ink bg-paper px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_-4px_0_rgba(45,45,45,1)]">
+                <div className="mx-auto w-full max-w-2xl bg-surface p-4 border-2 border-ink shadow-ink flex flex-col items-center text-center gap-4">
+                  <div className="space-y-1">
+                    <h3 className="font-display font-bold text-lg">Message Request</h3>
+                    <p className="text-sm text-ink/70 font-medium">
+                      If you reply, {getDisplayName(active)} will be able to call you and see when you've read their messages.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-4 w-full">
+                    <Button 
+                      variant="destructive" 
+                      className="flex-1 border-2 border-ink shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 transition-transform"
+                      onClick={() => {
+                        if (confirm(`Are you sure you want to delete this chat request from ${active}?`)) {
+                          deleteConversation(active);
+                        }
+                      }}
+                    >
+                      Delete
+                    </Button>
+                    <Button 
+                      className="flex-1 bg-accent hover:bg-accent/90 text-white border-2 border-ink shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 transition-transform"
+                      onClick={() => acceptUser(active)}
+                    >
+                      Accept
+                    </Button>
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="shrink-0 border-t-2 border-ink bg-paper px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-4px_0_rgba(45,45,45,1)]">
