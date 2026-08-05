@@ -14,6 +14,9 @@ import {
   Loader2,
   Copy,
   Share2,
+  Phone,
+  PhoneMissed,
+  PhoneCall,
 } from "lucide-react";
 import { toast } from "sonner";
 import QRCode from "react-qr-code";
@@ -28,6 +31,8 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { AutoResizeTextarea } from "@/components/AutoResizeTextarea";
+import { AudioCallUI, CallLogData } from "@/components/AudioCallUI";
+import { IncomingCallModal } from "@/components/IncomingCallModal";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -114,6 +119,10 @@ function Messages() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { byMessage, toggle } = useReactions("direct", hashedId);
 
+  // Calling states
+  const [incomingCall, setIncomingCall] = useState<{ roomID: string; callerUsername: string } | null>(null);
+  const [activeCall, setActiveCall] = useState<{ roomID: string; isCaller: boolean; remoteUsername: string } | null>(null);
+
   const [pushStatus, setPushStatus] = useState<string>("unsupported");
   const [isPushSupportedFlag, setIsPushSupportedFlag] = useState(false);
 
@@ -179,6 +188,31 @@ function Messages() {
     return () => clearInterval(interval);
   }, [username, load]);
 
+  // Realtime: Listen for incoming calls
+  useEffect(() => {
+    if (!username) return;
+    const callCh = supabase
+      .channel(`calls-${username}`)
+      .on("broadcast", { event: "incoming_call" }, (payload) => {
+        if (!activeCall) { // don't ring if already in a call
+          setIncomingCall({
+            roomID: payload.payload.roomID,
+            callerUsername: payload.payload.caller,
+          });
+        }
+      })
+      .on("broadcast", { event: "call_rejected" }, (payload) => {
+        if (activeCall?.roomID === payload.payload.roomID) {
+          endCall({ missed: true, duration: 0 });
+          toast("Call was rejected or ended.");
+        }
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(callCh);
+    };
+  }, [username, activeCall]);
+
   // Realtime: instantly reflect new/updated DMs that involve me.
   useEffect(() => {
     if (!hashedId) return;
@@ -242,6 +276,67 @@ function Messages() {
     prevActive.current = active;
     box.scrollTo({ top: box.scrollHeight, behavior: instant ? "auto" : "smooth" });
   }, [active, thread.length]);
+
+  const startCall = async () => {
+    if (!active || !username) return;
+    const roomID = `room_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    const callCh = supabase.channel(`calls-${active}`);
+    callCh.subscribe(async (status) => {
+      if (status === "SUBSCRIBED") {
+        await callCh.send({
+          type: "broadcast",
+          event: "incoming_call",
+          payload: { roomID, caller: username },
+        });
+        setActiveCall({ roomID, isCaller: true, remoteUsername: active }); // Join immediately as caller
+        supabase.removeChannel(callCh);
+      }
+    });
+  };
+
+  const endCall = async (log?: CallLogData) => {
+    setActiveCall(null);
+    if (log && activeCall && activeCall.isCaller && hashedId && username) {
+      const content = log.missed ? "CALL_LOG|MISSED" : `CALL_LOG|ANSWERED|${log.duration}`;
+      try {
+        await submitDirectMessage({
+          data: {
+            hashedId,
+            username,
+            recipientUsername: activeCall.remoteUsername,
+            content,
+          },
+        });
+        await load();
+      } catch (e) {
+        console.error("Failed to log call", e);
+      }
+    }
+  };
+
+  const acceptCall = () => {
+    if (incomingCall) {
+      setActiveCall({ roomID: incomingCall.roomID, isCaller: false, remoteUsername: incomingCall.callerUsername });
+      setIncomingCall(null);
+    }
+  };
+
+  const rejectCall = async () => {
+    if (incomingCall) {
+      const callCh = supabase.channel(`calls-${incomingCall.callerUsername}`);
+      callCh.subscribe(async (status) => {
+        if (status === "SUBSCRIBED") {
+          await callCh.send({
+            type: "broadcast",
+            event: "call_rejected",
+            payload: { roomID: incomingCall.roomID },
+          });
+          setIncomingCall(null);
+          supabase.removeChannel(callCh);
+        }
+      });
+    }
+  };
 
   const send = async () => {
     if ((!text.trim() && !imageFile) || !hashedId || !username || !active) return;
@@ -724,7 +819,16 @@ function Messages() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="ml-auto text-muted-foreground hover:text-destructive"
+                className="ml-auto text-accent hover:bg-accent/10 hover:text-accent"
+                aria-label={`Call ${active}`}
+                onClick={startCall}
+              >
+                <Phone className="h-5 w-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-muted-foreground hover:text-destructive"
                 aria-label={`Delete conversation with ${active}`}
                 onClick={() => deleteConversation(active)}
               >
@@ -836,10 +940,34 @@ function Messages() {
                                   </div>
                                 )}
                                 <div className="flex flex-wrap items-end justify-end gap-x-2">
-                                  {m.content && (
+                                  {m.content && !m.content.startsWith("CALL_LOG|") && (
                                     <span className="whitespace-pre-wrap break-all leading-relaxed">
                                       <Linkify text={m.content} />
                                     </span>
+                                  )}
+                                  {m.content?.startsWith("CALL_LOG|") && (
+                                    <div className="flex items-center gap-2 font-display font-medium">
+                                      {m.content === "CALL_LOG|MISSED" ? (
+                                        own ? (
+                                          <>
+                                            <PhoneMissed className="h-4 w-4 text-white/80" />
+                                            <span className="text-white/90">Canceled Call</span>
+                                          </>
+                                        ) : (
+                                          <>
+                                            <PhoneMissed className="h-4 w-4 text-red-500" />
+                                            <span className="text-red-500">Missed Call</span>
+                                          </>
+                                        )
+                                      ) : (
+                                        <>
+                                          <PhoneCall className="h-4 w-4" />
+                                          <span>
+                                            Audio Call • {Math.floor(parseInt(m.content.split("|")[2] || "0") / 60)}:{(parseInt(m.content.split("|")[2] || "0") % 60).toString().padStart(2, "0")}
+                                          </span>
+                                        </>
+                                      )}
+                                    </div>
                                   )}
                                   <span
                                     className={cn(
@@ -983,6 +1111,22 @@ function Messages() {
           </div>
         )}
       </section>
+
+      {activeCall && (
+        <AudioCallUI
+          roomID={activeCall.roomID}
+          isCaller={activeCall.isCaller}
+          remoteUsername={activeCall.remoteUsername}
+          onLeaveRoom={endCall}
+        />
+      )}
+      {incomingCall && (
+        <IncomingCallModal
+          callerUsername={incomingCall.callerUsername}
+          onAccept={acceptCall}
+          onReject={rejectCall}
+        />
+      )}
     </div>
   );
 }
