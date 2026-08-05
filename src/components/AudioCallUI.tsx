@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Mic, MicOff, PhoneOff } from "lucide-react";
 import { UserSymbol } from "@/components/UserSymbol";
+import { cn } from "@/lib/utils";
 
 export interface CallLogData {
   missed: boolean;
@@ -13,10 +14,11 @@ interface AudioCallUIProps {
   roomID: string;
   isCaller: boolean;
   remoteUsername: string;
+  remoteNickname?: string;
   onLeaveRoom: (log?: CallLogData) => void;
 }
 
-export function AudioCallUI({ roomID, isCaller, remoteUsername, onLeaveRoom }: AudioCallUIProps) {
+export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, onLeaveRoom }: AudioCallUIProps) {
   const [callStatus, setCallStatus] = useState<string>("Connecting...");
   const [isMuted, setIsMuted] = useState(false);
   const localStreamRef = useRef<MediaStream | null>(null);
@@ -245,31 +247,46 @@ export function AudioCallUI({ roomID, isCaller, remoteUsername, onLeaveRoom }: A
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-zinc-950 text-white flex flex-col items-center justify-center p-6 text-center">
+    <div className="fixed inset-0 z-[9999] bg-paper text-ink flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-300">
       <audio ref={remoteAudioRef} autoPlay />
 
-      <div className="flex flex-col items-center space-y-6">
-        <UserSymbol username={remoteUsername} size="lg" />
-        <h2 className="text-3xl font-display font-bold">@{remoteUsername}</h2>
-        <p className="text-zinc-400 text-lg animate-pulse">{callStatus}</p>
+      <div className="flex flex-col items-center space-y-6 relative z-10 w-full max-w-sm">
+        <div className="wobbly-md bg-white border-4 border-ink p-8 shadow-ink flex flex-col items-center gap-6 w-full relative">
+          {/* Decorative pins */}
+          <div className="absolute -top-3 -left-3 h-6 w-6 rounded-full bg-marker border-2 border-ink shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"></div>
+          <div className="absolute -bottom-3 -right-3 h-6 w-6 rounded-full bg-accent border-2 border-ink shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"></div>
 
-        <div className="flex items-center gap-6 mt-12">
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={toggleMute}
-            className={`h-16 w-16 rounded-full border-2 ${isMuted ? "border-red-500 text-red-500 bg-red-500/10 hover:bg-red-500/20" : "border-zinc-700 text-white bg-zinc-800 hover:bg-zinc-700 hover:text-white"}`}
-          >
-            {isMuted ? <MicOff className="h-8 w-8" /> : <Mic className="h-8 w-8" />}
-          </Button>
+          <UserSymbol username={remoteUsername} size="lg" />
+          <div className="space-y-2">
+            <h2 className="text-3xl font-display font-black tracking-wide inline-block bg-marker/20 px-3 py-1 wobbly-sm border-2 border-ink shadow-ink-sm">
+              {remoteNickname || remoteUsername}
+            </h2>
+            <p className="text-ink/80 font-bold text-lg animate-pulse mt-2">{callStatus}</p>
+          </div>
           
-          <Button
-            size="icon"
-            onClick={handleUserLeave}
-            className="h-16 w-16 rounded-full bg-red-600 hover:bg-red-700 shadow-lg text-white"
-          >
-            <PhoneOff className="h-8 w-8" />
-          </Button>
+          <div className="flex items-center gap-6 mt-4 pt-6 border-t-4 border-ink border-dashed w-full justify-center">
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={toggleMute}
+              className={cn(
+                "h-16 w-16 rounded-full border-4 wobbly-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-y-1 active:translate-x-1 transition-all",
+                isMuted 
+                  ? "border-destructive text-destructive bg-destructive/10" 
+                  : "border-ink text-ink bg-white hover:bg-muted"
+              )}
+            >
+              {isMuted ? <MicOff className="h-7 w-7" /> : <Mic className="h-7 w-7" />}
+            </Button>
+            
+            <Button
+              size="icon"
+              onClick={handleUserLeave}
+              className="h-16 w-16 rounded-full border-4 border-ink wobbly-sm bg-destructive hover:bg-destructive/90 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-y-1 active:translate-x-1 transition-all text-white"
+            >
+              <PhoneOff className="h-7 w-7" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>

@@ -5,11 +5,12 @@ import { useEffect, useRef } from "react";
 
 interface IncomingCallModalProps {
   callerUsername: string;
+  callerNickname?: string;
   onAccept: () => void;
   onReject: () => void;
 }
 
-export function IncomingCallModal({ callerUsername, onAccept, onReject }: IncomingCallModalProps) {
+export function IncomingCallModal({ callerUsername, callerNickname, onAccept, onReject }: IncomingCallModalProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -32,8 +33,11 @@ export function IncomingCallModal({ callerUsername, onAccept, onReject }: Incomi
       <DialogContent className="sm:max-w-md text-center p-6 bg-white border-2 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] [&>button]:hidden" style={{ borderRadius: "25px 8px 22px 8px / 8px 22px 8px 25px" }}>
         <DialogHeader>
           <DialogTitle className="text-2xl font-display font-bold">Incoming Audio Call</DialogTitle>
-          <DialogDescription className="text-base">
-            <span className="font-bold text-accent">@{callerUsername}</span> is calling you...
+          <DialogDescription className="text-base text-ink font-medium">
+            <span className="font-bold text-accent px-1 bg-marker/20 wobbly-sm border border-ink inline-block mx-1">
+              {callerNickname || callerUsername}
+            </span> 
+            is calling you...
           </DialogDescription>
         </DialogHeader>
 

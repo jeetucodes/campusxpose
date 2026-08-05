@@ -55,6 +55,7 @@ import {
   deleteDirectConversation,
   togglePinMessage,
 } from "@/lib/content.functions";
+import { notifyIncomingCall } from "@/lib/push.functions";
 import { uploadToImgbb } from "@/lib/upload";
 import { useReactions } from "@/hooks/useReactions";
 import { ReactionChips, MessageActions, ReplyQuote } from "@/components/MessageReactions";
@@ -339,6 +340,9 @@ function Messages() {
         });
         setActiveCall({ roomID, isCaller: true, remoteUsername: active }); // Join immediately as caller
         supabase.removeChannel(callCh);
+        
+        // Notify them via Push Notification if they are backgrounded/offline
+        notifyIncomingCall({ data: { targetUsername: active, callerUsername: username } }).catch(() => {});
       }
     });
   };
@@ -1183,12 +1187,14 @@ function Messages() {
           roomID={activeCall.roomID}
           isCaller={activeCall.isCaller}
           remoteUsername={activeCall.remoteUsername}
+          remoteNickname={nicknames[activeCall.remoteUsername]}
           onLeaveRoom={endCall}
         />
       )}
       {incomingCall && (
         <IncomingCallModal
           callerUsername={incomingCall.callerUsername}
+          callerNickname={nicknames[incomingCall.callerUsername]}
           onAccept={acceptCall}
           onReject={rejectCall}
         />
