@@ -19,7 +19,7 @@ export function MobileBottomNav() {
             <Link
               to={to}
               activeOptions={{ exact }}
-              className="flex h-16 flex-col items-center justify-center gap-1 text-xs font-medium transition-colors"
+              className="flex h-16 sm:h-20 flex-col items-center justify-center gap-1 sm:gap-1.5 text-xs sm:text-[15px] font-medium sm:font-bold transition-colors"
             >
               {({ isActive }) => (
                 <>
@@ -29,10 +29,10 @@ export function MobileBottomNav() {
                       isActive ? "text-accent" : "text-muted-foreground",
                     )}
                   >
-                    <Icon className="h-5 w-5" strokeWidth={2.5} />
+                    <Icon className="h-5 w-5 sm:h-7 sm:w-7" strokeWidth={2.5} />
 
                     {isActive && (
-                      <span className="absolute -bottom-1.5 h-1 w-1 rounded-full bg-accent" />
+                      <span className="absolute -bottom-1.5 sm:-bottom-2 h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full bg-accent" />
                     )}
                   </span>
                   <span className={cn(isActive ? "text-accent" : "text-muted-foreground")}>

@@ -10,10 +10,10 @@ export const KNIFE_LEVELS: KnifeLevel[] = Array.from({ length: 100 }).map((_, i)
   const levelId = i + 1;
   const isBoss = levelId % 10 === 0; // Boss every 10 levels
   
-  // Base knives scales up slowly
-  let knivesToThrow = 5 + Math.floor(i / 8); 
-  if (isBoss) knivesToThrow += 3;
-  if (knivesToThrow > 15) knivesToThrow = 15; // Cap knives so it's not impossible
+  // Progressive difficulty for knives to throw
+  let knivesToThrow = 5 + Math.floor((levelId - 1) / 3); 
+  if (isBoss) knivesToThrow += 2; // Boss levels require more knives
+  if (knivesToThrow > 12) knivesToThrow = 12; // Cap at 12 to prevent UI overflow
 
   // Speed increases
   let baseSpeed = 0.02 + (i * 0.0015);
@@ -22,10 +22,10 @@ export const KNIFE_LEVELS: KnifeLevel[] = Array.from({ length: 100 }).map((_, i)
   let preStuckKnives: number[] = [];
   let changeIntervals: { duration: number; speed: number }[] | undefined = undefined;
 
-  // Add pre-stuck knives progressively
+  // Add pre-stuck knives progressively but keep it low
   if (levelId >= 3) {
-    let numPreStuck = Math.min(Math.floor(levelId / 3), 9);
-    if (isBoss) numPreStuck = 2; // Boss levels have fewer pre-stuck, rely on crazy speed
+    let numPreStuck = Math.min(Math.floor((levelId - 1) / 5), 3); // Max 3 knives on any level
+    if (isBoss) numPreStuck = 1; // Boss levels rely on crazy speed, not clutter
     
     // Spread them out evenly but skip some spots
     const totalSlots = numPreStuck + 2; 
@@ -34,48 +34,25 @@ export const KNIFE_LEVELS: KnifeLevel[] = Array.from({ length: 100 }).map((_, i)
     }
   }
 
-  // Erratic speeds (starting early to make it harder as requested)
-  if (levelId >= 3) {
-    if (isBoss) {
-      changeIntervals = [
-        { duration: Math.max(15, 40 - i), speed: baseSpeed * 1.8 },
-        { duration: 15, speed: 0 },
-        { duration: Math.max(20, 50 - i), speed: -baseSpeed * 2.2 },
-        { duration: 25, speed: 0 },
-        { duration: 30, speed: baseSpeed * 1.5 },
-      ];
-    } else if (levelId % 5 === 0) {
-      changeIntervals = [
-        { duration: 60, speed: baseSpeed * 1.5 },
-        { duration: 40, speed: -baseSpeed * 1.5 },
-        { duration: 20, speed: baseSpeed * 2.2 },
-        { duration: 30, speed: -baseSpeed * 2 },
-      ];
-    } else if (levelId % 4 === 0) {
-      changeIntervals = [
-        { duration: Math.max(30, 80 - i*2), speed: baseSpeed * 1.3 },
-        { duration: 15, speed: 0 },
-        { duration: Math.max(25, 60 - i), speed: -baseSpeed * 1.6 },
-      ];
-    } else if (levelId % 3 === 0) {
-      changeIntervals = [
-        { duration: 70, speed: baseSpeed * 1.4 },
-        { duration: 25, speed: baseSpeed * 0.1 }, // dramatic slow down
-        { duration: 30, speed: baseSpeed * 2.0 }, // sudden burst
-      ];
-    } else if (levelId % 2 === 0 && levelId > 8) {
-       changeIntervals = [
-        { duration: 50, speed: baseSpeed * 1.3 },
-        { duration: 40, speed: -baseSpeed * 0.8 },
-        { duration: 35, speed: baseSpeed * 1.7 },
-      ];
-    } else if (levelId > 12) {
-       // Even normal levels get crazy after 12
-       changeIntervals = [
-        { duration: 45, speed: baseSpeed * (1 + (levelId%3)*0.3) },
-        { duration: 25, speed: -baseSpeed * (1 + (levelId%2)*0.4) },
-        { duration: 40, speed: baseSpeed * 1.6 },
-      ];
+  // Erratic speeds (forward only, to ensure 360 degree rotation)
+  // We use multipliers like 0.2 to 2.5 to make it irregular but always moving
+  if (isBoss) {
+    changeIntervals = [
+      { duration: 40, speed: baseSpeed * 2.5 },
+      { duration: 30, speed: baseSpeed * 0.5 },
+      { duration: 50, speed: baseSpeed * 3.0 },
+      { duration: 25, speed: baseSpeed * 0.2 },
+      { duration: 30, speed: baseSpeed * 1.5 },
+    ];
+  } else {
+    // Generate random irregular intervals for every level
+    changeIntervals = [];
+    const numIntervals = 3 + (levelId % 4); // 3 to 6 intervals
+    for (let j = 0; j < numIntervals; j++) {
+       const isFast = Math.random() > 0.5;
+       const speedMult = isFast ? (1.2 + Math.random() * 1.5) : (0.2 + Math.random() * 0.6);
+       const duration = 20 + Math.floor(Math.random() * 60);
+       changeIntervals.push({ duration, speed: baseSpeed * speedMult });
     }
   }
 
@@ -87,3 +64,4 @@ export const KNIFE_LEVELS: KnifeLevel[] = Array.from({ length: 100 }).map((_, i)
     preStuckKnives,
   };
 });
+
