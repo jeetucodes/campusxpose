@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Phone, PhoneOff } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useRingTone } from "@/hooks/useRingTone";
 
 interface IncomingCallModalProps {
   callerUsername: string;
@@ -11,22 +11,7 @@ interface IncomingCallModalProps {
 }
 
 export function IncomingCallModal({ callerUsername, callerNickname, onAccept, onReject }: IncomingCallModalProps) {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  useEffect(() => {
-    // Play a generic ringing sound from a public URL
-    const audio = new Audio("https://actions.google.com/sounds/v1/alarms/phone_ringing.ogg");
-    audio.loop = true;
-    audio.play().catch((e) => {
-      console.warn("Autoplay blocked for ringing sound", e);
-    });
-    audioRef.current = audio;
-
-    return () => {
-      audio.pause();
-      audio.currentTime = 0;
-    };
-  }, []);
+  useRingTone("incoming");
 
   return (
     <Dialog open={true} onOpenChange={() => {}}>

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Mic, MicOff, PhoneOff } from "lucide-react";
 import { UserSymbol } from "@/components/UserSymbol";
 import { cn } from "@/lib/utils";
+import { useRingTone } from "@/hooks/useRingTone";
 
 export interface CallLogData {
   missed: boolean;
@@ -27,6 +28,9 @@ export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, 
   const channelRef = useRef<any>(null);
   const connectedAtRef = useRef<number | null>(null);
 
+  const ringType = isCaller && callStatus !== "Connected" && callStatus !== "Call Ended" ? "outgoing" : "none";
+  useRingTone(ringType);
+
   useEffect(() => {
     let isCleanup = false;
 
@@ -39,10 +43,26 @@ export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, 
         localStreamRef.current = stream;
 
         // 2. Setup RTCPeerConnection
-        const configuration = {
+        const configuration: RTCConfiguration = {
           iceServers: [
             { urls: "stun:stun.l.google.com:19302" },
-            { urls: "stun:stun1.l.google.com:19302" }
+            { urls: "stun:stun1.l.google.com:19302" },
+            { urls: "stun:stun.cloudflare.com:3478" },
+            {
+              urls: "turn:openrelay.metered.ca:80",
+              username: "openrelayproject",
+              credential: "openrelayproject"
+            },
+            {
+              urls: "turn:openrelay.metered.ca:443",
+              username: "openrelayproject",
+              credential: "openrelayproject"
+            },
+            {
+              urls: "turn:openrelay.metered.ca:443?transport=tcp",
+              username: "openrelayproject",
+              credential: "openrelayproject"
+            }
           ],
         };
         const pc = new RTCPeerConnection(configuration);
@@ -78,13 +98,20 @@ export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, 
           }
         };
 
+        pc.oniceconnectionstatechange = () => {
+          if (pc.iceConnectionState === "disconnected" || pc.iceConnectionState === "failed") {
+            setCallStatus("Disconnected (Network Error)");
+            setTimeout(() => emitLeave(), 1500);
+          }
+        };
+
         pc.onconnectionstatechange = () => {
           if (pc.connectionState === "connected") {
             setCallStatus("Connected");
             if (!connectedAtRef.current) connectedAtRef.current = Date.now();
           } else if (pc.connectionState === "disconnected" || pc.connectionState === "failed") {
             setCallStatus("Disconnected");
-            setTimeout(() => emitLeave(), 1000);
+            setTimeout(() => emitLeave(), 1500);
           }
         };
 
@@ -207,8 +234,19 @@ export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, 
         localStreamRef.current.getTracks().forEach((track) => track.stop());
         localStreamRef.current = null;
       }
+      // do not call emitLeave here to avoid infinite loops, the caller should trigger it on explicitly leaving.
     };
   }, [roomID, isCaller]);
+
+  // 30-second ringing/connecting timeout
+  useEffect(() => {
+    if (callStatus === "Connected" || callStatus.includes("Disconnected")) return;
+    const timeout = setTimeout(() => {
+      setCallStatus("Call Timeout");
+      setTimeout(() => onLeaveRoom({ missed: true, duration: 0 }), 1500);
+    }, 30000);
+    return () => clearTimeout(timeout);
+  }, [callStatus, onLeaveRoom]);
 
   const emitLeave = () => {
     let log: CallLogData | undefined = undefined;

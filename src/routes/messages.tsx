@@ -242,25 +242,38 @@ function Messages() {
     if (!username) return;
     const callCh = supabase
       .channel(`calls-${username}`)
-      .on("broadcast", { event: "incoming_call" }, (payload) => {
-        if (!activeCall) { // don't ring if already in a call
+      .on("broadcast", { event: "incoming_call" }, async (payload) => {
+        if (!activeCall && !incomingCall) { 
           setIncomingCall({
             roomID: payload.payload.roomID,
             callerUsername: payload.payload.caller,
+          });
+        } else {
+          // Send busy signal back to the caller
+          const callerCh = supabase.channel(`calls-${payload.payload.caller}`);
+          callerCh.subscribe(async (status) => {
+            if (status === "SUBSCRIBED") {
+              await callerCh.send({
+                type: "broadcast",
+                event: "call_rejected",
+                payload: { roomID: payload.payload.roomID, reason: "busy" },
+              });
+              supabase.removeChannel(callerCh);
+            }
           });
         }
       })
       .on("broadcast", { event: "call_rejected" }, (payload) => {
         if (activeCall?.roomID === payload.payload.roomID) {
           endCall({ missed: true, duration: 0 });
-          toast("Call was rejected or ended.");
+          toast(payload.payload.reason === "busy" ? "User is busy on another call" : "Call was rejected");
         }
       })
       .subscribe();
     return () => {
       supabase.removeChannel(callCh);
     };
-  }, [username, activeCall]);
+  }, [username, activeCall, incomingCall]);
 
   // Realtime: instantly reflect new/updated DMs that involve me.
   useEffect(() => {
@@ -329,7 +342,7 @@ function Messages() {
 
   const startCall = async () => {
     if (!active || !username) return;
-    const roomID = `room_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    const roomID = `room_${crypto.randomUUID()}`;
     const callCh = supabase.channel(`calls-${active}`);
     callCh.subscribe(async (status) => {
       if (status === "SUBSCRIBED") {
