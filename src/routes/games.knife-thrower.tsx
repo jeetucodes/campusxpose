@@ -80,15 +80,6 @@ export interface KnifeItem {
   type: "classic" | "cleaver" | "scimitar" | "crystal" | "pencil" | "pen" | "fork" | "screwdriver" | "kunai";
 }
 
-export const SHOP_KNIVES: KnifeItem[] = [
-  { id: "k_classic", name: "Classic Dagger", price: 0, type: "classic" },
-  { id: "k_pencil", name: "2B Pencil", price: 1000, type: "pencil" },
-  { id: "k_pen", name: "Ink Pen", price: 2000, type: "pen" },
-  { id: "k_screwdriver", name: "Screwdriver", price: 3000, type: "screwdriver" },
-  { id: "k_kunai", name: "Ninja Kunai", price: 4000, type: "kunai" },
-  { id: "k_fork", name: "Steel Fork", price: 5000, type: "fork" },
-];
-
 export const drawKnifeStyle = (ctx: CanvasRenderingContext2D, theme: ThemeConfig, type: string) => {
   ctx.fillStyle = theme.knifePrimary || "#ffffff";
   ctx.strokeStyle = "#2d2d2d";
@@ -487,13 +478,26 @@ export default function KnifeThrowerGame() {
   const [levelIdx, setLevelIdx] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
 
-  const [gameState, setGameState] = useState<"playing" | "won" | "lost" | "ad_offer" | "shop">("playing");
+  const [gameState, setGameState] = useState<"playing" | "won" | "lost" | "ad_offer">("playing");
   const [score, setScore] = useState(0);
   const [knivesLeft, setKnivesLeft] = useState(0);
   const [lives, setLives] = useState(3);
   const [coins, setCoins] = useState(0);
   const [showAdModal, setShowAdModal] = useState(false);
   const [highestUnlocked, setHighestUnlocked] = useState(0);
+  const [bestScore, setBestScore] = useState(() => {
+    if (typeof window !== "undefined") {
+      return parseInt(localStorage.getItem("cx_knife_best_score") || "0", 10);
+    }
+    return 0;
+  });
+
+  useEffect(() => {
+    if (score > bestScore) {
+      setBestScore(score);
+      localStorage.setItem("cx_knife_best_score", score.toString());
+    }
+  }, [score, bestScore]);
   const [showLevels, setShowLevels] = useState(false);
   const [hasUsedRevive, setHasUsedRevive] = useState(false);
 
@@ -1277,20 +1281,6 @@ export default function KnifeThrowerGame() {
         }}
       />
 
-      {/* Desktop-only floating elements (Outside main container) */}
-      <div className="hidden sm:flex absolute right-[5%] top-1/2 -translate-y-1/2 flex-col gap-4 z-20 pointer-events-auto">
-        <div 
-           className="bg-paper border-4 border-ink shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 cursor-pointer hover:scale-105 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 transition-all flex flex-col items-center gap-2 rotate-2"
-           onClick={() => setGameState("shop")}
-        >
-          <div className="text-3xl font-black font-display text-ink text-center">KNIFE<br/>SHOP</div>
-          <div className="bg-postit rounded-full p-4 border-4 border-ink shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] -rotate-3 mt-2">
-             <Coins className="w-10 h-10 text-ink" />
-          </div>
-          <div className="font-bold font-sans tracking-widest mt-2 bg-ink text-paper px-3 py-1 rounded-full text-sm">OPEN</div>
-        </div>
-      </div>
-
       {/* Game Container Wrapper */}
       <div className="w-full max-w-[500px] h-full sm:h-[95%] sm:max-h-[900px] relative sm:rounded-wobbly overflow-hidden flex flex-col items-center justify-center shadow-ink-lg sm:border-4 border-ink z-10">
 
@@ -1298,41 +1288,49 @@ export default function KnifeThrowerGame() {
         <div className="absolute inset-0 pointer-events-none z-10 flex flex-col justify-between w-full">
 
           {/* Top Bar */}
-          <div className="flex items-start justify-between p-4 sm:p-6 w-full">
+          <div className="flex items-start justify-between p-4 sm:p-6 w-full pointer-events-none">
             {/* Left: Stage & Hearts */}
-            <div className="flex flex-col items-start gap-1">
+            <div className="flex flex-col items-start gap-3 pointer-events-auto">
               <div
-                className="text-2xl sm:text-3xl font-black text-ink font-display cursor-pointer hover:scale-105 transition-transform pointer-events-auto shadow-ink-soft bg-paper border-2 border-ink px-3 py-1 rounded-wobbly-sm -rotate-2"
+                className="text-2xl sm:text-3xl font-black text-ink font-display cursor-pointer hover:scale-105 transition-transform shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-[#fef08a] border-4 border-ink px-4 py-1 rounded-sm -rotate-3 relative"
                 onClick={(e) => { e.stopPropagation(); setShowLevels(true); }}
               >
-                STAGE: <span className="text-marker">{levelIdx + 1}</span>
+                {/* Pin graphic */}
+                <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-red-500 border-2 border-ink shadow-sm" />
+                STAGE <span className="text-red-600">{levelIdx + 1}</span>
               </div>
-              <div className="flex gap-1 ml-1 mt-1">
+              
+              <div className="flex gap-1.5 ml-1 bg-white/80 p-1.5 rounded-full border-2 border-ink shadow-ink-soft backdrop-blur-sm">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <Heart
                     key={i}
-                    className={`w-6 h-6 stroke-[2.5px] ${i < lives ? "fill-marker text-ink" : "fill-transparent text-ink"}`}
+                    className={`w-5 h-5 sm:w-6 sm:h-6 stroke-[3px] transition-all duration-300 ${i < lives ? "fill-red-500 text-ink scale-100" : "fill-transparent text-ink/40 scale-90"}`}
                   />
                 ))}
               </div>
             </div>
 
-            {/* Right: Score & Coins */}
-            <div className="flex flex-col items-end gap-2 pointer-events-auto">
-              <div className="bg-paper border-2 border-ink rounded-wobbly-sm pl-3 pr-1 py-1 flex items-center gap-2 shadow-ink-soft rotate-1">
-                <span className="text-xl sm:text-2xl font-bold text-ink font-display">{score}</span>
-                <div className="bg-postit rounded-full p-1 border-2 border-ink shadow-ink-soft">
-                  <Coins className="w-4 h-4 text-ink" />
+            {/* Right: Score, Coins & Utils */}
+            <div className="flex flex-col items-end gap-3 pointer-events-auto">
+              <div className="flex flex-col items-end">
+                <div className="text-xs sm:text-sm font-black text-ink bg-blue-100 px-3 py-0.5 border-2 border-ink shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] -rotate-2 relative top-2 z-10 mr-2">
+                  BEST: {Math.max(score, bestScore)}
+                </div>
+                <div className="bg-white border-4 border-ink rounded-xl pl-4 pr-1 py-1.5 flex items-center gap-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rotate-1 relative z-0">
+                  <span className="text-2xl sm:text-3xl font-black text-ink font-display leading-none mt-1">{score}</span>
+                  <div className="bg-yellow-300 rounded-full p-1.5 border-2 border-ink">
+                    <Coins className="w-5 h-5 text-ink" />
+                  </div>
                 </div>
               </div>
               
-              <div className="flex gap-2 mt-1">
-                <Button variant="outline" size="icon" className="text-ink border-2 border-ink bg-paper shadow-ink-soft rounded-wobbly-sm hover:bg-muted" onClick={(e) => { e.stopPropagation(); toggleMute(); }}>
-                  {isMuted ? <VolumeX className="w-4 h-4 sm:w-5 sm:h-5" /> : <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />}
+              <div className="flex gap-2">
+                <Button variant="ghost" size="icon" className="text-ink border-2 border-ink bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-full hover:bg-gray-100 w-10 h-10 sm:w-12 sm:h-12 hover:-translate-y-0.5 transition-all" onClick={(e) => { e.stopPropagation(); toggleMute(); }}>
+                  {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
                 </Button>
                 <Link to="/games">
-                  <Button variant="outline" size="icon" className="text-ink border-2 border-ink bg-paper shadow-ink-soft rounded-wobbly-sm hover:bg-muted">
-                    <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <Button variant="ghost" size="icon" className="text-ink border-2 border-ink bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-full hover:bg-gray-100 w-10 h-10 sm:w-12 sm:h-12 hover:-translate-y-0.5 transition-all">
+                    <ArrowLeft className="w-5 h-5" />
                   </Button>
                 </Link>
               </div>
@@ -1361,12 +1359,6 @@ export default function KnifeThrowerGame() {
             })}
           </div>
 
-          {/* Bottom Right: Utility Buttons */}
-          <div className="absolute right-4 sm:right-6 bottom-8 sm:bottom-16 flex flex-col items-end gap-3 z-10 pointer-events-auto">
-            <Button variant="outline" className="sm:hidden text-ink border-2 border-ink bg-paper shadow-ink-soft rounded-wobbly-sm hover:bg-muted font-display font-bold px-6 py-4 text-xl rotate-1" onClick={(e) => { e.stopPropagation(); setGameState("shop"); }}>
-              SHOP
-            </Button>
-          </div>
         </div> {/* End of HUD Layer */}
 
         {/* Game Canvas */}
@@ -1394,6 +1386,7 @@ export default function KnifeThrowerGame() {
               
               <div className="bg-postit w-full p-4 rounded-sm border-2 border-ink shadow-ink-soft rotate-2 my-4 flex flex-col gap-2">
                  <div className="text-ink text-xl font-black font-display flex items-center justify-between gap-4"><span>SCORE</span> <span>{score}</span></div>
+                 <div className="text-ink/60 text-sm font-black font-display flex items-center justify-between gap-4"><span>BEST SCORE</span> <span>{Math.max(score, bestScore)}</span></div>
                  <div className="w-full h-0.5 bg-ink/20 rounded-full" />
                  <div className="text-warning text-xl font-black font-display flex items-center justify-between gap-4"><span>COINS</span> <span className="flex items-center gap-1"><Coins className="w-5 h-5"/>{coins}</span></div>
               </div>
@@ -1419,9 +1412,11 @@ export default function KnifeThrowerGame() {
               <h2 className="text-6xl font-black text-destructive mb-2 font-display uppercase tracking-tighter drop-shadow-sm">GAME OVER</h2>
               <div className="text-ink font-bold font-sans opacity-70 mb-4 bg-gray-200 px-3 py-1 rounded-sm border-2 border-dashed border-gray-400">STAGE {levelIdx + 1} FAILED</div>
               
-              <div className="bg-white p-4 rounded-sm border-4 border-ink mb-6 w-full relative shadow-ink-soft">
+              <div className="bg-white p-4 rounded-sm border-4 border-ink mb-6 w-full relative shadow-ink-soft flex flex-col gap-2">
                  <div className="absolute -top-4 -right-4 bg-destructive text-white font-black px-3 py-1 rotate-12 text-sm border-2 border-ink shadow-ink-soft">FINAL</div>
                  <div className="text-ink text-3xl font-black font-display flex items-center justify-between"><span>SCORE</span> <span>{score}</span></div>
+                 <div className="w-full h-0.5 bg-ink/20 rounded-full" />
+                 <div className="text-ink text-lg font-black font-display flex items-center justify-between opacity-60"><span>BEST SCORE</span> <span>{Math.max(score, bestScore)}</span></div>
               </div>
 
               <Button
@@ -1438,67 +1433,7 @@ export default function KnifeThrowerGame() {
           </div>
         )}
 
-        {gameState === "shop" && (
-          <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-50 pointer-events-auto animate-in fade-in duration-300">
-            <div className="sketch-card wobbly-md p-6 max-w-sm w-[95%] max-h-[85%] flex flex-col items-center animate-in zoom-in duration-300 overflow-hidden relative">
-              <div className="flex w-full justify-between items-center mb-2 border-b-2 border-ink pb-2 shrink-0">
-                <h2 className="text-3xl font-black text-ink font-display">KNIFE SHOP</h2>
-                <Button variant="ghost" size="icon" className="rounded-full hover:bg-muted font-black" onClick={(e) => { e.stopPropagation(); setGameState("playing"); }}>
-                  X
-                </Button>
-              </div>
-              <div className="w-full flex items-center gap-2 mb-4 shrink-0 bg-paper p-2 rounded-xl border-2 border-ink shadow-ink-soft">
-                <div className="bg-postit rounded-full p-1.5 border-2 border-ink"><Coins className="w-4 h-4 text-ink"/></div>
-                <span className="font-display font-bold text-xl text-ink">{coins} COINS</span>
-              </div>
-              <div className="w-full overflow-y-auto pr-2 grid grid-cols-2 gap-3 pb-4">
-                {SHOP_KNIVES.map(knife => {
-                  const isOwned = ownedKnives.includes(knife.id);
-                  const isEquipped = equippedKnife === knife.id;
-                  
-                  return (
-                    <div key={knife.id} className={`flex flex-col items-center border-2 rounded-wobbly-sm p-3 transition-transform ${isEquipped ? 'bg-[#bfdbfe] border-ink shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] scale-105' : isOwned ? 'bg-white border-ink' : 'bg-gray-100 border-gray-400'}`}>
-                      <div className="h-24 flex items-center justify-center mb-2">
-                        <KnifePreview type={knife.type} theme={theme} />
-                      </div>
-                      <div className="text-center font-bold text-sm mb-1 h-10 flex items-center font-display leading-tight">{knife.name}</div>
-                      {!isOwned && <div className="text-warning font-bold mb-2 flex items-center gap-1 font-sans"><Coins className="w-3 h-3"/>{knife.price}</div>}
-                      
-                      <Button
-                        size="sm"
-                        className={`w-full font-bold font-display ${isEquipped ? 'bg-success hover:bg-success text-white' : isOwned ? 'bg-ink hover:bg-ink/90 text-white' : coins >= knife.price ? 'bg-warning hover:bg-warning/90 text-ink border-2 border-ink' : 'bg-gray-300 text-gray-500'}`}
-                        disabled={!isOwned && coins < knife.price}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (isEquipped) return;
-                          if (isOwned) {
-                            setEquippedKnife(knife.id);
-                            localStorage.setItem("cx_knife_equipped", knife.id);
-                          } else if (coins >= knife.price) {
-                            setCoins(c => {
-                              const nc = c - knife.price;
-                              localStorage.setItem("cx_knife_coins", nc.toString());
-                              return nc;
-                            });
-                            setOwnedKnives(prev => {
-                              const np = [...prev, knife.id];
-                              localStorage.setItem("cx_knife_owned", JSON.stringify(np));
-                              return np;
-                            });
-                            setEquippedKnife(knife.id);
-                            localStorage.setItem("cx_knife_equipped", knife.id);
-                          }
-                        }}
-                      >
-                        {isEquipped ? "EQUIPPED" : isOwned ? "EQUIP" : "BUY"}
-                      </Button>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          </div>
-        )}
+
       </div>
 
       {/* Overlays */}
