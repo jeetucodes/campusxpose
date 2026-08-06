@@ -105,6 +105,7 @@
     background-image: radial-gradient(#e5e0d8 1.5px, transparent 1.5px);
     background-size: 24px 24px;
     -webkit-font-smoothing: antialiased;
+    overscroll-behavior-y: none; /* Blocks pull-to-refresh */
   }
   h1,
   h2,
