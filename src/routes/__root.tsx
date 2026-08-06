@@ -147,6 +147,19 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.OneSignalDeferred = window.OneSignalDeferred || [];
+              OneSignalDeferred.push(async function(OneSignal) {
+                await OneSignal.init({
+                  appId: "99906f9e-9dd2-4000-b559-0185efddc600",
+                });
+              });
+            `,
+          }}
+        />
       </head>
       <body>
         {children}
@@ -191,6 +204,49 @@ function RootComponent() {
   useEffect(() => {
     if (typeof window !== "undefined" && (window as any).showAppPrompt) {
       setShowPrompt(true);
+    }
+  }, []);
+
+  // OneSignal Push Notification Setup for Median.co App
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const setupOneSignal = () => {
+      const median = (window as any).median || (window as any).gonative;
+      if (median && median.onesignal) {
+        // Prompt/register device for push notifications
+        median.onesignal.register();
+
+        // Listen for Supabase auth state to map OneSignal Player ID to our User ID
+        import("@/integrations/supabase/client").then(({ supabase }) => {
+          // Set initial session
+          supabase.auth.getSession().then(({ data }) => {
+            if (data.session?.user) {
+              median.onesignal.setExternalUserId({ externalId: data.session.user.id });
+            }
+          });
+
+          // Listen for future login/logout events
+          supabase.auth.onAuthStateChange((_event, session) => {
+            if (session?.user) {
+              median.onesignal.setExternalUserId({ externalId: session.user.id });
+            } else {
+              // Wait, median.onesignal might not have removeExternalUserId natively exposed on all versions, 
+              // but it's safe to call if it exists. Alternatively setting it to empty.
+              if (median.onesignal.removeExternalUserId) {
+                median.onesignal.removeExternalUserId();
+              }
+            }
+          });
+        });
+      }
+    };
+
+    if ((window as any).median || (window as any).gonative) {
+      setupOneSignal();
+    } else {
+      document.addEventListener("medianReady", setupOneSignal, { once: true });
+      document.addEventListener("GoNativeJSReady", setupOneSignal, { once: true });
     }
   }, []);
 
