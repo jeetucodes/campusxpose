@@ -536,43 +536,53 @@ function CollegeAdCard({ ad, index }: { ad: Ad; index: number }) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(index * 0.04, 0.4) }}
+      className="group relative"
     >
+      {/* Decorative background shadow/element for pop */}
+      <div className="absolute inset-0 bg-blue-500 rounded-2xl translate-x-1.5 translate-y-1.5 -z-10 group-hover:translate-x-2.5 group-hover:translate-y-2.5 transition-transform" />
+      
       <div
         className={cn(
-          "sketch-card flex h-full flex-col p-5 border-dashed border-accent/50",
+          "sketch-card flex h-full flex-col p-5 border-2 border-border bg-white shadow-none transition-transform group-hover:-translate-y-1 group-hover:-translate-x-1",
           index % 2 ? "-rotate-1" : "rotate-1",
         )}
         style={{
-          borderRadius: "25px 8px 22px 8px / 8px 22px 8px 25px",
-          background: "linear-gradient(135deg, rgba(255,255,255,1) 0%, rgba(245,245,255,1) 100%)",
+          borderRadius: "20px",
         }}
       >
-        <div className="flex items-start justify-between gap-2 mb-1">
-          <span className="inline-flex items-center gap-1 border border-accent/20 bg-accent/10 px-2 py-0.5 text-[10px] font-bold text-accent uppercase tracking-wider">
-            Sponsored
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <span className="inline-flex items-center gap-1.5 border-2 border-border bg-yellow-300 px-2.5 py-1 text-[10px] font-black text-black uppercase tracking-wider shadow-sm rounded-md">
+            <span className="animate-pulse">✨</span> Sponsored
           </span>
         </div>
-        <h3 className="font-display text-lg font-bold leading-tight mt-1">{ad.title}</h3>
+        <h3 className="font-display text-xl sm:text-2xl font-black leading-tight mt-1 text-foreground">{ad.title}</h3>
         {ad.media_url && (
-          <div className="mt-3 aspect-video w-full overflow-hidden rounded-md border-2 border-border">
+          <div className="mt-4 relative w-full aspect-video overflow-hidden rounded-xl border-2 border-border bg-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] group-hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] group-hover:translate-x-[2px] group-hover:translate-y-[2px] transition-all">
+            {/* Blurred background layer in case image is smaller than container width */}
+            <img
+              src={ad.media_url}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover opacity-60 blur-xl scale-110"
+              aria-hidden="true"
+            />
+            {/* Main contained image with natural height */}
             <img
               src={ad.media_url}
               alt={ad.title}
-              className="w-full h-full object-cover"
+              className="relative z-10 w-full h-full object-contain"
               loading="lazy"
             />
           </div>
         )}
-        {ad.body && <p className="mt-3 text-sm text-muted-foreground line-clamp-3">{ad.body}</p>}
-        <div className="mt-auto pt-5">
+        {ad.body && <p className="mt-4 text-sm font-medium text-muted-foreground line-clamp-3 leading-relaxed">{ad.body}</p>}
+        <div className="mt-auto pt-6">
           <a
             href={ad.link_url || "#"}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex w-full items-center justify-center gap-1 border-2 border-border bg-accent px-4 py-2.5 text-sm font-bold text-accent-foreground shadow-ink transition-transform duration-100 hover:-translate-y-0.5 hover:shadow-ink-lg"
-            style={{ borderRadius: "18px 6px 20px 6px / 6px 20px 6px 18px" }}
+            className="flex w-full items-center justify-center gap-2 border-2 border-border bg-accent px-4 py-3 text-base font-black text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:bg-accent/90 rounded-xl"
           >
-            {ad.cta_label || "Learn More"} <ArrowRight className="h-4 w-4" />
+            {ad.cta_label || "Explore Now"} <ArrowRight className="h-5 w-5" />
           </a>
         </div>
       </div>

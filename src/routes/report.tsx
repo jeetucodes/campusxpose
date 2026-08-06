@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Ghost, Shield, Check, ArrowLeft, ArrowRight } from "lucide-react";
+import { Ghost, Shield, Check, ArrowLeft, ArrowRight, Flame } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -148,21 +148,29 @@ function ReportPage() {
 
   return (
     <SiteShell hideFooter>
-      <div className="mx-auto max-w-2xl px-4 py-10">
-        <h1 className="text-2xl font-bold">Report an Incident</h1>
-        {/* progress */}
-        <div className="mt-4 flex gap-2">
+      <div className="mx-auto max-w-2xl px-4 py-12 sm:py-16">
+        <div className="mb-8">
+          <h1 className="font-display text-3xl sm:text-4xl font-black flex items-center gap-3">
+            <Flame className="h-8 w-8 sm:h-10 sm:w-10 text-yellow-500 animate-pulse" /> Report an Incident
+          </h1>
+          <p className="mt-3 text-muted-foreground font-medium text-sm sm:text-base">Speak up securely. 100% anonymous & untraceable.</p>
+        </div>
+
+        {/* Chunky Progress */}
+        <div className="flex gap-2 sm:gap-3 mb-2">
           {[1, 2, 3, 4, 5].map((s) => (
             <div
               key={s}
               className={cn(
-                "h-1.5 flex-1 rounded-full transition-colors",
-                s <= step ? (isCritical ? "bg-red-500" : "bg-primary") : "bg-surface-2",
+                "h-3 sm:h-4 flex-1 rounded-md border-2 border-border transition-all duration-300",
+                s <= step 
+                  ? (isCritical ? "bg-red-500 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]" : "bg-accent shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]") 
+                  : "bg-surface-2 opacity-50"
               )}
             />
           ))}
         </div>
-        <p className="mt-2 text-xs text-muted-foreground">Step {step} of 5</p>
+        <p className="text-xs sm:text-sm font-bold text-foreground">Step {step} of 5</p>
 
         {/* Critical warning banner */}
         <AnimatePresence>
@@ -201,8 +209,8 @@ function ReportPage() {
         </AnimatePresence>
 
         <div
-          className="mt-6 border-2 border-border bg-white p-6 shadow-ink"
-          style={{ borderRadius: "25px 8px 22px 8px / 8px 22px 8px 25px" }}
+          className="mt-8 border-[3px] border-border bg-white p-6 sm:p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all"
+          style={{ borderRadius: "24px" }}
         >
           <AnimatePresence mode="wait">
             <motion.div
@@ -243,27 +251,27 @@ function ReportPage() {
 
               {step === 2 && (
                 <div>
-                  <h2 className="mb-3 font-semibold">Choose Category</h2>
-                  <div className="grid grid-cols-2 gap-2">
+                  <h2 className="mb-4 font-display text-xl sm:text-2xl font-black">Choose Category</h2>
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4">
                     {REPORT_CATEGORIES.map((cat) => (
                       <button
                         key={cat.key}
                         onClick={() => setCategory(cat.key)}
                         className={cn(
-                          "border-2 p-4 text-left transition-all duration-100 hover:-translate-y-0.5",
+                          "border-2 p-4 text-left transition-all duration-200",
                           category === cat.key
                             ? CRITICAL_CATEGORIES.has(cat.key)
-                              ? "border-red-400 bg-red-50 shadow-ink-soft"
-                              : "border-primary bg-primary/10 shadow-ink-soft"
-                            : "border-border bg-white hover:bg-surface-2",
+                              ? "border-red-500 bg-red-100 shadow-[4px_4px_0px_0px_rgba(239,68,68,1)] -translate-y-1"
+                              : "border-accent bg-accent/10 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] -translate-y-1"
+                            : "border-border bg-white shadow-sm hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5",
                         )}
-                        style={{ borderRadius: "18px 6px 20px 6px / 6px 20px 6px 18px" }}
+                        style={{ borderRadius: "16px" }}
                       >
-                        <div className="text-2xl">{cat.emoji}</div>
-                        <div className="mt-1 text-sm font-medium">{cat.label}</div>
+                        <div className="text-3xl mb-2">{cat.emoji}</div>
+                        <div className="text-sm sm:text-base font-bold text-foreground leading-tight">{cat.label}</div>
                         {CRITICAL_CATEGORIES.has(cat.key) && (
-                          <div className="mt-1 text-xs text-red-500 font-medium">
-                            Proof required
+                          <div className="mt-2 inline-block rounded-md border border-red-200 bg-red-50 px-2 py-0.5 text-[10px] font-bold text-red-600 uppercase tracking-wide">
+                            Proof Required
                           </div>
                         )}
                       </button>
@@ -273,77 +281,76 @@ function ReportPage() {
               )}
 
               {step === 3 && (
-                <div className="space-y-4">
-                  <h2 className="font-semibold">Describe the Incident</h2>
+                <div className="space-y-5">
+                  <h2 className="font-display text-xl sm:text-2xl font-black mb-2">Describe the Incident</h2>
                   {category === "fake_fine" && (
-                    <div className="grid gap-3 rounded-lg bg-surface-2 p-3">
+                    <div className="grid gap-3 rounded-xl border-2 border-border bg-yellow-50 p-4 shadow-sm">
                       <div>
-                        <label className="text-xs text-muted-foreground">Fine Amount (₹)</label>
+                        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1 block">Fine Amount (₹)</label>
                         <Input
                           type="number"
                           value={fineAmount}
                           onChange={(e) => setFineAmount(e.target.value)}
-                          className="bg-surface"
+                          className="border-2 border-border shadow-sm focus-visible:ring-2 focus-visible:ring-accent bg-white"
                         />
                       </div>
                     </div>
                   )}
                   <div>
-                    <label className="text-xs text-muted-foreground">
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1 block">
                       What happened? (min 50 chars)
                     </label>
                     <AutoResizeTextarea
                       value={content}
                       onChange={(e) => setContent(e.target.value)}
                       placeholder="Detail me likho kya hua..."
-                      className="bg-surface-2 min-h-[100px]"
+                      className="border-2 border-border shadow-sm focus-visible:ring-2 focus-visible:ring-accent min-h-[120px] bg-white text-base"
                     />
                     <p className="mt-1 text-right text-xs text-muted-foreground">
                       {content.length} chars
                     </p>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs text-muted-foreground">
-                        Students affected (optional)
+                      <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1 block">
+                        Students affected <span className="text-[10px] font-normal lowercase">(optional)</span>
                       </label>
                       <Input
                         type="number"
                         value={affected}
                         onChange={(e) => setAffected(e.target.value)}
-                        className="bg-surface-2"
+                        className="border-2 border-border shadow-sm focus-visible:ring-2 focus-visible:ring-accent bg-white"
                       />
                     </div>
                     <div>
-                      <label className="text-xs text-muted-foreground">When? (optional)</label>
+                      <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1 block">When? <span className="text-[10px] font-normal lowercase">(optional)</span></label>
                       <Input
                         type="date"
                         value={date}
                         onChange={(e) => setDate(e.target.value)}
-                        className="bg-surface-2"
+                        className="border-2 border-border shadow-sm focus-visible:ring-2 focus-visible:ring-accent bg-white"
                       />
                     </div>
                   </div>
                   {CRITICAL_CATEGORIES.has(category) && (
-                    <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-600">
-                      🚨 Is category ke liye proof upload mandatory hai. Aage badh ke proof zaroor
-                      upload karein.
+                    <div className="rounded-lg border-2 border-red-300 bg-red-50 px-3 py-2.5 text-xs font-bold text-red-700 shadow-sm">
+                      🚨 Is category ke liye proof upload mandatory hai. Aage badh ke proof zaroor upload karein.
                     </div>
                   )}
                 </div>
               )}
 
               {step === 4 && (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <h2 className="font-semibold">Upload Proof</h2>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <h2 className="font-display text-xl sm:text-2xl font-black">Upload Proof</h2>
                     {proofMandatory && (
-                      <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-600">
+                      <span className="rounded-md border-2 border-red-200 bg-red-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-red-700 shadow-sm">
                         REQUIRED
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm font-medium text-muted-foreground">
                     {proofMandatory
                       ? "⚠️ Is serious report ke liye proof upload karna zaroori hai. Bina proof ke publish nahi hoga."
                       : "Proof makes your report 5x more credible."}
@@ -364,15 +371,14 @@ function ReportPage() {
               )}
 
               {step === 5 && (
-                <div className="space-y-4">
-                  <h2 className="font-semibold">Review & Submit</h2>
+                <div className="space-y-5">
+                  <h2 className="font-display text-xl sm:text-2xl font-black">Review & Submit</h2>
                   {isCritical && (
-                    <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
-                      🚨 Serious allegation — {evidenceUrls.length} proof file(s) attached. Report
-                      hold mein rahegi jab tak admin review na kare.
+                    <div className="rounded-xl border-2 border-red-300 bg-red-50 px-4 py-3 text-xs font-bold text-red-800 shadow-[2px_2px_0px_0px_rgba(239,68,68,1)]">
+                      🚨 Serious allegation — {evidenceUrls.length} proof file(s) attached. Report hold mein rahegi jab tak admin review na kare.
                     </div>
                   )}
-                  <div className="space-y-2 rounded-lg bg-surface-2 p-4 text-sm">
+                  <div className="space-y-2.5 rounded-xl border-2 border-border bg-surface-2 p-5 text-sm shadow-sm">
                     <Row k="College" v={selectedCollege?.name ?? "—"} />
                     <Row
                       k="Category"
@@ -382,24 +388,25 @@ function ReportPage() {
                     <Row k="Affected" v={affected || "—"} />
                     <Row k="Proof files" v={String(evidenceUrls.length)} />
                     {isCritical && <Row k="AI Review" v={`${severityLabel} — Proof Required`} />}
-                    <div className="pt-2 text-muted-foreground">{content}</div>
+                    <div className="pt-3 mt-1 border-t-2 border-dashed border-border text-foreground font-medium text-sm leading-relaxed">{content}</div>
                   </div>
-                  <div className="rounded-lg border border-success/30 bg-success/5 p-4">
+                  <div className="rounded-xl border-2 border-green-500 bg-green-50 p-4 shadow-[4px_4px_0px_0px_rgba(34,197,94,1)]">
                     <div className="flex items-center gap-2">
-                      <Ghost className="h-5 w-5 text-primary" />
-                      <span className="font-medium">{username}</span>
+                      <Ghost className="h-6 w-6 text-green-600" />
+                      <span className="font-black text-green-900">{username}</span>
                     </div>
-                    <div className="mt-2 flex items-center gap-2 text-sm text-success">
+                    <div className="mt-2 flex items-center gap-2 text-sm font-bold text-green-700">
                       <Shield className="h-4 w-4" /> Your real identity is never stored
                     </div>
-                    <p className="mt-1 text-xs text-muted-foreground">
+                    <p className="mt-1 text-xs font-semibold text-green-600/80">
                       Even we cannot identify you.
                     </p>
                   </div>
                   <Button
+                    size="lg"
                     disabled={busy || (proofMandatory && evidenceUrls.length === 0)}
                     onClick={submit}
-                    className={cn("w-full", isCritical && "bg-red-600 hover:bg-red-700")}
+                    className={cn("w-full border-2 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all font-black text-base sm:text-lg", isCritical ? "bg-red-500 hover:bg-red-600 text-white" : "bg-accent hover:bg-accent/90 text-white")}
                   >
                     {busy
                       ? "Submitting..."
@@ -418,9 +425,11 @@ function ReportPage() {
           </AnimatePresence>
 
           {/* footer buttons */}
-          <div className="mt-6 flex justify-between">
+          <div className="mt-8 flex justify-between border-t-2 border-dashed border-border pt-6">
             <Button
-              variant="ghost"
+              variant="outline"
+              size="lg"
+              className="border-2 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all font-bold"
               onClick={() => {
                 if (step === 1) {
                   if (collegeId) {
@@ -433,29 +442,31 @@ function ReportPage() {
                 }
               }}
             >
-              <ArrowLeft className="mr-1 h-4 w-4" /> {step === 1 ? "Exit" : "Back"}
+              <ArrowLeft className="mr-2 h-4 w-4" /> {step === 1 ? "Exit" : "Back"}
             </Button>
             {step < 5 &&
               (step === 3 ? (
-                <Button onClick={next} disabled={scanning}>
+                <Button size="lg" className="border-2 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all font-bold bg-accent text-white" onClick={next} disabled={scanning}>
                   {scanning ? (
                     <span className="flex items-center gap-2">
                       <motion.div
                         animate={{ rotate: 360 }}
                         transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                        className="h-4 w-4 rounded-full border-2 border-current border-t-transparent"
+                        className="h-5 w-5 rounded-full border-4 border-current border-t-transparent"
                       />
-                      AI Review...
+                      Scanning...
                     </span>
                   ) : (
                     <>
-                      Next <ArrowRight className="ml-1 h-4 w-4" />
+                      Next Step <ArrowRight className="ml-2 h-5 w-5" />
                     </>
                   )}
                 </Button>
               ) : step === 4 ? (
                 proofMandatory ? (
                   <Button
+                    size="lg"
+                    className={cn("border-2 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all font-bold bg-accent text-white", evidenceUrls.length > 0 ? "" : "opacity-50 cursor-not-allowed")}
                     onClick={() => {
                       if (evidenceUrls.length === 0) {
                         toast.error("Is serious report ke liye proof upload karna zaroori hai");
@@ -463,18 +474,17 @@ function ReportPage() {
                       }
                       setStep(5);
                     }}
-                    className={cn(evidenceUrls.length > 0 ? "" : "opacity-60")}
                   >
-                    Continue <ArrowRight className="ml-1 h-4 w-4" />
+                    Continue <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 ) : (
-                  <Button onClick={() => setStep(5)} variant="outline">
-                    Skip / Continue <ArrowRight className="ml-1 h-4 w-4" />
+                  <Button size="lg" onClick={() => setStep(5)} variant="outline" className="border-2 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all font-bold">
+                    Skip / Continue <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 )
               ) : (
-                <Button onClick={next}>
-                  Next <ArrowRight className="ml-1 h-4 w-4" />
+                <Button size="lg" className="border-2 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all font-bold bg-accent text-white" onClick={next}>
+                  Next Step <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               ))}
           </div>

@@ -13,6 +13,7 @@ import {
   Megaphone,
   Ghost,
   Search,
+  Gamepad2,
 } from "lucide-react";
 import { UserSymbol } from "@/components/UserSymbol";
 import { SiteShell } from "@/components/Footer";
@@ -31,6 +32,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { ExpandableText } from "@/components/ExpandableText";
 
 const homeQueryOptions = queryOptions({
   queryKey: ["home"],
@@ -95,30 +97,6 @@ function FloatingDot({
       }}
       transition={{ duration, delay, repeat: Infinity, ease: "easeInOut" }}
     />
-  );
-}
-
-function ExpandableText({ text }: { text: string }) {
-  const [expanded, setExpanded] = useState(false);
-  const isLong = text.length > 150;
-  
-  if (!isLong) return <p className="mt-4 text-base font-medium leading-relaxed text-foreground group-hover:text-accent transition-colors">{text}</p>;
-  
-  return (
-    <div>
-      <p className={`mt-3 sm:mt-4 text-sm sm:text-base font-medium leading-relaxed text-foreground group-hover:text-accent transition-colors ${!expanded ? "line-clamp-3" : ""}`}>
-        {text}
-      </p>
-      <button 
-        onClick={(e) => {
-          e.preventDefault(); 
-          setExpanded(!expanded);
-        }}
-        className="text-xs sm:text-sm font-bold text-accent mt-2 py-1.5 px-3 border-2 border-accent/20 bg-accent/5 hover:bg-accent/10 rounded-md transition-colors inline-block active:scale-95"
-      >
-        {expanded ? "See less" : "Read full report..."}
-      </button>
-    </div>
   );
 }
 
@@ -296,7 +274,7 @@ function Home() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3 sm:mt-4">
-           <Link to="/confessions" className="block group">
+           <Link to="/confessions" className={`block group ${!(data?.site_settings?.news_enabled !== false && data?.news && data.news.length > 0) ? "sm:col-span-2" : ""}`}>
             <div className="sketch-card flex items-center gap-4 bg-[#fff9c4] p-3 sm:p-4 transition-all" style={{ borderRadius: WOBBLY_MD }}>
               <div className="w-12 h-12 rounded-full bg-purple-100 border-2 border-border flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 transition-transform">
                 <Ghost className="h-6 w-6 text-purple-600" />
@@ -308,7 +286,7 @@ function Home() {
             </div>
           </Link>
           
-          {data?.site_settings?.news_enabled !== false && data?.news && data.news.length > 0 ? (
+          {data?.site_settings?.news_enabled !== false && data?.news && data.news.length > 0 && (
              <Link to="/news" className="block group">
               <div className="sketch-card flex items-center gap-4 bg-blue-100 p-3 sm:p-4 transition-all relative" style={{ borderRadius: WOBBLY_MD }}>
                 <span className="absolute -top-2 -right-2 bg-destructive text-white text-[10px] font-bold px-2 py-0.5 rounded-full border-2 border-border shadow-sm animate-pulse">NEW</span>
@@ -321,18 +299,28 @@ function Home() {
                 </div>
               </div>
             </Link>
-          ) : (
-            <div className="sketch-card flex items-center gap-4 bg-surface-2 p-3 sm:p-4 opacity-70" style={{ borderRadius: WOBBLY_MD }}>
-              <div className="w-12 h-12 rounded-full bg-muted border-2 border-dashed border-border flex items-center justify-center shrink-0">
-                <Search className="h-6 w-6 text-muted-foreground opacity-50" />
-              </div>
-              <div className="text-left">
-                <div className="font-display font-bold text-lg sm:text-xl text-muted-foreground leading-tight">More Features</div>
-                <div className="text-muted-foreground/70 text-[10px] sm:text-xs font-semibold uppercase tracking-wider mt-0.5">Coming Soon</div>
-              </div>
-            </div>
           )}
         </div>
+
+        {/* Game Arcade Wide Banner */}
+        <Link to="/games" className="block group mt-3 sm:mt-4">
+          <div className="sketch-card flex items-center justify-between gap-4 bg-green-300 p-3 sm:p-5 transition-all relative overflow-hidden" style={{ borderRadius: WOBBLY_MD }}>
+            {/* Background dots/pattern */}
+            <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "radial-gradient(#000 2px, transparent 2px)", backgroundSize: "16px 16px" }}></div>
+            <div className="flex items-center gap-4 relative z-10">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white border-2 border-border flex items-center justify-center shrink-0 shadow-sm group-hover:-rotate-12 group-hover:scale-110 transition-transform">
+                <Gamepad2 className="h-6 w-6 sm:h-7 sm:w-7 text-green-600" />
+              </div>
+              <div className="text-left">
+                <div className="font-display font-bold text-xl sm:text-2xl text-foreground leading-tight group-hover:underline decoration-foreground decoration-2 underline-offset-2 flex items-center gap-2">
+                  Game Arcade <span className="bg-destructive text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-border animate-bounce shadow-sm">PLAY</span>
+                </div>
+                <div className="text-foreground/80 text-[11px] sm:text-xs font-semibold uppercase tracking-wider mt-0.5">Stress buster mini-games</div>
+              </div>
+            </div>
+            <ArrowRight className="h-6 w-6 text-foreground opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all relative z-10 hidden sm:block" />
+          </div>
+        </Link>
       </div>
 
       <HomeAds />
@@ -444,7 +432,7 @@ function Home() {
           </span>
         </div>
         <div className="columns-1 sm:columns-2 gap-6 space-y-6">
-          {(showAllReports ? recentPosts : recentPosts.slice(0, 4)).map((p, i) => {
+          {recentPosts.slice(0, 4).map((p, i) => {
             const isPinned = i === 0;
             const card = (
               <div
@@ -494,9 +482,11 @@ function Home() {
         </div>
         {recentPosts.length > 3 && (
           <div className="mt-8 text-center">
-            <Button variant="outline" size="lg" className="border-2 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] transition-all" onClick={() => setShowAllReports((v) => !v)}>
-              {showAllReports ? "Show less" : "Read more reports"}
-            </Button>
+            <Link to="/reports">
+              <Button variant="outline" size="lg" className="border-2 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] transition-all font-bold">
+                Read all reports <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
           </div>
         )}
       </section>

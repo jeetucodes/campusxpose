@@ -13,6 +13,7 @@ import { Route as TrustRouteImport } from './routes/trust'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SetupProjectsRouteImport } from './routes/setup-projects'
+import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -75,6 +76,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const SetupProjectsRoute = SetupProjectsRouteImport.update({
   id: '/setup-projects',
   path: '/setup-projects',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportRoute = ReportRouteImport.update({
@@ -304,6 +310,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/report': typeof ReportRoute
+  '/reports': typeof ReportsRoute
   '/setup-projects': typeof SetupProjectsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
@@ -353,6 +360,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/report': typeof ReportRoute
+  '/reports': typeof ReportsRoute
   '/setup-projects': typeof SetupProjectsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
@@ -403,6 +411,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/report': typeof ReportRoute
+  '/reports': typeof ReportsRoute
   '/setup-projects': typeof SetupProjectsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
@@ -454,6 +463,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/report'
+    | '/reports'
     | '/setup-projects'
     | '/sitemap.xml'
     | '/terms'
@@ -503,6 +513,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/report'
+    | '/reports'
     | '/setup-projects'
     | '/sitemap.xml'
     | '/terms'
@@ -552,6 +563,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/report'
+    | '/reports'
     | '/setup-projects'
     | '/sitemap.xml'
     | '/terms'
@@ -602,6 +614,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   ReportRoute: typeof ReportRoute
+  ReportsRoute: typeof ReportsRoute
   SetupProjectsRoute: typeof SetupProjectsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
@@ -669,6 +682,13 @@ declare module '@tanstack/react-router' {
       path: '/setup-projects'
       fullPath: '/setup-projects'
       preLoaderRoute: typeof SetupProjectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/report': {
@@ -986,6 +1006,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   ReportRoute: ReportRoute,
+  ReportsRoute: ReportsRoute,
   SetupProjectsRoute: SetupProjectsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,

@@ -38,6 +38,38 @@ export type HomeData = {
   };
 };
 
+export const getAllReports = createServerFn({ method: "GET" }).handler(
+  async () => {
+    const supabase = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_PUBLISHABLE_KEY!,
+      { auth: { persistSession: false } },
+    );
+
+    const [postsRes, collegesRes] = await Promise.all([
+      supabase
+        .from("posts")
+        .select("id, username, content, category, created_at, college_id, upvotes")
+        .order("upvotes", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(50),
+      supabase.from("colleges").select("id, name"),
+    ]);
+
+    const collegeNames = new Map<string, string>();
+    for (const c of collegesRes.data ?? []) {
+      collegeNames.set(c.id as string, c.name as string);
+    }
+
+    const reports = (postsRes.data ?? []).map((p) => ({
+      ...p,
+      college_name: p.college_id ? collegeNames.get(p.college_id) ?? null : null,
+    }));
+
+    return reports;
+  }
+);
+
 export const getHomeData = createServerFn({ method: "GET" }).handler(
   async (): Promise<HomeData> => {
     const supabase = createClient(
