@@ -304,48 +304,50 @@ function Home() {
       <HomeAds />
 
       {/* Top Reported Colleges */}
-      <section className="mx-auto max-w-3xl px-4 py-16">
-        <div className="mb-6 flex items-center justify-between gap-3">
-          <h2 className="font-display text-3xl font-bold">🔥 Top Reported Colleges</h2>
+      <section className="mx-auto max-w-3xl px-4 py-12 sm:py-16">
+        <div className="mb-8 flex items-center justify-between gap-3 border-b-4 border-border pb-4">
+          <h2 className="font-display text-3xl sm:text-4xl font-bold flex items-center gap-2">
+            <span className="text-4xl">🔥</span> Top Reported
+          </h2>
           <span
-            className="inline-flex items-center gap-1.5 border-2 border-border bg-white px-2.5 py-1 text-xs font-bold text-success"
+            className="inline-flex items-center gap-1.5 border-2 border-border bg-yellow-300 px-3 py-1.5 text-xs font-bold text-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
             style={{ borderRadius: WOBBLY_MD }}
           >
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-accent" />
             </span>
             LIVE
           </span>
         </div>
-        <div className="space-y-4">
+        <div className="space-y-5">
           {top.map((c, i) => (
             <Link
               key={c.id}
               to="/colleges/$id"
               params={{ id: c.id }}
-              className={`sketch-card flex items-center justify-between p-4 ${i % 2 ? "rotate-1" : "-rotate-1"}`}
+              className={`sketch-card flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 ${i % 2 ? "rotate-1" : "-rotate-1"}`}
               style={{ borderRadius: WOBBLY_MD }}
             >
-              <div className="flex items-center gap-3">
-                <span className="font-display text-2xl font-bold text-muted-foreground">
+              <div className="flex items-center gap-4">
+                <span className={`flex items-center justify-center h-12 w-12 font-display text-2xl font-bold border-2 border-border rounded-full shadow-sm ${i === 0 ? "bg-yellow-400 text-foreground" : i === 1 ? "bg-gray-200 text-foreground" : i === 2 ? "bg-orange-300 text-foreground" : "bg-muted text-muted-foreground"}`}>
                   #{i + 1}
                 </span>
                 <div>
-                  <div className="font-display text-lg font-bold">{c.name}</div>
-                  <div className="text-sm text-muted-foreground">{c.city}</div>
+                  <div className="font-display text-xl font-bold text-foreground group-hover:text-accent transition-colors">{c.name}</div>
+                  <div className="text-sm font-semibold text-muted-foreground flex items-center gap-1 mt-0.5"><MapPinOff className="w-3.5 h-3.5" /> {c.city}</div>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="inline-flex items-center gap-1 border-2 border-border bg-accent/15 px-2.5 py-1 text-sm font-bold text-accent">
-                  <Flame className="h-3.5 w-3.5" /> {c.incident_count}
+              <div className="flex items-center gap-3 self-start sm:self-auto ml-16 sm:ml-0">
+                <span className="inline-flex items-center gap-1.5 border-2 border-border bg-accent/10 px-3 py-1.5 text-sm font-bold text-accent rounded-lg">
+                  <Flame className="h-4 w-4" /> {c.incident_count} <span className="hidden sm:inline">Reports</span>
                 </span>
-                <TrendingUp className="h-4 w-4 text-accent" strokeWidth={2.5} />
+                <TrendingUp className="h-5 w-5 text-accent animate-pulse" strokeWidth={2.5} />
               </div>
             </Link>
           ))}
           {top.length === 0 && (
-            <p className="text-center text-muted-foreground">
+            <p className="text-center text-muted-foreground font-medium p-8 border-2 border-dashed border-border rounded-xl">
               No reports yet. Be the first to speak up!
             </p>
           )}
@@ -353,46 +355,51 @@ function Home() {
       </section>
 
       {/* Latest Reports */}
-      <section className="mx-auto max-w-3xl px-4 py-16">
-        <div className="mb-6 flex items-center justify-between gap-3">
-          <h2 className="font-display text-3xl font-bold">📰 Latest Reports</h2>
+      <section className="mx-auto max-w-3xl px-4 py-12 sm:py-16">
+        <div className="mb-8 flex items-center justify-between gap-3 border-b-4 border-border pb-4">
+          <h2 className="font-display text-3xl sm:text-4xl font-bold flex items-center gap-2">
+            <span className="text-4xl">📰</span> Latest Reports
+          </h2>
           <span
-            className="inline-flex items-center gap-1.5 border-2 border-border bg-white px-2.5 py-1 text-xs font-bold text-success"
+            className="inline-flex items-center gap-1.5 border-2 border-border bg-yellow-300 px-3 py-1.5 text-xs font-bold text-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
             style={{ borderRadius: WOBBLY_MD }}
           >
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-accent" />
             </span>
             LIVE
           </span>
         </div>
-        <div className="space-y-4">
+        <div className="space-y-6">
           {(showAllReports ? recentPosts : recentPosts.slice(0, 3)).map((p, i) => {
             const card = (
               <div
-                className={`sketch-card p-4 ${i % 2 ? "rotate-1" : "-rotate-1"}`}
+                className={`sketch-card p-5 group ${i % 2 ? "-rotate-1" : "rotate-1"}`}
                 style={{ borderRadius: WOBBLY_MD }}
               >
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
                   <UserSymbol username={p.username} size="sm" />
-                  <span className="inline-flex items-center gap-1 font-medium text-foreground">
+                  <span className="inline-flex items-center gap-1 font-bold text-foreground text-sm">
                     {p.username ?? "Anonymous"}
                     {p.username && verified.has(p.username) && <VerifiedBadge />}
                   </span>
-                  {p.created_at && <span suppressHydrationWarning>· {timeAgo(p.created_at)}</span>}
-                  <span className="ml-auto inline-flex items-center gap-1 border-2 border-border bg-white px-2 py-0.5 text-[11px] font-bold text-accent">
-                    <ArrowBigUp className="h-3.5 w-3.5" /> {p.upvotes ?? 0}
+                  {p.created_at && <span className="font-medium text-[11px] bg-muted px-2 py-0.5 rounded-full" suppressHydrationWarning>{timeAgo(p.created_at)}</span>}
+                  <span className="ml-auto inline-flex items-center gap-1.5 border-2 border-border bg-green-100 px-2.5 py-1 text-xs font-bold text-green-700 rounded-md">
+                    <ArrowBigUp className="h-4 w-4" /> {p.upvotes ?? 0}
                   </span>
-                  <span className="border border-border bg-white px-2 py-0.5 text-[11px]">
-                    {categoryEmoji(p.category ?? "general")}{" "}
-                    {categoryLabel(p.category ?? "general")}
+                </div>
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="border-2 border-border bg-yellow-100 px-2.5 py-1 text-xs font-bold text-yellow-800 rounded-md shadow-sm">
+                    {categoryEmoji(p.category ?? "general")} {categoryLabel(p.category ?? "general")}
                   </span>
                 </div>
                 {p.college_name && (
-                  <div className="mt-1 text-xs font-semibold text-accent">🏫 {p.college_name}</div>
+                  <div className="mt-3 flex items-start gap-1.5 text-sm font-bold text-accent bg-accent/5 p-2 rounded-lg border border-accent/20">
+                    <span className="mt-0.5">🏫</span> <span className="line-clamp-1">{p.college_name}</span>
+                  </div>
                 )}
-                <p className="mt-2 line-clamp-3 text-sm">{p.content}</p>
+                <p className="mt-4 line-clamp-4 text-base font-medium leading-relaxed text-foreground group-hover:text-accent transition-colors">{p.content}</p>
               </div>
             );
             return p.college_id ? (
@@ -404,61 +411,66 @@ function Home() {
             );
           })}
           {recentPosts.length === 0 && (
-            <p className="text-center text-muted-foreground">No reports yet. Check back soon!</p>
+            <p className="text-center text-muted-foreground font-medium p-8 border-2 border-dashed border-border rounded-xl">No reports yet. Check back soon!</p>
           )}
         </div>
         {recentPosts.length > 3 && (
-          <div className="mt-6 text-center">
-            <Button variant="outline" onClick={() => setShowAllReports((v) => !v)}>
-              {showAllReports ? "Show less" : "Read more"}
+          <div className="mt-8 text-center">
+            <Button variant="outline" size="lg" className="border-2 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] transition-all" onClick={() => setShowAllReports((v) => !v)}>
+              {showAllReports ? "Show less" : "Read more reports"}
             </Button>
           </div>
         )}
       </section>
 
       {/* FAQ */}
-      <section className="mx-auto max-w-3xl px-4 py-12">
-        <div className="mb-6 text-center">
-          <h2 className="font-display text-3xl font-bold">🤔 Common Sawaal</h2>
-          <p className="mt-2 text-muted-foreground">
+      <section className="mx-auto max-w-3xl px-4 py-16">
+        <div className="mb-10 text-center relative">
+          <div className="absolute inset-0 -top-4 w-24 h-24 mx-auto bg-yellow-300 rounded-full blur-2xl opacity-40 pointer-events-none" />
+          <h2 className="font-display text-4xl sm:text-5xl font-bold relative z-10 flex items-center justify-center gap-3">
+            <span className="text-4xl">🤔</span> Common Sawaal
+          </h2>
+          <p className="mt-3 text-lg font-medium text-muted-foreground relative z-10 max-w-lg mx-auto">
             Tumhare dimaag mein chal rahe kuch sawaalon ke jawaab
           </p>
         </div>
-        <div className="sketch-card p-2 sm:p-4 bg-white" style={{ borderRadius: WOBBLY_MD }}>
-          <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="item-1" className="border-b-2 border-border">
-              <AccordionTrigger className="font-bold text-left hover:no-underline hover:text-accent">
+        <div className="sketch-card p-4 sm:p-6 bg-[#fff9c4] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative" style={{ borderRadius: WOBBLY_MD }}>
+          {/* Post-it pin */}
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-8 h-8 bg-red-400 rounded-full border-2 border-border shadow-sm z-10" />
+          <Accordion type="single" collapsible className="w-full space-y-3 pt-2">
+            <AccordionItem value="item-1" className="border-2 border-border bg-white px-4 rounded-xl shadow-sm">
+              <AccordionTrigger className="font-bold text-lg text-left hover:no-underline hover:text-accent py-4">
                 Kya mera sach mein koi naam nahi aayega?
               </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground font-medium">
+              <AccordionContent className="text-muted-foreground font-medium text-base pb-4">
                 Haan, bilkul! Hum na email maangte hain, na phone number, aur na hi koi location/IP
                 data store karte hain. Tum ekdum safe aur anonymous ho.
               </AccordionContent>
             </AccordionItem>
-            <AccordionItem value="item-2" className="border-b-2 border-border">
-              <AccordionTrigger className="font-bold text-left hover:no-underline hover:text-accent">
+            <AccordionItem value="item-2" className="border-2 border-border bg-white px-4 rounded-xl shadow-sm">
+              <AccordionTrigger className="font-bold text-lg text-left hover:no-underline hover:text-accent py-4">
                 College administration ko kaise pata chalega?
               </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground font-medium">
+              <AccordionContent className="text-muted-foreground font-medium text-base pb-4">
                 Jab tumhari post pe kaafi upvotes aur engagement aati hai, toh usey automatically
                 attention milti hai. Yeh platform ek collective voice banata hai jise ignore karna
                 mushkil ho jata hai.
               </AccordionContent>
             </AccordionItem>
-            <AccordionItem value="item-3" className="border-b-2 border-border">
-              <AccordionTrigger className="font-bold text-left hover:no-underline hover:text-accent">
+            <AccordionItem value="item-3" className="border-2 border-border bg-white px-4 rounded-xl shadow-sm">
+              <AccordionTrigger className="font-bold text-lg text-left hover:no-underline hover:text-accent py-4">
                 Kya main proof/documents upload kar sakta hoon?
               </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground font-medium">
+              <AccordionContent className="text-muted-foreground font-medium text-base pb-4">
                 Haan! Hum strongly encourage karte hain ki tum reports ke saath photos ya documents
                 upload karo taaki tumhari baat sach sabit ho sake.
               </AccordionContent>
             </AccordionItem>
-            <AccordionItem value="item-4" className="border-b-0">
-              <AccordionTrigger className="font-bold text-left hover:no-underline hover:text-accent">
+            <AccordionItem value="item-4" className="border-2 border-border bg-white px-4 rounded-xl shadow-sm">
+              <AccordionTrigger className="font-bold text-lg text-left hover:no-underline hover:text-accent py-4">
                 Fake reports ko kaise rokoge?
               </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground font-medium">
+              <AccordionContent className="text-muted-foreground font-medium text-base pb-4">
                 Hamari community hi moderation karti hai. Agar koi fake ya galat cheez post hoti
                 hai, toh users use downvote ya report kar sakte hain. Spam accounts jaldi block kar
                 diye jaate hain.
