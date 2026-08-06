@@ -7,11 +7,43 @@ export function useRingTone(type: "incoming" | "outgoing" | "none") {
   const gainNodeRef = useRef<GainNode | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  const stopTone = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    
+    if (gainNodeRef.current && audioCtxRef.current && audioCtxRef.current.state !== "closed") {
+      try {
+        const now = audioCtxRef.current.currentTime;
+        gainNodeRef.current.gain.cancelScheduledValues(now);
+        gainNodeRef.current.gain.setTargetAtTime(0, now, 0.015);
+      } catch {}
+    }
+    if (oscillator1Ref.current) {
+      try { oscillator1Ref.current.stop(); } catch {}
+      try { oscillator1Ref.current.disconnect(); } catch {}
+      oscillator1Ref.current = null;
+    }
+    if (oscillator2Ref.current) {
+      try { oscillator2Ref.current.stop(); } catch {}
+      try { oscillator2Ref.current.disconnect(); } catch {}
+      oscillator2Ref.current = null;
+    }
+    if (audioCtxRef.current && audioCtxRef.current.state !== "closed") {
+      try { audioCtxRef.current.close(); } catch {}
+      audioCtxRef.current = null;
+    }
+  };
+
   useEffect(() => {
     if (type === "none") {
       stopTone();
       return;
     }
+
+    // Stop any existing tones first before starting a new one
+    stopTone();
 
     const startTone = () => {
       try {
@@ -50,7 +82,8 @@ export function useRingTone(type: "incoming" | "outgoing" | "none") {
         oscillator2Ref.current = o2;
 
         const playPattern = () => {
-          const now = ctx.currentTime;
+          if (!audioCtxRef.current || audioCtxRef.current.state === "closed") return;
+          const now = audioCtxRef.current.currentTime;
           if (type === "incoming") {
             // Fast double ring pattern
             g.gain.setValueAtTime(0.2, now);
@@ -91,22 +124,4 @@ export function useRingTone(type: "incoming" | "outgoing" | "none") {
       document.removeEventListener("touchstart", unlockAudio);
     };
   }, [type]);
-
-  const stopTone = () => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    if (gainNodeRef.current && audioCtxRef.current) {
-      try {
-        gainNodeRef.current.gain.setValueAtTime(0, audioCtxRef.current.currentTime);
-      } catch {}
-    }
-    if (oscillator1Ref.current) {
-      try { oscillator1Ref.current.stop(); } catch {}
-    }
-    if (oscillator2Ref.current) {
-      try { oscillator2Ref.current.stop(); } catch {}
-    }
-    if (audioCtxRef.current) {
-      try { audioCtxRef.current.close(); } catch {}
-    }
-  };
 }

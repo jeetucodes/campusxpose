@@ -15,6 +15,14 @@ export function timeAgo(date: string | Date | null | undefined): string {
   return `${Math.floor(mo / 12)}y ago`;
 }
 
+export function formatTime(date: string | Date | null | undefined): string {
+  if (!date) return "";
+  const d = typeof date === "string" ? new Date(date) : date;
+  if (!(d instanceof Date) || isNaN(d.getTime())) return "";
+  
+  return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+}
+
 export function ratingColor(rating: number): string {
   if (rating < 2.5) return "text-destructive";
   if (rating <= 3.5) return "text-warning";

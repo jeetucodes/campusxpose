@@ -20,6 +20,8 @@ import {
   MoreVertical,
   Ban,
   Edit2,
+  ChevronRight,
+  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import QRCode from "react-qr-code";
@@ -40,8 +42,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { AutoResizeTextarea } from "@/components/AutoResizeTextarea";
-import { AudioCallUI, CallLogData } from "@/components/AudioCallUI";
-import { IncomingCallModal } from "@/components/IncomingCallModal";
+import { useCallStore } from "@/stores/call";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,7 +63,7 @@ import { ReactionChips, MessageActions, ReplyQuote } from "@/components/MessageR
 import { MessageGestures } from "@/components/MessageGestures";
 import { usePresence } from "@/hooks/usePresence";
 import { TypingIndicator } from "@/components/ChatPresence";
-import { timeAgo } from "@/lib/format";
+import { timeAgo, formatTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useVerifiedUsernames } from "@/hooks/useVerified";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
@@ -167,7 +168,7 @@ function Messages() {
   };
 
   const [acceptedUsers, setAcceptedUsers] = useState<string[]>([]);
-  
+
   useEffect(() => {
     const stored = localStorage.getItem("chat_accepted_users");
     if (stored) setAcceptedUsers(JSON.parse(stored));
@@ -184,9 +185,7 @@ function Messages() {
 
   const getDisplayName = (user: string) => nicknames[user] || user;
 
-  // Calling states
-  const [incomingCall, setIncomingCall] = useState<{ roomID: string; callerUsername: string } | null>(null);
-  const [activeCall, setActiveCall] = useState<{ roomID: string; isCaller: boolean; remoteUsername: string } | null>(null);
+  const { startCall: globalStartCall } = useCallStore();
 
   const [pushStatus, setPushStatus] = useState<string>("unsupported");
   const [isPushSupportedFlag, setIsPushSupportedFlag] = useState(false);
@@ -260,64 +259,7 @@ function Messages() {
     acceptedUsersRef.current = acceptedUsers;
   }, [all, acceptedUsers]);
 
-  // Realtime: Listen for incoming calls
-  useEffect(() => {
-    if (!username) return;
-    const callCh = supabase
-      .channel(`calls-${username}`)
-      .on("broadcast", { event: "incoming_call" }, async (payload) => {
-        const caller = payload.payload.caller;
-        const isAccepted = acceptedUsersRef.current.includes(caller) || allRef.current.some((m) => m.sender_username === username && m.recipient_username === caller);
 
-        if (!isAccepted) {
-          // Reject silently if they are unknown
-          const callerCh = supabase.channel(`calls-${caller}`);
-          callerCh.subscribe(async (status) => {
-            if (status === "SUBSCRIBED") {
-              await callerCh.send({
-                type: "broadcast",
-                event: "call_rejected",
-                payload: { roomID: payload.payload.roomID, reason: "declined" },
-              });
-              supabase.removeChannel(callerCh);
-            }
-          });
-          return;
-        }
-
-        if (!activeCall && !incomingCall) { 
-          setIncomingCall({
-            roomID: payload.payload.roomID,
-            callerUsername: payload.payload.caller,
-          });
-        } else {
-          // Send busy signal back to the caller
-          const callerCh = supabase.channel(`calls-${payload.payload.caller}`);
-          callerCh.subscribe(async (status) => {
-            if (status === "SUBSCRIBED") {
-              await callerCh.send({
-                type: "broadcast",
-                event: "call_rejected",
-                payload: { roomID: payload.payload.roomID, reason: "busy" },
-              });
-              supabase.removeChannel(callerCh);
-            }
-          });
-        }
-      })
-      .on("broadcast", { event: "call_rejected" }, (payload) => {
-        if (activeCall?.roomID === payload.payload.roomID) {
-          endCall({ missed: true, duration: 0 });
-          toast(payload.payload.reason === "busy" ? "User is busy on another call" : "Call was rejected");
-        }
-      })
-      .subscribe();
-    return () => {
-      supabase.removeChannel(callCh);
-    };
-  }, [username, activeCall, incomingCall]);
-
-  // Realtime: instantly reflect new/updated DMs that involve me.
   useEffect(() => {
     if (!hashedId) return;
     const ch = supabase
@@ -364,7 +306,11 @@ function Messages() {
     };
   }, [all, username, blockedUsers, acceptedUsers]);
 
-  const [activeTab, setActiveTab] = useState<"messages" | "requests">("messages");
+  const callsList = useMemo(() => {
+    return all.filter(m => m.content?.startsWith("CALL_LOG|")).sort((a, b) => b.created_at.localeCompare(a.created_at));
+  }, [all]);
+
+  const [activeTab, setActiveTab] = useState<"messages" | "requests" | "calls">("messages");
 
   const active = to;
   const dmRoom = active && username ? `dm-${[username, active].sort().join("|")}` : "";
@@ -373,10 +319,10 @@ function Messages() {
     () =>
       active
         ? all.filter(
-            (m) =>
-              (m.sender_username === username && m.recipient_username === active) ||
-              (m.sender_username === active && m.recipient_username === username),
-          )
+          (m) =>
+            (m.sender_username === username && m.recipient_username === active) ||
+            (m.sender_username === active && m.recipient_username === username),
+        )
         : [],
     [all, active, username],
   );
@@ -402,66 +348,7 @@ function Messages() {
 
   const startCall = async () => {
     if (!active || !username) return;
-    const roomID = `room_${crypto.randomUUID()}`;
-    const callCh = supabase.channel(`calls-${active}`);
-    callCh.subscribe(async (status) => {
-      if (status === "SUBSCRIBED") {
-        await callCh.send({
-          type: "broadcast",
-          event: "incoming_call",
-          payload: { roomID, caller: username },
-        });
-        setActiveCall({ roomID, isCaller: true, remoteUsername: active }); // Join immediately as caller
-        supabase.removeChannel(callCh);
-        
-        // Notify them via Push Notification if they are backgrounded/offline
-        notifyIncomingCall({ data: { targetUsername: active, callerUsername: username } }).catch(() => {});
-      }
-    });
-  };
-
-  const endCall = async (log?: CallLogData) => {
-    setActiveCall(null);
-    if (log && activeCall && activeCall.isCaller && hashedId && username) {
-      const content = log.missed ? "CALL_LOG|MISSED" : `CALL_LOG|ANSWERED|${log.duration}`;
-      try {
-        await submitDirectMessage({
-          data: {
-            hashedId,
-            username,
-            recipientUsername: activeCall.remoteUsername,
-            content,
-          },
-        });
-        await load();
-      } catch (e) {
-        console.error("Failed to log call", e);
-      }
-    }
-  };
-
-  const acceptCall = () => {
-    if (incomingCall) {
-      setActiveCall({ roomID: incomingCall.roomID, isCaller: false, remoteUsername: incomingCall.callerUsername });
-      setIncomingCall(null);
-    }
-  };
-
-  const rejectCall = async () => {
-    if (incomingCall) {
-      const callCh = supabase.channel(`calls-${incomingCall.callerUsername}`);
-      callCh.subscribe(async (status) => {
-        if (status === "SUBSCRIBED") {
-          await callCh.send({
-            type: "broadcast",
-            event: "call_rejected",
-            payload: { roomID: incomingCall.roomID },
-          });
-          setIncomingCall(null);
-          supabase.removeChannel(callCh);
-        }
-      });
-    }
+    globalStartCall(active, username);
   };
 
   const send = async () => {
@@ -556,364 +443,480 @@ function Messages() {
   const isUnknown = thread.length > 0 && thread.every((m) => m.sender_username !== username) && !acceptedUsers.includes(active || "");
 
   return (
-    <div className="flex h-[100dvh] bg-background md:h-[calc(100vh-4rem)]">
-      {/* Conversation list */}
+    <div className="flex h-[100dvh] w-full flex-col overflow-hidden bg-paper md:flex-row font-sans text-ink">
       <aside
         className={cn(
-          "w-full flex-col border-r-2 border-ink bg-paper md:flex md:w-[320px] shadow-ink",
-          active ? "hidden md:flex" : "flex",
+          "flex h-full w-full shrink-0 flex-col border-r-2 border-ink/10 bg-paper transition-all z-10",
+          active ? "hidden md:flex md:w-[340px] lg:w-[380px]" : "flex",
         )}
       >
-        <header className="flex items-center gap-2 border-b-2 border-ink px-4 py-3 bg-paper sticky top-0 z-10 shadow-ink-soft">
-          <Button asChild variant="ghost" size="icon" className="hover:bg-muted text-ink">
-            <Link to="/">
-              <ArrowLeft className="h-5 w-5" />
-            </Link>
-          </Button>
-          <MessageCircle className="h-5 w-5 text-accent" strokeWidth={2.5} />
-          <span className="font-display text-lg font-bold tracking-tight">Messages</span>
+        <header className="flex items-center justify-between p-4 pb-2">
+          <div className="flex items-center gap-2">
+            <Button asChild variant="ghost" size="icon" className="hover:bg-muted md:hidden -ml-2 text-ink/70">
+              <Link to="/">
+                <ArrowLeft className="h-5 w-5" />
+              </Link>
+            </Button>
+            <MessageCircle className="h-5 w-5 text-marker" strokeWidth={2.5} />
+            <span className="font-display text-2xl font-bold tracking-tight text-ink">Messages</span>
+          </div>
 
-          <Dialog
-            open={isDialogOpen}
-            onOpenChange={(open) => {
-              setIsDialogOpen(open);
-              if (!open && localStorage.getItem("camera_permission_granted") !== "true") {
-                setIsScanning(false);
-              }
-            }}
-          >
-            <DialogTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="ml-auto text-accent hover:text-accent hover:bg-accent/10 transition-colors"
-                aria-label="Add Friends"
-              >
-                <UserPlus className="h-5 w-5" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md border-2 border-ink bg-paper shadow-ink-lg wobbly-md overflow-hidden">
-              <Tabs defaultValue="my-code" className="w-full">
-                <DialogHeader className="mb-4">
-                  <div className="flex items-center justify-between">
-                    <DialogTitle className="flex items-center gap-2 text-xl font-display text-ink">
-                      <UserPlus className="h-5 w-5 text-marker" /> Chat with Friends
-                    </DialogTitle>
-                    <TabsList className="bg-surface-2 border-2 border-ink shadow-ink-soft wobbly-sm p-1">
-                      <TabsTrigger
-                        value="my-code"
-                        className="wobbly-sm data-[state=active]:bg-marker data-[state=active]:text-white"
-                      >
-                        My Code
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="scan"
-                        className="wobbly-sm data-[state=active]:bg-marker data-[state=active]:text-white"
-                      >
-                        Scan
-                      </TabsTrigger>
-                    </TabsList>
-                  </div>
-                  <DialogDescription className="text-base">
-                    Share your QR code or scan a friend's code.
-                  </DialogDescription>
-                </DialogHeader>
+          <div className="flex items-center gap-1 ml-auto">
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn("relative text-ink/60 hover:text-ink hover:bg-muted transition-colors", activeTab === "requests" && "bg-muted text-ink")}
+              onClick={() => setActiveTab(activeTab === "requests" ? "messages" : "requests")}
+              aria-label="Message Requests"
+            >
+              <ShieldCheck className="h-5 w-5" />
+              {requests.length > 0 && (
+                <span className="absolute top-0.5 right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-marker text-[9px] font-bold text-white ring-2 ring-paper">
+                  {requests.length > 9 ? "9+" : requests.length}
+                </span>
+              )}
+            </Button>
 
-                <TabsContent
-                  value="my-code"
-                  className="mt-2 min-h-[420px] flex flex-col items-center justify-center w-full outline-none"
+            <Dialog
+              open={isDialogOpen}
+              onOpenChange={(open) => {
+                setIsDialogOpen(open);
+                if (!open && localStorage.getItem("camera_permission_granted") !== "true") {
+                  setIsScanning(false);
+                }
+              }}
+            >
+              <DialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-accent hover:text-accent hover:bg-accent/10 transition-colors"
+                  aria-label="Add Friends"
                 >
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                    className="flex w-full flex-col items-center justify-center gap-5 py-2"
+                  <UserPlus className="h-5 w-5" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md border-2 border-ink bg-paper shadow-ink-lg wobbly-md overflow-hidden">
+                <Tabs defaultValue="my-code" className="w-full">
+                  <DialogHeader className="mb-4">
+                    <div className="flex items-center justify-between">
+                      <DialogTitle className="flex items-center gap-2 text-xl font-display text-ink">
+                        <UserPlus className="h-5 w-5 text-marker" /> Chat with Friends
+                      </DialogTitle>
+                      <TabsList className="bg-surface-2 border-2 border-ink shadow-ink-soft wobbly-sm p-1">
+                        <TabsTrigger
+                          value="my-code"
+                          className="wobbly-sm data-[state=active]:bg-marker data-[state=active]:text-white"
+                        >
+                          My Code
+                        </TabsTrigger>
+                        <TabsTrigger
+                          value="scan"
+                          className="wobbly-sm data-[state=active]:bg-marker data-[state=active]:text-white"
+                        >
+                          Scan
+                        </TabsTrigger>
+                      </TabsList>
+                    </div>
+                    <DialogDescription className="text-base">
+                      Share your QR code or scan a friend's code.
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <TabsContent
+                    value="my-code"
+                    className="mt-2 min-h-[420px] flex flex-col items-center justify-center w-full outline-none"
                   >
                     <motion.div
-                      animate={{ y: [0, -4, 0], rotate: [0, -1, 1, 0] }}
-                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                      className="sketch-card wobbly-md p-5 bg-white relative cursor-pointer"
+                      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                      className="flex w-full flex-col items-center justify-center gap-5 py-2"
                     >
-                      <QRCode
-                        value={`https://campusxpose.online/messages?to=${username}`}
-                        size={180}
-                        style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-                        viewBox={`0 0 256 256`}
-                        fgColor="var(--ink)"
-                        bgColor="transparent"
-                      />
-                    </motion.div>
-                    <div className="text-center space-y-1">
-                      <p className="font-display font-bold text-xl tracking-tight text-foreground">
-                        @{username}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Scan with phone camera to open chat
-                      </p>
-                    </div>
-                    <div className="flex w-full items-center gap-2 bg-white p-2 wobbly-sm border-2 border-ink shadow-ink-soft">
-                      <Input
-                        readOnly
-                        value={`https://campusxpose.online/messages?to=${username}`}
-                        className="flex-1 bg-transparent border-none text-xs font-mono truncate shadow-none focus-visible:ring-0 px-2 text-ink"
-                      />
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="shrink-0 h-8 w-8 hover:bg-muted hover:text-ink transition-colors wobbly-sm"
-                        onClick={() => {
-                          navigator.clipboard.writeText(
-                            `https://campusxpose.online/messages?to=${username}`,
-                          );
-                          toast.success("Link copied to clipboard!");
-                        }}
-                      >
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        className="shrink-0 h-8 w-8 bg-marker text-white hover:bg-marker/90 border-2 border-ink shadow-ink-soft transition-all wobbly-sm hover:-translate-y-0.5"
-                        onClick={() => {
-                          const shareUrl = `https://campusxpose.online/messages?to=${username}`;
-                          if (typeof navigator !== "undefined" && navigator.share) {
-                            navigator
-                              .share({
-                                title: "Message me anonymously",
-                                text: `Chat with me on CampusXpose!`,
-                                url: shareUrl,
-                              })
-                              .catch(() => {});
-                          } else if (typeof window !== "undefined" && (window as any).median) {
-                            (window as any).median.share.sharePage({
-                              url: shareUrl,
-                              title: "Message me anonymously",
-                            });
-                          } else {
-                            navigator.clipboard.writeText(shareUrl);
-                            toast.success("Link copied to clipboard!");
-                          }
-                        }}
-                      >
-                        <Share2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </motion.div>
-                </TabsContent>
-
-                <TabsContent
-                  value="scan"
-                  className="mt-2 min-h-[420px] flex flex-col items-center justify-center w-full outline-none"
-                >
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                    className="flex w-full flex-col items-center justify-center py-2"
-                  >
-                    {!isScanning ? (
-                      <div className="flex flex-col items-center justify-center gap-4 py-8 text-center px-4 sketch-card wobbly-md w-full h-[320px] relative overflow-hidden bg-white">
-                        <motion.div
-                          animate={{ scale: [1, 1.1, 1], rotate: [-3, 3, -3] }}
-                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                          className="wobbly-oval bg-secondary p-5 border-2 border-ink shadow-ink-soft relative z-10"
-                        >
-                          <ImageIcon className="h-10 w-10 text-marker" />
-                        </motion.div>
-                        <div className="relative z-10">
-                          <h3 className="font-display font-bold text-ink text-xl">
-                            Camera Permission
-                          </h3>
-                          <p className="text-sm text-muted-foreground mt-1 max-w-[250px] font-sans">
-                            We need your permission to use the camera for scanning QR codes.
-                          </p>
-                        </div>
-                        <Button
-                          onClick={() => {
-                            setIsScanning(true);
-                            localStorage.setItem("camera_permission_granted", "true");
-                          }}
-                          className="mt-2 bg-marker text-white hover:bg-marker/90 border-2 border-ink shadow-ink transition-all wobbly-sm px-6 hover:-translate-y-1 active:translate-y-0 relative z-10"
-                        >
-                          Enable Camera & Scan
-                        </Button>
-                      </div>
-                    ) : (
                       <motion.div
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                        className="w-full max-w-[280px] overflow-hidden wobbly-md border-2 border-ink shadow-ink bg-white aspect-square relative flex items-center justify-center"
+                        animate={{ y: [0, -4, 0], rotate: [0, -1, 1, 0] }}
+                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                        className="sketch-card wobbly-md p-5 bg-white relative cursor-pointer"
                       >
-                        <motion.div
-                          animate={{ top: ["0%", "100%", "0%"] }}
-                          transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                          className="absolute left-0 w-full h-[4px] bg-marker z-20 pointer-events-none opacity-80"
-                        />
-                        <Scanner
-                          formats={["qr_code"]}
-                          constraints={{ facingMode: "environment" }}
-                          onError={(error: any) => {
-                            console.error("Scanner Error:", error);
-                            setIsScanning(false);
-                            localStorage.removeItem("camera_permission_granted");
-
-                            // Specific error handling for permissions
-                            if (
-                              error?.name === "NotAllowedError" ||
-                              error?.message?.toLowerCase().includes("permission denied")
-                            ) {
-                              toast.error(
-                                "Camera Permission Denied! If you are in the app, make sure Camera permission is enabled in your App Settings/Manifest.",
-                                { duration: 6000 },
-                              );
-                            } else if (
-                              window.location.protocol !== "https:" &&
-                              window.location.hostname !== "localhost"
-                            ) {
-                              toast.error("Camera requires HTTPS to work securely.");
-                            } else {
-                              toast.error(
-                                error?.message ||
-                                  "Failed to access camera. Device might not support it.",
-                              );
-                            }
-                          }}
-                          onScan={(result) => {
-                            if (result && result.length > 0) {
-                              const url = result[0].rawValue;
-                              try {
-                                const parsedUrl = new URL(url);
-                                if (
-                                  parsedUrl.hostname.includes("campusxpose.online") &&
-                                  parsedUrl.pathname.includes("/messages")
-                                ) {
-                                  const scannedUsername = parsedUrl.searchParams.get("to");
-                                  if (scannedUsername) {
-                                    setIsDialogOpen(false);
-                                    navigate({ to: "/messages", search: { to: scannedUsername } });
-                                    toast.success(`Chatting with ${scannedUsername}`);
-                                  }
-                                } else {
-                                  toast.error("Invalid CampusXpose QR Code");
-                                }
-                              } catch (e) {
-                                toast.error("Invalid QR Code content");
-                              }
-                            }
-                          }}
+                        <QRCode
+                          value={`https://campusxpose.online/messages?to=${username}`}
+                          size={180}
+                          style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                          viewBox={`0 0 256 256`}
+                          fgColor="var(--ink)"
+                          bgColor="transparent"
                         />
                       </motion.div>
-                    )}
-                    <p className="mt-6 text-xs text-muted-foreground text-center px-4 font-medium h-[20px]">
-                      Point your camera at a friend's CampusXpose QR code.
-                    </p>
-                  </motion.div>
-                </TabsContent>
-              </Tabs>
-            </DialogContent>
-          </Dialog>
+                      <div className="text-center space-y-1">
+                        <p className="font-display font-bold text-xl tracking-tight text-foreground">
+                          @{username}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Scan with phone camera to open chat
+                        </p>
+                      </div>
+                      <div className="flex w-full items-center gap-2 bg-white p-2 wobbly-sm border-2 border-ink shadow-ink-soft">
+                        <Input
+                          readOnly
+                          value={`https://campusxpose.online/messages?to=${username}`}
+                          className="flex-1 bg-transparent border-none text-xs font-mono truncate shadow-none focus-visible:ring-0 px-2 text-ink"
+                        />
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="shrink-0 h-8 w-8 hover:bg-muted hover:text-ink transition-colors wobbly-sm"
+                          onClick={() => {
+                            navigator.clipboard.writeText(
+                              `https://campusxpose.online/messages?to=${username}`,
+                            );
+                            toast.success("Link copied to clipboard!");
+                          }}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          className="shrink-0 h-8 w-8 bg-marker text-white hover:bg-marker/90 border-2 border-ink shadow-ink-soft transition-all wobbly-sm hover:-translate-y-0.5"
+                          onClick={() => {
+                            const shareUrl = `https://campusxpose.online/messages?to=${username}`;
+                            if (typeof navigator !== "undefined" && navigator.share) {
+                              navigator
+                                .share({
+                                  title: "Message me anonymously",
+                                  text: `Chat with me on CampusXpose!`,
+                                  url: shareUrl,
+                                })
+                                .catch(() => { });
+                            } else if (typeof window !== "undefined" && (window as any).median) {
+                              (window as any).median.share.sharePage({
+                                url: shareUrl,
+                                title: "Message me anonymously",
+                              });
+                            } else {
+                              navigator.clipboard.writeText(shareUrl);
+                              toast.success("Link copied to clipboard!");
+                            }
+                          }}
+                        >
+                          <Share2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </motion.div>
+                  </TabsContent>
+
+                  <TabsContent
+                    value="scan"
+                    className="mt-2 min-h-[420px] flex flex-col items-center justify-center w-full outline-none"
+                  >
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                      className="flex w-full flex-col items-center justify-center py-2"
+                    >
+                      {!isScanning ? (
+                        <div className="flex flex-col items-center justify-center gap-4 py-8 text-center px-4 sketch-card wobbly-md w-full h-[320px] relative overflow-hidden bg-white">
+                          <motion.div
+                            animate={{ scale: [1, 1.1, 1], rotate: [-3, 3, -3] }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                            className="wobbly-oval bg-secondary p-5 border-2 border-ink shadow-ink-soft relative z-10"
+                          >
+                            <ImageIcon className="h-10 w-10 text-marker" />
+                          </motion.div>
+                          <div className="relative z-10">
+                            <h3 className="font-display font-bold text-ink text-xl">
+                              Camera Permission
+                            </h3>
+                            <p className="text-sm text-muted-foreground mt-1 max-w-[250px] font-sans">
+                              We need your permission to use the camera for scanning QR codes.
+                            </p>
+                          </div>
+                          <Button
+                            onClick={() => {
+                              setIsScanning(true);
+                              localStorage.setItem("camera_permission_granted", "true");
+                            }}
+                            className="mt-2 bg-marker text-white hover:bg-marker/90 border-2 border-ink shadow-ink transition-all wobbly-sm px-6 hover:-translate-y-1 active:translate-y-0 relative z-10"
+                          >
+                            Enable Camera & Scan
+                          </Button>
+                        </div>
+                      ) : (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                          className="w-full max-w-[280px] overflow-hidden wobbly-md border-2 border-ink shadow-ink bg-white aspect-square relative flex items-center justify-center"
+                        >
+                          <motion.div
+                            animate={{ top: ["0%", "100%", "0%"] }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                            className="absolute left-0 w-full h-[4px] bg-marker z-20 pointer-events-none opacity-80"
+                          />
+                          <Scanner
+                            formats={["qr_code"]}
+                            constraints={{ facingMode: "environment" }}
+                            onError={(error: any) => {
+                              console.error("Scanner Error:", error);
+                              setIsScanning(false);
+                              localStorage.removeItem("camera_permission_granted");
+
+                              // Specific error handling for permissions
+                              if (
+                                error?.name === "NotAllowedError" ||
+                                error?.message?.toLowerCase().includes("permission denied")
+                              ) {
+                                toast.error(
+                                  "Camera Permission Denied! If you are in the app, make sure Camera permission is enabled in your App Settings/Manifest.",
+                                  { duration: 6000 },
+                                );
+                              } else if (
+                                window.location.protocol !== "https:" &&
+                                window.location.hostname !== "localhost"
+                              ) {
+                                toast.error("Camera requires HTTPS to work securely.");
+                              } else {
+                                toast.error(
+                                  error?.message ||
+                                  "Failed to access camera. Device might not support it.",
+                                );
+                              }
+                            }}
+                            onScan={(result) => {
+                              if (result && result.length > 0) {
+                                const url = result[0].rawValue;
+                                try {
+                                  const parsedUrl = new URL(url);
+                                  if (
+                                    parsedUrl.hostname.includes("campusxpose.online") &&
+                                    parsedUrl.pathname.includes("/messages")
+                                  ) {
+                                    const scannedUsername = parsedUrl.searchParams.get("to");
+                                    if (scannedUsername) {
+                                      setIsDialogOpen(false);
+                                      navigate({ to: "/messages", search: { to: scannedUsername } });
+                                      toast.success(`Chatting with ${scannedUsername}`);
+                                    }
+                                  } else {
+                                    toast.error("Invalid CampusXpose QR Code");
+                                  }
+                                } catch (e) {
+                                  toast.error("Invalid QR Code content");
+                                }
+                              }
+                            }}
+                          />
+                        </motion.div>
+                      )}
+                      <p className="mt-6 text-xs text-muted-foreground text-center px-4 font-medium h-[20px]">
+                        Point your camera at a friend's CampusXpose QR code.
+                      </p>
+                    </motion.div>
+                  </TabsContent>
+                </Tabs>
+              </DialogContent>
+            </Dialog>
+          </div>
         </header>
 
-        <div className="flex border-b-2 border-ink">
-          <button 
-            className={cn("flex-1 py-2 font-display font-bold border-r-2 border-ink transition-colors", activeTab === "messages" ? "bg-accent text-white" : "bg-paper text-ink hover:bg-muted")}
-            onClick={() => setActiveTab("messages")}
-          >
-            Messages
-          </button>
-          <button 
-            className={cn("flex-1 py-2 font-display font-bold transition-colors", activeTab === "requests" ? "bg-accent text-white" : "bg-paper text-ink hover:bg-muted")}
-            onClick={() => setActiveTab("requests")}
-          >
-            Requests {requests.length > 0 && `(${requests.length})`}
-          </button>
+        <div className="px-3 pb-2">
+          <div className="flex bg-secondary/60 p-1 rounded-xl border border-ink/8">
+            <button
+              className={cn("flex-1 py-1.5 font-sans font-semibold transition-all text-sm rounded-lg", activeTab === "messages" || activeTab === "requests" ? "bg-white text-ink shadow-sm border border-ink/10" : "text-ink/50 hover:text-ink")}
+              onClick={() => setActiveTab("messages")}
+            >
+              Chats
+            </button>
+            <button
+              className={cn("flex-1 py-1.5 font-sans font-semibold transition-all text-sm rounded-lg", activeTab === "calls" ? "bg-white text-ink shadow-sm border border-ink/10" : "text-ink/50 hover:text-ink")}
+              onClick={() => setActiveTab("calls")}
+            >
+              Calls
+            </button>
+          </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto wobbly-scroll">
+        <div className="flex-1 overflow-y-auto no-scrollbar px-2">
           {isPushSupportedFlag && pushStatus === "default" && (
-            <div className="bg-postit p-3 border-b-2 border-ink shadow-ink-soft">
+            <div className="bg-postit p-3 mx-2 mb-2 rounded-xl border border-ink/15 shadow-ink-soft">
               <p className="text-sm font-sans font-medium text-ink mb-2">
                 Enable Push Notifications to get alerted for new messages.
               </p>
               <Button
                 onClick={handleEnablePush}
                 size="sm"
-                className="w-full bg-marker text-white hover:bg-marker/90 wobbly-sm shadow-none border-none"
+                className="w-full bg-ink text-white hover:bg-ink/80 rounded-lg shadow-none border-none"
               >
                 <BellRing className="w-4 h-4 mr-2" /> Enable Notifications
               </Button>
             </div>
           )}
 
-          <div className="border-b-2 border-ink bg-surface-2 p-3">
-            <div className="flex items-center gap-2 bg-white wobbly-sm border-2 border-ink shadow-ink-soft pr-1">
+          <div className="px-1 mb-3">
+            <div className="flex items-center gap-2 bg-white rounded-xl px-2 py-1.5 border border-ink/10 shadow-sm focus-within:border-ink/25 transition-all">
               <Input
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && startNew()}
-                placeholder="Username to message..."
-                className="bg-transparent border-none focus-visible:ring-0 shadow-none text-ink placeholder:text-muted-foreground flex-1"
+                placeholder="New message to..."
+                className="bg-transparent border-none focus-visible:ring-0 shadow-none text-ink placeholder:text-ink/30 flex-1 px-2 text-sm h-9"
               />
               <Button
                 onClick={startNew}
                 size="icon"
-                className="shrink-0 bg-marker text-white hover:bg-marker/90 wobbly-sm h-8 w-8 transition-transform hover:-translate-y-0.5 shadow-none border-none"
+                className="shrink-0 bg-ink text-white rounded-lg h-8 w-8 transition-transform hover:scale-105 shadow-sm border-none"
               >
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
           </div>
 
+
+          {activeTab === "requests" && (
+            <div className="px-2 mb-2 mt-1">
+              <button
+                onClick={() => setActiveTab("messages")}
+                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-ink font-medium px-2 py-1 mb-2 transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Chats
+              </button>
+            </div>
+          )}
+
           {loading
             ? Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="flex items-center gap-3 px-4 py-3">
-                  <div className="h-10 w-10 shrink-0 rounded-full bg-muted/40 animate-pulse" />
-                  <div className="min-w-0 flex-1 space-y-2">
-                    <div className="h-4 w-1/2 rounded bg-muted/40 animate-pulse" />
-                    <div className="h-3 w-3/4 rounded bg-muted/40 animate-pulse" />
-                  </div>
+              <div key={i} className="flex items-center gap-3 px-4 py-3">
+                <div className="h-10 w-10 shrink-0 rounded-full bg-muted/40 animate-pulse" />
+                <div className="min-w-0 flex-1 space-y-2">
+                  <div className="h-4 w-1/2 rounded bg-muted/40 animate-pulse" />
+                  <div className="h-3 w-3/4 rounded bg-muted/40 animate-pulse" />
                 </div>
-              ))
-            : (activeTab === "requests" ? requests : regularConversations).map((item) => {
-                const unread = unreadBy[item.user] ?? 0;
-                return (
-                  <div
-                    key={item.user}
-                    className={cn(
-                      "group flex items-center gap-3 border-b-2 border-ink px-4 py-3 transition-all hover:bg-muted cursor-pointer relative",
-                      active === item.user && "bg-postit",
-                    )}
-                  >
-                    <Link
-                      to="/messages"
-                      search={{ to: item.user }}
-                      className="flex min-w-0 flex-1 items-center gap-3"
+              </div>
+            ))
+            : activeTab === "calls" ? (
+              callsList.length === 0 ? (
+                <div className="flex flex-col items-center justify-center gap-3 px-4 py-16 text-center text-muted-foreground">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted/30">
+                    <Phone className="h-6 w-6 opacity-50" />
+                  </div>
+                  <p className="text-sm">No recent calls.</p>
+                </div>
+              ) : (
+                callsList.map((call) => {
+                  const otherUser = call.sender_username === username ? call.recipient_username : call.sender_username;
+                  const isIncoming = call.sender_username !== username;
+                  const isMissed = call.content === "CALL_LOG|MISSED";
+                  const durationStr = call.content.split("|")[2] || "0";
+                  const durationInt = parseInt(durationStr);
+                  const formattedDuration = `${Math.floor(durationInt / 60)}:${(durationInt % 60).toString().padStart(2, "0")}`;
+
+                  return (
+                    <div
+                      key={call.id}
+                      className={cn(
+                        "group flex items-center gap-3 px-3 py-3 rounded-2xl transition-all hover:bg-muted/50 cursor-pointer relative mb-1",
+                        active === otherUser && "bg-white shadow-sm border border-border/40"
+                      )}
+                      onClick={() => navigate({ to: "/messages", search: { to: otherUser } })}
                     >
-                      <UserSymbol username={item.user} size="sm" />
+                      <UserSymbol username={otherUser} size="sm" />
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 truncate font-medium">
-                          {getDisplayName(item.user)}
-                          {item.user && verified.has(item.user) && (
-                            <VerifiedBadge className="h-3.5 w-3.5" />
-                          )}
-                          {unread > 0 && active !== item.user && (
-                            <span className="grid h-5 min-w-5 place-items-center bg-marker px-1 text-[10px] font-bold leading-none text-white wobbly-sm shadow-ink-soft">
-                              {unread > 9 ? "9+" : unread}
-                            </span>
-                          )}
+                          <span className={isMissed && isIncoming ? "text-red-500 font-semibold" : "text-ink/90 font-semibold"}>
+                            {getDisplayName(otherUser)}
+                          </span>
                         </div>
-                        <div className="truncate text-xs text-muted-foreground">
-                          {item.msg.sender_username === username ? "You: " : ""}
-                          {item.msg.content}
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5 font-medium">
+                          {isMissed ? (
+                            isIncoming ? (
+                              <PhoneMissed className="h-3 w-3 text-red-500" />
+                            ) : (
+                              <PhoneMissed className="h-3 w-3" />
+                            )
+                          ) : (
+                            <PhoneCall className="h-3 w-3 text-emerald-500" />
+                          )}
+                          <span className={isMissed && isIncoming ? "text-red-500" : ""}>
+                            {isMissed ? (isIncoming ? "Missed Call" : "Canceled Call") : `Incoming Call • ${formattedDuration}`}
+                          </span>
                         </div>
                       </div>
-                      <div className="shrink-0 text-[10px] text-muted-foreground">
+                      <div className="shrink-0 text-[10px] text-muted-foreground self-start mt-1 font-medium">
+                        {timeAgo(call.created_at)}
+                      </div>
+                    </div>
+                  );
+                })
+              )
+            ) : (activeTab === "requests" ? requests : regularConversations).map((item) => {
+              const unread = unreadBy[item.user] ?? 0;
+              return (
+                <div
+                  key={item.user}
+                  className={cn(
+                    "group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all hover:bg-white/80 cursor-pointer relative mb-0.5",
+                    active === item.user && "bg-white shadow-sm border border-ink/8",
+                  )}
+                >
+                  <Link
+                    to="/messages"
+                    search={{ to: item.user }}
+                    className="flex min-w-0 flex-1 items-center gap-3 outline-none"
+                  >
+                    <UserSymbol username={item.user} size="sm" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 truncate font-medium">
+                        <span className="text-ink font-semibold">{getDisplayName(item.user)}</span>
+                        {item.user && verified.has(item.user) && (
+                          <VerifiedBadge className="h-3.5 w-3.5" />
+                        )}
+                        {unread > 0 && active !== item.user && (
+                          <span className="grid h-5 min-w-5 place-items-center bg-marker rounded-full px-1.5 text-[10px] font-bold leading-none text-white">
+                            {unread > 9 ? "9+" : unread}
+                          </span>
+                        )}
+                      </div>
+                      <div className="truncate text-xs text-muted-foreground font-medium mt-0.5">
+                        {item.msg.sender_username === username ? "You: " : ""}
+                        {item.msg.content?.startsWith("CALL_LOG|") ? (item.msg.content === "CALL_LOG|MISSED" ? "Missed call" : "Audio call") : item.msg.content}
+                      </div>
+                    </div>
+
+                    {activeTab === "requests" ? (
+                      <div className="flex items-center gap-1 ml-1" onClick={(e) => e.preventDefault()}>
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            acceptUser(item.user);
+                          }}
+                          className="p-1.5 rounded-full text-blue-600 hover:bg-blue-100 transition-colors"
+                        >
+                          <Check className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (confirm(`Are you sure you want to delete this chat request from ${item.user}?`)) {
+                              deleteConversation(item.user);
+                            }
+                          }}
+                          className="p-1.5 rounded-full text-red-500 hover:bg-red-100 transition-colors"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="shrink-0 text-[10px] text-muted-foreground mt-1 font-medium self-start">
                         {timeAgo(item.msg.created_at)}
                       </div>
-                    </Link>
-                  </div>
-                );
-              })}
+                    )}
+                  </Link>
+                </div>
+              );
+            })}
           {!loading && regularConversations.length === 0 && activeTab === "messages" && (
             <div className="flex flex-col items-center justify-center gap-3 px-4 py-16 text-center text-muted-foreground">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted/30">
@@ -941,24 +944,24 @@ function Messages() {
 
       {/* Active thread */}
       <section
-        className={cn("min-h-0 flex-1 flex-col bg-paper", active ? "flex" : "hidden md:flex")}
+        className={cn("min-h-0 flex-1 flex-col bg-paper relative", active ? "flex" : "hidden md:flex")}
       >
         {active ? (
           <>
-            <header className="flex items-center gap-3 border-b-2 border-ink px-4 py-3 bg-paper sticky top-0 z-10 shadow-ink-soft">
-              <Button asChild variant="ghost" size="icon" className="hover:bg-muted text-ink">
+            <header className="flex items-center gap-3 border-b-2 border-ink/8 px-4 py-3 bg-white/90 backdrop-blur-md sticky top-0 z-20">
+              <Button asChild variant="ghost" size="icon" className="md:hidden hover:bg-muted text-ink/80 -ml-2">
                 <Link to="/messages" search={{}}>
                   <ArrowLeft className="h-5 w-5" />
                 </Link>
               </Button>
               <UserSymbol username={active} size="md" />
               <div>
-                <div className="inline-flex items-center gap-1 font-display font-bold">
+                <div className="inline-flex items-center gap-1 font-display font-bold text-ink">
                   {getDisplayName(active)}
                   {active && verified.has(active) && <VerifiedBadge />}
                 </div>
                 {online >= 2 ? (
-                  <span className="flex items-center gap-1 text-xs text-emerald-600">
+                  <span className="flex items-center gap-1 text-xs text-emerald-600 font-medium">
                     <span className="relative flex h-2 w-2">
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-70" />
                       <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
@@ -966,44 +969,44 @@ function Messages() {
                     online
                   </span>
                 ) : (
-                  <div className="text-xs text-muted-foreground">Anonymous direct message</div>
+                  <div className="text-xs text-ink/40 font-medium">Anonymous direct message</div>
                 )}
               </div>
               <div className="ml-auto flex items-center gap-2">
                 {active && !blockedUsers.includes(active) && !isUnknown && (
                   <button
                     onClick={startCall}
-                    className="rounded-full bg-accent/10 p-2 text-accent hover:bg-accent/20 transition-colors shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] border-2 border-ink"
+                    className="rounded-full bg-ink/5 p-2 text-ink/60 hover:bg-ink/10 hover:text-ink transition-colors"
                   >
                     <Phone className="h-5 w-5" />
                   </button>
                 )}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:bg-muted">
+                    <Button variant="ghost" size="icon" className="text-ink/40 hover:bg-muted hover:text-ink">
                       <MoreVertical className="h-5 w-5" />
                     </Button>
                   </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48 bg-paper border-2 border-ink shadow-ink-md">
-                  <DropdownMenuItem className="cursor-pointer" onClick={() => {
-                    setNicknameInput(nicknames[active] || "");
-                    setNicknameDialogOpen(true);
-                  }}>
-                    <Edit2 className="mr-2 h-4 w-4" /> {nicknames[active] ? "Change Nickname" : "Add Nickname"}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer text-destructive focus:bg-destructive/10" onClick={() => deleteConversation(active)}>
-                    <Trash2 className="mr-2 h-4 w-4 text-destructive" /> Delete Chat
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer text-destructive focus:bg-destructive/10" onClick={() => toggleBlockUser(active)}>
-                    <Ban className="mr-2 h-4 w-4 text-destructive" /> {blockedUsers.includes(active) ? "Unblock User" : "Block User"}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-lg border-2 border-ink/10 bg-white">
+                    <DropdownMenuItem className="cursor-pointer font-medium" onClick={() => {
+                      setNicknameInput(nicknames[active] || "");
+                      setNicknameDialogOpen(true);
+                    }}>
+                      <Edit2 className="mr-2 h-4 w-4" /> {nicknames[active] ? "Change Nickname" : "Add Nickname"}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer text-marker focus:bg-red-50 focus:text-marker" onClick={() => deleteConversation(active)}>
+                      <Trash2 className="mr-2 h-4 w-4" /> Delete Chat
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer text-marker focus:bg-red-50 focus:text-marker" onClick={() => toggleBlockUser(active)}>
+                      <Ban className="mr-2 h-4 w-4" /> {blockedUsers.includes(active) ? "Unblock User" : "Block User"}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </header>
 
             {thread.some((m) => m.pinned) && (
-              <div className="border-b-2 border-ink bg-postit px-4 py-2 shadow-ink-soft z-10 relative">
+              <div className="border-b-2 border-ink/8 bg-postit/60 backdrop-blur-sm px-4 py-2 z-10 relative">
                 <div className="mx-auto w-full max-w-2xl space-y-1">
                   {thread
                     .filter((m) => m.pinned)
@@ -1031,131 +1034,136 @@ function Messages() {
 
             <div
               ref={threadBoxRef}
-              className="mx-auto flex w-full max-w-2xl min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-4 py-4"
+              className="mx-auto flex w-full md:max-w-3xl min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-4 md:px-8 py-4"
             >
               {loading
                 ? Array.from({ length: 6 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className={cn("flex w-full", i % 2 === 0 ? "justify-end" : "justify-start")}
+                  >
                     <div
-                      key={i}
-                      className={cn("flex w-full", i % 2 === 0 ? "justify-end" : "justify-start")}
-                    >
-                      <div
-                        className={cn(
-                          "h-12 w-[60%] border-2 border-ink bg-muted/20 animate-pulse wobbly-md shadow-ink-soft",
-                          i % 2 === 0 ? "bg-accent/10" : "",
-                        )}
-                      />
-                    </div>
-                  ))
+                      className={cn(
+                        "h-10 w-[50%] rounded-2xl bg-muted/40 animate-pulse",
+                        i % 2 === 0 ? "rounded-tr-sm bg-blue-100/50" : "rounded-tl-sm",
+                      )}
+                    />
+                  </div>
+                ))
                 : thread.map((m) => {
-                    const own = m.sender_hash === hashedId;
-                    const reactions = byMessage.get(m.id) ?? [];
+                  const own = m.sender_hash === hashedId;
+                  const reactions = byMessage.get(m.id) ?? [];
+                  const isCallLog = m.content?.startsWith("CALL_LOG|");
+
+                  if (isCallLog) {
+                    const isMissed = m.content === "CALL_LOG|MISSED";
+                    const durationStr = m.content?.split("|")[2] || "0";
+                    const durationInt = parseInt(durationStr);
+                    const formattedDuration = `${Math.floor(durationInt / 60)}:${(durationInt % 60).toString().padStart(2, "0")}`;
+
                     return (
-                      <div
-                        key={m.id}
-                        className={cn("group flex w-full", own ? "justify-end" : "justify-start")}
-                      >
-                        <div
-                          className={cn(
-                            "flex max-w-[85%] flex-col gap-0",
-                            own ? "items-end" : "items-start",
-                          )}
-                        >
-                          <MessageGestures
-                            onReply={() => setReplyTo(m)}
-                            onReact={(e) => toggle(m.id, e)}
-                            onPin={() => pinMessage(m)}
-                            pinned={m.pinned}
-                            align={own ? "end" : "start"}
-                          >
-                            <div
-                              className={cn(
-                                "flex items-center gap-1",
-                                own ? "flex-row" : "flex-row-reverse",
-                              )}
-                            >
-                              <MessageActions
-                                className="hidden transition-opacity md:flex md:opacity-0 md:group-hover:opacity-100"
-                                onToggle={(e) => toggle(m.id, e)}
-                                onReply={() => setReplyTo(m)}
-                                onPin={() => pinMessage(m)}
-                                pinned={m.pinned}
-                              />
-                              <div
-                                className={cn(
-                                  "relative w-fit max-w-full border-2 border-ink px-3 py-2 text-sm shadow-ink-soft wobbly-sm",
-                                  own ? "bg-marker text-white" : "bg-white text-ink",
-                                )}
-                              >
-                                {m.pinned && (
-                                  <Pin className="absolute -right-2 -top-2 h-4 w-4 rotate-45 text-marker bg-postit rounded-full p-0.5 border border-ink shadow-sm" />
-                                )}
-                                <ReplyQuote
-                                  username={m.reply_to_username}
-                                  content={m.reply_to_content}
-                                  align={own ? "end" : "start"}
-                                />
-                                {m.image_url && (
-                                  <div className="mb-2 max-w-[240px] overflow-hidden rounded-md border border-ink/10 mt-1">
-                                    <img
-                                      src={m.image_url}
-                                      alt="Attachment"
-                                      className="w-full h-auto object-cover"
-                                      loading="lazy"
-                                    />
-                                  </div>
-                                )}
-                                <div className="flex flex-wrap items-end justify-end gap-x-2">
-                                  {m.content && !m.content.startsWith("CALL_LOG|") && (
-                                    <span className="whitespace-pre-wrap break-all leading-relaxed">
-                                      <Linkify text={m.content} />
-                                    </span>
-                                  )}
-                                  {m.content?.startsWith("CALL_LOG|") && (
-                                    <div className="flex items-center gap-2 font-display font-medium">
-                                      {m.content === "CALL_LOG|MISSED" ? (
-                                        own ? (
-                                          <>
-                                            <PhoneMissed className="h-4 w-4 text-white/80" />
-                                            <span className="text-white/90">Canceled Call</span>
-                                          </>
-                                        ) : (
-                                          <>
-                                            <PhoneMissed className="h-4 w-4 text-red-500" />
-                                            <span className="text-red-500">Missed Call</span>
-                                          </>
-                                        )
-                                      ) : (
-                                        <>
-                                          <PhoneCall className="h-4 w-4" />
-                                          <span>
-                                            Audio Call • {Math.floor(parseInt(m.content.split("|")[2] || "0") / 60)}:{(parseInt(m.content.split("|")[2] || "0") % 60).toString().padStart(2, "0")}
-                                          </span>
-                                        </>
-                                      )}
-                                    </div>
-                                  )}
-                                  <span
-                                    className={cn(
-                                      "shrink-0 text-[10px]",
-                                      own ? "text-white/80" : "text-muted-foreground",
-                                    )}
-                                  >
-                                    {timeAgo(m.created_at)}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </MessageGestures>
-                          <ReactionChips
-                            reactions={reactions}
-                            onToggle={(e) => toggle(m.id, e)}
-                            align={own ? "end" : "start"}
-                          />
+                      <div key={m.id} className={cn("flex w-full my-3", own ? "justify-end" : "justify-start")}>
+                        <div className={cn("flex items-center gap-3 px-4 py-2.5 rounded-xl border-2", isMissed ? "bg-red-50/80 border-red-200/50" : "bg-white border-ink/8")}>
+                          <div className={cn("p-2 rounded-lg", isMissed ? "bg-red-100" : "bg-emerald-100")}>
+                            {isMissed ? <PhoneMissed className="h-4 w-4 text-red-600" /> : <PhoneCall className="h-4 w-4 text-emerald-600" />}
+                          </div>
+                          <div className="flex flex-col ml-1">
+                            <span className={cn("text-sm font-semibold tracking-wide", isMissed ? "text-red-600" : "text-emerald-700")}>
+                              {isMissed ? (own ? "Canceled Call" : "Missed Call") : "Audio Call"}
+                            </span>
+                            {!isMissed && <span className="text-xs font-medium text-ink/50">{formattedDuration}</span>}
+                          </div>
+                          <div className="w-[1px] h-6 bg-ink/10 mx-2"></div>
+                          <span className="text-[10px] text-ink/40 font-medium">{formatTime(m.created_at)}</span>
                         </div>
                       </div>
                     );
-                  })}
+                  }
+
+                  return (
+                    <div
+                      key={m.id}
+                      className={cn("group flex w-full", own ? "justify-end" : "justify-start")}
+                    >
+                      <div
+                        className={cn(
+                          "flex max-w-[85%] flex-col gap-0",
+                          own ? "items-end" : "items-start",
+                        )}
+                      >
+                        <MessageGestures
+                          onReply={() => setReplyTo(m)}
+                          onReact={(e) => toggle(m.id, e)}
+                          onPin={() => pinMessage(m)}
+                          pinned={m.pinned}
+                          align={own ? "end" : "start"}
+                        >
+                          <div
+                            className={cn(
+                              "flex items-center gap-1",
+                              own ? "flex-row" : "flex-row-reverse",
+                            )}
+                          >
+                            <MessageActions
+                              className="hidden transition-opacity md:flex md:opacity-0 md:group-hover:opacity-100"
+                              onToggle={(e) => toggle(m.id, e)}
+                              onReply={() => setReplyTo(m)}
+                              onPin={() => pinMessage(m)}
+                              pinned={m.pinned}
+                            />
+                            <div
+                              className={cn(
+                                "relative w-fit max-w-full px-4 py-2.5 text-[15px]",
+                                own
+                                  ? "bg-ink text-white rounded-2xl rounded-tr-[4px] shadow-sm"
+                                  : "bg-white text-ink border-2 border-ink/8 rounded-2xl rounded-tl-[4px]",
+                              )}
+                            >
+                              {m.pinned && (
+                                <Pin className={cn("absolute -right-2 -top-2 h-5 w-5 rotate-45 rounded-full p-1", own ? "bg-white text-ink" : "bg-marker text-white")} />
+                              )}
+                              <ReplyQuote
+                                username={m.reply_to_username}
+                                content={m.reply_to_content}
+                                align={own ? "end" : "start"}
+                              />
+                              {m.image_url && (
+                                <div className="mb-2 max-w-[240px] overflow-hidden rounded-xl mt-1">
+                                  <img
+                                    src={m.image_url}
+                                    alt="Attachment"
+                                    className="w-full h-auto object-cover"
+                                    loading="lazy"
+                                  />
+                                </div>
+                              )}
+                              <div className="flex flex-wrap items-end justify-end gap-x-2">
+                                {m.content && (
+                                  <span className="whitespace-pre-wrap break-all leading-relaxed">
+                                    <Linkify text={m.content} />
+                                  </span>
+                                )}
+                                <span
+                                  className={cn(
+                                    "shrink-0 text-[10px] ml-2 font-medium relative top-1",
+                                    own ? "text-white/50" : "text-ink/30",
+                                  )}
+                                >
+                                  {formatTime(m.created_at)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </MessageGestures>
+                        <ReactionChips
+                          reactions={reactions}
+                          onToggle={(e) => toggle(m.id, e)}
+                          align={own ? "end" : "start"}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
               {thread.length === 0 && (
                 <p className="my-auto text-center text-sm text-muted-foreground">
                   No messages yet. Say hi to {active}.
@@ -1164,33 +1172,32 @@ function Messages() {
             </div>
 
             {active === "admin" ? (
-              <div className="shrink-0 border-t-2 border-ink bg-paper px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
-                <div className="mx-auto flex w-full max-w-2xl items-center justify-center gap-2 wobbly-md border-2 border-dashed border-ink bg-postit px-4 py-3 text-center text-sm text-ink shadow-ink-soft">
-                  <ShieldCheck className="h-4 w-4 shrink-0 text-marker" />
-                  <span>
-                    This is an official admin message. You can read replies here, but can't reply
-                    back.
+              <div className="shrink-0 bg-transparent px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+                <div className="mx-auto flex w-full max-w-xl items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-center text-sm text-ink shadow-md border border-border/20">
+                  <ShieldCheck className="h-4 w-4 shrink-0 text-blue-500" />
+                  <span className="font-medium">
+                    This is an official admin message. You can read replies here, but can't reply back.
                   </span>
                 </div>
               </div>
             ) : blockedUsers.includes(active) ? (
-              <div className="border-t-2 border-ink p-6 text-center bg-muted/20 text-muted-foreground font-medium flex items-center justify-center gap-2">
-                <Ban className="h-5 w-5" />
+              <div className="bg-white/60 backdrop-blur-md p-6 text-center text-muted-foreground font-medium flex flex-col items-center justify-center gap-2 border-t border-border/20 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+                <Ban className="h-8 w-8 text-red-400 mb-2" />
                 You have blocked this user. Unblock them from the top menu to send messages.
               </div>
             ) : thread.length > 0 && thread.every((m) => m.sender_username !== username) && !acceptedUsers.includes(active) ? (
-              <div className="shrink-0 border-t-2 border-ink bg-paper px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_-4px_0_rgba(45,45,45,1)]">
-                <div className="mx-auto w-full max-w-2xl bg-surface p-4 border-2 border-ink shadow-ink flex flex-col items-center text-center gap-4">
+              <div className="shrink-0 bg-white/80 backdrop-blur-md border-t border-border/20 px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+                <div className="mx-auto w-full max-w-xl bg-white rounded-2xl p-6 shadow-lg border border-border/10 flex flex-col items-center text-center gap-5">
                   <div className="space-y-1">
-                    <h3 className="font-display font-bold text-lg">Message Request</h3>
-                    <p className="text-sm text-ink/70 font-medium">
-                      If you reply, {getDisplayName(active)} will be able to call you and see when you've read their messages.
+                    <h3 className="font-sans font-bold text-lg text-ink">Message Request</h3>
+                    <p className="text-sm text-muted-foreground">
+                      If you reply, <span className="font-semibold text-ink">{getDisplayName(active)}</span> will be able to call you and see when you've read their messages.
                     </p>
                   </div>
-                  <div className="flex items-center gap-4 w-full">
-                    <Button 
-                      variant="destructive" 
-                      className="flex-1 border-2 border-ink shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 transition-transform"
+                  <div className="flex items-center gap-3 w-full">
+                    <Button
+                      variant="outline"
+                      className="flex-1 rounded-xl text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600 transition-colors"
                       onClick={() => {
                         if (confirm(`Are you sure you want to delete this chat request from ${active}?`)) {
                           deleteConversation(active);
@@ -1199,8 +1206,8 @@ function Messages() {
                     >
                       Delete
                     </Button>
-                    <Button 
-                      className="flex-1 bg-accent hover:bg-accent/90 text-white border-2 border-ink shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 transition-transform"
+                    <Button
+                      className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-xl shadow-md transition-all"
                       onClick={() => acceptUser(active)}
                     >
                       Accept
@@ -1209,31 +1216,31 @@ function Messages() {
                 </div>
               </div>
             ) : (
-              <div className="shrink-0 border-t-2 border-ink bg-paper px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-4px_0_rgba(45,45,45,1)]">
-                <div className="mx-auto w-full max-w-2xl">
-                  <TypingIndicator users={typing} className="mb-1.5 px-1" />
+              <div className="shrink-0 bg-white/90 backdrop-blur-md border-t-2 border-ink/8 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+                <div className="mx-auto w-full md:max-w-3xl">
+                  <TypingIndicator users={typing} className="mb-1.5 px-2" />
                   {replyTo && (
-                    <div className="mb-2 flex items-center gap-2 wobbly-sm border-2 border-ink bg-surface-2 px-3 py-1.5 text-xs shadow-ink-soft">
+                    <div className="mb-2 flex items-center gap-2 rounded-xl border-2 border-ink/10 bg-surface-2/50 px-3 py-2 text-xs">
                       <div className="min-w-0 flex-1">
-                        <span className="font-semibold text-marker">
+                        <span className="font-semibold text-ink">
                           Replying to {replyTo.content ? replyTo.sender_username : "an image"}
                         </span>
-                        <div className="truncate text-ink">
+                        <div className="truncate text-ink/50 mt-0.5">
                           {replyTo.content || (replyTo.image_url ? "📷 Image" : "")}
                         </div>
                       </div>
                       <button
                         onClick={() => setReplyTo(null)}
                         aria-label="Cancel reply"
-                        className="hover:text-marker text-muted-foreground transition-colors"
+                        className="hover:bg-muted/50 rounded-full p-1 text-ink/40 transition-colors"
                       >
-                        <X className="h-4 w-4 text-muted-foreground" />
+                        <X className="h-4 w-4" />
                       </button>
                     </div>
                   )}
                   <div className="flex flex-col gap-2">
                     {imageFile && (
-                      <div className="relative w-20 h-20 rounded-md border-2 border-border overflow-hidden bg-surface-2/60">
+                      <div className="relative w-20 h-20 rounded-xl border-2 border-ink/10 overflow-hidden bg-surface-2/30 ml-2">
                         <img
                           src={URL.createObjectURL(imageFile)}
                           alt="Preview"
@@ -1241,13 +1248,13 @@ function Messages() {
                         />
                         <button
                           onClick={() => setImageFile(null)}
-                          className="absolute top-1 right-1 rounded-full bg-black/50 p-1 text-white hover:bg-black/70"
+                          className="absolute top-1 right-1 rounded-full bg-ink/70 p-1 text-white hover:bg-ink/90 transition-colors"
                         >
                           <X className="h-3 w-3" />
                         </button>
                       </div>
                     )}
-                    <div className="flex items-center gap-2 wobbly-md border-2 border-ink bg-white px-2 py-1.5 shadow-ink transition-transform focus-within:-translate-y-1">
+                    <div className="flex items-center gap-2 rounded-xl border-2 border-ink/10 bg-white px-2 py-1.5 transition-all focus-within:border-ink/20">
                       <input
                         type="file"
                         accept="image/*"
@@ -1261,11 +1268,11 @@ function Messages() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="shrink-0 text-ink hover:bg-muted hover:text-marker wobbly-sm transition-colors"
+                        className="shrink-0 text-ink/30 hover:bg-muted hover:text-ink rounded-lg transition-colors ml-1 h-9 w-9"
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploadingImage}
                       >
-                        <ImageIcon className="h-4 w-4" />
+                        <ImageIcon className="h-5 w-5" />
                       </Button>
 
                       <AutoResizeTextarea
@@ -1280,17 +1287,17 @@ function Messages() {
                             send();
                           }
                         }}
-                        placeholder={`Message ${getDisplayName(active)}...`}
+                        placeholder="Type a message..."
                         maxLength={1000}
                         maxHeight={150}
-                        className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 max-h-32 pt-2.5 text-ink placeholder:text-muted-foreground font-sans"
+                        className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 max-h-32 pt-2 text-ink placeholder:text-ink/25 font-sans text-[15px]"
                         disabled={uploadingImage}
                       />
                       <Button
                         onClick={send}
                         disabled={(!text.trim() && !imageFile) || uploadingImage}
                         size="icon"
-                        className="h-10 w-10 shrink-0 bg-marker text-white hover:bg-marker/90 wobbly-sm transition-transform active:scale-90 shadow-none border-none"
+                        className="h-9 w-9 shrink-0 bg-ink text-white rounded-lg hover:scale-105 hover:bg-ink/80 transition-transform active:scale-95 shadow-sm border-none mr-1"
                         aria-label="Send message"
                       >
                         {uploadingImage ? (
@@ -1306,30 +1313,24 @@ function Messages() {
             )}
           </>
         ) : (
-          <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center text-muted-foreground">
-            <MessageCircle className="h-10 w-10 text-accent" strokeWidth={2} />
-            <p>Pick a conversation or start a new one.</p>
+          <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center text-ink/30 bg-paper">
+            <div className="relative">
+              <div className="h-20 w-20 rounded-2xl border-2 border-ink/8 bg-white flex items-center justify-center rotate-3 shadow-ink-soft">
+                <MessageCircle className="h-10 w-10 text-ink/15" strokeWidth={1.5} />
+              </div>
+              <div className="absolute -bottom-2 -right-2 h-6 w-6 rounded-lg bg-marker/10 border border-marker/20 flex items-center justify-center -rotate-6">
+                <Send className="h-3 w-3 text-marker/40" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <p className="font-display text-lg font-bold text-ink/25">Your messages</p>
+              <p className="text-sm text-ink/20 font-medium">Select a chat or start a new conversation</p>
+            </div>
           </div>
         )}
       </section>
 
-      {activeCall && (
-        <AudioCallUI
-          roomID={activeCall.roomID}
-          isCaller={activeCall.isCaller}
-          remoteUsername={activeCall.remoteUsername}
-          remoteNickname={nicknames[activeCall.remoteUsername]}
-          onLeaveRoom={endCall}
-        />
-      )}
-      {incomingCall && (
-        <IncomingCallModal
-          callerUsername={incomingCall.callerUsername}
-          callerNickname={nicknames[incomingCall.callerUsername]}
-          onAccept={acceptCall}
-          onReject={rejectCall}
-        />
-      )}
+
 
       {/* Nickname Dialog */}
       <Dialog open={nicknameDialogOpen} onOpenChange={setNicknameDialogOpen}>

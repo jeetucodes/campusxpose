@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff, PhoneOff } from "lucide-react";
+import { Mic, MicOff, PhoneOff, Minimize2, Maximize2 } from "lucide-react";
 import { UserSymbol } from "@/components/UserSymbol";
 import { cn } from "@/lib/utils";
 import { useRingTone } from "@/hooks/useRingTone";
+import { useCallStore } from "@/stores/call";
 
 export interface CallLogData {
   missed: boolean;
@@ -22,13 +23,15 @@ interface AudioCallUIProps {
 export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, onLeaveRoom }: AudioCallUIProps) {
   const [callStatus, setCallStatus] = useState<string>("Connecting...");
   const [isMuted, setIsMuted] = useState(false);
+  const [duration, setDuration] = useState(0);
   const localStreamRef = useRef<MediaStream | null>(null);
   const remoteAudioRef = useRef<HTMLAudioElement>(null);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const channelRef = useRef<any>(null);
   const connectedAtRef = useRef<number | null>(null);
+  const { isMinimized, setIsMinimized } = useCallStore();
 
-  const ringType = isCaller && callStatus !== "Connected" && callStatus !== "Call Ended" ? "outgoing" : "none";
+  const ringType = isCaller && (callStatus === "Waiting for answer..." || callStatus === "Ringing...") ? "outgoing" : "none";
   useRingTone(ringType);
 
   useEffect(() => {
@@ -238,9 +241,27 @@ export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, 
     };
   }, [roomID, isCaller]);
 
+  // Duration timer
+  useEffect(() => {
+    if (callStatus === "Connected") {
+      const interval = setInterval(() => {
+        if (connectedAtRef.current) {
+          setDuration(Math.floor((Date.now() - connectedAtRef.current) / 1000));
+        }
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [callStatus]);
+
+  const formatDuration = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+  };
+
   // 30-second ringing/connecting timeout
   useEffect(() => {
-    if (callStatus === "Connected" || callStatus.includes("Disconnected")) return;
+    if (callStatus === "Connected" || callStatus.includes("Disconnected") || callStatus.includes("Ended")) return;
     const timeout = setTimeout(() => {
       setCallStatus("Call Timeout");
       setTimeout(() => onLeaveRoom({ missed: true, duration: 0 }), 1500);
@@ -260,7 +281,10 @@ export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, 
     onLeaveRoom(log);
   };
 
-  const handleUserLeave = () => {
+  const handleUserLeave = (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
     if (channelRef.current) {
       channelRef.current.send({
         type: "broadcast",
@@ -274,7 +298,8 @@ export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, 
     }, 1000);
   };
 
-  const toggleMute = () => {
+  const toggleMute = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (localStreamRef.current) {
       const audioTrack = localStreamRef.current.getAudioTracks()[0];
       if (audioTrack) {
@@ -284,47 +309,135 @@ export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, 
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-[9999] bg-paper text-ink flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-300">
-      <audio ref={remoteAudioRef} autoPlay />
-
-      <div className="flex flex-col items-center space-y-6 relative z-10 w-full max-w-sm">
-        <div className="wobbly-md bg-white border-4 border-ink p-8 shadow-ink flex flex-col items-center gap-6 w-full relative">
-          {/* Decorative pins */}
-          <div className="absolute -top-3 -left-3 h-6 w-6 rounded-full bg-marker border-2 border-ink shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"></div>
-          <div className="absolute -bottom-3 -right-3 h-6 w-6 rounded-full bg-accent border-2 border-ink shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"></div>
-
-          <UserSymbol username={remoteUsername} size="lg" />
-          <div className="space-y-2">
-            <h2 className="text-3xl font-display font-black tracking-wide inline-block bg-marker/20 px-3 py-1 wobbly-sm border-2 border-ink shadow-ink-sm">
-              {remoteNickname || remoteUsername}
-            </h2>
-            <p className="text-ink/80 font-bold text-lg animate-pulse mt-2">{callStatus}</p>
-          </div>
+  if (isMinimized) {
+    return (
+      <div 
+        onClick={() => setIsMinimized(false)}
+        className="fixed top-[max(env(safe-area-inset-top),1rem)] left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-3 bg-white border-2 border-ink shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-full px-4 py-2 cursor-pointer hover:-translate-y-0.5 transition-all wobbly-sm animate-in slide-in-from-top-10"
+      >
+        <audio ref={remoteAudioRef} autoPlay />
+        <div className="flex flex-col">
+          <span className="font-display font-bold text-sm tracking-tight truncate max-w-[120px]">
+            {remoteNickname || remoteUsername}
+          </span>
+          <span className="text-xs font-bold text-accent">
+            {callStatus === "Connected" ? formatDuration(duration) : callStatus}
+          </span>
+        </div>
+        
+        <div className="flex items-center gap-2 ml-2">
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={toggleMute}
+            className={cn(
+              "h-8 w-8 rounded-full border-2",
+              isMuted 
+                ? "border-destructive text-destructive bg-destructive/10" 
+                : "border-transparent text-ink hover:bg-muted"
+            )}
+          >
+            {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+          </Button>
           
-          <div className="flex items-center gap-6 mt-4 pt-6 border-t-4 border-ink border-dashed w-full justify-center">
-            <Button
-              size="icon"
-              variant="outline"
-              onClick={toggleMute}
-              className={cn(
-                "h-16 w-16 rounded-full border-4 wobbly-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-y-1 active:translate-x-1 transition-all",
-                isMuted 
-                  ? "border-destructive text-destructive bg-destructive/10" 
-                  : "border-ink text-ink bg-white hover:bg-muted"
-              )}
-            >
-              {isMuted ? <MicOff className="h-7 w-7" /> : <Mic className="h-7 w-7" />}
-            </Button>
-            
-            <Button
-              size="icon"
-              onClick={handleUserLeave}
-              className="h-16 w-16 rounded-full border-4 border-ink wobbly-sm bg-destructive hover:bg-destructive/90 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-y-1 active:translate-x-1 transition-all text-white"
-            >
-              <PhoneOff className="h-7 w-7" />
-            </Button>
+          <Button
+            size="icon"
+            onClick={handleUserLeave}
+            className="h-8 w-8 rounded-full bg-destructive hover:bg-destructive/90 text-white shadow-none"
+          >
+            <PhoneOff className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 z-[9999] bg-zinc-950 text-white flex flex-col items-center justify-between p-8 text-center animate-in fade-in duration-300 overflow-hidden">
+      <audio ref={remoteAudioRef} autoPlay />
+      
+      {/* Background ambient glow based on call status */}
+      <div className={cn(
+        "absolute inset-0 opacity-40 transition-colors duration-1000",
+        callStatus === "Connected" ? "bg-[radial-gradient(circle_at_center,theme(colors.accent.DEFAULT)_0%,transparent_60%)]" : "bg-[radial-gradient(circle_at_center,theme(colors.zinc.700)_0%,transparent_60%)]"
+      )}></div>
+
+      {/* Noise overlay for cinematic texture */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/stardust.png")' }}></div>
+
+      {/* Top Header */}
+      <div className="relative z-10 w-full flex justify-between items-start">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setIsMinimized(true)}
+          className="bg-white/10 hover:bg-white/20 text-white rounded-full backdrop-blur-md transition-all h-12 w-12 border border-white/10"
+        >
+          <Minimize2 className="h-6 w-6" />
+        </Button>
+        <div className="flex bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/10 items-center gap-2 shadow-lg">
+           <span className="relative flex h-3 w-3">
+             <span className={cn("animate-ping absolute inline-flex h-full w-full rounded-full opacity-75", callStatus === "Connected" ? "bg-green-400" : "bg-amber-400")}></span>
+             <span className={cn("relative inline-flex rounded-full h-3 w-3", callStatus === "Connected" ? "bg-green-500" : "bg-amber-500")}></span>
+           </span>
+           <span className="text-sm font-semibold tracking-wider text-white/90 uppercase">{callStatus === "Connected" ? "In Call" : "Calling"}</span>
+        </div>
+        <div className="w-12 h-12"></div> {/* Spacer for alignment */}
+      </div>
+
+      {/* Center Content: Avatar & Status */}
+      <div className="relative z-10 flex flex-col items-center flex-1 justify-center w-full">
+        <div className="relative mb-10">
+          {callStatus === "Connected" && (
+             <>
+               <div className="absolute inset-0 rounded-full border border-accent animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite] opacity-50 scale-150"></div>
+               <div className="absolute inset-0 rounded-full border border-accent animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite_1s] opacity-30 scale-[2]"></div>
+             </>
+          )}
+          
+          <div className="relative bg-zinc-900 border-4 border-white/10 p-2 rounded-full shadow-2xl backdrop-blur-md">
+            <div className="scale-[2] origin-center transform m-8">
+              <UserSymbol username={remoteUsername} size="lg" />
+            </div>
           </div>
+        </div>
+        
+        <div className="space-y-3">
+          <h2 className="text-4xl md:text-5xl font-display font-bold tracking-tight text-white drop-shadow-lg">
+            {remoteNickname || remoteUsername}
+          </h2>
+          <div className="flex flex-col items-center gap-1 h-12">
+            <p className={cn("font-medium text-xl md:text-2xl", callStatus !== "Connected" ? "animate-pulse text-zinc-400" : "text-zinc-200")}>
+              {callStatus === "Connected" ? formatDuration(duration) : callStatus}
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      {/* Bottom Controls */}
+      <div className="relative z-10 flex flex-col items-center w-full pb-8">
+        <div className="flex items-center gap-8 bg-zinc-900/60 p-6 rounded-[3rem] backdrop-blur-xl border border-white/10 shadow-2xl">
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={toggleMute}
+            className={cn(
+              "h-16 w-16 rounded-full border-none transition-all duration-300",
+              isMuted 
+                ? "bg-white text-zinc-950 hover:bg-white/90 scale-105" 
+                : "bg-white/10 text-white hover:bg-white/20"
+            )}
+          >
+            {isMuted ? <MicOff className="h-7 w-7" /> : <Mic className="h-7 w-7" />}
+          </Button>
+          
+          <Button
+            size="icon"
+            onClick={handleUserLeave}
+            className="h-20 w-20 rounded-full bg-red-500 hover:bg-red-600 shadow-[0_0_30px_rgba(239,68,68,0.4)] active:scale-95 transition-all text-white border-none"
+          >
+            <PhoneOff className="h-8 w-8" />
+          </Button>
         </div>
       </div>
     </div>

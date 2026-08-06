@@ -156,6 +156,8 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+import { GlobalCallListener } from "@/components/GlobalCallListener";
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
@@ -254,6 +256,7 @@ function RootComponent() {
       </div>
       {!hideNav && <MobileBottomNav />}
       <Toaster position="top-center" theme="light" richColors />
+      <GlobalCallListener />
     </QueryClientProvider>
   );
 }
