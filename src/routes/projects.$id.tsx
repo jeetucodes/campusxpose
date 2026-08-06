@@ -763,9 +763,10 @@ function ProjectDetailPage() {
       }
     } catch (err: any) {
       if (err.name === "AbortError") return;
-      // Silent fallback: copy to clipboard without showing any notification
+      // Fallback: copy to clipboard and notify
       try {
         await navigator.clipboard.writeText(window.location.href);
+        import("sonner").then((m) => m.toast.success("Link copied to clipboard!"));
       } catch (_) {
         // ignore — clipboard not available either
       }

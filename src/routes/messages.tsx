@@ -586,7 +586,12 @@ function Messages() {
                                   text: `Chat with me on CampusXpose!`,
                                   url: shareUrl,
                                 })
-                                .catch(() => { });
+                                .catch((err: any) => {
+                                  if (err.name === "AbortError") return;
+                                  navigator.clipboard.writeText(shareUrl).then(() => {
+                                    toast.success("Link copied to clipboard!");
+                                  }).catch(() => {});
+                                });
                             } else if (typeof window !== "undefined" && (window as any).median) {
                               (window as any).median.share.sharePage({
                                 url: shareUrl,

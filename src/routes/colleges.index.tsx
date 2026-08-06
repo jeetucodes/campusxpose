@@ -340,6 +340,7 @@ async function shareCollege(c: Col) {
       // navigator.share failed (e.g. iframe restriction) — silent clipboard fallback
       try {
         await navigator.clipboard.writeText(url);
+        import("sonner").then((m) => m.toast.success("Link copied to clipboard!"));
       } catch (_) {
         /* ignore */
       }
@@ -348,6 +349,7 @@ async function shareCollege(c: Col) {
     // navigator.share not available — silent clipboard fallback
     try {
       await navigator.clipboard?.writeText(url);
+      import("sonner").then((m) => m.toast.success("Link copied to clipboard!"));
     } catch (_) {
       /* ignore */
     }

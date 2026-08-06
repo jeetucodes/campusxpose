@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
-import { motion, useMotionValue, useTransform, animate } from "framer-motion";
+import { motion, useMotionValue, useTransform, animate, AnimatePresence } from "framer-motion";
 import {
   FileWarning,
   ArrowRight,
@@ -12,6 +12,7 @@ import {
   MapPinOff,
   Megaphone,
   Ghost,
+  Search,
 } from "lucide-react";
 import { UserSymbol } from "@/components/UserSymbol";
 import { SiteShell } from "@/components/Footer";
@@ -97,6 +98,30 @@ function FloatingDot({
   );
 }
 
+function ExpandableText({ text }: { text: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const isLong = text.length > 150;
+  
+  if (!isLong) return <p className="mt-4 text-base font-medium leading-relaxed text-foreground group-hover:text-accent transition-colors">{text}</p>;
+  
+  return (
+    <div>
+      <p className={`mt-3 sm:mt-4 text-sm sm:text-base font-medium leading-relaxed text-foreground group-hover:text-accent transition-colors ${!expanded ? "line-clamp-3" : ""}`}>
+        {text}
+      </p>
+      <button 
+        onClick={(e) => {
+          e.preventDefault(); 
+          setExpanded(!expanded);
+        }}
+        className="text-xs sm:text-sm font-bold text-accent mt-2 py-1.5 px-3 border-2 border-accent/20 bg-accent/5 hover:bg-accent/10 rounded-md transition-colors inline-block active:scale-95"
+      >
+        {expanded ? "See less" : "Read full report..."}
+      </button>
+    </div>
+  );
+}
+
 function Home() {
   const { data } = useQuery(homeQueryOptions);
   const verified = useVerifiedUsernames();
@@ -104,6 +129,16 @@ function Home() {
   const recentPosts: HomeData["recentPosts"] = data?.recentPosts ?? [];
   const queryClient = useQueryClient();
   const [showAllReports, setShowAllReports] = useState(false);
+  const [activeTopIdx, setActiveTopIdx] = useState(0);
+
+  // Auto-scroll for Top Colleges (Ad-like Slider)
+  useEffect(() => {
+    if (top.length <= 1) return;
+    const interval = setInterval(() => {
+      setActiveTopIdx((prev) => (prev + 1) % top.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [top.length]);
 
   // Cycling headline word state
   const [wordIdx, setWordIdx] = useState(0);
@@ -233,126 +268,163 @@ function Home() {
           </div>
         </motion.section>
 
-        {/* CTA Buttons */}
-        <div className="flex gap-2 sm:gap-3">
-          <motion.div className="flex-1" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
-            <Button
-              asChild
-              className="w-full shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] border-2 border-border bg-accent text-white hover:bg-accent/90 h-10 text-[11px] sm:h-12 sm:text-base px-2 sm:px-4"
-              style={{ borderRadius: WOBBLY_MD }}
-            >
-              <Link to="/colleges">
-                Find Your College <ArrowRight className="ml-1 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              </Link>
-            </Button>
-          </motion.div>
-
-          <motion.div className="flex-1" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
-            <Button
-              asChild
-              variant="outline"
-              className="w-full shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] border-2 border-border bg-white text-foreground hover:bg-muted h-10 text-[11px] sm:h-12 sm:text-base px-2 sm:px-4"
-              style={{ borderRadius: WOBBLY_MD }}
-            >
-              <Link to="/report">Report an Issue</Link>
-            </Button>
-          </motion.div>
-        </div>
-
-        {data?.site_settings?.news_enabled !== false && data?.news && data.news.length > 0 && (
-          <motion.div whileHover={{ scale: 1.01 }}>
-            <Button
-              asChild
-              variant="outline"
-              className="w-full mt-4 h-12 border-2 border-border bg-white hover:bg-muted shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-primary font-bold flex items-center justify-center gap-2"
-              style={{ borderRadius: WOBBLY_MD }}
-            >
-              <Link to="/news">
-                <Megaphone className="w-5 h-5 animate-pulse" />
-                Latest News & Updates
-                <div className="bg-destructive text-white text-[10px] px-2 py-0.5 rounded-full ml-2">
-                  New
-                </div>
-              </Link>
-            </Button>
-          </motion.div>
-        )}
-
-
-        {/* Confessions Banner */}
-        <motion.div whileHover={{ scale: 1.01 }}>
-          <Link to="/confessions" className="block">
-            <div
-              className="mt-2 flex items-center gap-3 border-2 border-border bg-white p-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-muted/50 transition-colors"
-              style={{ borderRadius: WOBBLY_MD }}
-            >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-border bg-purple-100 text-primary shadow-sm">
-                <Ghost className="h-5 w-5" />
+        {/* CTA Wide Buttons */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-6">
+          <Link to="/colleges" className="block group">
+            <div className="sketch-card flex items-center gap-4 bg-accent p-3 sm:p-4 transition-all" style={{ borderRadius: WOBBLY_MD }}>
+              <div className="w-12 h-12 rounded-full bg-white border-2 border-border flex items-center justify-center shrink-0 shadow-sm group-hover:rotate-12 transition-transform">
+                <Search className="h-6 w-6 text-accent" />
               </div>
-              <div className="flex-1">
-                <div className="font-display font-bold text-sm">Anonymous Confessions</div>
-                <div className="text-[11px] text-muted-foreground font-medium line-clamp-1">
-                  Share your secrets, read others' gossip. 100% untraceable.
-                </div>
+              <div className="text-left">
+                <div className="font-display font-bold text-lg sm:text-xl text-white leading-tight group-hover:underline decoration-white decoration-2 underline-offset-2">Find College</div>
+                <div className="text-white/90 text-[10px] sm:text-xs font-semibold uppercase tracking-wider mt-0.5">Search & Reviews</div>
               </div>
-              <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
             </div>
           </Link>
-        </motion.div>
+
+          <Link to="/report" className="block group">
+            <div className="sketch-card flex items-center gap-4 bg-yellow-400 p-3 sm:p-4 transition-all" style={{ borderRadius: WOBBLY_MD }}>
+              <div className="w-12 h-12 rounded-full bg-white border-2 border-border flex items-center justify-center shrink-0 shadow-sm group-hover:-rotate-12 transition-transform">
+                <Flame className="h-6 w-6 text-yellow-500" />
+              </div>
+              <div className="text-left">
+                <div className="font-display font-bold text-lg sm:text-xl text-foreground leading-tight group-hover:underline decoration-foreground decoration-2 underline-offset-2">Report Issue</div>
+                <div className="text-foreground/70 text-[10px] sm:text-xs font-semibold uppercase tracking-wider mt-0.5">100% Anonymous</div>
+              </div>
+            </div>
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3 sm:mt-4">
+           <Link to="/confessions" className="block group">
+            <div className="sketch-card flex items-center gap-4 bg-[#fff9c4] p-3 sm:p-4 transition-all" style={{ borderRadius: WOBBLY_MD }}>
+              <div className="w-12 h-12 rounded-full bg-purple-100 border-2 border-border flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 transition-transform">
+                <Ghost className="h-6 w-6 text-purple-600" />
+              </div>
+              <div className="text-left">
+                <div className="font-display font-bold text-lg sm:text-xl text-foreground leading-tight group-hover:underline decoration-foreground decoration-2 underline-offset-2">Confessions</div>
+                <div className="text-foreground/70 text-[10px] sm:text-xs font-semibold uppercase tracking-wider mt-0.5">Secrets & Gossip</div>
+              </div>
+            </div>
+          </Link>
+          
+          {data?.site_settings?.news_enabled !== false && data?.news && data.news.length > 0 ? (
+             <Link to="/news" className="block group">
+              <div className="sketch-card flex items-center gap-4 bg-blue-100 p-3 sm:p-4 transition-all relative" style={{ borderRadius: WOBBLY_MD }}>
+                <span className="absolute -top-2 -right-2 bg-destructive text-white text-[10px] font-bold px-2 py-0.5 rounded-full border-2 border-border shadow-sm animate-pulse">NEW</span>
+                <div className="w-12 h-12 rounded-full bg-white border-2 border-border flex items-center justify-center shrink-0 shadow-sm group-hover:rotate-12 transition-transform">
+                  <Megaphone className="h-6 w-6 text-blue-600" />
+                </div>
+                <div className="text-left">
+                  <div className="font-display font-bold text-lg sm:text-xl text-foreground leading-tight group-hover:underline decoration-foreground decoration-2 underline-offset-2">Latest News</div>
+                  <div className="text-foreground/70 text-[10px] sm:text-xs font-semibold uppercase tracking-wider mt-0.5">Updates & Alerts</div>
+                </div>
+              </div>
+            </Link>
+          ) : (
+            <div className="sketch-card flex items-center gap-4 bg-surface-2 p-3 sm:p-4 opacity-70" style={{ borderRadius: WOBBLY_MD }}>
+              <div className="w-12 h-12 rounded-full bg-muted border-2 border-dashed border-border flex items-center justify-center shrink-0">
+                <Search className="h-6 w-6 text-muted-foreground opacity-50" />
+              </div>
+              <div className="text-left">
+                <div className="font-display font-bold text-lg sm:text-xl text-muted-foreground leading-tight">More Features</div>
+                <div className="text-muted-foreground/70 text-[10px] sm:text-xs font-semibold uppercase tracking-wider mt-0.5">Coming Soon</div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       <HomeAds />
 
-      {/* Top Reported Colleges */}
-      <section className="mx-auto max-w-3xl px-4 py-12 sm:py-16">
-        <div className="mb-8 flex items-center justify-between gap-3 border-b-4 border-border pb-4">
-          <h2 className="font-display text-3xl sm:text-4xl font-bold flex items-center gap-2">
-            <span className="text-4xl">🔥</span> Top Reported
-          </h2>
-          <span
-            className="inline-flex items-center gap-1.5 border-2 border-border bg-yellow-300 px-3 py-1.5 text-xs font-bold text-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-            style={{ borderRadius: WOBBLY_MD }}
-          >
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-accent" />
-            </span>
-            LIVE
-          </span>
-        </div>
-        <div className="space-y-5">
-          {top.map((c, i) => (
-            <Link
-              key={c.id}
-              to="/colleges/$id"
-              params={{ id: c.id }}
-              className={`sketch-card flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 ${i % 2 ? "rotate-1" : "-rotate-1"}`}
+      {/* Top Reported Colleges (Big Card Style & Scroll Effect) */}
+      <motion.section
+        initial={{ opacity: 0, y: 50, rotate: -1, scale: 0.95 }}
+        whileInView={{ opacity: 1, y: 0, rotate: 0, scale: 1 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.6, type: "spring", bounce: 0.4 }}
+        className="mx-auto max-w-4xl px-4 py-8 sm:py-12 z-20 relative"
+      >
+        <div className="sketch-card bg-[#fff9c4] p-4 sm:p-8 border-4 border-border shadow-ink-lg relative overflow-hidden group" style={{ borderRadius: WOBBLY_MD }}>
+          {/* Decorative tape/pin */}
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-6 bg-red-400/80 border-2 border-border rotate-2 z-10 shadow-sm" />
+
+          {/* Background decoration */}
+          <div className="absolute -right-12 -bottom-12 w-40 h-40 bg-yellow-300 rounded-full blur-3xl opacity-40 group-hover:opacity-70 transition-opacity duration-700 pointer-events-none" />
+          <div className="absolute -left-12 -top-12 w-32 h-32 bg-accent rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity duration-700 pointer-events-none" />
+
+          {/* Section Header */}
+          <div className="mb-6 flex items-center justify-between gap-3 border-b-4 border-border/20 pb-4 relative z-10">
+            <h2 className="font-display text-3xl sm:text-4xl font-bold flex items-center gap-2 text-foreground">
+              <span className="text-4xl">🔥</span> Top Reported
+            </h2>
+            <span
+              className="inline-flex items-center gap-1.5 border-2 border-border bg-yellow-300 px-3 py-1.5 text-xs font-bold text-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
               style={{ borderRadius: WOBBLY_MD }}
             >
-              <div className="flex items-center gap-4">
-                <span className={`flex items-center justify-center h-12 w-12 font-display text-2xl font-bold border-2 border-border rounded-full shadow-sm ${i === 0 ? "bg-yellow-400 text-foreground" : i === 1 ? "bg-gray-200 text-foreground" : i === 2 ? "bg-orange-300 text-foreground" : "bg-muted text-muted-foreground"}`}>
-                  #{i + 1}
-                </span>
-                <div>
-                  <div className="font-display text-xl font-bold text-foreground group-hover:text-accent transition-colors">{c.name}</div>
-                  <div className="text-sm font-semibold text-muted-foreground flex items-center gap-1 mt-0.5"><MapPinOff className="w-3.5 h-3.5" /> {c.city}</div>
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-accent" />
+              </span>
+              LIVE
+            </span>
+          </div>
+
+          {/* The Slider */}
+          <div className="relative overflow-hidden w-full h-[220px] sm:h-[180px] bg-white border-2 border-border flex flex-col justify-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] z-10" style={{ borderRadius: WOBBLY_MD }}>
+            <AnimatePresence mode="wait">
+              {top.length > 0 ? (
+                <motion.div
+                  key={activeTopIdx}
+                  initial={{ opacity: 0, x: 20, rotate: 1 }}
+                  animate={{ opacity: 1, x: 0, rotate: 0 }}
+                  exit={{ opacity: 0, x: -20, rotate: -1 }}
+                  transition={{ duration: 0.3 }}
+                  className="absolute inset-0 p-5 sm:p-6 flex flex-col"
+                >
+                   <Link
+                     to="/colleges/$id"
+                     params={{ id: top[activeTopIdx].id }}
+                     className="flex-1 flex flex-col justify-between w-full h-full"
+                   >
+                     <div className="flex items-start gap-4">
+                       <span className={`flex items-center justify-center shrink-0 h-14 w-14 font-display text-3xl font-bold border-2 border-border rounded-full shadow-sm ${activeTopIdx === 0 ? "bg-yellow-400 text-foreground" : activeTopIdx === 1 ? "bg-gray-200 text-foreground" : activeTopIdx === 2 ? "bg-orange-300 text-foreground" : "bg-muted text-muted-foreground"}`}>
+                         #{activeTopIdx + 1}
+                       </span>
+                       <div className="pt-1 w-full max-w-[80%]">
+                         <div className="font-display text-2xl sm:text-3xl font-bold text-foreground group-hover:text-accent transition-colors line-clamp-2 leading-tight">{top[activeTopIdx].name}</div>
+                         <div className="text-sm font-semibold text-muted-foreground flex items-center gap-1 mt-1"><MapPinOff className="w-4 h-4" /> {top[activeTopIdx].city}</div>
+                       </div>
+                     </div>
+                     <div className="flex items-center gap-2 mt-auto border-t-2 border-dashed border-border/20 pt-4 pb-1">
+                       <span className="inline-flex items-center gap-1.5 border-2 border-border bg-accent px-3 py-1.5 text-sm font-bold text-white shadow-sm" style={{ borderRadius: WOBBLY_MD }}>
+                         <Flame className="h-4 w-4 fill-yellow-400" /> {top[activeTopIdx].incident_count} Reports
+                       </span>
+                       <span className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest ml-2 hidden sm:inline-block">Trending</span>
+                     </div>
+                   </Link>
+                </motion.div>
+              ) : (
+                <div className="text-center w-full text-muted-foreground font-medium flex items-center justify-center h-full">
+                  No reports yet. Be the first to speak up!
                 </div>
+              )}
+            </AnimatePresence>
+            {/* Progress dots */}
+            {top.length > 1 && (
+              <div className="absolute bottom-4 right-5 sm:bottom-6 sm:right-6 flex gap-1.5 z-10 bg-white/80 p-1.5 rounded-full border-2 border-border shadow-sm">
+                {top.map((_, i) => (
+                  <button
+                    key={i} 
+                    onClick={() => setActiveTopIdx(i)}
+                    className={`w-2.5 h-2.5 rounded-full border-2 border-border transition-colors ${i === activeTopIdx ? "bg-accent" : "bg-white hover:bg-muted"}`} 
+                  />
+                ))}
               </div>
-              <div className="flex items-center gap-3 self-start sm:self-auto ml-16 sm:ml-0">
-                <span className="inline-flex items-center gap-1.5 border-2 border-border bg-accent/10 px-3 py-1.5 text-sm font-bold text-accent rounded-lg">
-                  <Flame className="h-4 w-4" /> {c.incident_count} <span className="hidden sm:inline">Reports</span>
-                </span>
-                <TrendingUp className="h-5 w-5 text-accent animate-pulse" strokeWidth={2.5} />
-              </div>
-            </Link>
-          ))}
-          {top.length === 0 && (
-            <p className="text-center text-muted-foreground font-medium p-8 border-2 border-dashed border-border rounded-xl">
-              No reports yet. Be the first to speak up!
-            </p>
-          )}
+            )}
+          </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Latest Reports */}
       <section className="mx-auto max-w-3xl px-4 py-12 sm:py-16">
@@ -371,26 +443,32 @@ function Home() {
             LIVE
           </span>
         </div>
-        <div className="space-y-6">
-          {(showAllReports ? recentPosts : recentPosts.slice(0, 3)).map((p, i) => {
+        <div className="columns-1 sm:columns-2 gap-6 space-y-6">
+          {(showAllReports ? recentPosts : recentPosts.slice(0, 4)).map((p, i) => {
+            const isPinned = i === 0;
             const card = (
               <div
-                className={`sketch-card p-5 group ${i % 2 ? "-rotate-1" : "rotate-1"}`}
-                style={{ borderRadius: WOBBLY_MD }}
+                className={`sketch-card relative p-4 sm:p-5 group transition-all hover:-translate-y-1 hover:shadow-ink-lg ${i % 2 ? "-rotate-1" : "rotate-1"} ${isPinned ? "bg-red-50" : "bg-white"}`}
+                style={{ borderRadius: WOBBLY_MD, breakInside: "avoid" }}
               >
-                <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
+                {isPinned && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-accent rounded-full border-2 border-border shadow-sm z-10 flex items-center justify-center">
+                    <div className="w-2 h-2 bg-white rounded-full opacity-60" />
+                  </div>
+                )}
+                <div className="flex items-center gap-2 text-[11px] sm:text-xs text-muted-foreground flex-wrap">
                   <UserSymbol username={p.username} size="sm" />
-                  <span className="inline-flex items-center gap-1 font-bold text-foreground text-sm">
+                  <span className="inline-flex items-center gap-1 font-bold text-foreground text-xs sm:text-sm">
                     {p.username ?? "Anonymous"}
                     {p.username && verified.has(p.username) && <VerifiedBadge />}
                   </span>
-                  {p.created_at && <span className="font-medium text-[11px] bg-muted px-2 py-0.5 rounded-full" suppressHydrationWarning>{timeAgo(p.created_at)}</span>}
-                  <span className="ml-auto inline-flex items-center gap-1.5 border-2 border-border bg-green-100 px-2.5 py-1 text-xs font-bold text-green-700 rounded-md">
-                    <ArrowBigUp className="h-4 w-4" /> {p.upvotes ?? 0}
+                  {p.created_at && <span className="font-medium text-[10px] sm:text-[11px] bg-muted px-2 py-0.5 rounded-full" suppressHydrationWarning>{timeAgo(p.created_at)}</span>}
+                  <span className="ml-auto inline-flex items-center gap-1 sm:gap-1.5 border-2 border-border bg-green-100 px-2 py-0.5 sm:px-2.5 sm:py-1 text-[11px] sm:text-xs font-bold text-green-700 rounded-md">
+                    <ArrowBigUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> {p.upvotes ?? 0}
                   </span>
                 </div>
-                <div className="mt-3 flex items-center gap-2">
-                  <span className="border-2 border-border bg-yellow-100 px-2.5 py-1 text-xs font-bold text-yellow-800 rounded-md shadow-sm">
+                <div className="mt-2.5 sm:mt-3 flex items-center gap-2">
+                  <span className="border-2 border-border bg-yellow-100 px-2 py-0.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-xs font-bold text-yellow-800 rounded-md shadow-sm">
                     {categoryEmoji(p.category ?? "general")} {categoryLabel(p.category ?? "general")}
                   </span>
                 </div>
@@ -399,7 +477,7 @@ function Home() {
                     <span className="mt-0.5">🏫</span> <span className="line-clamp-1">{p.college_name}</span>
                   </div>
                 )}
-                <p className="mt-4 line-clamp-4 text-base font-medium leading-relaxed text-foreground group-hover:text-accent transition-colors">{p.content}</p>
+                <ExpandableText text={p.content || ""} />
               </div>
             );
             return p.college_id ? (
@@ -411,7 +489,7 @@ function Home() {
             );
           })}
           {recentPosts.length === 0 && (
-            <p className="text-center text-muted-foreground font-medium p-8 border-2 border-dashed border-border rounded-xl">No reports yet. Check back soon!</p>
+            <p className="text-center text-muted-foreground font-medium p-8 border-2 border-dashed border-border rounded-xl col-span-full">No reports yet. Check back soon!</p>
           )}
         </div>
         {recentPosts.length > 3 && (

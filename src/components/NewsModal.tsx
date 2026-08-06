@@ -52,9 +52,10 @@ export function NewsModal({ news }: { news: HomeData["news"] }) {
       // If user cancelled the share, don't fallback to clipboard
       if (err.name === "AbortError") return;
 
-      // Silent fallback: copy to clipboard without showing any notification
+      // Fallback: copy to clipboard and notify
       try {
         await navigator.clipboard.writeText(text);
+        import("sonner").then((m) => m.toast.success("Link copied to clipboard!"));
       } catch (_) {
         // ignore — clipboard not available either
       }
