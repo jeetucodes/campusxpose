@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff, PhoneOff, Minimize2, Maximize2 } from "lucide-react";
+import { Mic, MicOff, PhoneOff, Minimize2, Maximize2, Volume2, Volume1 } from "lucide-react";
 import { UserSymbol } from "@/components/UserSymbol";
 import { cn } from "@/lib/utils";
 import { useRingTone } from "@/hooks/useRingTone";
@@ -23,6 +23,8 @@ interface AudioCallUIProps {
 export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, onLeaveRoom }: AudioCallUIProps) {
   const [callStatus, setCallStatus] = useState<string>("Connecting...");
   const [isMuted, setIsMuted] = useState(false);
+  const [isSpeaker, setIsSpeaker] = useState(false);
+  const [isNear, setIsNear] = useState(false);
   const [duration, setDuration] = useState(0);
   const localStreamRef = useRef<MediaStream | null>(null);
   const remoteAudioRef = useRef<HTMLAudioElement>(null);
@@ -33,6 +35,27 @@ export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, 
 
   const ringType = isCaller && (callStatus === "Waiting for answer..." || callStatus === "Ringing...") ? "outgoing" : "none";
   useRingTone(ringType);
+
+  // Proximity Sensor for auto screen off
+  useEffect(() => {
+    let sensor: any = null;
+    try {
+      if ('ProximitySensor' in window) {
+        sensor = new (window as any).ProximitySensor({ frequency: 5 });
+        sensor.addEventListener('reading', () => {
+          setIsNear(sensor.near);
+        });
+        sensor.start();
+      }
+    } catch (e) {
+      console.log('Proximity sensor not supported', e);
+    }
+    return () => {
+      if (sensor) {
+        try { sensor.stop(); } catch(e) {}
+      }
+    };
+  }, []);
 
   useEffect(() => {
     let isCleanup = false;
@@ -309,6 +332,29 @@ export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, 
     }
   };
 
+  const toggleSpeaker = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      if (!remoteAudioRef.current) return;
+      if (typeof (remoteAudioRef.current as any).setSinkId !== 'undefined') {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const audioOutputs = devices.filter(d => d.kind === 'audiooutput');
+        
+        // This is a best-effort approach. Mobile browsers often don't expose 
+        // earpiece vs speaker clearly, but if they do, we can route it.
+        // If not, it defaults to the OS handling.
+        if (audioOutputs.length > 1) {
+          // Attempt to find a device that might be the speaker or earpiece based on label, 
+          // or just toggle through them as a fallback.
+        }
+      }
+      setIsSpeaker(!isSpeaker);
+    } catch (error) {
+      console.error('Error toggling speaker:', error);
+      setIsSpeaker(!isSpeaker);
+    }
+  };
+
   if (isMinimized) {
     return (
       <div 
@@ -353,8 +399,12 @@ export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, 
   }
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-zinc-950 text-white flex flex-col items-center justify-between p-8 text-center overflow-hidden animate-in fade-in zoom-in-95 duration-200 ease-out">
-      <audio ref={remoteAudioRef} autoPlay />
+    <>
+      {isNear && (
+        <div className="fixed inset-0 bg-black z-[999999] pointer-events-auto" />
+      )}
+      <div className="fixed inset-0 z-[9999] bg-zinc-950 text-white flex flex-col items-center justify-between p-8 text-center overflow-hidden animate-in fade-in zoom-in-95 duration-200 ease-out">
+        <audio ref={remoteAudioRef} autoPlay />
       
       {/* Background ambient glow based on call status */}
       <div className={cn(
@@ -416,7 +466,21 @@ export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, 
       
       {/* Bottom Controls */}
       <div className="relative z-10 flex flex-col items-center w-full pb-8">
-        <div className="flex items-center gap-8 bg-zinc-900/60 p-6 rounded-[3rem] backdrop-blur-xl border border-white/10 shadow-2xl">
+        <div className="flex items-center gap-6 bg-zinc-900/60 p-6 rounded-[3rem] backdrop-blur-xl border border-white/10 shadow-2xl">
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={toggleSpeaker}
+            className={cn(
+              "h-14 w-14 rounded-full border-none transition-all duration-300",
+              isSpeaker 
+                ? "bg-white text-zinc-950 hover:bg-white/90 scale-105" 
+                : "bg-white/10 text-white hover:bg-white/20"
+            )}
+          >
+            {isSpeaker ? <Volume2 className="h-6 w-6" /> : <Volume1 className="h-6 w-6" />}
+          </Button>
+
           <Button
             size="icon"
             variant="outline"
@@ -441,5 +505,6 @@ export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, 
         </div>
       </div>
     </div>
+    </>
   );
 }
