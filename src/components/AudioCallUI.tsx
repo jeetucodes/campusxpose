@@ -24,7 +24,6 @@ export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, 
   const [callStatus, setCallStatus] = useState<string>("Connecting...");
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeaker, setIsSpeaker] = useState(false);
-  const [isNear, setIsNear] = useState(false);
   const [duration, setDuration] = useState(0);
   const localStreamRef = useRef<MediaStream | null>(null);
   const remoteAudioRef = useRef<HTMLAudioElement>(null);
@@ -35,27 +34,6 @@ export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, 
 
   const ringType = isCaller && (callStatus === "Waiting for answer..." || callStatus === "Ringing...") ? "outgoing" : "none";
   useRingTone(ringType);
-
-  // Proximity Sensor for auto screen off
-  useEffect(() => {
-    let sensor: any = null;
-    try {
-      if ('ProximitySensor' in window) {
-        sensor = new (window as any).ProximitySensor({ frequency: 5 });
-        sensor.addEventListener('reading', () => {
-          setIsNear(sensor.near);
-        });
-        sensor.start();
-      }
-    } catch (e) {
-      console.log('Proximity sensor not supported', e);
-    }
-    return () => {
-      if (sensor) {
-        try { sensor.stop(); } catch(e) {}
-      }
-    };
-  }, []);
 
   useEffect(() => {
     let isCleanup = false;
@@ -336,7 +314,7 @@ export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, 
     e.stopPropagation();
     try {
       if (!remoteAudioRef.current) return;
-      if (typeof (remoteAudioRef.current as any).setSinkId !== 'undefined') {
+      if (typeof (remoteAudioRef.current as any).setSinkId !== 'undefined' && navigator.mediaDevices) {
         const devices = await navigator.mediaDevices.enumerateDevices();
         const audioOutputs = devices.filter(d => d.kind === 'audiooutput');
         
@@ -399,12 +377,8 @@ export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, 
   }
 
   return (
-    <>
-      {isNear && (
-        <div className="fixed inset-0 bg-black z-[999999] pointer-events-auto" />
-      )}
-      <div className="fixed inset-0 z-[9999] bg-zinc-950 text-white flex flex-col items-center justify-between p-8 text-center overflow-hidden animate-in fade-in zoom-in-95 duration-200 ease-out">
-        <audio ref={remoteAudioRef} autoPlay />
+    <div className="fixed inset-0 z-[9999] bg-zinc-950 text-white flex flex-col items-center justify-between p-8 text-center overflow-hidden animate-in fade-in zoom-in-95 duration-200 ease-out">
+      <audio ref={remoteAudioRef} autoPlay />
       
       {/* Background ambient glow based on call status */}
       <div className={cn(
@@ -505,6 +479,5 @@ export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, 
         </div>
       </div>
     </div>
-    </>
   );
 }
