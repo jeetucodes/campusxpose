@@ -39,6 +39,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { AutoResizeTextarea } from "@/components/AutoResizeTextarea";
@@ -310,7 +317,8 @@ function Messages() {
     return all.filter(m => m.content?.startsWith("CALL_LOG|")).sort((a, b) => b.created_at.localeCompare(a.created_at));
   }, [all]);
 
-  const [activeTab, setActiveTab] = useState<"messages" | "requests" | "calls">("messages");
+  const [activeTab, setActiveTab] = useState<"messages" | "calls">("messages");
+  const [requestsSheetOpen, setRequestsSheetOpen] = useState(false);
 
   const active = to;
   const dmRoom = active && username ? `dm-${[username, active].sort().join("|")}` : "";
@@ -446,8 +454,8 @@ function Messages() {
     <div className="flex h-[100dvh] w-full flex-col overflow-hidden bg-paper md:flex-row font-sans text-ink">
       <aside
         className={cn(
-          "flex h-full w-full shrink-0 flex-col border-r-2 border-ink/10 bg-paper transition-all z-10",
-          active ? "hidden md:flex md:w-[340px] lg:w-[380px]" : "flex",
+          "flex h-full w-full shrink-0 flex-col border-r-2 border-ink bg-paper transition-all z-10",
+          active ? "hidden md:flex md:w-[340px] lg:w-[380px]" : "flex md:w-[340px] lg:w-[380px]",
         )}
       >
         <header className="flex items-center justify-between p-4 pb-2">
@@ -462,20 +470,102 @@ function Messages() {
           </div>
 
           <div className="flex items-center gap-1 ml-auto">
-            <Button
-              variant="ghost"
-              size="icon"
-              className={cn("relative text-ink/60 hover:text-ink hover:bg-muted transition-colors", activeTab === "requests" && "bg-muted text-ink")}
-              onClick={() => setActiveTab(activeTab === "requests" ? "messages" : "requests")}
-              aria-label="Message Requests"
-            >
-              <ShieldCheck className="h-5 w-5" />
-              {requests.length > 0 && (
-                <span className="absolute top-0.5 right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-marker text-[9px] font-bold text-white ring-2 ring-paper">
-                  {requests.length > 9 ? "9+" : requests.length}
-                </span>
-              )}
-            </Button>
+            <Sheet open={requestsSheetOpen} onOpenChange={setRequestsSheetOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn("relative text-ink/60 hover:text-ink hover:bg-muted transition-colors")}
+                  aria-label="Message Requests"
+                >
+                  <ShieldCheck className="h-5 w-5" />
+                  {requests.length > 0 && (
+                    <span className="absolute top-0.5 right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-marker text-[9px] font-bold text-white ring-2 ring-paper">
+                      {requests.length > 9 ? "9+" : requests.length}
+                    </span>
+                  )}
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[340px] sm:w-[400px] bg-paper border-l-2 border-ink shadow-ink-lg flex flex-col gap-0 p-0">
+                <SheetHeader className="p-4 border-b-2 border-ink">
+                  <SheetTitle className="font-display text-xl text-ink flex items-center gap-2">
+                    <ShieldCheck className="h-5 w-5 text-marker" /> Message Requests
+                  </SheetTitle>
+                </SheetHeader>
+                <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                  {requests.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center gap-3 px-4 py-16 text-center text-muted-foreground">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted/30">
+                        <ShieldCheck className="h-6 w-6 opacity-50" />
+                      </div>
+                      <p className="text-sm">No new message requests.</p>
+                    </div>
+                  ) : (
+                    requests.map((item) => {
+                      const unread = unreadBy[item.user] ?? 0;
+                      return (
+                        <div
+                          key={item.user}
+                          className={cn(
+                            "group flex items-center gap-3 px-3 py-2.5 wobbly-sm transition-all hover:bg-white/80 cursor-pointer relative",
+                            active === item.user && "bg-white shadow-ink-soft border-2 border-ink sketch-card",
+                          )}
+                        >
+                          <div
+                            className="flex min-w-0 flex-1 items-center gap-3 outline-none"
+                            onClick={() => {
+                              setRequestsSheetOpen(false);
+                              navigate({ to: "/messages", search: { to: item.user } });
+                            }}
+                          >
+                            <UserSymbol username={item.user} size="sm" />
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2 truncate font-medium">
+                                <span className="text-ink font-semibold">{getDisplayName(item.user)}</span>
+                                {item.user && verified.has(item.user) && (
+                                  <VerifiedBadge className="h-3.5 w-3.5" />
+                                )}
+                                {unread > 0 && active !== item.user && (
+                                  <span className="grid h-5 min-w-5 place-items-center bg-marker rounded-full px-1.5 text-[10px] font-bold leading-none text-white">
+                                    {unread > 9 ? "9+" : unread}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="truncate text-xs text-muted-foreground font-medium mt-0.5">
+                                {item.msg.content?.startsWith("CALL_LOG|") ? (item.msg.content === "CALL_LOG|MISSED" ? "Missed call" : "Audio call") : item.msg.content}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-1 shrink-0 ml-1">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                acceptUser(item.user);
+                              }}
+                              className="p-1.5 rounded-full text-emerald-600 hover:bg-emerald-100 transition-colors wobbly-sm border border-transparent hover:border-emerald-600/20"
+                            >
+                              <Check className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (confirm(`Are you sure you want to delete this chat request from ${item.user}?`)) {
+                                  deleteConversation(item.user);
+                                }
+                              }}
+                              className="p-1.5 rounded-full text-red-500 hover:bg-red-100 transition-colors wobbly-sm border border-transparent hover:border-red-500/20"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </SheetContent>
+            </Sheet>
 
             <Dialog
               open={isDialogOpen}
@@ -725,15 +815,15 @@ function Messages() {
         </header>
 
         <div className="px-3 pb-2">
-          <div className="flex bg-secondary/60 p-1 rounded-xl border border-ink/8">
+          <div className="flex bg-secondary/60 p-1 wobbly-sm border-2 border-ink shadow-ink-soft">
             <button
-              className={cn("flex-1 py-1.5 font-sans font-semibold transition-all text-sm rounded-lg", activeTab === "messages" || activeTab === "requests" ? "bg-white text-ink shadow-sm border border-ink/10" : "text-ink/50 hover:text-ink")}
+              className={cn("flex-1 py-1.5 font-sans font-semibold transition-all text-sm wobbly-sm", activeTab === "messages" ? "bg-white text-ink shadow-ink-soft border-2 border-ink sketch-card" : "text-ink/50 hover:text-ink")}
               onClick={() => setActiveTab("messages")}
             >
               Chats
             </button>
             <button
-              className={cn("flex-1 py-1.5 font-sans font-semibold transition-all text-sm rounded-lg", activeTab === "calls" ? "bg-white text-ink shadow-sm border border-ink/10" : "text-ink/50 hover:text-ink")}
+              className={cn("flex-1 py-1.5 font-sans font-semibold transition-all text-sm wobbly-sm ml-1", activeTab === "calls" ? "bg-white text-ink shadow-ink-soft border-2 border-ink sketch-card" : "text-ink/50 hover:text-ink")}
               onClick={() => setActiveTab("calls")}
             >
               Calls
@@ -758,18 +848,18 @@ function Messages() {
           )}
 
           <div className="px-1 mb-3">
-            <div className="flex items-center gap-2 bg-white rounded-xl px-2 py-1.5 border border-ink/10 shadow-sm focus-within:border-ink/25 transition-all">
+            <div className="flex items-center gap-2 bg-white wobbly-sm px-2 py-1.5 border-2 border-ink shadow-ink-soft focus-within:shadow-ink transition-all">
               <Input
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && startNew()}
                 placeholder="New message to..."
-                className="bg-transparent border-none focus-visible:ring-0 shadow-none text-ink placeholder:text-ink/30 flex-1 px-2 text-sm h-9"
+                className="bg-transparent border-none focus-visible:ring-0 shadow-none text-ink placeholder:text-ink/30 flex-1 px-2 text-sm h-9 font-sans"
               />
               <Button
                 onClick={startNew}
                 size="icon"
-                className="shrink-0 bg-ink text-white rounded-lg h-8 w-8 transition-transform hover:scale-105 shadow-sm border-none"
+                className="shrink-0 bg-marker text-white wobbly-sm h-8 w-8 transition-transform hover:-translate-y-0.5 shadow-ink-soft border-2 border-ink"
               >
                 <Plus className="h-4 w-4" />
               </Button>
@@ -777,17 +867,7 @@ function Messages() {
           </div>
 
 
-          {activeTab === "requests" && (
-            <div className="px-2 mb-2 mt-1">
-              <button
-                onClick={() => setActiveTab("messages")}
-                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-ink font-medium px-2 py-1 mb-2 transition-colors"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back to Chats
-              </button>
-            </div>
-          )}
+
 
           {loading
             ? Array.from({ length: 5 }).map((_, i) => (
@@ -854,14 +934,14 @@ function Messages() {
                   );
                 })
               )
-            ) : (activeTab === "requests" ? requests : regularConversations).map((item) => {
+            ) : regularConversations.map((item) => {
               const unread = unreadBy[item.user] ?? 0;
               return (
                 <div
                   key={item.user}
                   className={cn(
-                    "group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all hover:bg-white/80 cursor-pointer relative mb-0.5",
-                    active === item.user && "bg-white shadow-sm border border-ink/8",
+                    "group flex items-center gap-3 px-3 py-2.5 wobbly-sm transition-all hover:bg-white/80 cursor-pointer relative mb-1",
+                    active === item.user && "bg-white shadow-ink-soft border-2 border-ink sketch-card",
                   )}
                 >
                   <Link
@@ -888,36 +968,9 @@ function Messages() {
                       </div>
                     </div>
 
-                    {activeTab === "requests" ? (
-                      <div className="flex items-center gap-1 ml-1" onClick={(e) => e.preventDefault()}>
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            acceptUser(item.user);
-                          }}
-                          className="p-1.5 rounded-full text-blue-600 hover:bg-blue-100 transition-colors"
-                        >
-                          <Check className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            if (confirm(`Are you sure you want to delete this chat request from ${item.user}?`)) {
-                              deleteConversation(item.user);
-                            }
-                          }}
-                          className="p-1.5 rounded-full text-red-500 hover:bg-red-100 transition-colors"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    ) : (
                       <div className="shrink-0 text-[10px] text-muted-foreground mt-1 font-medium self-start">
                         {timeAgo(item.msg.created_at)}
                       </div>
-                    )}
                   </Link>
                 </div>
               );
@@ -934,16 +987,7 @@ function Messages() {
               </p>
             </div>
           )}
-          {!loading && requests.length === 0 && activeTab === "requests" && (
-            <div className="flex flex-col items-center justify-center gap-3 px-4 py-16 text-center text-muted-foreground">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted/30">
-                <ShieldCheck className="h-6 w-6 opacity-50" />
-              </div>
-              <p className="text-sm">
-                No new message requests.
-              </p>
-            </div>
-          )}
+
         </div>
       </aside>
 
@@ -953,7 +997,7 @@ function Messages() {
       >
         {active ? (
           <>
-            <header className="flex items-center gap-3 border-b-2 border-ink/8 px-4 py-3 bg-white/90 backdrop-blur-md sticky top-0 z-20">
+            <header className="flex items-center gap-3 border-b-2 border-ink px-4 py-3 bg-white/90 backdrop-blur-md sticky top-0 z-20">
               <Button asChild variant="ghost" size="icon" className="md:hidden hover:bg-muted text-ink/80 -ml-2">
                 <Link to="/messages" search={{}}>
                   <ArrowLeft className="h-5 w-5" />
@@ -1011,7 +1055,7 @@ function Messages() {
             </header>
 
             {thread.some((m) => m.pinned) && (
-              <div className="border-b-2 border-ink/8 bg-postit/60 backdrop-blur-sm px-4 py-2 z-10 relative">
+              <div className="border-b-2 border-ink bg-postit px-4 py-2 z-10 relative shadow-ink-sm wobbly-sm mx-4 mt-2 mb-2">
                 <div className="mx-auto w-full max-w-2xl space-y-1">
                   {thread
                     .filter((m) => m.pinned)
@@ -1039,7 +1083,7 @@ function Messages() {
 
             <div
               ref={threadBoxRef}
-              className="mx-auto flex w-full md:max-w-3xl min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-4 md:px-8 py-4"
+              className="mx-auto flex w-full md:max-w-3xl min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 md:px-8 py-4 bg-paper"
             >
               {loading
                 ? Array.from({ length: 6 }).map((_, i) => (
@@ -1118,10 +1162,10 @@ function Messages() {
                             />
                             <div
                               className={cn(
-                                "relative w-fit max-w-full px-4 py-2.5 text-[15px]",
+                                "relative w-fit max-w-full px-4 py-2.5 text-[15px] font-sans",
                                 own
-                                  ? "bg-ink text-white rounded-2xl rounded-tr-[4px] shadow-sm"
-                                  : "bg-white text-ink border-2 border-ink/8 rounded-2xl rounded-tl-[4px]",
+                                  ? "bg-ink text-white wobbly-sm shadow-ink-soft"
+                                  : "bg-white text-ink border-2 border-ink wobbly-sm shadow-ink-soft sketch-card",
                               )}
                             >
                               {m.pinned && (
@@ -1225,7 +1269,7 @@ function Messages() {
                 <div className="mx-auto w-full md:max-w-3xl">
                   <TypingIndicator users={typing} className="mb-1.5 px-2" />
                   {replyTo && (
-                    <div className="mb-2 flex items-center gap-2 rounded-xl border-2 border-ink/10 bg-surface-2/50 px-3 py-2 text-xs">
+                    <div className="mb-2 flex items-center gap-2 wobbly-sm border-2 border-ink bg-postit px-3 py-2 text-xs shadow-ink-soft">
                       <div className="min-w-0 flex-1">
                         <span className="font-semibold text-ink">
                           Replying to {replyTo.content ? replyTo.sender_username : "an image"}
@@ -1259,7 +1303,7 @@ function Messages() {
                         </button>
                       </div>
                     )}
-                    <div className="flex items-center gap-2 rounded-xl border-2 border-ink/10 bg-white px-2 py-1.5 transition-all focus-within:border-ink/20">
+                    <div className="flex items-center gap-2 wobbly-sm border-2 border-ink bg-white px-2 py-1.5 transition-all shadow-ink-soft focus-within:shadow-ink">
                       <input
                         type="file"
                         accept="image/*"
@@ -1273,7 +1317,7 @@ function Messages() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="shrink-0 text-ink/30 hover:bg-muted hover:text-ink rounded-lg transition-colors ml-1 h-9 w-9"
+                        className="shrink-0 text-ink hover:bg-surface-2 wobbly-sm transition-colors ml-1 h-9 w-9 border border-transparent hover:border-ink"
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploadingImage}
                       >
@@ -1302,7 +1346,7 @@ function Messages() {
                         onClick={send}
                         disabled={(!text.trim() && !imageFile) || uploadingImage}
                         size="icon"
-                        className="h-9 w-9 shrink-0 bg-ink text-white rounded-lg hover:scale-105 hover:bg-ink/80 transition-transform active:scale-95 shadow-sm border-none mr-1"
+                        className="h-9 w-9 shrink-0 bg-marker text-white wobbly-sm hover:-translate-y-0.5 transition-transform active:translate-y-0 shadow-ink-soft border-2 border-ink mr-1"
                         aria-label="Send message"
                       >
                         {uploadingImage ? (
