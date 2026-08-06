@@ -313,7 +313,7 @@ export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, 
     return (
       <div 
         onClick={() => setIsMinimized(false)}
-        className="fixed top-[max(env(safe-area-inset-top),1rem)] left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-3 bg-white border-2 border-ink shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-full px-4 py-2 cursor-pointer hover:-translate-y-0.5 transition-all wobbly-sm animate-in slide-in-from-top-10"
+        className="fixed top-[max(env(safe-area-inset-top),1rem)] left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-3 bg-white border-2 border-ink shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-full px-4 py-2 cursor-pointer hover:-translate-y-0.5 transition-all wobbly-sm animate-in fade-in slide-in-from-top-4 duration-200 ease-out"
       >
         <audio ref={remoteAudioRef} autoPlay />
         <div className="flex flex-col">
@@ -353,7 +353,7 @@ export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, 
   }
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-zinc-950 text-white flex flex-col items-center justify-between p-8 text-center animate-in fade-in duration-300 overflow-hidden">
+    <div className="fixed inset-0 z-[9999] bg-zinc-950 text-white flex flex-col items-center justify-between p-8 text-center overflow-hidden animate-in fade-in zoom-in-95 duration-200 ease-out">
       <audio ref={remoteAudioRef} autoPlay />
       
       {/* Background ambient glow based on call status */}
@@ -363,7 +363,7 @@ export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, 
       )}></div>
 
       {/* Noise overlay for cinematic texture */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/stardust.png")' }}></div>
+      <div className="absolute inset-0 opacity-[0.05] pointer-events-none" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/stardust.png")' }}></div>
 
       {/* Top Header */}
       <div className="relative z-10 w-full flex justify-between items-start">

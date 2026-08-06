@@ -20,7 +20,7 @@ export function IncomingCallModal({ callerUsername, callerNickname }: IncomingCa
         
         {/* Background glow & Noise overlay */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,theme(colors.accent.DEFAULT)_0%,transparent_70%)] opacity-20 pointer-events-none"></div>
-        <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/stardust.png")' }}></div>
+        <div className="absolute inset-0 opacity-[0.05] pointer-events-none" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/stardust.png")' }}></div>
 
         <div className="relative z-10 flex items-center gap-4">
           
