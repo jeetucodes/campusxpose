@@ -222,19 +222,9 @@ function RootComponent() {
         OneSignal.initialize("99906f9e-9dd2-4000-b559-0185efddc600");
         OneSignal.Notifications.requestPermission(true);
 
-        import("@/integrations/supabase/client").then(({ supabase }) => {
-          supabase.auth.getSession().then(({ data }) => {
-            if (data.session?.user) {
-              OneSignal.login(data.session.user.id);
-            }
-          });
-
-          supabase.auth.onAuthStateChange((_event, session) => {
-            if (session?.user) {
-              OneSignal.login(session.user.id);
-            } else {
-              OneSignal.logout();
-            }
+        import("@/lib/identity").then(({ loadOrCreateIdentity }) => {
+          loadOrCreateIdentity().then(({ hashedId }) => {
+            OneSignal.login(hashedId);
           });
         });
       } catch (e) {
@@ -246,18 +236,10 @@ function RootComponent() {
       setupCapacitorOneSignal();
     } else if (isMedian) {
       // Median (GoNative) Webview OneSignal Setup
-      import("@/integrations/supabase/client").then(({ supabase }) => {
-        supabase.auth.getSession().then(({ data }) => {
-          if (data.session?.user && (window as any).median?.onesignal?.setExternalUserId) {
-            (window as any).median.onesignal.setExternalUserId({ externalId: data.session.user.id });
-          }
-        });
-        
-        supabase.auth.onAuthStateChange((_event, session) => {
-          if (session?.user && (window as any).median?.onesignal?.setExternalUserId) {
-             (window as any).median.onesignal.setExternalUserId({ externalId: session.user.id });
-          } else if (!session?.user && (window as any).median?.onesignal?.removeExternalUserId) {
-             (window as any).median.onesignal.removeExternalUserId();
+      import("@/lib/identity").then(({ loadOrCreateIdentity }) => {
+        loadOrCreateIdentity().then(({ hashedId }) => {
+          if ((window as any).median?.onesignal?.setExternalUserId) {
+            (window as any).median.onesignal.setExternalUserId({ externalId: hashedId });
           }
         });
       });
@@ -267,19 +249,9 @@ function RootComponent() {
       OneSignalDeferred.push(async function(OneSignal: any) {
         await OneSignal.Slidedown.promptPush();
         
-        import("@/integrations/supabase/client").then(({ supabase }) => {
-          supabase.auth.getSession().then(({ data }) => {
-            if (data.session?.user) {
-              OneSignal.login(data.session.user.id);
-            }
-          });
-          
-          supabase.auth.onAuthStateChange((_event, session) => {
-            if (session?.user) {
-              OneSignal.login(session.user.id);
-            } else {
-              OneSignal.logout();
-            }
+        import("@/lib/identity").then(({ loadOrCreateIdentity }) => {
+          loadOrCreateIdentity().then(({ hashedId }) => {
+            OneSignal.login(hashedId);
           });
         });
       });
