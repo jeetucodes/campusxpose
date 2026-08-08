@@ -1,0 +1,10 @@
+{
+	"appId": "co.campusxpose.app",
+	"appName": "campusxpose",
+	"webDir": ".output/public",
+	"bundledWebRuntime": false,
+	"server": {
+		"url": "https://campusxpose.online",
+		"cleartext": true
+	}
+}

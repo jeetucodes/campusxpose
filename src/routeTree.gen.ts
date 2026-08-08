@@ -32,6 +32,7 @@ import { Route as ProjectsNewRouteImport } from './routes/projects.new'
 import { Route as ProjectsIdRouteImport } from './routes/projects.$id'
 import { Route as GamesTicTacToeRouteImport } from './routes/games.tic-tac-toe'
 import { Route as GamesPipeConnectRouteImport } from './routes/games.pipe-connect'
+import { Route as GamesMemoryMatchRouteImport } from './routes/games.memory-match'
 import { Route as GamesKnifeThrowerRouteImport } from './routes/games.knife-thrower'
 import { Route as GamesArrowPuzzleRouteImport } from './routes/games.arrow-puzzle'
 import { Route as Games2048RouteImport } from './routes/games.2048'
@@ -172,6 +173,11 @@ const GamesTicTacToeRoute = GamesTicTacToeRouteImport.update({
 const GamesPipeConnectRoute = GamesPipeConnectRouteImport.update({
   id: '/games/pipe-connect',
   path: '/games/pipe-connect',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesMemoryMatchRoute = GamesMemoryMatchRouteImport.update({
+  id: '/games/memory-match',
+  path: '/games/memory-match',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GamesKnifeThrowerRoute = GamesKnifeThrowerRouteImport.update({
@@ -347,6 +353,7 @@ export interface FileRoutesByFullPath {
   '/games/2048': typeof Games2048Route
   '/games/arrow-puzzle': typeof GamesArrowPuzzleRoute
   '/games/knife-thrower': typeof GamesKnifeThrowerRoute
+  '/games/memory-match': typeof GamesMemoryMatchRoute
   '/games/pipe-connect': typeof GamesPipeConnectRoute
   '/games/tic-tac-toe': typeof GamesTicTacToeRoute
   '/projects/$id': typeof ProjectsIdRoute
@@ -398,6 +405,7 @@ export interface FileRoutesByTo {
   '/games/2048': typeof Games2048Route
   '/games/arrow-puzzle': typeof GamesArrowPuzzleRoute
   '/games/knife-thrower': typeof GamesKnifeThrowerRoute
+  '/games/memory-match': typeof GamesMemoryMatchRoute
   '/games/pipe-connect': typeof GamesPipeConnectRoute
   '/games/tic-tac-toe': typeof GamesTicTacToeRoute
   '/projects/$id': typeof ProjectsIdRoute
@@ -450,6 +458,7 @@ export interface FileRoutesById {
   '/games/2048': typeof Games2048Route
   '/games/arrow-puzzle': typeof GamesArrowPuzzleRoute
   '/games/knife-thrower': typeof GamesKnifeThrowerRoute
+  '/games/memory-match': typeof GamesMemoryMatchRoute
   '/games/pipe-connect': typeof GamesPipeConnectRoute
   '/games/tic-tac-toe': typeof GamesTicTacToeRoute
   '/projects/$id': typeof ProjectsIdRoute
@@ -503,6 +512,7 @@ export interface FileRouteTypes {
     | '/games/2048'
     | '/games/arrow-puzzle'
     | '/games/knife-thrower'
+    | '/games/memory-match'
     | '/games/pipe-connect'
     | '/games/tic-tac-toe'
     | '/projects/$id'
@@ -554,6 +564,7 @@ export interface FileRouteTypes {
     | '/games/2048'
     | '/games/arrow-puzzle'
     | '/games/knife-thrower'
+    | '/games/memory-match'
     | '/games/pipe-connect'
     | '/games/tic-tac-toe'
     | '/projects/$id'
@@ -605,6 +616,7 @@ export interface FileRouteTypes {
     | '/games/2048'
     | '/games/arrow-puzzle'
     | '/games/knife-thrower'
+    | '/games/memory-match'
     | '/games/pipe-connect'
     | '/games/tic-tac-toe'
     | '/projects/$id'
@@ -657,6 +669,7 @@ export interface RootRouteChildren {
   Games2048Route: typeof Games2048Route
   GamesArrowPuzzleRoute: typeof GamesArrowPuzzleRoute
   GamesKnifeThrowerRoute: typeof GamesKnifeThrowerRoute
+  GamesMemoryMatchRoute: typeof GamesMemoryMatchRoute
   GamesPipeConnectRoute: typeof GamesPipeConnectRoute
   GamesTicTacToeRoute: typeof GamesTicTacToeRoute
   ProjectsIdRoute: typeof ProjectsIdRoute
@@ -828,6 +841,13 @@ declare module '@tanstack/react-router' {
       path: '/games/pipe-connect'
       fullPath: '/games/pipe-connect'
       preLoaderRoute: typeof GamesPipeConnectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games/memory-match': {
+      id: '/games/memory-match'
+      path: '/games/memory-match'
+      fullPath: '/games/memory-match'
+      preLoaderRoute: typeof GamesMemoryMatchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/games/knife-thrower': {
@@ -1057,6 +1077,7 @@ const rootRouteChildren: RootRouteChildren = {
   Games2048Route: Games2048Route,
   GamesArrowPuzzleRoute: GamesArrowPuzzleRoute,
   GamesKnifeThrowerRoute: GamesKnifeThrowerRoute,
+  GamesMemoryMatchRoute: GamesMemoryMatchRoute,
   GamesPipeConnectRoute: GamesPipeConnectRoute,
   GamesTicTacToeRoute: GamesTicTacToeRoute,
   ProjectsIdRoute: ProjectsIdRoute,

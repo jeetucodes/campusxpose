@@ -1,0 +1,1 @@
+import{t as e}from"./jsx-runtime-DiK4U9sA.js";import{t}from"./badge-check-yZlzFUYS.js";import{Cn as n}from"./index-yoH-JVgR.js";var r=e();function i({className:e}){return(0,r.jsx)(t,{className:n(`inline-block h-4 w-4 shrink-0 fill-accent text-white`,e),"aria-label":`Verified`})}export{i as t};

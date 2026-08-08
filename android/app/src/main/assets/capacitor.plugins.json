@@ -1,0 +1,10 @@
+[
+	{
+		"pkg": "@capgo/capacitor-proximity",
+		"classpath": "app.capgo.proximity.CapacitorProximityPlugin"
+	},
+	{
+		"pkg": "@onesignal/capacitor-plugin",
+		"classpath": "com.onesignal.capacitor.OneSignalCapacitorPlugin"
+	}
+]
