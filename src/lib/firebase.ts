@@ -3,7 +3,7 @@ import { getAnalytics } from "firebase/analytics";
 import { getMessaging } from "firebase/messaging"; // Often needed for push notifications
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC_7WL3573EkKxFZ31HnO65kYX3_qjiMAA",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "campusxpose-7cfb6.firebaseapp.com",
   projectId: "campusxpose-7cfb6",
   storageBucket: "campusxpose-7cfb6.firebasestorage.app",
