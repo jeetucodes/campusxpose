@@ -16,6 +16,7 @@ export async function sendOneSignalNotification({
   broadcast = false,
 }: OneSignalPayload) {
   const restApiKey = process.env.ONESIGNAL_REST_API_KEY;
+  console.log("OneSignal Backend Triggered. API Key exists?", !!restApiKey);
   if (!restApiKey) {
     console.warn("ONESIGNAL_REST_API_KEY is missing in environment. Cannot send notification.");
     return false;
