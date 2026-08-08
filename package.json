@@ -12,6 +12,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@capgo/capacitor-proximity": "^8.1.9",
     "@fontsource/inter": "^5.2.8",
     "@fontsource/kalam": "^5.2.8",
     "@fontsource/patrick-hand": "^5.2.8",
