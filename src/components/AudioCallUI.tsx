@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Mic, MicOff, PhoneOff, Minimize2, Maximize2, Volume2, Volume1 } from "lucide-react";
+import { CapacitorProximity as Proximity } from '@capgo/capacitor-proximity';
 import { UserSymbol } from "@/components/UserSymbol";
 import { cn } from "@/lib/utils";
 import { useRingTone } from "@/hooks/useRingTone";
@@ -24,6 +25,7 @@ export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, 
   const [callStatus, setCallStatus] = useState<string>("Connecting...");
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeaker, setIsSpeaker] = useState(false);
+  const [isNear, setIsNear] = useState(false);
   const [duration, setDuration] = useState(0);
   const localStreamRef = useRef<MediaStream | null>(null);
   const remoteAudioRef = useRef<HTMLAudioElement>(null);
@@ -34,6 +36,37 @@ export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, 
 
   const ringType = isCaller && (callStatus === "Waiting for answer..." || callStatus === "Ringing...") ? "outgoing" : "none";
   useRingTone(ringType);
+
+  // Native Capacitor Audio Routing & Proximity
+  useEffect(() => {
+    const isNative = typeof window !== "undefined" && (window as any).Capacitor?.isNative;
+    if (!isNative) return;
+
+    // Proximity Setup
+    let listener: any;
+    Proximity.enable().then(() => {
+      listener = Proximity.addListener('onProximityChanged', (state) => {
+        setIsNear(state.value === 0); // 0 means near
+      });
+    }).catch(console.error);
+
+    return () => {
+      if (listener) listener.then((l: any) => l.remove());
+      Proximity.disable().catch(console.error);
+    };
+  }, []);
+
+  useEffect(() => {
+    const isNative = typeof window !== "undefined" && (window as any).Capacitor?.isNative;
+    if (isNative && (window as any).AudioManagement) {
+      const AudioManagement = (window as any).AudioManagement;
+      if (isSpeaker) {
+        AudioManagement.setAudioMode(AudioManagement.AudioMode.NORMAL, () => {}, () => {});
+      } else {
+        AudioManagement.setAudioMode(AudioManagement.AudioMode.IN_COMMUNICATION, () => {}, () => {});
+      }
+    }
+  }, [isSpeaker]);
 
   useEffect(() => {
     let isCleanup = false;
@@ -377,8 +410,12 @@ export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, 
   }
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-zinc-950 text-white flex flex-col items-center justify-between p-8 text-center overflow-hidden animate-in fade-in zoom-in-95 duration-200 ease-out">
-      <audio ref={remoteAudioRef} autoPlay />
+    <>
+      {isNear && (
+        <div className="fixed inset-0 bg-black z-[999999] pointer-events-auto" />
+      )}
+      <div className="fixed inset-0 z-[9999] bg-zinc-950 text-white flex flex-col items-center justify-between p-8 text-center overflow-hidden animate-in fade-in zoom-in-95 duration-200 ease-out">
+        <audio ref={remoteAudioRef} autoPlay />
       
       {/* Background ambient glow based on call status */}
       <div className={cn(
@@ -479,5 +516,6 @@ export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, 
         </div>
       </div>
     </div>
+    </>
   );
 }

@@ -74,6 +74,7 @@ export default function GamesHub() {
     "knife-thrower": true,
     "2048": true,
     "memory-match": true,
+    "tic-tac-toe": true,
   });
 
   const [arrowTotalLevels, setArrowTotalLevels] = useState<number>(100);
@@ -332,6 +333,22 @@ export default function GamesHub() {
       link: "/games/memory-match",
       statLabel: stats.memoryBest > 0 ? `Best Time: ${stats.memoryBest}s` : "Speed Brain Training",
       icon: "⏱️",
+    },
+    {
+      id: "tic-tac-toe" as const,
+      title: "Tic Tac Toe",
+      tagline: "Classic X's and O's with a friend or a bot!",
+      description:
+        "Challenge your friends or beat the smart AI bot in this classic wobbly Tic Tac Toe game.",
+      emoji: "❌",
+      bgGradient: "from-[#e2e8f0] via-[#cbd5e1] to-[#94a3b8]",
+      category: "arcade",
+      badge: "NEW",
+      badgeBg: "bg-[#e2e8f0] text-black",
+      color: "bg-[#cbd5e1]",
+      link: "/games/tic-tac-toe",
+      statLabel: "Classic Board Game",
+      icon: "⭕",
     },
   ];
 

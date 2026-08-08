@@ -30,6 +30,7 @@ import { Route as CollegesIndexRouteImport } from './routes/colleges.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ProjectsNewRouteImport } from './routes/projects.new'
 import { Route as ProjectsIdRouteImport } from './routes/projects.$id'
+import { Route as GamesTicTacToeRouteImport } from './routes/games.tic-tac-toe'
 import { Route as GamesPipeConnectRouteImport } from './routes/games.pipe-connect'
 import { Route as GamesKnifeThrowerRouteImport } from './routes/games.knife-thrower'
 import { Route as GamesArrowPuzzleRouteImport } from './routes/games.arrow-puzzle'
@@ -161,6 +162,11 @@ const ProjectsNewRoute = ProjectsNewRouteImport.update({
 const ProjectsIdRoute = ProjectsIdRouteImport.update({
   id: '/projects/$id',
   path: '/projects/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesTicTacToeRoute = GamesTicTacToeRouteImport.update({
+  id: '/games/tic-tac-toe',
+  path: '/games/tic-tac-toe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GamesPipeConnectRoute = GamesPipeConnectRouteImport.update({
@@ -342,6 +348,7 @@ export interface FileRoutesByFullPath {
   '/games/arrow-puzzle': typeof GamesArrowPuzzleRoute
   '/games/knife-thrower': typeof GamesKnifeThrowerRoute
   '/games/pipe-connect': typeof GamesPipeConnectRoute
+  '/games/tic-tac-toe': typeof GamesTicTacToeRoute
   '/projects/$id': typeof ProjectsIdRoute
   '/projects/new': typeof ProjectsNewRoute
   '/admin/': typeof AdminIndexRoute
@@ -392,6 +399,7 @@ export interface FileRoutesByTo {
   '/games/arrow-puzzle': typeof GamesArrowPuzzleRoute
   '/games/knife-thrower': typeof GamesKnifeThrowerRoute
   '/games/pipe-connect': typeof GamesPipeConnectRoute
+  '/games/tic-tac-toe': typeof GamesTicTacToeRoute
   '/projects/$id': typeof ProjectsIdRoute
   '/projects/new': typeof ProjectsNewRoute
   '/admin': typeof AdminIndexRoute
@@ -443,6 +451,7 @@ export interface FileRoutesById {
   '/games/arrow-puzzle': typeof GamesArrowPuzzleRoute
   '/games/knife-thrower': typeof GamesKnifeThrowerRoute
   '/games/pipe-connect': typeof GamesPipeConnectRoute
+  '/games/tic-tac-toe': typeof GamesTicTacToeRoute
   '/projects/$id': typeof ProjectsIdRoute
   '/projects/new': typeof ProjectsNewRoute
   '/admin/': typeof AdminIndexRoute
@@ -495,6 +504,7 @@ export interface FileRouteTypes {
     | '/games/arrow-puzzle'
     | '/games/knife-thrower'
     | '/games/pipe-connect'
+    | '/games/tic-tac-toe'
     | '/projects/$id'
     | '/projects/new'
     | '/admin/'
@@ -545,6 +555,7 @@ export interface FileRouteTypes {
     | '/games/arrow-puzzle'
     | '/games/knife-thrower'
     | '/games/pipe-connect'
+    | '/games/tic-tac-toe'
     | '/projects/$id'
     | '/projects/new'
     | '/admin'
@@ -595,6 +606,7 @@ export interface FileRouteTypes {
     | '/games/arrow-puzzle'
     | '/games/knife-thrower'
     | '/games/pipe-connect'
+    | '/games/tic-tac-toe'
     | '/projects/$id'
     | '/projects/new'
     | '/admin/'
@@ -646,6 +658,7 @@ export interface RootRouteChildren {
   GamesArrowPuzzleRoute: typeof GamesArrowPuzzleRoute
   GamesKnifeThrowerRoute: typeof GamesKnifeThrowerRoute
   GamesPipeConnectRoute: typeof GamesPipeConnectRoute
+  GamesTicTacToeRoute: typeof GamesTicTacToeRoute
   ProjectsIdRoute: typeof ProjectsIdRoute
   ProjectsNewRoute: typeof ProjectsNewRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -801,6 +814,13 @@ declare module '@tanstack/react-router' {
       path: '/projects/$id'
       fullPath: '/projects/$id'
       preLoaderRoute: typeof ProjectsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games/tic-tac-toe': {
+      id: '/games/tic-tac-toe'
+      path: '/games/tic-tac-toe'
+      fullPath: '/games/tic-tac-toe'
+      preLoaderRoute: typeof GamesTicTacToeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/games/pipe-connect': {
@@ -1038,6 +1058,7 @@ const rootRouteChildren: RootRouteChildren = {
   GamesArrowPuzzleRoute: GamesArrowPuzzleRoute,
   GamesKnifeThrowerRoute: GamesKnifeThrowerRoute,
   GamesPipeConnectRoute: GamesPipeConnectRoute,
+  GamesTicTacToeRoute: GamesTicTacToeRoute,
   ProjectsIdRoute: ProjectsIdRoute,
   ProjectsNewRoute: ProjectsNewRoute,
   AdminIndexRoute: AdminIndexRoute,

@@ -24,6 +24,7 @@ export interface GameAnalytics {
     "2048": number;
     "memory-match": number;
     "knife-thrower": number;
+    "tic-tac-toe"?: number;
   };
   players: Record<string, RealPlayerRecord>;
 }
@@ -48,6 +49,7 @@ export function getGameAnalytics(): GameAnalytics {
       "2048": 0,
       "memory-match": 0,
       "knife-thrower": 0,
+      "tic-tac-toe": 0,
     },
     players: {},
   };
@@ -80,6 +82,10 @@ function mergeAnalytics(local: GameAnalytics, remote: GameAnalytics): GameAnalyt
     "knife-thrower": Math.max(
       local.gamePlayCounts?.["knife-thrower"] || 0,
       remote.gamePlayCounts?.["knife-thrower"] || 0,
+    ),
+    "tic-tac-toe": Math.max(
+      local.gamePlayCounts?.["tic-tac-toe"] || 0,
+      remote.gamePlayCounts?.["tic-tac-toe"] || 0,
     ),
   };
 
@@ -120,7 +126,7 @@ export async function fetchGlobalAnalyticsFromSupabase(): Promise<GameAnalytics 
 }
 
 export async function recordGameSession(
-  gameId: "arrow-puzzle" | "pipe-connect" | "2048" | "memory-match" | "knife-thrower",
+  gameId: "arrow-puzzle" | "pipe-connect" | "2048" | "memory-match" | "knife-thrower" | "tic-tac-toe",
   achievedScore: number = 0,
   levelReached: number = 1,
 ) {
@@ -156,6 +162,7 @@ export async function recordGameSession(
         "2048": 0,
         "memory-match": 0,
         "knife-thrower": 0,
+        "tic-tac-toe": 0,
       };
     }
     analytics.gamePlayCounts[gameId] = (analytics.gamePlayCounts[gameId] || 0) + 1;

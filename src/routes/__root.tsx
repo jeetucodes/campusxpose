@@ -207,46 +207,42 @@ function RootComponent() {
     }
   }, []);
 
-  // OneSignal Push Notification Setup for Median.co App
+  // Native Capacitor OneSignal Setup
   useEffect(() => {
     if (typeof window === "undefined") return;
+    
+    // Check if we are running in a Capacitor native environment
+    const isCapacitor = !!(window as any).Capacitor?.isNative;
 
-    const setupOneSignal = () => {
-      const median = (window as any).median || (window as any).gonative;
-      if (median && median.onesignal) {
-        // Prompt/register device for push notifications
-        median.onesignal.register();
+    const setupOneSignal = async () => {
+      try {
+        const { default: OneSignal } = await import('@onesignal/capacitor-plugin');
+        
+        OneSignal.initialize("99906f9e-9dd2-4000-b559-0185efddc600");
+        OneSignal.Notifications.requestPermission(true);
 
-        // Listen for Supabase auth state to map OneSignal Player ID to our User ID
         import("@/integrations/supabase/client").then(({ supabase }) => {
-          // Set initial session
           supabase.auth.getSession().then(({ data }) => {
             if (data.session?.user) {
-              median.onesignal.setExternalUserId({ externalId: data.session.user.id });
+              OneSignal.login(data.session.user.id);
             }
           });
 
-          // Listen for future login/logout events
           supabase.auth.onAuthStateChange((_event, session) => {
             if (session?.user) {
-              median.onesignal.setExternalUserId({ externalId: session.user.id });
+              OneSignal.login(session.user.id);
             } else {
-              // Wait, median.onesignal might not have removeExternalUserId natively exposed on all versions, 
-              // but it's safe to call if it exists. Alternatively setting it to empty.
-              if (median.onesignal.removeExternalUserId) {
-                median.onesignal.removeExternalUserId();
-              }
+              OneSignal.logout();
             }
           });
         });
+      } catch (e) {
+        console.error("OneSignal initialization failed", e);
       }
     };
 
-    if ((window as any).median || (window as any).gonative) {
+    if (isCapacitor) {
       setupOneSignal();
-    } else {
-      document.addEventListener("medianReady", setupOneSignal, { once: true });
-      document.addEventListener("GoNativeJSReady", setupOneSignal, { once: true });
     }
   }, []);
 
