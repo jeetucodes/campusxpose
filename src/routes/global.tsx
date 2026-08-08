@@ -341,7 +341,7 @@ function GlobalChat() {
                         )}
                         <div
                           className={cn(
-                            "relative w-fit max-w-full border-2 border-border px-3 py-2 text-sm shadow-ink-soft",
+                            "relative w-fit max-w-full border-2 border-border px-3 py-2 text-base shadow-ink-soft",
                             own ? "bg-accent text-accent-foreground" : "bg-white",
                           )}
                           style={{ borderRadius: "16px 6px 18px 6px / 6px 18px 6px 16px" }}
@@ -378,7 +378,7 @@ function GlobalChat() {
                           )}
                           <div className="flex flex-wrap items-end justify-end gap-x-2">
                             {m.content && (
-                              <span className="whitespace-pre-wrap break-all">
+                              <span className="whitespace-pre-wrap break-words font-bold">
                                 <Linkify text={m.content} />
                               </span>
                             )}

@@ -403,7 +403,7 @@ function Community() {
                             </div>
                           )}
                           {m.content && (
-                            <div className="whitespace-pre-wrap break-all leading-relaxed">
+                            <div className="whitespace-pre-wrap break-words leading-relaxed font-bold">
                               <Linkify text={m.content} />
                             </div>
                           )}

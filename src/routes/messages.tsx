@@ -1162,9 +1162,9 @@ function Messages() {
                             />
                             <div
                               className={cn(
-                                "relative w-fit max-w-full px-4 py-2.5 text-[15px] font-sans",
+                                "relative w-fit max-w-full px-4 py-2.5 text-[16px] font-sans",
                                 own
-                                  ? "bg-ink text-white wobbly-sm shadow-ink-soft"
+                                  ? "bg-blue-100 text-ink border-2 border-blue-300 wobbly-sm shadow-ink-soft sketch-card"
                                   : "bg-white text-ink border-2 border-ink wobbly-sm shadow-ink-soft sketch-card",
                               )}
                             >
@@ -1188,7 +1188,7 @@ function Messages() {
                               )}
                               <div className="flex flex-wrap items-end justify-end gap-x-2">
                                 {m.content && (
-                                  <span className="whitespace-pre-wrap break-all leading-relaxed">
+                                  <span className="whitespace-pre-wrap break-words leading-relaxed font-bold">
                                     <Linkify text={m.content} />
                                   </span>
                                 )}
