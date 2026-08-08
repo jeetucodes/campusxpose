@@ -207,14 +207,15 @@ function RootComponent() {
     }
   }, []);
 
-  // Native Capacitor OneSignal Setup
+  // OneSignal Setup for Capacitor, Web, and Median
   useEffect(() => {
     if (typeof window === "undefined") return;
     
-    // Check if we are running in a Capacitor native environment
+    // Check environments
     const isCapacitor = !!(window as any).Capacitor?.isNative;
+    const isMedian = /Median|gonative/i.test(navigator.userAgent) || !!(window as any).median;
 
-    const setupOneSignal = async () => {
+    const setupCapacitorOneSignal = async () => {
       try {
         const { default: OneSignal } = await import('@onesignal/capacitor-plugin');
         
@@ -237,12 +238,51 @@ function RootComponent() {
           });
         });
       } catch (e) {
-        console.error("OneSignal initialization failed", e);
+        console.error("OneSignal Capacitor initialization failed", e);
       }
     };
 
     if (isCapacitor) {
-      setupOneSignal();
+      setupCapacitorOneSignal();
+    } else if (isMedian) {
+      // Median (GoNative) Webview OneSignal Setup
+      import("@/integrations/supabase/client").then(({ supabase }) => {
+        supabase.auth.getSession().then(({ data }) => {
+          if (data.session?.user && (window as any).median?.onesignal?.setExternalUserId) {
+            (window as any).median.onesignal.setExternalUserId({ externalId: data.session.user.id });
+          }
+        });
+        
+        supabase.auth.onAuthStateChange((_event, session) => {
+          if (session?.user && (window as any).median?.onesignal?.setExternalUserId) {
+             (window as any).median.onesignal.setExternalUserId({ externalId: session.user.id });
+          } else if (!session?.user && (window as any).median?.onesignal?.removeExternalUserId) {
+             (window as any).median.onesignal.removeExternalUserId();
+          }
+        });
+      });
+    } else {
+      // Web OneSignal Setup
+      const OneSignalDeferred = (window as any).OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal: any) {
+        await OneSignal.Slidedown.promptPush();
+        
+        import("@/integrations/supabase/client").then(({ supabase }) => {
+          supabase.auth.getSession().then(({ data }) => {
+            if (data.session?.user) {
+              OneSignal.login(data.session.user.id);
+            }
+          });
+          
+          supabase.auth.onAuthStateChange((_event, session) => {
+            if (session?.user) {
+              OneSignal.login(session.user.id);
+            } else {
+              OneSignal.logout();
+            }
+          });
+        });
+      });
     }
   }, []);
 
