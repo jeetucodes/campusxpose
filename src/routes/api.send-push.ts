@@ -18,46 +18,23 @@ export const Route = createFileRoute("/api/send-push")({
         }
         if (!body?.payload?.title) return new Response("Missing payload", { status: 400 });
 
-        const supabaseAdmin = createClient(
-          process.env.SUPABASE_URL!,
-          process.env.SUPABASE_SERVICE_ROLE_KEY!,
-          { auth: { persistSession: false } },
-        );
+        const { sendOneSignalNotification } = await import("@/lib/onesignal.server");
 
-        let query = supabaseAdmin.from("push_subscriptions").select("id, endpoint, p256dh, auth");
-        if (!body.broadcast) {
-          const hashes = (body.user_hashes ?? []).filter(Boolean);
-          if (hashes.length === 0) return Response.json({ sent: 0, skipped: "no targets" });
-          query = query.in("user_hash", hashes);
-        }
-        const { data: subs, error } = await query;
-        if (error) return new Response(error.message, { status: 500 });
-        if (!subs || subs.length === 0) return Response.json({ sent: 0 });
+        const payload = {
+          title: body.payload.title,
+          message: body.payload.body || "",
+          url: body.payload.url,
+          broadcast: body.broadcast === true,
+          userIds: !body.broadcast ? (body.user_hashes ?? []).filter(Boolean) : undefined,
+        };
 
-        let sent = 0;
-        const stale: string[] = [];
-
-        const { sendPushMessage } = await import("@/lib/push.server");
-
-        await Promise.all(
-          subs.map(async (s) => {
-            const success = await sendPushMessage(
-              { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
-              body.payload,
-            );
-            if (success) {
-              sent++;
-            } else {
-              stale.push(s.id);
-            }
-          }),
-        );
-
-        if (stale.length > 0) {
-          await supabaseAdmin.from("push_subscriptions").delete().in("id", stale);
+        if (!payload.broadcast && (!payload.userIds || payload.userIds.length === 0)) {
+           return Response.json({ sent: 0, skipped: "no targets" });
         }
 
-        return Response.json({ sent, removed: stale.length });
+        const success = await sendOneSignalNotification(payload);
+
+        return Response.json({ sent: success ? 1 : 0 });
       },
     },
   },

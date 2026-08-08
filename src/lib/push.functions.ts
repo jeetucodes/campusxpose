@@ -52,7 +52,7 @@ export const notifyIncomingCall = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { sendPushMessage } = await import("./push.server");
+    const { sendOneSignalNotification } = await import("./onesignal.server");
 
     const { data: targetUser } = await supabaseAdmin
       .from("anon_users")
@@ -62,32 +62,12 @@ export const notifyIncomingCall = createServerFn({ method: "POST" })
 
     if (!targetUser?.user_hash) return { ok: false };
 
-    const { data: subs } = await supabaseAdmin
-      .from("push_subscriptions")
-      .select("*")
-      .eq("user_hash", targetUser.user_hash);
+    const success = await sendOneSignalNotification({
+      userIds: [targetUser.user_hash],
+      title: "Incoming Call! 📞",
+      message: `${data.callerUsername} is calling you on CampusXpose.`,
+      url: `/messages?to=${data.callerUsername}`,
+    });
 
-    if (!subs || subs.length === 0) return { ok: true, pushed: 0 };
-
-    let pushed = 0;
-    const stale: string[] = [];
-
-    for (const s of subs) {
-      const success = await sendPushMessage(
-        { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
-        {
-          title: "Incoming Call! 📞",
-          body: `${data.callerUsername} is calling you on CampusXpose.`,
-          url: `/messages?to=${data.callerUsername}`,
-        },
-      );
-      if (success) pushed++;
-      else stale.push(s.id);
-    }
-
-    if (stale.length > 0) {
-      await supabaseAdmin.from("push_subscriptions").delete().in("id", stale);
-    }
-
-    return { ok: true, pushed };
+    return { ok: true, pushed: success ? 1 : 0 };
   });
