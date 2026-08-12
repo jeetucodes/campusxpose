@@ -1,0 +1,20 @@
+{
+    "logs": [
+        {
+            "outputFile": "co.campusxpose.app-mergeDebugResources-47:/values-v16/values-v16.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\pc\\.gradle\\caches\\9.1.0\\transforms\\7ebe5394af115c37aef473a5b731c138\\workspace\\transformed\\appcompat-1.7.1\\res\\values-v16\\values-v16.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endLines": "5",
+                        "endColumns": "12",
+                        "endOffsets": "223"
+                    }
+                }
+            ]
+        }
+    ]
+}

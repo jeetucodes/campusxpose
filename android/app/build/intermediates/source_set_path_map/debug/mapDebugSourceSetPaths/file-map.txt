@@ -1,0 +1,58 @@
+co.campusxpose.app-lifecycle-runtime-2.6.2-0 C:\Users\pc\.gradle\caches\9.1.0\transforms\000743e4154106987c18e51d2a45fdcc\workspace\transformed\lifecycle-runtime-2.6.2\res
+co.campusxpose.app-annotation-experimental-1.4.1-1 C:\Users\pc\.gradle\caches\9.1.0\transforms\07d405a0f3e5695b21e41667f9815085\workspace\transformed\annotation-experimental-1.4.1\res
+co.campusxpose.app-emoji2-1.3.0-2 C:\Users\pc\.gradle\caches\9.1.0\transforms\0e8a27121f36b47e47590620f9b047f2\workspace\transformed\emoji2-1.3.0\res
+co.campusxpose.app-firebase-messaging-24.0.0-3 C:\Users\pc\.gradle\caches\9.1.0\transforms\1458aabbbac86e7c31906033b6af3bbb\workspace\transformed\firebase-messaging-24.0.0\res
+co.campusxpose.app-play-services-basement-18.3.0-4 C:\Users\pc\.gradle\caches\9.1.0\transforms\154ba4c8ed53500ccff7983cbb86b068\workspace\transformed\play-services-basement-18.3.0\res
+co.campusxpose.app-in-app-messages-5.9.8-5 C:\Users\pc\.gradle\caches\9.1.0\transforms\15b7a2f0658bf45666ba99b0a9ee6ac3\workspace\transformed\in-app-messages-5.9.8\res
+co.campusxpose.app-notifications-5.9.8-6 C:\Users\pc\.gradle\caches\9.1.0\transforms\1f363fc7d057ebd879369cb2fba18f4c\workspace\transformed\notifications-5.9.8\res
+co.campusxpose.app-lifecycle-runtime-ktx-2.6.2-7 C:\Users\pc\.gradle\caches\9.1.0\transforms\21b9e711d351400f41f05da352f955c0\workspace\transformed\lifecycle-runtime-ktx-2.6.2\res
+co.campusxpose.app-lifecycle-livedata-core-2.6.2-8 C:\Users\pc\.gradle\caches\9.1.0\transforms\27ba8ee7db279585978c4b89bff830c0\workspace\transformed\lifecycle-livedata-core-2.6.2\res
+co.campusxpose.app-location-5.9.8-9 C:\Users\pc\.gradle\caches\9.1.0\transforms\292ee443de6a81528a9eb0d014850d75\workspace\transformed\location-5.9.8\res
+co.campusxpose.app-savedstate-1.2.1-10 C:\Users\pc\.gradle\caches\9.1.0\transforms\2b7e2b7407810d7c1d557cbd72a239ee\workspace\transformed\savedstate-1.2.1\res
+co.campusxpose.app-webkit-1.14.0-11 C:\Users\pc\.gradle\caches\9.1.0\transforms\2b9802562feb81c975b0d9180fe1d551\workspace\transformed\webkit-1.14.0\res
+co.campusxpose.app-core-ktx-1.17.0-12 C:\Users\pc\.gradle\caches\9.1.0\transforms\3522f34815e48008912cde6ee62eefc1\workspace\transformed\core-ktx-1.17.0\res
+co.campusxpose.app-firebase-common-21.0.0-13 C:\Users\pc\.gradle\caches\9.1.0\transforms\3c008544f38267305b6c5668a2a519c0\workspace\transformed\firebase-common-21.0.0\res
+co.campusxpose.app-coordinatorlayout-1.3.0-14 C:\Users\pc\.gradle\caches\9.1.0\transforms\3f3b049621369df30806962468ba0520\workspace\transformed\coordinatorlayout-1.3.0\res
+co.campusxpose.app-profileinstaller-1.4.0-15 C:\Users\pc\.gradle\caches\9.1.0\transforms\3f9018b5451f0c09132d6a3be3f23c04\workspace\transformed\profileinstaller-1.4.0\res
+co.campusxpose.app-startup-runtime-1.2.0-16 C:\Users\pc\.gradle\caches\9.1.0\transforms\42781a36adc4f8e588325c7bd8302d51\workspace\transformed\startup-runtime-1.2.0\res
+co.campusxpose.app-lifecycle-service-2.6.2-17 C:\Users\pc\.gradle\caches\9.1.0\transforms\5e7e4d44fe788f6a6b4b5c618731c2c3\workspace\transformed\lifecycle-service-2.6.2\res
+co.campusxpose.app-lifecycle-viewmodel-ktx-2.6.2-18 C:\Users\pc\.gradle\caches\9.1.0\transforms\6288b3bfc57373440ae7ace71a76ce5b\workspace\transformed\lifecycle-viewmodel-ktx-2.6.2\res
+co.campusxpose.app-fragment-1.8.9-19 C:\Users\pc\.gradle\caches\9.1.0\transforms\62f153a1a6e8f478e3e8d8edbee8ac06\workspace\transformed\fragment-1.8.9\res
+co.campusxpose.app-emoji2-views-helper-1.3.0-20 C:\Users\pc\.gradle\caches\9.1.0\transforms\70ca310b83fc57737e07362eca9b1cc8\workspace\transformed\emoji2-views-helper-1.3.0\res
+co.campusxpose.app-appcompat-resources-1.7.1-21 C:\Users\pc\.gradle\caches\9.1.0\transforms\7351aa14ea81430cf00a5616c15c9d5f\workspace\transformed\appcompat-resources-1.7.1\res
+co.campusxpose.app-activity-1.11.0-22 C:\Users\pc\.gradle\caches\9.1.0\transforms\75f6bad49eb3f89bbef530ac99e404bc\workspace\transformed\activity-1.11.0\res
+co.campusxpose.app-lifecycle-process-2.6.2-23 C:\Users\pc\.gradle\caches\9.1.0\transforms\77c5b3efc2e785923d628398d3937bfb\workspace\transformed\lifecycle-process-2.6.2\res
+co.campusxpose.app-core-5.9.8-24 C:\Users\pc\.gradle\caches\9.1.0\transforms\77e37365128e7f2b6630dd58ae2b1300\workspace\transformed\core-5.9.8\res
+co.campusxpose.app-tracing-1.2.0-25 C:\Users\pc\.gradle\caches\9.1.0\transforms\7864d49742e6b0740bb45be02e683a99\workspace\transformed\tracing-1.2.0\res
+co.campusxpose.app-sqlite-2.3.0-26 C:\Users\pc\.gradle\caches\9.1.0\transforms\79916b18afc0b765c16a7d6b8d44fe2b\workspace\transformed\sqlite-2.3.0\res
+co.campusxpose.app-room-runtime-2.5.0-27 C:\Users\pc\.gradle\caches\9.1.0\transforms\7b6479e34e706f34ee77518f3be08338\workspace\transformed\room-runtime-2.5.0\res
+co.campusxpose.app-appcompat-1.7.1-28 C:\Users\pc\.gradle\caches\9.1.0\transforms\7ebe5394af115c37aef473a5b731c138\workspace\transformed\appcompat-1.7.1\res
+co.campusxpose.app-lifecycle-viewmodel-savedstate-2.6.2-29 C:\Users\pc\.gradle\caches\9.1.0\transforms\7f080623d3939da8a0325442519f8356\workspace\transformed\lifecycle-viewmodel-savedstate-2.6.2\res
+co.campusxpose.app-core-runtime-2.2.0-30 C:\Users\pc\.gradle\caches\9.1.0\transforms\93efd6b3520991a46c75ec8090c71fa0\workspace\transformed\core-runtime-2.2.0\res
+co.campusxpose.app-cardview-1.0.0-31 C:\Users\pc\.gradle\caches\9.1.0\transforms\b1bef35179170da290272709c8b1b1f4\workspace\transformed\cardview-1.0.0\res
+co.campusxpose.app-core-1.17.0-32 C:\Users\pc\.gradle\caches\9.1.0\transforms\b202f1568d8b995c7c03efbdb9f98f83\workspace\transformed\core-1.17.0\res
+co.campusxpose.app-core-viewtree-1.0.0-33 C:\Users\pc\.gradle\caches\9.1.0\transforms\b35da74e18c4c7a2ee6fe283830eed05\workspace\transformed\core-viewtree-1.0.0\res
+co.campusxpose.app-core-splashscreen-1.0.1-34 C:\Users\pc\.gradle\caches\9.1.0\transforms\ba394c623b1145972ffe626ceacbb628\workspace\transformed\core-splashscreen-1.0.1\res
+co.campusxpose.app-savedstate-ktx-1.2.1-35 C:\Users\pc\.gradle\caches\9.1.0\transforms\c63372599350f82b74a2649d77e546a8\workspace\transformed\savedstate-ktx-1.2.1\res
+co.campusxpose.app-play-services-base-18.0.1-36 C:\Users\pc\.gradle\caches\9.1.0\transforms\cc814a3301e676c8aa9bfcc86d818333\workspace\transformed\play-services-base-18.0.1\res
+co.campusxpose.app-lifecycle-livedata-2.6.2-37 C:\Users\pc\.gradle\caches\9.1.0\transforms\dd4805cc0beaf502949aaaba0ebdb54b\workspace\transformed\lifecycle-livedata-2.6.2\res
+co.campusxpose.app-work-runtime-2.8.1-38 C:\Users\pc\.gradle\caches\9.1.0\transforms\e232b14927cc42b14a32eb9ca534f6a3\workspace\transformed\work-runtime-2.8.1\res
+co.campusxpose.app-activity-ktx-1.11.0-39 C:\Users\pc\.gradle\caches\9.1.0\transforms\e249e408cee96f0bf786209b4fdee0bd\workspace\transformed\activity-ktx-1.11.0\res
+co.campusxpose.app-constraintlayout-2.2.0-40 C:\Users\pc\.gradle\caches\9.1.0\transforms\ea8599afb853c7d8e2977626b9d35847\workspace\transformed\constraintlayout-2.2.0\res
+co.campusxpose.app-browser-1.3.0-41 C:\Users\pc\.gradle\caches\9.1.0\transforms\f4865e03fd3e1ac4d63b7deb3cea2035\workspace\transformed\browser-1.3.0\res
+co.campusxpose.app-lifecycle-viewmodel-2.6.2-42 C:\Users\pc\.gradle\caches\9.1.0\transforms\f799ec159dc9106d97d0c823cb4635c4\workspace\transformed\lifecycle-viewmodel-2.6.2\res
+co.campusxpose.app-sqlite-framework-2.3.0-43 C:\Users\pc\.gradle\caches\9.1.0\transforms\f7f30e7ad220aa79065a487096a9202c\workspace\transformed\sqlite-framework-2.3.0\res
+co.campusxpose.app-work-runtime-ktx-2.8.1-44 C:\Users\pc\.gradle\caches\9.1.0\transforms\fe4512825d95c851c3073478552db084\workspace\transformed\work-runtime-ktx-2.8.1\res
+co.campusxpose.app-pngs-45 C:\Users\pc\Desktop\Campusxpose app\android\app\build\generated\res\pngs\debug
+co.campusxpose.app-resValues-46 C:\Users\pc\Desktop\Campusxpose app\android\app\build\generated\res\resValues\debug
+co.campusxpose.app-updated_navigation_xml-47 C:\Users\pc\Desktop\Campusxpose app\android\app\build\generated\updated_navigation_xml\debug
+co.campusxpose.app-packageDebugResources-48 C:\Users\pc\Desktop\Campusxpose app\android\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+co.campusxpose.app-packageDebugResources-49 C:\Users\pc\Desktop\Campusxpose app\android\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+co.campusxpose.app-debug-50 C:\Users\pc\Desktop\Campusxpose app\android\app\build\intermediates\merged_res\debug\mergeDebugResources
+co.campusxpose.app-debug-51 C:\Users\pc\Desktop\Campusxpose app\android\app\src\debug\res
+co.campusxpose.app-main-52 C:\Users\pc\Desktop\Campusxpose app\android\app\src\main\res
+co.campusxpose.app-debug-53 C:\Users\pc\Desktop\Campusxpose app\android\capacitor-cordova-android-plugins\build\intermediates\packaged_res\debug\packageDebugResources
+co.campusxpose.app-debug-54 C:\Users\pc\Desktop\Campusxpose app\node_modules\@capacitor\android\capacitor\build\intermediates\packaged_res\debug\packageDebugResources
+co.campusxpose.app-debug-55 C:\Users\pc\Desktop\Campusxpose app\node_modules\@capacitor\local-notifications\android\build\intermediates\packaged_res\debug\packageDebugResources
+co.campusxpose.app-debug-56 C:\Users\pc\Desktop\Campusxpose app\node_modules\@capgo\capacitor-proximity\android\build\intermediates\packaged_res\debug\packageDebugResources
+co.campusxpose.app-debug-57 C:\Users\pc\Desktop\Campusxpose app\node_modules\@onesignal\capacitor-plugin\android\build\intermediates\packaged_res\debug\packageDebugResources

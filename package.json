@@ -12,6 +12,8 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/local-notifications": "^8.2.1",
     "@capgo/capacitor-proximity": "^8.1.9",
     "@fontsource/inter": "^5.2.8",
     "@fontsource/kalam": "^5.2.8",

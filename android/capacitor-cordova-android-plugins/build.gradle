@@ -52,7 +52,6 @@ dependencies {
 
 // PLUGIN GRADLE EXTENSIONS START
 apply from: "cordova.variables.gradle"
-apply from: "../../node_modules/onesignal-cordova-plugin/build-extras-onesignal.gradle"
 // PLUGIN GRADLE EXTENSIONS END
 
 for (def func : cdvPluginPostBuildExtras) {

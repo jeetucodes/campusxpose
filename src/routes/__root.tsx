@@ -227,6 +227,36 @@ function RootComponent() {
             OneSignal.login(hashedId);
           });
         });
+
+        // Trigger Welcome Local Notification on First App Launch
+        try {
+          const { LocalNotifications } = await import('@capacitor/local-notifications');
+          const hasShownWelcome = localStorage.getItem('welcome_notification_shown');
+          
+          if (!hasShownWelcome) {
+            let permStatus = await LocalNotifications.checkPermissions();
+            if (permStatus.display !== 'granted') {
+              permStatus = await LocalNotifications.requestPermissions();
+            }
+            
+            if (permStatus.display === 'granted') {
+              await LocalNotifications.schedule({
+                notifications: [
+                  {
+                    title: "Welcome to Campusxpose! 🎉",
+                    body: "Thanks for downloading the app. Start exploring your campus now!",
+                    id: 1,
+                    schedule: { at: new Date(Date.now() + 1000 * 5) }, // 5 seconds from now
+                  }
+                ]
+              });
+              localStorage.setItem('welcome_notification_shown', 'true');
+            }
+          }
+        } catch (localNotifError) {
+          console.error("Local notification scheduling failed", localNotifError);
+        }
+
       } catch (e) {
         console.error("OneSignal Capacitor initialization failed", e);
       }

@@ -1,1 +1,0 @@
-import{At as e,Tn as t}from"./index-yoH-JVgR.js";function n(){let n=t({queryKey:[`verified-usernames`],queryFn:()=>e(),staleTime:30*1e3});return new Set(n.data?.usernames??[])}export{n as t};

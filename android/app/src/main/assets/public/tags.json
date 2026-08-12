@@ -1,0 +1,43 @@
+{
+  "sections": [
+    {
+      "name": "General",
+      "items": [
+        {
+          "name": "Important Announcements",
+          "identifier": "announcements"
+        },
+        {
+          "name": "Campus News",
+          "identifier": "news"
+        }
+      ]
+    },
+    {
+      "name": "Social",
+      "items": [
+        {
+          "name": "Confessions",
+          "identifier": "confessions"
+        },
+        {
+          "name": "New Posts",
+          "identifier": "posts"
+        },
+        {
+          "name": "Colleges Updates",
+          "identifier": "colleges"
+        }
+      ]
+    },
+    {
+      "name": "Entertainment",
+      "items": [
+        {
+          "name": "Arcade & Games",
+          "identifier": "games"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "co.campusxpose.app-debug-49:/xml_config.xml.flat",
+        "source": "co.campusxpose.app-main-51:/xml/config.xml"
+    },
+    {
+        "merged": "co.campusxpose.app-debug-49:/xml_file_paths.xml.flat",
+        "source": "co.campusxpose.app-main-51:/xml/file_paths.xml"
+    }
+]

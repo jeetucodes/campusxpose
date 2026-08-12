@@ -343,7 +343,7 @@ function Community() {
                   {!own && <UserSymbol username={m.username} size="sm" />}
                   <div
                     className={cn(
-                      "group/msg flex max-w-[80%] flex-col gap-0",
+                      "group/msg flex max-w-[80%] min-w-0 flex-col gap-0",
                       own ? "items-end" : "items-start",
                     )}
                   >
@@ -369,7 +369,7 @@ function Community() {
                         />
                         <div
                           className={cn(
-                            "relative rounded-2xl px-3.5 py-2.5 text-sm shadow-sm",
+                            "relative min-w-0 rounded-2xl px-3.5 py-2.5 text-sm shadow-sm",
                             own
                               ? "rounded-br-md bg-primary text-primary-foreground shadow-primary/15"
                               : "rounded-bl-md border border-border bg-surface",

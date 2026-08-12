@@ -1,0 +1,1 @@
+import{On as e,jt as t}from"./index-cB4EQfLF.js";function n(){let n=e({queryKey:[`verified-usernames`],queryFn:()=>t(),staleTime:30*1e3});return new Set(n.data?.usernames??[])}export{n as t};

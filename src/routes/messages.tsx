@@ -1136,7 +1136,7 @@ function Messages() {
                     >
                       <div
                         className={cn(
-                          "flex max-w-[85%] flex-col gap-0",
+                          "flex max-w-[85%] min-w-0 flex-col gap-0",
                           own ? "items-end" : "items-start",
                         )}
                       >
@@ -1162,7 +1162,7 @@ function Messages() {
                             />
                             <div
                               className={cn(
-                                "relative w-fit max-w-full px-4 py-2.5 text-[16px] font-sans",
+                                "relative min-w-0 w-fit max-w-full px-4 py-2.5 text-[16px] font-sans",
                                 own
                                   ? "bg-blue-100 text-ink border-2 border-blue-300 wobbly-sm shadow-ink-soft sketch-card"
                                   : "bg-white text-ink border-2 border-ink wobbly-sm shadow-ink-soft sketch-card",
@@ -1188,14 +1188,14 @@ function Messages() {
                               )}
                               <div className="flex flex-wrap items-end justify-end gap-x-2">
                                 {m.content && (
-                                  <span className="whitespace-pre-wrap break-words leading-relaxed font-bold">
+                                  <span className="min-w-0 whitespace-pre-wrap break-words leading-relaxed font-bold flex-1">
                                     <Linkify text={m.content} />
                                   </span>
                                 )}
                                 <span
                                   className={cn(
                                     "shrink-0 text-[10px] ml-2 font-medium relative top-1",
-                                    own ? "text-white/50" : "text-ink/30",
+                                    own ? "text-ink/50" : "text-ink/30",
                                   )}
                                 >
                                   {formatTime(m.created_at)}
