@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { ShoppingCart, Plus, Trash2, Edit, Loader2, RefreshCw, Upload } from "lucide-react";
+import { ShoppingCart, Plus, Trash2, Edit, Loader2, RefreshCw, Upload, ArrowRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { uploadToImgbb } from "@/lib/upload";
 
@@ -56,6 +56,7 @@ type Product = {
   description: string;
   is_hot_deal: boolean;
   buy_url: string;
+  images?: string[];
 };
 
 type Category = {
@@ -76,6 +77,10 @@ type Banner = {
   badge_bg_class: string;
   badge_text_class: string;
   badge_border_class: string;
+  button_text?: string;
+  button_link?: string;
+  target_product_id?: string;
+  title_size?: string;
 };
 
 function AdminStoreManagement() {
@@ -154,7 +159,20 @@ function ProductsTab() {
     if (prodRes.error) {
       toast.error("Failed to load products");
     } else {
-      setProducts(prodRes.data || []);
+      const sanitized = (prodRes.data || []).map((p: any) => {
+        if (typeof p.images === 'string') {
+          try { p.images = JSON.parse(p.images); }
+          catch {
+            if (p.images.startsWith('{') && p.images.endsWith('}')) {
+              p.images = p.images.slice(1, -1).split(',').map((s: string) => s.replace(/(^"|"$)/g, '').trim()).filter(Boolean);
+            } else {
+              p.images = [p.images];
+            }
+          }
+        }
+        return p;
+      });
+      setProducts(sanitized);
       setCategories(catRes.data || []);
     }
     setLoading(false);
@@ -164,19 +182,38 @@ function ProductsTab() {
     fetchProducts();
   }, []);
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: string, isMultiple = false) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
     setUploadingImage(true);
     try {
-      const url = await uploadToImgbb(file);
-      setFormData(prev => ({ ...prev, [field]: url }));
-      toast.success("Image uploaded successfully!");
+      if (isMultiple) {
+        const uploadedUrls = [];
+        for (let i = 0; i < files.length; i++) {
+          const url = await uploadToImgbb(files[i]);
+          uploadedUrls.push(url);
+        }
+        setFormData(prev => ({ 
+          ...prev, 
+          images: [...(prev.images || []), ...uploadedUrls] 
+        }));
+      } else {
+        const url = await uploadToImgbb(files[0]);
+        setFormData(prev => ({ ...prev, [field]: url }));
+      }
+      toast.success("Image(s) uploaded successfully!");
     } catch (err: any) {
-      toast.error(err.message || "Failed to upload image");
+      toast.error(err.message || "Failed to upload image(s)");
     } finally {
       setUploadingImage(false);
     }
+  };
+
+  const removeImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images?.filter((_, i) => i !== index)
+    }));
   };
 
   const handleSave = async () => {
@@ -247,7 +284,7 @@ function ProductsTab() {
                 <div className="sm:col-span-2"><label className="text-sm font-bold">Description</label><Textarea value={formData.description || ''} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Product details..." /></div>
                 <div>
                   <label className="text-sm font-bold flex justify-between">
-                    Product Image
+                    Primary Image
                     {uploadingImage && <Loader2 className="w-4 h-4 animate-spin text-green-600" />}
                   </label>
                   <div className="flex gap-2">
@@ -255,6 +292,28 @@ function ProductsTab() {
                     <label className="flex items-center justify-center bg-white hover:bg-gray-100 border-2 border-gray-900 rounded px-3 cursor-pointer transition-colors" title="Upload to ImgBB">
                       <Upload className="w-4 h-4" />
                       <input type="file" accept="image/*" className="hidden" onChange={e => handleImageUpload(e, 'icon_url')} disabled={uploadingImage} />
+                    </label>
+                  </div>
+                </div>
+                <div className="sm:col-span-2 mt-2">
+                  <label className="text-sm font-bold flex justify-between">
+                    Additional Gallery Images
+                  </label>
+                  <div className="mt-2 flex flex-wrap gap-3">
+                    {formData.images?.map((img, i) => (
+                      <div key={i} className="relative group w-16 h-16 rounded-md border-2 border-gray-900 overflow-hidden bg-gray-50">
+                        <img src={img} className="w-full h-full object-contain" />
+                        <button 
+                          onClick={() => removeImage(i)}
+                          className="absolute top-1 right-1 bg-red-500 text-white p-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                    <label className="w-16 h-16 flex flex-col items-center justify-center bg-gray-50 hover:bg-gray-100 border-2 border-dashed border-gray-400 rounded-md cursor-pointer transition-colors">
+                      <Plus className="w-5 h-5 text-gray-500" />
+                      <input type="file" accept="image/*" multiple className="hidden" onChange={e => handleImageUpload(e, 'images', true)} disabled={uploadingImage} />
                     </label>
                   </div>
                 </div>
@@ -437,6 +496,7 @@ function CategoriesTab() {
 function BannersTab() {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -445,13 +505,15 @@ function BannersTab() {
 
   const fetchBanners = async () => {
     setLoading(true);
-    const [banRes, catRes] = await Promise.all([
+    const [banRes, catRes, prodRes] = await Promise.all([
       (supabase as any).from('store_banners').select('*').order('created_at', { ascending: false }),
-      (supabase as any).from('store_categories').select('*').order('name', { ascending: true })
+      (supabase as any).from('store_categories').select('*').order('name', { ascending: true }),
+      (supabase as any).from('store_products').select('*').order('name', { ascending: true })
     ]);
     if (!banRes.error) {
       setBanners(banRes.data || []);
       setCategories(catRes.data || []);
+      setProducts(prodRes.data || []);
     }
     setLoading(false);
   };
@@ -507,7 +569,47 @@ function BannersTab() {
       {showAdd && (
         <div className="bg-white p-6 border-2 border-gray-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" style={{ borderRadius: WOBBLY_MD }}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div><label className="text-sm font-bold">Title</label><Input value={formData.title || ''} onChange={e => setFormData({...formData, title: e.target.value})} placeholder="Laptops & Tabs" /></div>
+            <div>
+              <label className="text-sm font-bold flex justify-between">Title</label>
+              <Input value={formData.title || ''} onChange={e => setFormData({...formData, title: e.target.value})} placeholder="Laptops & Tabs" />
+            </div>
+            <div>
+              <label className="text-sm font-bold block mb-1">Mobile Title Size</label>
+              <select 
+                value={(formData.title_size || 'text-xl sm:text-2xl').split(' ')[0]} 
+                onChange={e => {
+                  const currentDesktop = (formData.title_size || 'text-xl sm:text-2xl').split(' ').find(c => c.startsWith('sm:')) || 'sm:text-2xl';
+                  setFormData({...formData, title_size: `${e.target.value} ${currentDesktop}`});
+                }} 
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="text-lg">Small</option>
+                <option value="text-xl">Normal</option>
+                <option value="text-2xl">Large</option>
+                <option value="text-3xl">Extra Large</option>
+                <option value="text-4xl">Huge</option>
+                <option value="text-5xl">Massive</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-bold block mb-1">Desktop Title Size</label>
+              <select 
+                value={(formData.title_size || 'text-xl sm:text-2xl').split(' ').find(c => c.startsWith('sm:'))?.replace('sm:', '') || 'text-2xl'} 
+                onChange={e => {
+                  const currentMobile = (formData.title_size || 'text-xl sm:text-2xl').split(' ')[0] || 'text-xl';
+                  setFormData({...formData, title_size: `${currentMobile} sm:${e.target.value}`});
+                }} 
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="text-xl">Small</option>
+                <option value="text-2xl">Normal</option>
+                <option value="text-3xl">Large</option>
+                <option value="text-4xl">Extra Large</option>
+                <option value="text-5xl">Huge</option>
+                <option value="text-6xl">Massive</option>
+                <option value="text-7xl">Gigantic</option>
+              </select>
+            </div>
             <div>
               <label className="text-sm font-bold">Linked Category</label>
               <select 
@@ -532,6 +634,22 @@ function BannersTab() {
                   <input type="file" accept="image/*" className="hidden" onChange={e => handleImageUpload(e, 'image_url')} disabled={uploadingImage} />
                 </label>
               </div>
+            </div>
+            
+            {/* Button Settings */}
+            <div><label className="text-sm font-bold">Button Text</label><Input value={formData.button_text || ''} onChange={e => setFormData({...formData, button_text: e.target.value})} placeholder="Shop Now" /></div>
+            <div><label className="text-sm font-bold">Button Link URL</label><Input value={formData.button_link || ''} onChange={e => setFormData({...formData, button_link: e.target.value})} placeholder="Optional external link" /></div>
+            
+            <div className="sm:col-span-2">
+              <label className="text-sm font-bold block mb-1">Target Product (Optional)</label>
+              <select 
+                value={formData.target_product_id || ''} 
+                onChange={e => setFormData({...formData, target_product_id: e.target.value})} 
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="">None (Link opens category)</option>
+                {products.map(p => <option key={p.id} value={p.id}>{p.name} - ₹{p.price}</option>)}
+              </select>
             </div>
             
             <div className="sm:col-span-2">
@@ -567,6 +685,45 @@ function BannersTab() {
                 <div><label className="text-xs font-bold text-gray-600">Badge Border Class</label><Input className="h-8 text-xs" value={formData.badge_border_class || ''} onChange={e => setFormData({...formData, badge_border_class: e.target.value})} placeholder="border-blue-900" /></div>
               </div>
             </details>
+
+            {/* Live Preview */}
+            <div className="sm:col-span-2 mt-2 border-2 border-gray-200 p-4 rounded-xl relative overflow-hidden bg-white">
+              <div className="font-bold text-gray-400 mb-3 text-xs uppercase tracking-wider flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                Live Preview
+              </div>
+              <div className={`relative w-full rounded-[20px] overflow-hidden ${formData.bg_class || 'bg-gradient-to-br from-emerald-50 via-teal-50 to-green-100'} p-6 min-h-[180px] flex items-center transition-colors duration-500 shadow-sm border border-black/5`}>
+                <div className="flex justify-between items-center w-full relative z-10">
+                  <div className="flex flex-col items-start max-w-[60%]">
+                    {formData.badge_text && (
+                      <span className={`${formData.badge_bg_class || 'bg-green-100'} ${formData.badge_text_class || 'text-green-700'} ${formData.badge_border_class ? `border ${formData.badge_border_class}` : ''} text-[10px] font-bold px-2.5 py-1 rounded-full mb-2`}>
+                        {formData.badge_text}
+                      </span>
+                    )}
+                    <h2 className={`${formData.title_size || 'text-xl sm:text-2xl'} font-bold ${formData.text_class || 'text-[#0e2a47]'} mb-1 leading-tight`}>
+                      {formData.title || 'Banner Title'}
+                    </h2>
+                    <p className={`text-xs sm:text-sm font-medium mb-4 ${formData.text_class ? formData.text_class.replace('text-', 'text-opacity-80 text-') : 'text-gray-600'}`}>
+                      {formData.category || 'Category Name'}
+                    </p>
+                    <button className={`text-white text-[11px] font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 ${formData.text_class ? formData.text_class.replace('text-', 'bg-') : 'bg-[#0e2a47]'}`}>
+                      {formData.button_text || 'Shop Now'}
+                      <span className={`bg-white rounded-full p-0.5 w-4 h-4 flex items-center justify-center ${formData.text_class || 'text-[#0e2a47]'}`}>
+                        <ArrowRight className="w-2 h-2" />
+                      </span>
+                    </button>
+                  </div>
+                  <div className="w-[35%] flex justify-end">
+                    {formData.image_url ? (
+                      <img src={formData.image_url} alt="Preview" className="w-full max-w-[120px] object-contain transform -rotate-6 mix-blend-multiply drop-shadow-xl" />
+                    ) : (
+                      <div className="w-20 h-20 bg-black/5 rounded-xl flex items-center justify-center text-[10px] font-bold text-black/30 border border-dashed border-black/20">IMAGE</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
           <Button onClick={handleSave} disabled={uploadingImage} className="mt-6 w-full gap-2 border-2 border-gray-900 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] bg-yellow-300 text-yellow-900 hover:bg-yellow-400 font-black">Save Banner</Button>
         </div>

@@ -37,6 +37,8 @@ export const runStoreMigration = createServerFn({ method: "GET" }).handler(async
           badge_bg_class text,
           badge_text_class text,
           badge_border_class text,
+          button_text text,
+          button_link text,
           created_at timestamp default now()
         )`,
     },
@@ -113,6 +115,10 @@ export const runStoreMigration = createServerFn({ method: "GET" }).handler(async
           if not exists (select 1 from pg_policies where tablename='store_products' and policyname='allow_all_write_products') then
             create policy allow_all_write_products on store_products for all using (true) with check (true);
           end if; end $$`,
+    },
+    {
+      name: "Add button fields to store_banners",
+      sql: `alter table store_banners add column if not exists button_text text; alter table store_banners add column if not exists button_link text;`
     }
   ];
 

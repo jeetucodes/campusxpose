@@ -18,6 +18,10 @@ CREATE TABLE IF NOT EXISTS store_banners (
   badge_bg_class text,
   badge_text_class text,
   badge_border_class text,
+  button_text text,
+  button_link text,
+  target_product_id uuid REFERENCES store_products(id) ON DELETE SET NULL,
+  title_size text,
   created_at timestamp DEFAULT now()
 );
 
@@ -29,6 +33,7 @@ CREATE TABLE IF NOT EXISTS store_products (
   original_price text,
   time text,
   icon_url text,
+  images text[],
   platform text,
   category text,
   description text,
@@ -78,3 +83,9 @@ INSERT INTO store_banners (title, category, badge_text, image_url, bg_class, tex
 ('Midnight Snacks', 'Snacks', 'Delivery in 10 mins', '/shop/cat_snacks_1786624546251.png', 'bg-orange-50', 'text-orange-900', 'bg-orange-200', 'text-orange-700', 'border-orange-900'),
 ('Study Books', 'Study', 'Semester Prep', '/shop/cat_study_1786624743210.png', 'bg-purple-50', 'text-purple-900', 'bg-purple-200', 'text-purple-700', 'border-purple-900'),
 ('Audio Gear', 'Audio', 'Noise Cancelling', '/shop/cat_audio_1786624820961.png', 'bg-green-50', 'text-green-900', 'bg-green-200', 'text-green-700', 'border-green-900');
+
+-- Run these if upgrading existing tables:
+-- ALTER TABLE store_banners ADD COLUMN IF NOT EXISTS button_text text;
+-- ALTER TABLE store_banners ADD COLUMN IF NOT EXISTS button_link text;
+-- ALTER TABLE store_banners ADD COLUMN IF NOT EXISTS target_product_id uuid REFERENCES store_products(id) ON DELETE SET NULL;
+-- ALTER TABLE store_banners ADD COLUMN IF NOT EXISTS title_size text;
