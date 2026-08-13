@@ -1237,12 +1237,24 @@ export const adminGetFeatures = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: setting } = await supabaseAdmin
-      .from("app_settings" as any)
-      .select("value")
-      .eq("key", "projects_enabled")
-      .maybeSingle();
-    return { projectsEnabled: (setting as any)?.value === true };
+    
+    const [projectsSetting, storeSetting] = await Promise.all([
+      supabaseAdmin
+        .from("app_settings" as any)
+        .select("value")
+        .eq("key", "projects_enabled")
+        .maybeSingle(),
+      supabaseAdmin
+        .from("app_settings" as any)
+        .select("value")
+        .eq("key", "store_enabled")
+        .maybeSingle()
+    ]);
+      
+    return { 
+      projectsEnabled: (projectsSetting.data as any)?.value === true,
+      storeEnabled: (storeSetting.data as any)?.value !== false // Default to true if not set
+    };
   });
 
 export const adminSetFeature = createServerFn({ method: "POST" })

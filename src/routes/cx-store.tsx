@@ -9,11 +9,11 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-export const Route = createFileRoute("/shop")({
+export const Route = createFileRoute("/cx-store")({
   head: () => ({
     meta: [{ title: "CX Store | CampusXpose" }],
   }),
-  component: ModernShop,
+  component: CXStore,
 });
 
 type Product = {
@@ -68,7 +68,7 @@ const categoryColors = [
   "bg-green-50",
 ];
 
-function ModernShop() {
+function CXStore() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -287,13 +287,12 @@ function ModernShop() {
             <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
           </div>
           <h2 className="text-2xl font-black text-gray-900 mb-2">This page didn't load</h2>
-          <p className="text-gray-500 mb-4 max-w-sm mx-auto">Something went wrong on our end. You can try refreshing or head back home.</p>
+          <p className="text-gray-500 mb-4 max-w-sm mx-auto">Something went wrong on our end. You can try refreshing.</p>
           <div className="bg-red-50 text-red-800 text-xs p-3 rounded-xl mb-8 max-w-sm w-full font-mono break-words border border-red-100">
             {hasError}
           </div>
-          <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
+          <div className="flex flex-col gap-3 w-full max-w-xs">
             <button onClick={() => window.location.reload()} className="flex-1 bg-[#0e2a47] text-white font-bold py-3 rounded-xl hover:bg-[#1a426e] transition-colors">Try again</button>
-            <button onClick={() => window.history.back()} className="flex-1 bg-white border border-gray-200 text-gray-900 font-bold py-3 rounded-xl hover:bg-gray-50 transition-colors">Go home</button>
           </div>
         </div>
       </SiteShell>
@@ -577,9 +576,6 @@ function ModernShop() {
           <header className="px-4 py-4 sticky top-0 z-40 bg-white">
             <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <button onClick={() => window.history.back()} className="w-10 h-10 border border-gray-200 rounded-xl flex items-center justify-center text-gray-700 hover:bg-gray-50">
-                  <ArrowLeft className="w-5 h-5" />
-                </button>
                 <div className="font-black text-2xl tracking-tight text-[#0e2a47] flex items-center gap-1.5">
                   CX <span className="bg-[#ffd814] px-2 py-0.5 rounded-lg text-black">Store</span>
                 </div>

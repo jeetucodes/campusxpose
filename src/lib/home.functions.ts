@@ -35,6 +35,7 @@ export type HomeData = {
   }>;
   site_settings?: {
     news_enabled: boolean;
+    store_enabled: boolean;
   };
 };
 
@@ -89,6 +90,7 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(
       recent,
       users,
       newsRows,
+      storeSetting,
       siteSettingsRows,
     ] = await Promise.all([
       supabase.from("colleges").select("*", { count: "exact", head: true }),
@@ -109,6 +111,11 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(
         .select("id, text, link_url, image_url, created_at, upvotes, comment_count")
         .eq("is_active", true)
         .order("created_at", { ascending: false }),
+      supabase
+        .from("app_settings" as any)
+        .select("value")
+        .eq("key", "store_enabled")
+        .maybeSingle(),
       supabase
         .from("site_settings" as any)
         .select("*")
@@ -165,8 +172,14 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(
         comment_count: n.comment_count || 0,
       })),
       site_settings: siteSettingsRows?.data
-        ? { news_enabled: siteSettingsRows.data.news_enabled }
-        : { news_enabled: true },
+        ? { 
+            news_enabled: siteSettingsRows.data.news_enabled,
+            store_enabled: storeSetting?.data?.value !== false,
+          }
+        : { 
+            news_enabled: true,
+            store_enabled: true,
+          },
     };
   },
 );

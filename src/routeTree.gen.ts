@@ -23,6 +23,7 @@ import { Route as NewsRouteImport } from './routes/news'
 import { Route as MyReportsRouteImport } from './routes/my-reports'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as GlobalRouteImport } from './routes/global'
+import { Route as CxStoreRouteImport } from './routes/cx-store'
 import { Route as ConfessionsRouteImport } from './routes/confessions'
 import { Route as ConfessRouteImport } from './routes/confess'
 import { Route as IndexRouteImport } from './routes/index'
@@ -131,6 +132,11 @@ const MessagesRoute = MessagesRouteImport.update({
 const GlobalRoute = GlobalRouteImport.update({
   id: '/global',
   path: '/global',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CxStoreRoute = CxStoreRouteImport.update({
+  id: '/cx-store',
+  path: '/cx-store',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConfessionsRoute = ConfessionsRouteImport.update({
@@ -333,6 +339,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/confess': typeof ConfessRoute
   '/confessions': typeof ConfessionsRoute
+  '/cx-store': typeof CxStoreRoute
   '/global': typeof GlobalRoute
   '/messages': typeof MessagesRoute
   '/my-reports': typeof MyReportsRoute
@@ -388,6 +395,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/confess': typeof ConfessRoute
   '/confessions': typeof ConfessionsRoute
+  '/cx-store': typeof CxStoreRoute
   '/global': typeof GlobalRoute
   '/messages': typeof MessagesRoute
   '/my-reports': typeof MyReportsRoute
@@ -444,6 +452,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/confess': typeof ConfessRoute
   '/confessions': typeof ConfessionsRoute
+  '/cx-store': typeof CxStoreRoute
   '/global': typeof GlobalRoute
   '/messages': typeof MessagesRoute
   '/my-reports': typeof MyReportsRoute
@@ -501,6 +510,7 @@ export interface FileRouteTypes {
     | '/'
     | '/confess'
     | '/confessions'
+    | '/cx-store'
     | '/global'
     | '/messages'
     | '/my-reports'
@@ -556,6 +566,7 @@ export interface FileRouteTypes {
     | '/'
     | '/confess'
     | '/confessions'
+    | '/cx-store'
     | '/global'
     | '/messages'
     | '/my-reports'
@@ -611,6 +622,7 @@ export interface FileRouteTypes {
     | '/'
     | '/confess'
     | '/confessions'
+    | '/cx-store'
     | '/global'
     | '/messages'
     | '/my-reports'
@@ -667,6 +679,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ConfessRoute: typeof ConfessRoute
   ConfessionsRoute: typeof ConfessionsRoute
+  CxStoreRoute: typeof CxStoreRoute
   GlobalRoute: typeof GlobalRoute
   MessagesRoute: typeof MessagesRoute
   MyReportsRoute: typeof MyReportsRoute
@@ -817,6 +830,13 @@ declare module '@tanstack/react-router' {
       path: '/global'
       fullPath: '/global'
       preLoaderRoute: typeof GlobalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cx-store': {
+      id: '/cx-store'
+      path: '/cx-store'
+      fullPath: '/cx-store'
+      preLoaderRoute: typeof CxStoreRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/confessions': {
@@ -1099,6 +1119,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ConfessRoute: ConfessRoute,
   ConfessionsRoute: ConfessionsRoute,
+  CxStoreRoute: CxStoreRoute,
   GlobalRoute: GlobalRoute,
   MessagesRoute: MessagesRoute,
   MyReportsRoute: MyReportsRoute,
