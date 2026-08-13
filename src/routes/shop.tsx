@@ -79,6 +79,8 @@ function ModernShop() {
   const [sortBy, setSortBy] = useState<"default" | "price_asc" | "price_desc">("default");
   const [onlyHotDeals, setOnlyHotDeals] = useState(false);
   const [maxPrice, setMaxPrice] = useState<number>(5000);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   const toggleWishlist = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -346,25 +348,61 @@ function ModernShop() {
 
                 {(() => {
                   const gallery = selectedProduct.images?.length ? selectedProduct.images : (selectedProduct.icon_url ? [selectedProduct.icon_url] : []);
+                  
+                  const handleTouchStart = (e: React.TouchEvent) => {
+                    setTouchEnd(null);
+                    setTouchStart(e.targetTouches[0].clientX);
+                  };
+
+                  const handleTouchMove = (e: React.TouchEvent) => {
+                    setTouchEnd(e.targetTouches[0].clientX);
+                  };
+
+                  const handleTouchEnd = () => {
+                    if (!touchStart || !touchEnd) return;
+                    const distance = touchStart - touchEnd;
+                    if (distance > 50) {
+                      setCurrentImageIndex(prev => prev === gallery.length - 1 ? 0 : prev + 1);
+                    }
+                    if (distance < -50) {
+                      setCurrentImageIndex(prev => prev === 0 ? gallery.length - 1 : prev - 1);
+                    }
+                  };
+
                   return (
-                    <>
+                    <div 
+                      className="w-full h-full relative"
+                      onTouchStart={handleTouchStart}
+                      onTouchMove={handleTouchMove}
+                      onTouchEnd={handleTouchEnd}
+                    >
                       {gallery.length > 0 ? (
-                        <img src={gallery[currentImageIndex]} className="w-full h-full object-contain mix-blend-multiply drop-shadow-xl scale-[1.15] hover:scale-[1.25] transition-transform duration-500" />
+                        <AnimatePresence mode="wait">
+                          <motion.img 
+                            key={currentImageIndex}
+                            initial={{ opacity: 0, x: 10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -10 }}
+                            transition={{ duration: 0.2 }}
+                            src={gallery[currentImageIndex]} 
+                            className="w-full h-full object-contain mix-blend-multiply drop-shadow-xl scale-[1.15] hover:scale-[1.25] transition-transform duration-500 absolute inset-0 m-auto" 
+                          />
+                        </AnimatePresence>
                       ) : (
-                        <div className="text-gray-400 font-medium">No Image</div>
+                        <div className="text-gray-400 font-medium absolute inset-0 m-auto flex items-center justify-center">No Image</div>
                       )}
                       
                       {gallery.length > 1 && (
                         <>
                           <button 
                             onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(prev => prev === 0 ? gallery.length - 1 : prev - 1); }}
-                            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 rounded-full flex items-center justify-center shadow hover:bg-white z-20 transition-colors"
+                            className="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 rounded-full items-center justify-center shadow hover:bg-white z-20 transition-colors"
                           >
                             <ChevronLeft className="w-5 h-5 text-gray-700" />
                           </button>
                           <button 
                             onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(prev => prev === gallery.length - 1 ? 0 : prev + 1); }}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 rounded-full flex items-center justify-center shadow hover:bg-white z-20 transition-colors"
+                            className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 rounded-full items-center justify-center shadow hover:bg-white z-20 transition-colors"
                           >
                             <ChevronRight className="w-5 h-5 text-gray-700" />
                           </button>
@@ -380,7 +418,7 @@ function ModernShop() {
                           </div>
                         </>
                       )}
-                    </>
+                    </div>
                   );
                 })()}
               </div>
