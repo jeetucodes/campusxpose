@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TrustRouteImport } from './routes/trust'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ShopRouteImport } from './routes/shop'
+import { Route as SetupStoreRouteImport } from './routes/setup-store'
 import { Route as SetupProjectsRouteImport } from './routes/setup-projects'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as ReportRouteImport } from './routes/report'
@@ -40,6 +42,7 @@ import { Route as CommunityCollegeIdRouteImport } from './routes/community.$coll
 import { Route as CollegesIdRouteImport } from './routes/colleges.$id'
 import { Route as ApiSendPushRouteImport } from './routes/api.send-push'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminStoreRouteImport } from './routes/admin.store'
 import { Route as AdminProjectsRouteImport } from './routes/admin.projects'
 import { Route as AdminProfileRouteImport } from './routes/admin.profile'
 import { Route as AdminPostsRouteImport } from './routes/admin.posts'
@@ -73,6 +76,16 @@ const TermsRoute = TermsRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopRoute = ShopRouteImport.update({
+  id: '/shop',
+  path: '/shop',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SetupStoreRoute = SetupStoreRouteImport.update({
+  id: '/setup-store',
+  path: '/setup-store',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SetupProjectsRoute = SetupProjectsRouteImport.update({
@@ -215,6 +228,11 @@ const AdminUsersRoute = AdminUsersRouteImport.update({
   path: '/admin/users',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminStoreRoute = AdminStoreRouteImport.update({
+  id: '/admin/store',
+  path: '/admin/store',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminProjectsRoute = AdminProjectsRouteImport.update({
   id: '/admin/projects',
   path: '/admin/projects',
@@ -324,6 +342,8 @@ export interface FileRoutesByFullPath {
   '/report': typeof ReportRoute
   '/reports': typeof ReportsRoute
   '/setup-projects': typeof SetupProjectsRoute
+  '/setup-store': typeof SetupStoreRoute
+  '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
@@ -346,6 +366,7 @@ export interface FileRoutesByFullPath {
   '/admin/posts': typeof AdminPostsRoute
   '/admin/profile': typeof AdminProfileRoute
   '/admin/projects': typeof AdminProjectsRoute
+  '/admin/store': typeof AdminStoreRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/send-push': typeof ApiSendPushRoute
   '/colleges/$id': typeof CollegesIdRoute
@@ -376,6 +397,8 @@ export interface FileRoutesByTo {
   '/report': typeof ReportRoute
   '/reports': typeof ReportsRoute
   '/setup-projects': typeof SetupProjectsRoute
+  '/setup-store': typeof SetupStoreRoute
+  '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
@@ -398,6 +421,7 @@ export interface FileRoutesByTo {
   '/admin/posts': typeof AdminPostsRoute
   '/admin/profile': typeof AdminProfileRoute
   '/admin/projects': typeof AdminProjectsRoute
+  '/admin/store': typeof AdminStoreRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/send-push': typeof ApiSendPushRoute
   '/colleges/$id': typeof CollegesIdRoute
@@ -429,6 +453,8 @@ export interface FileRoutesById {
   '/report': typeof ReportRoute
   '/reports': typeof ReportsRoute
   '/setup-projects': typeof SetupProjectsRoute
+  '/setup-store': typeof SetupStoreRoute
+  '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
@@ -451,6 +477,7 @@ export interface FileRoutesById {
   '/admin/posts': typeof AdminPostsRoute
   '/admin/profile': typeof AdminProfileRoute
   '/admin/projects': typeof AdminProjectsRoute
+  '/admin/store': typeof AdminStoreRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/send-push': typeof ApiSendPushRoute
   '/colleges/$id': typeof CollegesIdRoute
@@ -483,6 +510,8 @@ export interface FileRouteTypes {
     | '/report'
     | '/reports'
     | '/setup-projects'
+    | '/setup-store'
+    | '/shop'
     | '/sitemap.xml'
     | '/terms'
     | '/trust'
@@ -505,6 +534,7 @@ export interface FileRouteTypes {
     | '/admin/posts'
     | '/admin/profile'
     | '/admin/projects'
+    | '/admin/store'
     | '/admin/users'
     | '/api/send-push'
     | '/colleges/$id'
@@ -535,6 +565,8 @@ export interface FileRouteTypes {
     | '/report'
     | '/reports'
     | '/setup-projects'
+    | '/setup-store'
+    | '/shop'
     | '/sitemap.xml'
     | '/terms'
     | '/trust'
@@ -557,6 +589,7 @@ export interface FileRouteTypes {
     | '/admin/posts'
     | '/admin/profile'
     | '/admin/projects'
+    | '/admin/store'
     | '/admin/users'
     | '/api/send-push'
     | '/colleges/$id'
@@ -587,6 +620,8 @@ export interface FileRouteTypes {
     | '/report'
     | '/reports'
     | '/setup-projects'
+    | '/setup-store'
+    | '/shop'
     | '/sitemap.xml'
     | '/terms'
     | '/trust'
@@ -609,6 +644,7 @@ export interface FileRouteTypes {
     | '/admin/posts'
     | '/admin/profile'
     | '/admin/projects'
+    | '/admin/store'
     | '/admin/users'
     | '/api/send-push'
     | '/colleges/$id'
@@ -640,6 +676,8 @@ export interface RootRouteChildren {
   ReportRoute: typeof ReportRoute
   ReportsRoute: typeof ReportsRoute
   SetupProjectsRoute: typeof SetupProjectsRoute
+  SetupStoreRoute: typeof SetupStoreRoute
+  ShopRoute: typeof ShopRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   TrustRoute: typeof TrustRoute
@@ -662,6 +700,7 @@ export interface RootRouteChildren {
   AdminPostsRoute: typeof AdminPostsRoute
   AdminProfileRoute: typeof AdminProfileRoute
   AdminProjectsRoute: typeof AdminProjectsRoute
+  AdminStoreRoute: typeof AdminStoreRoute
   AdminUsersRoute: typeof AdminUsersRoute
   ApiSendPushRoute: typeof ApiSendPushRoute
   CollegesIdRoute: typeof CollegesIdRoute
@@ -701,6 +740,20 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop': {
+      id: '/shop'
+      path: '/shop'
+      fullPath: '/shop'
+      preLoaderRoute: typeof ShopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/setup-store': {
+      id: '/setup-store'
+      path: '/setup-store'
+      fullPath: '/setup-store'
+      preLoaderRoute: typeof SetupStoreRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/setup-projects': {
@@ -899,6 +952,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/store': {
+      id: '/admin/store'
+      path: '/admin/store'
+      fullPath: '/admin/store'
+      preLoaderRoute: typeof AdminStoreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/projects': {
       id: '/admin/projects'
       path: '/admin/projects'
@@ -1048,6 +1108,8 @@ const rootRouteChildren: RootRouteChildren = {
   ReportRoute: ReportRoute,
   ReportsRoute: ReportsRoute,
   SetupProjectsRoute: SetupProjectsRoute,
+  SetupStoreRoute: SetupStoreRoute,
+  ShopRoute: ShopRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   TrustRoute: TrustRoute,
@@ -1070,6 +1132,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminPostsRoute: AdminPostsRoute,
   AdminProfileRoute: AdminProfileRoute,
   AdminProjectsRoute: AdminProjectsRoute,
+  AdminStoreRoute: AdminStoreRoute,
   AdminUsersRoute: AdminUsersRoute,
   ApiSendPushRoute: ApiSendPushRoute,
   CollegesIdRoute: CollegesIdRoute,

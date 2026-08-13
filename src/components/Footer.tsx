@@ -130,13 +130,15 @@ export function Footer() {
 export function SiteShell({
   children,
   hideFooter,
+  hideNavbar,
 }: {
   children: React.ReactNode;
   hideFooter?: boolean;
+  hideNavbar?: boolean;
 }) {
   return (
     <div className="flex min-h-screen flex-col">
-      <Navbar />
+      {!hideNavbar && <Navbar />}
       <main className="flex-1">{children}</main>
       {!hideFooter && <Footer />}
     </div>

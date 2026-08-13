@@ -19,6 +19,7 @@ import {
   UserCog,
   Handshake,
   Gamepad2,
+  ShoppingCart,
 } from "lucide-react";
 import { useAdmin } from "@/stores/admin";
 import { cn } from "@/lib/utils";
@@ -40,6 +41,7 @@ const NAV = [
   { to: "/admin/games", label: "Games & AI", icon: Gamepad2 },
   { to: "/admin/ads", label: "Ads", icon: Megaphone },
   { to: "/admin/features", label: "Features", icon: Bot },
+  { to: "/admin/store", label: "Store", icon: ShoppingCart },
   { to: "/admin/feedback", label: "Feedback", icon: MessageSquareHeart },
   { to: "/admin/profile", label: "Profile", icon: UserCog },
 ] as const;
