@@ -101,29 +101,10 @@ function FloatingDot({
   );
 }
 
-function Home() {
-  const { data } = useQuery(homeQueryOptions);
-  const verified = useVerifiedUsernames();
-  const top: HomeData["top"] = data?.top ?? [];
-  const recentPosts: HomeData["recentPosts"] = data?.recentPosts ?? [];
-  const queryClient = useQueryClient();
-  const [showAllReports, setShowAllReports] = useState(false);
-  const [activeTopIdx, setActiveTopIdx] = useState(0);
-
-  // Auto-scroll for Top Colleges (Ad-like Slider)
-  useEffect(() => {
-    if (top.length <= 1) return;
-    const interval = setInterval(() => {
-      setActiveTopIdx((prev) => (prev + 1) % top.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [top.length]);
-
-  // Cycling headline word state
+function CyclingHeadline() {
   const [wordIdx, setWordIdx] = useState(0);
   const [wordVisible, setWordVisible] = useState(true);
 
-  // Cycle headline word every 2.2s with a blur-fade transition
   useEffect(() => {
     const interval = setInterval(() => {
       setWordVisible(false);
@@ -134,6 +115,101 @@ function Home() {
     }, 2200);
     return () => clearInterval(interval);
   }, []);
+
+  return (
+    <motion.h1 className="font-display text-3xl font-bold leading-tight tracking-tight sm:text-5xl md:text-6xl text-foreground">
+      Speak your{" "}
+      <span className="relative inline-block">
+        <motion.span
+          key={wordIdx}
+          initial={{ opacity: 0, y: 10, filter: "blur(6px)" }}
+          animate={
+            wordVisible
+              ? { opacity: 1, y: 0, filter: "blur(0px)" }
+              : { opacity: 0, y: -8, filter: "blur(6px)" }
+          }
+          transition={{ duration: 0.28, ease: "easeInOut" }}
+          className="inline-block text-accent"
+        >
+          {CYCLING_WORDS[wordIdx]}
+        </motion.span>
+        {/* Underline that animates in/out with the word */}
+        <motion.span
+          className="absolute -bottom-1 left-0 h-[3px] bg-accent rounded-full"
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: wordVisible ? 1 : 0 }}
+          transition={{ duration: 0.28, ease: "easeInOut" }}
+          style={{ width: "100%", transformOrigin: "left" }}
+        />
+      </span>
+      —<br />
+      without fear.
+    </motion.h1>
+  );
+}
+
+function TopCollegesSlider({ top }: { top: HomeData["top"] }) {
+  const [activeTopIdx, setActiveTopIdx] = useState(0);
+
+  useEffect(() => {
+    if (top.length <= 1) return;
+    const interval = setInterval(() => {
+      setActiveTopIdx((prev) => (prev + 1) % top.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [top.length]);
+
+  return (
+    <div className="relative overflow-hidden w-full h-[220px] sm:h-[180px] bg-white border-2 border-border flex flex-col justify-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] z-10" style={{ borderRadius: WOBBLY_MD }}>
+      <AnimatePresence mode="wait">
+        {top.length > 0 ? (
+          <motion.div
+            key={activeTopIdx}
+            initial={{ opacity: 0, x: 20, rotate: 1 }}
+            animate={{ opacity: 1, x: 0, rotate: 0 }}
+            exit={{ opacity: 0, x: -20, rotate: -1 }}
+            transition={{ duration: 0.3 }}
+            className="absolute inset-0 p-5 sm:p-6 flex flex-col"
+          >
+             <Link
+               to="/colleges/$id"
+               params={{ id: top[activeTopIdx].id }}
+               className="flex-1 flex flex-col justify-between w-full h-full"
+             >
+               <div className="flex items-start gap-4">
+                 <span className={`flex items-center justify-center shrink-0 h-14 w-14 font-display text-3xl font-bold border-2 border-border rounded-full shadow-sm ${activeTopIdx === 0 ? "bg-yellow-400 text-foreground" : activeTopIdx === 1 ? "bg-gray-200 text-foreground" : activeTopIdx === 2 ? "bg-orange-300 text-foreground" : "bg-muted text-muted-foreground"}`}>
+                   #{activeTopIdx + 1}
+                 </span>
+                 <div className="pt-1 w-full max-w-[80%]">
+                   <div className="font-display text-2xl sm:text-3xl font-bold text-foreground group-hover:text-accent transition-colors line-clamp-2 leading-tight">{top[activeTopIdx].name}</div>
+                   <div className="text-sm font-semibold text-muted-foreground flex items-center gap-1 mt-1"><MapPinOff className="w-4 h-4" /> {top[activeTopIdx].city}</div>
+                 </div>
+               </div>
+               <div className="flex items-center gap-2 mt-auto border-t-2 border-dashed border-border/20 pt-4 pb-1">
+                 <span className="inline-flex items-center gap-1.5 border-2 border-border bg-accent px-3 py-1.5 text-sm font-bold text-white shadow-sm" style={{ borderRadius: WOBBLY_MD }}>
+                   <Flame className="h-4 w-4 fill-yellow-400" /> {top[activeTopIdx].incident_count} Reports
+                 </span>
+                 <span className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest ml-2 hidden sm:inline-block">Trending</span>
+               </div>
+             </Link>
+          </motion.div>
+        ) : (
+          <div className="text-center w-full text-muted-foreground font-medium flex items-center justify-center h-full">
+            No reports yet. Be the first to speak up!
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function Home() {
+  const { data } = useQuery(homeQueryOptions);
+  const verified = useVerifiedUsernames();
+  const top: HomeData["top"] = data?.top ?? [];
+  const recentPosts: HomeData["recentPosts"] = data?.recentPosts ?? [];
+  const queryClient = useQueryClient();
+  const [showAllReports, setShowAllReports] = useState(false);
 
   // Stable floating dots config
   const dots = useMemo(
@@ -209,34 +285,7 @@ function Home() {
               {/* Live anonymous badge */}
 
               {/* Headline with cycling & blurring word */}
-              <motion.h1 className="font-display text-3xl font-bold leading-tight tracking-tight sm:text-5xl md:text-6xl text-foreground">
-                Speak your{" "}
-                <span className="relative inline-block">
-                  <motion.span
-                    key={wordIdx}
-                    initial={{ opacity: 0, y: 10, filter: "blur(6px)" }}
-                    animate={
-                      wordVisible
-                        ? { opacity: 1, y: 0, filter: "blur(0px)" }
-                        : { opacity: 0, y: -8, filter: "blur(6px)" }
-                    }
-                    transition={{ duration: 0.28, ease: "easeInOut" }}
-                    className="inline-block text-accent"
-                  >
-                    {CYCLING_WORDS[wordIdx]}
-                  </motion.span>
-                  {/* Underline that animates in/out with the word */}
-                  <motion.span
-                    className="absolute -bottom-1 left-0 h-[3px] bg-accent rounded-full"
-                    initial={{ scaleX: 0 }}
-                    animate={{ scaleX: wordVisible ? 1 : 0 }}
-                    transition={{ duration: 0.28, ease: "easeInOut" }}
-                    style={{ width: "100%", transformOrigin: "left" }}
-                  />
-                </span>
-                —<br />
-                without fear.
-              </motion.h1>
+              <CyclingHeadline />
 
               <motion.p className="hidden sm:block text-xs leading-relaxed text-muted-foreground sm:text-sm font-medium">
                 Share the real story of your college.
@@ -411,58 +460,7 @@ function Home() {
           </div>
 
           {/* The Slider */}
-          <div className="relative overflow-hidden w-full h-[220px] sm:h-[180px] bg-white border-2 border-border flex flex-col justify-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] z-10" style={{ borderRadius: WOBBLY_MD }}>
-            <AnimatePresence mode="wait">
-              {top.length > 0 ? (
-                <motion.div
-                  key={activeTopIdx}
-                  initial={{ opacity: 0, x: 20, rotate: 1 }}
-                  animate={{ opacity: 1, x: 0, rotate: 0 }}
-                  exit={{ opacity: 0, x: -20, rotate: -1 }}
-                  transition={{ duration: 0.3 }}
-                  className="absolute inset-0 p-5 sm:p-6 flex flex-col"
-                >
-                   <Link
-                     to="/colleges/$id"
-                     params={{ id: top[activeTopIdx].id }}
-                     className="flex-1 flex flex-col justify-between w-full h-full"
-                   >
-                     <div className="flex items-start gap-4">
-                       <span className={`flex items-center justify-center shrink-0 h-14 w-14 font-display text-3xl font-bold border-2 border-border rounded-full shadow-sm ${activeTopIdx === 0 ? "bg-yellow-400 text-foreground" : activeTopIdx === 1 ? "bg-gray-200 text-foreground" : activeTopIdx === 2 ? "bg-orange-300 text-foreground" : "bg-muted text-muted-foreground"}`}>
-                         #{activeTopIdx + 1}
-                       </span>
-                       <div className="pt-1 w-full max-w-[80%]">
-                         <div className="font-display text-2xl sm:text-3xl font-bold text-foreground group-hover:text-accent transition-colors line-clamp-2 leading-tight">{top[activeTopIdx].name}</div>
-                         <div className="text-sm font-semibold text-muted-foreground flex items-center gap-1 mt-1"><MapPinOff className="w-4 h-4" /> {top[activeTopIdx].city}</div>
-                       </div>
-                     </div>
-                     <div className="flex items-center gap-2 mt-auto border-t-2 border-dashed border-border/20 pt-4 pb-1">
-                       <span className="inline-flex items-center gap-1.5 border-2 border-border bg-accent px-3 py-1.5 text-sm font-bold text-white shadow-sm" style={{ borderRadius: WOBBLY_MD }}>
-                         <Flame className="h-4 w-4 fill-yellow-400" /> {top[activeTopIdx].incident_count} Reports
-                       </span>
-                       <span className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest ml-2 hidden sm:inline-block">Trending</span>
-                     </div>
-                   </Link>
-                </motion.div>
-              ) : (
-                <div className="text-center w-full text-muted-foreground font-medium flex items-center justify-center h-full">
-                  No reports yet. Be the first to speak up!
-                </div>
-              )}
-            </AnimatePresence>
-            {/* Progress dots */}
-            {top.length > 1 && (
-              <div className="absolute bottom-4 right-5 sm:bottom-6 sm:right-6 flex gap-1.5 z-10 bg-white/80 p-1.5 rounded-full border-2 border-border shadow-sm">
-                {top.map((_, i) => (
-                  <button
-                    key={i} 
-                    onClick={() => setActiveTopIdx(i)}
-                    className={`w-2.5 h-2.5 rounded-full border-2 border-border transition-colors ${i === activeTopIdx ? "bg-accent" : "bg-white hover:bg-muted"}`} 
-                  />
-                ))}
-              </div>
-            )}
-          </div>
+          <TopCollegesSlider top={top} />
         </div>
       </motion.section>
 
