@@ -54,12 +54,6 @@ const NAV_GROUPS = [
       { to: "/admin/ads", label: "Ads", icon: Megaphone },
       { to: "/admin/games", label: "Games & AI", icon: Gamepad2 },
     ]
-  },
-  {
-    title: "Store",
-    items: [
-      { to: "/admin/store", label: "Store", icon: ShoppingCart },
-    ]
   }
 ];
 

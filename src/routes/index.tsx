@@ -14,7 +14,6 @@ import {
   Ghost,
   Search,
   Gamepad2,
-  Store,
 } from "lucide-react";
 import { UserSymbol } from "@/components/UserSymbol";
 import { SiteShell } from "@/components/Footer";
@@ -372,58 +371,6 @@ function Home() {
           </div>
         </Link>
 
-        {/* Shop Banner with Image - Ultra Eye-Catching */}
-        {data?.site_settings?.store_enabled !== false && (
-          <Link to="/shop" className="block group mt-5 sm:mt-6">
-            <div className="sketch-card relative flex items-center justify-between p-6 sm:p-8 transition-all overflow-hidden border-[3px] border-border bg-purple-900 group-hover:shadow-[8px_8px_0px_0px_rgba(147,51,234,0.4)] group-hover:-translate-y-1" style={{ borderRadius: WOBBLY_MD, minHeight: '220px' }}>
-              {/* Generated Banner Image Background */}
-              <div className="absolute inset-0 w-full h-full">
-                <img src="/shop-banner.png" alt="Shop Banner" className="w-full h-full object-cover opacity-80 group-hover:scale-110 transition-transform duration-1000 ease-out" />
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-900 via-purple-900/80 to-purple-900/10 mix-blend-multiply"></div>
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-900 via-purple-900/60 to-transparent"></div>
-              </div>
-              
-              {/* Floating Particles for extra catchy effect */}
-              <div className="absolute top-4 left-1/3 w-3 h-3 bg-yellow-400 rounded-full animate-ping opacity-75"></div>
-              <div className="absolute bottom-6 right-1/4 w-4 h-4 bg-pink-400 rounded-full animate-bounce"></div>
-              <div className="absolute top-8 right-10 w-2 h-2 bg-white rounded-full animate-pulse"></div>
-
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6 relative z-10 w-full max-w-[90%] sm:max-w-none">
-                
-                <div className="relative shrink-0 hidden sm:block">
-                  <div className="absolute inset-0 bg-yellow-400 blur-lg opacity-50 group-hover:opacity-100 animate-pulse transition-opacity"></div>
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-yellow-400 border-[3px] border-border flex items-center justify-center relative shadow-sm group-hover:-rotate-12 group-hover:scale-110 transition-transform">
-                    <Store className="h-8 w-8 sm:h-10 sm:w-10 text-foreground" />
-                  </div>
-                </div>
-
-                <div className="text-left flex-1 relative w-full pt-4 sm:pt-0">
-                  <div className="font-display font-black text-4xl sm:text-6xl text-white leading-tight group-hover:underline decoration-yellow-400 decoration-4 underline-offset-4 flex items-center gap-3 drop-shadow-lg w-full">
-                    CX Shop
-                    <span className="bg-destructive text-white text-[12px] sm:text-xs font-black px-2.5 py-1 rounded-full border-2 border-white animate-bounce shadow-[0_0_15px_rgba(239,68,68,0.6)] uppercase tracking-widest absolute right-0 top-0 sm:relative sm:top-0 sm:right-0 rotate-12 sm:rotate-0">
-                      SALE
-                    </span>
-                  </div>
-                  
-                  <div className="text-yellow-300 uppercase mt-1 sm:mt-2 drop-shadow-md flex items-center gap-2">
-                    <Flame className="w-6 h-6 sm:w-8 sm:h-8 fill-yellow-400 shrink-0 group-hover:scale-125 transition-transform" />
-                    <div className="flex items-baseline gap-1.5 font-black leading-none tracking-tight">
-                      <span className="text-xs sm:text-base font-bold text-yellow-200">UP TO</span>
-                      <span className="text-6xl sm:text-[85px] text-transparent bg-clip-text bg-gradient-to-br from-yellow-300 to-yellow-500 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] filter drop-shadow-[0_0_12px_rgba(253,224,71,0.5)]">90</span>
-                      <span className="text-2xl sm:text-4xl text-yellow-400 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">% OFF</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="hidden sm:flex flex-col items-end gap-1 relative z-10 ml-auto group-hover:scale-110 transition-transform origin-right">
-                  <div className="bg-yellow-400 border-2 border-border text-foreground text-sm sm:text-base font-black px-6 py-3 rounded-full flex items-center gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] group-hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] group-hover:translate-y-[2px] group-hover:translate-x-[2px] transition-all">
-                    SHOP NOW <ArrowRight className="h-5 w-5 animate-pulse" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Link>
-        )}
       </div>
 
       <HomeAds />

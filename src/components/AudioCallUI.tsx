@@ -45,7 +45,7 @@ export function AudioCallUI({ roomID, isCaller, remoteUsername, remoteNickname, 
     // Proximity Setup
     let listener: any;
     Proximity.enable().then(() => {
-      listener = Proximity.addListener('onProximityChanged', (state) => {
+      listener = (Proximity as any).addListener('onProximityChanged', (state: any) => {
         setIsNear(state.value === 0); // 0 means near
       });
     }).catch(console.error);

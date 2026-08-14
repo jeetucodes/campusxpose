@@ -313,9 +313,7 @@ function RootComponent() {
   const isMessages = useMemo(() => pathname === "/messages", [pathname]);
   const isConfess = useMemo(() => pathname === "/confess", [pathname]);
   const isGames = useMemo(() => pathname.startsWith("/games/"), [pathname]);
-  const isShop = useMemo(() => pathname.startsWith("/shop"), [pathname]);
-  const isCXStore = useMemo(() => pathname.startsWith("/cx-store"), [pathname]);
-  const hideNav = isCommunityChat || isAdmin || isGlobal || isMessages || isConfess || isGames || isShop || isCXStore;
+  const hideNav = isCommunityChat || isAdmin || isGlobal || isMessages || isConfess || isGames;
 
   return (
     <QueryClientProvider client={queryClient}>
