@@ -93,6 +93,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Anonymous platform for Indian college students to rate colleges and report fake fines, placement fraud, and harassment.",
       },
+      { name: "keywords", content: "CampusXpose, college reviews, Indian colleges, anonymous platform, student discounts, CX Store, CXShop" },
       { name: "author", content: "CampusXpose" },
       { name: "google-site-verification", content: "1BCMAogu2qMCNHNGQjFcQxKKiAa8183Lt1iPNZ1Y7s8" },
       { property: "og:title", content: "CampusXpose — College ka sach, bina darr ke" },

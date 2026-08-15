@@ -8,6 +8,7 @@ import {
   MessageSquareHeart,
   Lock,
   Scale,
+  ShoppingBag,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Navbar } from "@/components/Navbar";
@@ -111,6 +112,15 @@ export function Footer() {
                   >
                     <Scale className="h-4 w-4" /> Terms of Service
                   </Link>
+                </li>
+                <li>
+                  <a
+                    href="https://www.cxshopp.store/"
+                    title="Visit CX Store"
+                    className="inline-flex items-center gap-2 hover:text-accent transition-colors text-accent font-bold"
+                  >
+                    <ShoppingBag className="h-4 w-4" /> Shop (CXShop)
+                  </a>
                 </li>
               </ul>
             </div>

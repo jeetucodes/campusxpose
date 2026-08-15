@@ -413,6 +413,40 @@ function Home() {
         </div>
       </motion.section>
 
+      {/* CX Store Promo Banner */}
+      <section className="mx-auto max-w-4xl px-4 py-8 relative z-20">
+        <a href="https://www.cxshopp.store/" title="Visit CX Store" className="block group">
+          <div
+            className="sketch-card bg-[#e0e7ff] p-6 sm:p-8 border-4 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden transition-transform group-hover:-translate-y-1 group-hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
+            style={{ borderRadius: WOBBLY_MD }}
+          >
+            {/* Decorative tape/pin */}
+            <div className="absolute -top-3 right-12 w-12 h-6 bg-yellow-400/80 border-2 border-border -rotate-3 z-10 shadow-sm" />
+
+            {/* Background decoration */}
+            <div className="absolute -right-12 -bottom-12 w-40 h-40 bg-blue-300 rounded-full blur-3xl opacity-40 pointer-events-none" />
+            <div className="flex flex-col sm:flex-row items-center gap-6 relative z-10">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white border-2 border-border flex items-center justify-center shrink-0 shadow-sm group-hover:rotate-12 transition-transform">
+                <span className="text-3xl sm:text-4xl">🛍️</span>
+              </div>
+              <div className="text-center sm:text-left flex-1">
+                <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground group-hover:underline decoration-foreground decoration-2 underline-offset-2">
+                  Explore CX Store
+                </h2>
+                <p className="mt-2 text-sm sm:text-base font-semibold text-foreground/80 leading-relaxed">
+                  Looking for the best student discounts? Visit CX Store (CXShop) by CampusXpose to find exclusive deals on electronics, fashion, and college essentials.
+                </p>
+              </div>
+              <div className="hidden sm:flex shrink-0">
+                <span className="inline-flex items-center gap-2 border-2 border-border bg-accent px-4 py-2 font-bold text-white shadow-sm" style={{ borderRadius: WOBBLY_MD }}>
+                  Shop Now <ArrowRight className="h-4 w-4" />
+                </span>
+              </div>
+            </div>
+          </div>
+        </a>
+      </section>
+
       {/* Latest Reports */}
       <section className="mx-auto max-w-3xl px-4 py-12 sm:py-16">
         <div className="mb-8 flex items-center justify-between gap-3 border-b-4 border-border pb-4">
